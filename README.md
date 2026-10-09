@@ -4,7 +4,7 @@ Pokémon Sleep players vote on every candy line: **want**, **don't want** or **u
 
 - **Voting**: card-by-card voting for anything unvoted, plus a searchable grid to change any vote. Matchmake saves skipped lines as undecided.
 - **Friends**: look up players by exact Discord name, IGN or friend code, and manage your friend list (up to 50).
-- **Tier list**: which candy to prioritize, ranked S/A/B/C/Avoid by your friends' net votes, filterable by island, with an Everyone toggle for community totals.
+- **Tier list**: which candy to prioritize, ranked S/A/B/C/Avoid by your friends' net votes, with toggles for All islands / By island and My friends / Everyone.
 - **Matchmake**: players open to new friends whose votes line up with yours.
 - **Profile**: IGN, friend code, visibility toggles, blocked players, sign out, delete account.
 
