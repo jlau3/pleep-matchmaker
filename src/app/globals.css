@@ -1,0 +1,15 @@
+@import "tailwindcss";
+
+@theme {
+  --color-want: #16a34a;
+  --color-dont: #dc2626;
+  --color-meh: #64748b;
+}
+
+:root {
+  color-scheme: light dark;
+}
+
+body {
+  @apply bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100;
+}
