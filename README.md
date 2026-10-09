@@ -103,7 +103,7 @@ Players will see only the new lines at the top of **Voting** next time they open
 python3 scripts/build_islands.py
 ```
 
-The script fails loudly if a species can't be matched (add it to `ALIASES`) or a page layout changes. Lines on no island (currently Mew, Darkrai, Turtwig, Chimchar) only show under "All islands" in the Tier list filter.
+The script fails loudly if a species can't be matched (add it to `ALIASES`) or a page layout changes. Spawns Serebii doesn't list (Mew and Darkrai everywhere, Turtwig and Chimchar on some islands) are added from `EXTRA_SPAWNS` in the script.
 
 ## Tests
 

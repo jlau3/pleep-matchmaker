@@ -41,6 +41,15 @@ ALIASES = {
     "toxtricity low key form": "toxel",
 }
 
+# Spawns Serebii's location pages don't list (confirmed in-game).
+# "*" means every island.
+EXTRA_SPAWNS = {
+    "mew": "*",
+    "darkrai": "*",
+    "turtwig": ["greengrass-isle", "greengrass-isle-expert", "taupe-hollow", "lapis-lakeside"],
+    "chimchar": ["greengrass-isle", "greengrass-isle-expert", "taupe-hollow", "amber-canyon"],
+}
+
 ROW = re.compile(r'<td class="cen"><a href="/pokemonsleep/pokemon/[^"]+\.shtml"><u>([^<]+)</u></a></td>')
 REGIONAL = re.compile(r"^(alolan|paldean) (.+)$")
 
@@ -78,10 +87,17 @@ def main() -> int:
                 ids.add(line)
             else:
                 unmatched.add(s)
+        ids |= {line for line, where in EXTRA_SPAWNS.items() if where == "*" or island_id in where}
         order = {line["id"]: i for i, line in enumerate(lines)}
         out.append({"id": island_id, "name": name, "lines": sorted(ids, key=order.__getitem__)})
         print(f"{name}: {len(species)} species -> {len(ids)} candy lines")
         time.sleep(1)
+
+    known = {island_id for island_id, _, _ in ISLANDS}
+    for line, where in EXTRA_SPAWNS.items():
+        if line not in by_name.values() or (where != "*" and not set(where) <= known):
+            print(f"bad EXTRA_SPAWNS entry: {line}", file=sys.stderr)
+            return 1
 
     if unmatched:
         print(f"unmatched (add to ALIASES or rebuild lines): {sorted(unmatched)}", file=sys.stderr)
