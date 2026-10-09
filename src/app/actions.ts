@@ -15,7 +15,7 @@ export async function signInWithDiscord() {
     provider: "discord",
     options: { redirectTo: `${origin}/auth/callback` },
   });
-  if (error || !data.url) redirect("/?error=auth");
+  if (error || !data.url) redirect(`/?error=${encodeURIComponent(error?.message ?? "Could not start Discord sign-in")}`);
   redirect(data.url);
 }
 
