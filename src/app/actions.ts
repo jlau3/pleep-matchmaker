@@ -50,7 +50,7 @@ export async function finishSorting() {
     const { error } = await supabase
       .from("preferences")
       .upsert(rows, { onConflict: "user_id,line_id", ignoreDuplicates: true });
-    if (error) redirect("/pick?error=finish");
+    if (error) redirect("/vote?error=finish");
   }
   redirect("/matches");
 }
@@ -99,6 +99,7 @@ export async function addFriend(friendId: string): Promise<{ error?: string }> {
   const { error } = await supabase.from("friends").insert({ user_id: user.id, friend_id: friendId });
   if (error && error.code !== "23505") return { error: FRIEND_ERRORS[error.message] ?? "Couldn't add friend, try again" };
   revalidatePath("/friends");
+  revalidatePath("/tiers");
   return {};
 }
 
@@ -107,6 +108,7 @@ export async function removeFriend(friendId: string): Promise<{ error?: string }
   const { error } = await supabase.from("friends").delete().eq("user_id", user.id).eq("friend_id", friendId);
   if (error) return { error: "Couldn't remove friend, try again" };
   revalidatePath("/friends");
+  revalidatePath("/tiers");
   return {};
 }
 

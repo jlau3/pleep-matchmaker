@@ -19,7 +19,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ e
 
   if (user) {
     const choices = await loadOwnChoices(supabase, user.id);
-    redirect(Object.keys(choices).length < LINES.length ? "/pick" : "/friends");
+    redirect(Object.keys(choices).length < LINES.length ? "/vote" : "/tiers");
   }
 
   const signInError = params.error_description ?? params.error;

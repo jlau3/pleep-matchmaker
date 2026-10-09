@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { setChoice } from "@/app/actions";
 import { CHOICE_LABEL, LINES, type Choice } from "@/lib/lines";
 import { LineCard } from "./LineCard";
 
@@ -12,14 +11,19 @@ const FILTERS: { value: Filter; label: string }[] = [
   { value: "want", label: CHOICE_LABEL.want },
   { value: "dont_want", label: CHOICE_LABEL.dont_want },
   { value: "undecided", label: CHOICE_LABEL.undecided },
-  { value: "unsorted", label: "Not sorted" },
+  { value: "unsorted", label: "Not voted" },
 ];
 
-export function CollectionGrid({ initial }: { initial: Record<string, Choice> }) {
-  const [choices, setChoices] = useState(initial);
+/** Searchable, filterable grid of every line with compact vote buttons. */
+export function CollectionGrid({
+  choices,
+  onChoose,
+}: {
+  choices: Record<string, Choice>;
+  onChoose: (lineId: string, choice: Choice) => void;
+}) {
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<Filter>("all");
-  const [error, setError] = useState<string | null>(null);
 
   const visible = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -29,21 +33,6 @@ export function CollectionGrid({ initial }: { initial: Record<string, Choice> })
       return !q || line.members.some((member) => member.name.toLowerCase().includes(q));
     });
   }, [choices, query, filter]);
-
-  async function choose(lineId: string, choice: Choice) {
-    const previous = choices[lineId];
-    setChoices((current) => ({ ...current, [lineId]: choice }));
-    const result = await setChoice(lineId, choice);
-    if (result.error) {
-      setError(result.error);
-      setChoices((current) => {
-        const reverted = { ...current };
-        if (previous) reverted[lineId] = previous;
-        else delete reverted[lineId];
-        return reverted;
-      });
-    }
-  }
 
   return (
     <div>
@@ -71,15 +60,10 @@ export function CollectionGrid({ initial }: { initial: Record<string, Choice> })
             </button>
           ))}
         </div>
-        {error && (
-          <p role="alert" className="text-sm text-dont">
-            {error}
-          </p>
-        )}
       </div>
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {visible.map((line) => (
-          <LineCard key={line.id} line={line} choice={choices[line.id]} onChoose={(c) => choose(line.id, c)} compact />
+          <LineCard key={line.id} line={line} choice={choices[line.id]} onChoose={(c) => onChoose(line.id, c)} compact />
         ))}
       </div>
       {visible.length === 0 && <p className="py-8 text-center text-slate-500">Nothing here.</p>}
