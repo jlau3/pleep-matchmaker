@@ -1,11 +1,12 @@
 # Pleep Matchmaker
 
-Pokémon Sleep players sort every candy line into **want**, **don't want** or **undecided**. Then:
+Pokémon Sleep players vote on every candy line: **want**, **don't want** or **undecided**. Five tabs:
 
-- **Friends**: add up to 50 players and see which candy your friends want most, split by island.
-- **Find friends**: matchmaking against players who are open to new friends.
-- **Look up**: find a player by exact Discord name, IGN or friend code and see their list.
-- **Popular**: community vote totals, split by island.
+- **Voting**: card-by-card voting for anything unvoted, plus a searchable grid to change any vote. Matchmake saves skipped lines as undecided.
+- **Friends**: look up players by exact Discord name, IGN or friend code, and manage your friend list (up to 50).
+- **Tier list**: which candy to prioritize, ranked S/A/B/C/Avoid by your friends' net votes, with toggles for All islands / By island and My friends / Everyone.
+- **Matchmake**: players open to new friends whose votes line up with yours.
+- **Profile**: IGN, friend code, visibility toggles, blocked players, sign out, delete account.
 
 Stack: Next.js 15 (App Router) + Supabase (Postgres, Discord OAuth) + Tailwind. Built to run on the Vercel and Supabase free tiers.
 
@@ -27,10 +28,25 @@ Want vs undecided lowers the % through the denominator alone. Want vs don't want
 
 A match is shown when it's **≥ 25%** with **≥ 3 lines you both want**, the other player is open to new friends, has a friend code set, and was seen in the last **4 months**. All of these knobs live in `public.match_config()` in the first migration.
 
+## Tier list rules
+
+Net votes = wants minus don't-wants among the pool (your friends who have voted, or every player active in the last 4 months). Your own votes don't count.
+
+| Tier | Net votes as a share of voters |
+|---|---|
+| S | 60% or more |
+| A | 35–59% |
+| B | 15–34% |
+| C | under 15% |
+| Avoid | net negative |
+| No votes | net zero |
+
+Cutoffs live in `TIER_CUTOFFS` in `src/lib/tiers.ts`.
+
 ## Privacy
 
 - Row level security: users read and write only their own rows.
-- Other players' data only comes out of `security definer` functions (`get_matches`, `lookup_players`, `get_friends`, `get_line_stats`), which apply blocks, staleness, `open_to_friends` and `allow_lookup`.
+- Other players' data only comes out of `security definer` functions (`get_matches`, `lookup_players`, `get_friends`, `get_line_stats`, `get_voter_count`), which apply blocks, staleness, `open_to_friends` and `allow_lookup`.
 - Lookup is exact-match only, so the player list can't be scrolled or enumerated. Players can turn lookup off in Profile, which also hides their picks from people who added them as a friend.
 - Blocking hides both players from each other everywhere and removes any friend link.
 - Deleting an account removes the auth user, which cascades to everything else.
@@ -77,17 +93,17 @@ pip install pillow
 npm run data
 ```
 
-Players will see only the new lines the next time they open **Sort**.
+Players will see only the new lines at the top of **Voting** next time they open it.
 
 ### Island spawns
 
-`src/data/islands.json` lists the islands, but the `lines` arrays are empty because there's no public spawn-pool dataset in the sources above. Until they're filled in, every island view falls back to a single "All islands" group. To fill them in, add candy line ids (the `id` field in `candy-lines.json`) to each island:
+`src/data/islands.json` is generated from Serebii's location pages by `scripts/build_islands.py`, which maps every listed species to its candy line. Re-run it after `build_lines.py` when the game adds Pokémon or islands:
 
-```json
-{ "id": "cyan-beach", "name": "Cyan Beach", "lines": ["pikachu", "squirtle", "psyduck"] }
+```bash
+python3 scripts/build_islands.py
 ```
 
-A line can appear on several islands. Lines not listed on any island show under "Island not mapped yet".
+The script fails loudly if a species can't be matched (add it to `ALIASES`) or a page layout changes. Spawns Serebii doesn't list (Mew and Darkrai everywhere, Turtwig and Chimchar on some islands) are added from `EXTRA_SPAWNS` in the script.
 
 ## Tests
 
