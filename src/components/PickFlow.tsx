@@ -1,10 +1,10 @@
 "use client";
 
-import Link from "next/link";
 import { useRef, useState } from "react";
 import { setChoice } from "@/app/actions";
 import type { CandyLine, Choice } from "@/lib/lines";
 import { LineCard } from "./LineCard";
+import { MatchmakeButton } from "./MatchmakeButton";
 
 /**
  * One card per unsorted line, top to bottom. Each click saves immediately and,
@@ -42,9 +42,7 @@ export function PickFlow({ lines, total, alreadySorted }: { lines: CandyLine[]; 
           <span>
             <strong>{sorted}</strong> / {total} sorted
           </span>
-          <Link href="/matches" className="rounded-lg bg-slate-900 px-3 py-1.5 font-semibold text-white dark:bg-white dark:text-slate-900">
-            Matchmake
-          </Link>
+          <MatchmakeButton className="rounded-lg bg-slate-900 px-3 py-1.5 font-semibold text-white dark:bg-white dark:text-slate-900" />
         </div>
         <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-800">
           <div className="h-full bg-want transition-all" style={{ width: `${(sorted / total) * 100}%` }} />
@@ -70,9 +68,8 @@ export function PickFlow({ lines, total, alreadySorted }: { lines: CandyLine[]; 
       </ol>
 
       <div className="mx-auto mt-10 max-w-md text-center">
-        <Link href="/matches" className="block rounded-2xl bg-want px-6 py-4 text-lg font-bold text-white">
-          Matchmake
-        </Link>
+        <MatchmakeButton className="block w-full rounded-2xl bg-want px-6 py-4 text-lg font-bold text-white" />
+        <p className="mt-2 text-xs text-slate-500">Anything you skipped is saved as undecided.</p>
       </div>
     </div>
   );

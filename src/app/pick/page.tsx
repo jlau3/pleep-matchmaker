@@ -4,7 +4,7 @@ import { loadOwnChoices } from "@/lib/data";
 import { LINES } from "@/lib/lines";
 import { requireUser } from "@/lib/supabase/server";
 
-export default async function PickPage() {
+export default async function PickPage({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
   const { supabase, user } = await requireUser();
   const choices = await loadOwnChoices(supabase, user.id);
   const remaining = LINES.filter((line) => !(line.id in choices));
@@ -27,8 +27,14 @@ export default async function PickPage() {
     );
   }
 
+  const { error } = await searchParams;
   return (
     <div>
+      {error === "finish" && (
+        <p role="alert" className="mb-2 text-center text-sm text-dont">
+          Couldn&apos;t save your skipped lines. Try Matchmake again.
+        </p>
+      )}
       {sorted > 0 && (
         <p className="mb-2 text-center text-sm text-slate-500">
           {remaining.length} new or unsorted {remaining.length === 1 ? "line" : "lines"}. Change earlier picks in{" "}
