@@ -31,5 +31,8 @@ describe("buildTiers", () => {
     expect(tiers.get("avoid")!.map((r) => r.line.id)).toEqual(["charmander"]);
     expect(tiers.get("none")!.map((r) => r.line.id)).toEqual(["bulbasaur"]);
     expect(votes.get("squirtle")).toEqual({ wants: 2, dontWants: 0 });
+    const charmander = tiers.get("avoid")![0];
+    expect([charmander.wants, charmander.unsure, charmander.dontWants]).toEqual([1, 0, 2]);
+    expect(tiers.get("S")![1]).toMatchObject({ wants: 2, unsure: 1, dontWants: 0 });
   });
 });

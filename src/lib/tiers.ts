@@ -32,6 +32,8 @@ export interface RankedLine {
   line: CandyLine;
   wants: number;
   dontWants: number;
+  /** Voters in the pool who neither want nor don't want it (undecided or skipped). */
+  unsure: number;
   net: number;
 }
 
@@ -55,7 +57,13 @@ export function buildTiers(
   const out = new Map<TierId, RankedLine[]>(TIERS.map((t) => [t.id, []]));
   for (const line of lines) {
     const v = votes.get(line.id) ?? { wants: 0, dontWants: 0 };
-    out.get(tierFor(v, voters))!.push({ line, wants: v.wants, dontWants: v.dontWants, net: v.wants - v.dontWants });
+    out.get(tierFor(v, voters))!.push({
+      line,
+      wants: v.wants,
+      dontWants: v.dontWants,
+      unsure: Math.max(0, voters - v.wants - v.dontWants),
+      net: v.wants - v.dontWants,
+    });
   }
   for (const ranked of out.values()) {
     ranked.sort((a, b) => b.net - a.net || b.wants - a.wants || a.line.dex - b.line.dex);
