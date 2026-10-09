@@ -1,0 +1,2145 @@
+[
+  {
+    "id": "bulbasaur",
+    "name": "Bulbasaur",
+    "dex": 1,
+    "type": "grass",
+    "addedAt": "2023-07-17",
+    "members": [
+      {
+        "name": "Bulbasaur",
+        "dex": 1,
+        "sprite": 1
+      },
+      {
+        "name": "Ivysaur",
+        "dex": 2,
+        "sprite": 2
+      },
+      {
+        "name": "Venusaur",
+        "dex": 3,
+        "sprite": 3
+      }
+    ]
+  },
+  {
+    "id": "charmander",
+    "name": "Charmander",
+    "dex": 4,
+    "type": "fire",
+    "addedAt": "2023-07-17",
+    "members": [
+      {
+        "name": "Charmander",
+        "dex": 4,
+        "sprite": 4
+      },
+      {
+        "name": "Charmeleon",
+        "dex": 5,
+        "sprite": 5
+      },
+      {
+        "name": "Charizard",
+        "dex": 6,
+        "sprite": 6
+      }
+    ]
+  },
+  {
+    "id": "squirtle",
+    "name": "Squirtle",
+    "dex": 7,
+    "type": "water",
+    "addedAt": "2023-07-17",
+    "members": [
+      {
+        "name": "Squirtle",
+        "dex": 7,
+        "sprite": 7
+      },
+      {
+        "name": "Wartortle",
+        "dex": 8,
+        "sprite": 8
+      },
+      {
+        "name": "Blastoise",
+        "dex": 9,
+        "sprite": 9
+      }
+    ]
+  },
+  {
+    "id": "caterpie",
+    "name": "Caterpie",
+    "dex": 10,
+    "type": "bug",
+    "addedAt": "2023-07-17",
+    "members": [
+      {
+        "name": "Caterpie",
+        "dex": 10,
+        "sprite": 10
+      },
+      {
+        "name": "Metapod",
+        "dex": 11,
+        "sprite": 11
+      },
+      {
+        "name": "Butterfree",
+        "dex": 12,
+        "sprite": 12
+      }
+    ]
+  },
+  {
+    "id": "rattata",
+    "name": "Rattata",
+    "dex": 19,
+    "type": "normal",
+    "addedAt": "2023-07-17",
+    "members": [
+      {
+        "name": "Rattata",
+        "dex": 19,
+        "sprite": 19
+      },
+      {
+        "name": "Raticate",
+        "dex": 20,
+        "sprite": 20
+      }
+    ]
+  },
+  {
+    "id": "ekans",
+    "name": "Ekans",
+    "dex": 23,
+    "type": "poison",
+    "addedAt": "2023-07-17",
+    "members": [
+      {
+        "name": "Ekans",
+        "dex": 23,
+        "sprite": 23
+      },
+      {
+        "name": "Arbok",
+        "dex": 24,
+        "sprite": 24
+      }
+    ]
+  },
+  {
+    "id": "pikachu",
+    "name": "Pikachu",
+    "dex": 25,
+    "type": "electric",
+    "addedAt": "2023-07-17",
+    "members": [
+      {
+        "name": "Pichu",
+        "dex": 172,
+        "sprite": 172
+      },
+      {
+        "name": "Pikachu",
+        "dex": 25,
+        "sprite": 25
+      },
+      {
+        "name": "Raichu",
+        "dex": 26,
+        "sprite": 26
+      }
+    ]
+  },
+  {
+    "id": "sandshrew",
+    "name": "Sandshrew",
+    "dex": 27,
+    "type": "ground",
+    "addedAt": "2026-04-27",
+    "members": [
+      {
+        "name": "Sandshrew",
+        "dex": 27,
+        "sprite": 27
+      },
+      {
+        "name": "Sandslash",
+        "dex": 28,
+        "sprite": 28
+      }
+    ]
+  },
+  {
+    "id": "clefairy",
+    "name": "Clefairy",
+    "dex": 35,
+    "type": "fairy",
+    "addedAt": "2023-09-28",
+    "members": [
+      {
+        "name": "Cleffa",
+        "dex": 173,
+        "sprite": 173
+      },
+      {
+        "name": "Clefairy",
+        "dex": 35,
+        "sprite": 35
+      },
+      {
+        "name": "Clefable",
+        "dex": 36,
+        "sprite": 36
+      }
+    ]
+  },
+  {
+    "id": "vulpix",
+    "name": "Vulpix",
+    "dex": 37,
+    "type": "fire",
+    "addedAt": "2024-05-06",
+    "members": [
+      {
+        "name": "Vulpix",
+        "dex": 37,
+        "sprite": 37
+      },
+      {
+        "name": "Vulpix (Alola)",
+        "dex": 37,
+        "sprite": 10103
+      },
+      {
+        "name": "Ninetales",
+        "dex": 38,
+        "sprite": 38
+      },
+      {
+        "name": "Ninetales (Alola)",
+        "dex": 38,
+        "sprite": 10104
+      }
+    ]
+  },
+  {
+    "id": "jigglypuff",
+    "name": "Jigglypuff",
+    "dex": 39,
+    "type": "fairy",
+    "addedAt": "2023-07-17",
+    "members": [
+      {
+        "name": "Igglybuff",
+        "dex": 174,
+        "sprite": 174
+      },
+      {
+        "name": "Jigglypuff",
+        "dex": 39,
+        "sprite": 39
+      },
+      {
+        "name": "Wigglytuff",
+        "dex": 40,
+        "sprite": 40
+      }
+    ]
+  },
+  {
+    "id": "diglett",
+    "name": "Diglett",
+    "dex": 50,
+    "type": "ground",
+    "addedAt": "2023-07-17",
+    "members": [
+      {
+        "name": "Diglett",
+        "dex": 50,
+        "sprite": 50
+      },
+      {
+        "name": "Dugtrio",
+        "dex": 51,
+        "sprite": 51
+      }
+    ]
+  },
+  {
+    "id": "meowth",
+    "name": "Meowth",
+    "dex": 52,
+    "type": "normal",
+    "addedAt": "2023-07-17",
+    "members": [
+      {
+        "name": "Meowth",
+        "dex": 52,
+        "sprite": 52
+      },
+      {
+        "name": "Persian",
+        "dex": 53,
+        "sprite": 53
+      }
+    ]
+  },
+  {
+    "id": "psyduck",
+    "name": "Psyduck",
+    "dex": 54,
+    "type": "water",
+    "addedAt": "2023-07-17",
+    "members": [
+      {
+        "name": "Psyduck",
+        "dex": 54,
+        "sprite": 54
+      },
+      {
+        "name": "Golduck",
+        "dex": 55,
+        "sprite": 55
+      }
+    ]
+  },
+  {
+    "id": "mankey",
+    "name": "Mankey",
+    "dex": 56,
+    "type": "fighting",
+    "addedAt": "2023-07-17",
+    "members": [
+      {
+        "name": "Mankey",
+        "dex": 56,
+        "sprite": 56
+      },
+      {
+        "name": "Primeape",
+        "dex": 57,
+        "sprite": 57
+      }
+    ]
+  },
+  {
+    "id": "growlithe",
+    "name": "Growlithe",
+    "dex": 58,
+    "type": "fire",
+    "addedAt": "2023-07-17",
+    "members": [
+      {
+        "name": "Growlithe",
+        "dex": 58,
+        "sprite": 58
+      },
+      {
+        "name": "Arcanine",
+        "dex": 59,
+        "sprite": 59
+      }
+    ]
+  },
+  {
+    "id": "bellsprout",
+    "name": "Bellsprout",
+    "dex": 69,
+    "type": "grass",
+    "addedAt": "2023-07-17",
+    "members": [
+      {
+        "name": "Bellsprout",
+        "dex": 69,
+        "sprite": 69
+      },
+      {
+        "name": "Weepinbell",
+        "dex": 70,
+        "sprite": 70
+      },
+      {
+        "name": "Victreebel",
+        "dex": 71,
+        "sprite": 71
+      }
+    ]
+  },
+  {
+    "id": "geodude",
+    "name": "Geodude",
+    "dex": 74,
+    "type": "rock",
+    "addedAt": "2023-07-17",
+    "members": [
+      {
+        "name": "Geodude",
+        "dex": 74,
+        "sprite": 74
+      },
+      {
+        "name": "Graveler",
+        "dex": 75,
+        "sprite": 75
+      },
+      {
+        "name": "Golem",
+        "dex": 76,
+        "sprite": 76
+      }
+    ]
+  },
+  {
+    "id": "slowpoke",
+    "name": "Slowpoke",
+    "dex": 79,
+    "type": "water",
+    "addedAt": "2023-07-17",
+    "members": [
+      {
+        "name": "Slowpoke",
+        "dex": 79,
+        "sprite": 79
+      },
+      {
+        "name": "Slowbro",
+        "dex": 80,
+        "sprite": 80
+      },
+      {
+        "name": "Slowking",
+        "dex": 199,
+        "sprite": 199
+      }
+    ]
+  },
+  {
+    "id": "magnemite",
+    "name": "Magnemite",
+    "dex": 81,
+    "type": "steel",
+    "addedAt": "2023-07-17",
+    "members": [
+      {
+        "name": "Magnemite",
+        "dex": 81,
+        "sprite": 81
+      },
+      {
+        "name": "Magneton",
+        "dex": 82,
+        "sprite": 82
+      },
+      {
+        "name": "Magnezone",
+        "dex": 462,
+        "sprite": 462
+      }
+    ]
+  },
+  {
+    "id": "farfetchd",
+    "name": "Farfetch'd",
+    "dex": 83,
+    "type": "flying",
+    "addedAt": "2025-06-23",
+    "members": [
+      {
+        "name": "Farfetch'd",
+        "dex": 83,
+        "sprite": 83
+      }
+    ]
+  },
+  {
+    "id": "doduo",
+    "name": "Doduo",
+    "dex": 84,
+    "type": "flying",
+    "addedAt": "2023-07-17",
+    "members": [
+      {
+        "name": "Doduo",
+        "dex": 84,
+        "sprite": 84
+      },
+      {
+        "name": "Dodrio",
+        "dex": 85,
+        "sprite": 85
+      }
+    ]
+  },
+  {
+    "id": "gastly",
+    "name": "Gastly",
+    "dex": 92,
+    "type": "ghost",
+    "addedAt": "2023-07-17",
+    "members": [
+      {
+        "name": "Gastly",
+        "dex": 92,
+        "sprite": 92
+      },
+      {
+        "name": "Haunter",
+        "dex": 93,
+        "sprite": 93
+      },
+      {
+        "name": "Gengar",
+        "dex": 94,
+        "sprite": 94
+      }
+    ]
+  },
+  {
+    "id": "onix",
+    "name": "Onix",
+    "dex": 95,
+    "type": "rock",
+    "addedAt": "2023-11-14",
+    "members": [
+      {
+        "name": "Onix",
+        "dex": 95,
+        "sprite": 95
+      },
+      {
+        "name": "Steelix",
+        "dex": 208,
+        "sprite": 208
+      }
+    ]
+  },
+  {
+    "id": "cubone",
+    "name": "Cubone",
+    "dex": 104,
+    "type": "ground",
+    "addedAt": "2023-07-17",
+    "members": [
+      {
+        "name": "Cubone",
+        "dex": 104,
+        "sprite": 104
+      },
+      {
+        "name": "Marowak",
+        "dex": 105,
+        "sprite": 105
+      }
+    ]
+  },
+  {
+    "id": "chansey",
+    "name": "Chansey",
+    "dex": 113,
+    "type": "normal",
+    "addedAt": "2025-05-05",
+    "members": [
+      {
+        "name": "Happiny",
+        "dex": 440,
+        "sprite": 440
+      },
+      {
+        "name": "Chansey",
+        "dex": 113,
+        "sprite": 113
+      },
+      {
+        "name": "Blissey",
+        "dex": 242,
+        "sprite": 242
+      }
+    ]
+  },
+  {
+    "id": "kangaskhan",
+    "name": "Kangaskhan",
+    "dex": 115,
+    "type": "normal",
+    "addedAt": "2023-07-17",
+    "members": [
+      {
+        "name": "Kangaskhan",
+        "dex": 115,
+        "sprite": 115
+      }
+    ]
+  },
+  {
+    "id": "mr-mime",
+    "name": "Mr. Mime",
+    "dex": 122,
+    "type": "psychic",
+    "addedAt": "2023-09-12",
+    "members": [
+      {
+        "name": "Mime Jr.",
+        "dex": 439,
+        "sprite": 439
+      },
+      {
+        "name": "Mr. Mime",
+        "dex": 122,
+        "sprite": 122
+      }
+    ]
+  },
+  {
+    "id": "pinsir",
+    "name": "Pinsir",
+    "dex": 127,
+    "type": "bug",
+    "addedAt": "2023-07-17",
+    "members": [
+      {
+        "name": "Pinsir",
+        "dex": 127,
+        "sprite": 127
+      }
+    ]
+  },
+  {
+    "id": "ditto",
+    "name": "Ditto",
+    "dex": 132,
+    "type": "normal",
+    "addedAt": "2023-07-17",
+    "members": [
+      {
+        "name": "Ditto",
+        "dex": 132,
+        "sprite": 132
+      }
+    ]
+  },
+  {
+    "id": "eevee",
+    "name": "Eevee",
+    "dex": 133,
+    "type": "normal",
+    "addedAt": "2023-07-17",
+    "members": [
+      {
+        "name": "Eevee",
+        "dex": 133,
+        "sprite": 133
+      },
+      {
+        "name": "Vaporeon",
+        "dex": 134,
+        "sprite": 134
+      },
+      {
+        "name": "Jolteon",
+        "dex": 135,
+        "sprite": 135
+      },
+      {
+        "name": "Flareon",
+        "dex": 136,
+        "sprite": 136
+      },
+      {
+        "name": "Espeon",
+        "dex": 196,
+        "sprite": 196
+      },
+      {
+        "name": "Umbreon",
+        "dex": 197,
+        "sprite": 197
+      },
+      {
+        "name": "Leafeon",
+        "dex": 470,
+        "sprite": 470
+      },
+      {
+        "name": "Glaceon",
+        "dex": 471,
+        "sprite": 471
+      },
+      {
+        "name": "Sylveon",
+        "dex": 700,
+        "sprite": 700
+      }
+    ]
+  },
+  {
+    "id": "dratini",
+    "name": "Dratini",
+    "dex": 147,
+    "type": "dragon",
+    "addedAt": "2024-01-24",
+    "members": [
+      {
+        "name": "Dratini",
+        "dex": 147,
+        "sprite": 147
+      },
+      {
+        "name": "Dragonair",
+        "dex": 148,
+        "sprite": 148
+      },
+      {
+        "name": "Dragonite",
+        "dex": 149,
+        "sprite": 149
+      }
+    ]
+  },
+  {
+    "id": "mewtwo",
+    "name": "Mewtwo",
+    "dex": 150,
+    "type": "psychic",
+    "addedAt": "2026-09-14",
+    "members": [
+      {
+        "name": "Mewtwo",
+        "dex": 150,
+        "sprite": 150
+      }
+    ]
+  },
+  {
+    "id": "mew",
+    "name": "Mew",
+    "dex": 151,
+    "type": "psychic",
+    "addedAt": "2026-03-05",
+    "members": [
+      {
+        "name": "Mew",
+        "dex": 151,
+        "sprite": 151
+      }
+    ]
+  },
+  {
+    "id": "chikorita",
+    "name": "Chikorita",
+    "dex": 152,
+    "type": "grass",
+    "addedAt": "2023-07-17",
+    "members": [
+      {
+        "name": "Chikorita",
+        "dex": 152,
+        "sprite": 152
+      },
+      {
+        "name": "Bayleef",
+        "dex": 153,
+        "sprite": 153
+      },
+      {
+        "name": "Meganium",
+        "dex": 154,
+        "sprite": 154
+      }
+    ]
+  },
+  {
+    "id": "cyndaquil",
+    "name": "Cyndaquil",
+    "dex": 155,
+    "type": "fire",
+    "addedAt": "2023-07-17",
+    "members": [
+      {
+        "name": "Cyndaquil",
+        "dex": 155,
+        "sprite": 155
+      },
+      {
+        "name": "Quilava",
+        "dex": 156,
+        "sprite": 156
+      },
+      {
+        "name": "Typhlosion",
+        "dex": 157,
+        "sprite": 157
+      }
+    ]
+  },
+  {
+    "id": "totodile",
+    "name": "Totodile",
+    "dex": 158,
+    "type": "water",
+    "addedAt": "2023-07-17",
+    "members": [
+      {
+        "name": "Totodile",
+        "dex": 158,
+        "sprite": 158
+      },
+      {
+        "name": "Croconaw",
+        "dex": 159,
+        "sprite": 159
+      },
+      {
+        "name": "Feraligatr",
+        "dex": 160,
+        "sprite": 160
+      }
+    ]
+  },
+  {
+    "id": "togepi",
+    "name": "Togepi",
+    "dex": 175,
+    "type": "fairy",
+    "addedAt": "2023-07-17",
+    "members": [
+      {
+        "name": "Togepi",
+        "dex": 175,
+        "sprite": 175
+      },
+      {
+        "name": "Togetic",
+        "dex": 176,
+        "sprite": 176
+      },
+      {
+        "name": "Togekiss",
+        "dex": 468,
+        "sprite": 468
+      }
+    ]
+  },
+  {
+    "id": "natu",
+    "name": "Natu",
+    "dex": 177,
+    "type": "psychic",
+    "addedAt": "2025-09-29",
+    "members": [
+      {
+        "name": "Natu",
+        "dex": 177,
+        "sprite": 177
+      },
+      {
+        "name": "Xatu",
+        "dex": 178,
+        "sprite": 178
+      }
+    ]
+  },
+  {
+    "id": "mareep",
+    "name": "Mareep",
+    "dex": 179,
+    "type": "electric",
+    "addedAt": "2023-07-17",
+    "members": [
+      {
+        "name": "Mareep",
+        "dex": 179,
+        "sprite": 179
+      },
+      {
+        "name": "Flaaffy",
+        "dex": 180,
+        "sprite": 180
+      },
+      {
+        "name": "Ampharos",
+        "dex": 181,
+        "sprite": 181
+      }
+    ]
+  },
+  {
+    "id": "sudowoodo",
+    "name": "Sudowoodo",
+    "dex": 185,
+    "type": "rock",
+    "addedAt": "2023-07-17",
+    "members": [
+      {
+        "name": "Bonsly",
+        "dex": 438,
+        "sprite": 438
+      },
+      {
+        "name": "Sudowoodo",
+        "dex": 185,
+        "sprite": 185
+      }
+    ]
+  },
+  {
+    "id": "wooper",
+    "name": "Wooper",
+    "dex": 194,
+    "type": "water",
+    "addedAt": "2024-08-19",
+    "members": [
+      {
+        "name": "Wooper",
+        "dex": 194,
+        "sprite": 194
+      },
+      {
+        "name": "Wooper (Paldea)",
+        "dex": 194,
+        "sprite": 10253
+      },
+      {
+        "name": "Quagsire",
+        "dex": 195,
+        "sprite": 195
+      },
+      {
+        "name": "Clodsire",
+        "dex": 980,
+        "sprite": 980
+      }
+    ]
+  },
+  {
+    "id": "murkrow",
+    "name": "Murkrow",
+    "dex": 198,
+    "type": "dark",
+    "addedAt": "2025-05-26",
+    "members": [
+      {
+        "name": "Murkrow",
+        "dex": 198,
+        "sprite": 198
+      },
+      {
+        "name": "Honchkrow",
+        "dex": 430,
+        "sprite": 430
+      }
+    ]
+  },
+  {
+    "id": "wobbuffet",
+    "name": "Wobbuffet",
+    "dex": 202,
+    "type": "psychic",
+    "addedAt": "2023-07-17",
+    "members": [
+      {
+        "name": "Wynaut",
+        "dex": 360,
+        "sprite": 360
+      },
+      {
+        "name": "Wobbuffet",
+        "dex": 202,
+        "sprite": 202
+      }
+    ]
+  },
+  {
+    "id": "shuckle",
+    "name": "Shuckle",
+    "dex": 213,
+    "type": "bug",
+    "addedAt": "2026-01-19",
+    "members": [
+      {
+        "name": "Shuckle",
+        "dex": 213,
+        "sprite": 213
+      }
+    ]
+  },
+  {
+    "id": "heracross",
+    "name": "Heracross",
+    "dex": 214,
+    "type": "bug",
+    "addedAt": "2023-07-17",
+    "members": [
+      {
+        "name": "Heracross",
+        "dex": 214,
+        "sprite": 214
+      }
+    ]
+  },
+  {
+    "id": "sneasel",
+    "name": "Sneasel",
+    "dex": 215,
+    "type": "dark",
+    "addedAt": "2024-12-03",
+    "members": [
+      {
+        "name": "Sneasel",
+        "dex": 215,
+        "sprite": 215
+      },
+      {
+        "name": "Weavile",
+        "dex": 461,
+        "sprite": 461
+      }
+    ]
+  },
+  {
+    "id": "delibird",
+    "name": "Delibird",
+    "dex": 225,
+    "type": "flying",
+    "addedAt": "2023-12-18",
+    "members": [
+      {
+        "name": "Delibird",
+        "dex": 225,
+        "sprite": 225
+      }
+    ]
+  },
+  {
+    "id": "houndour",
+    "name": "Houndour",
+    "dex": 228,
+    "type": "dark",
+    "addedAt": "2023-07-17",
+    "members": [
+      {
+        "name": "Houndour",
+        "dex": 228,
+        "sprite": 228
+      },
+      {
+        "name": "Houndoom",
+        "dex": 229,
+        "sprite": 229
+      }
+    ]
+  },
+  {
+    "id": "raikou",
+    "name": "Raikou",
+    "dex": 243,
+    "type": "electric",
+    "addedAt": "2024-03-24",
+    "members": [
+      {
+        "name": "Raikou",
+        "dex": 243,
+        "sprite": 243
+      }
+    ]
+  },
+  {
+    "id": "entei",
+    "name": "Entei",
+    "dex": 244,
+    "type": "fire",
+    "addedAt": "2024-05-20",
+    "members": [
+      {
+        "name": "Entei",
+        "dex": 244,
+        "sprite": 244
+      }
+    ]
+  },
+  {
+    "id": "suicune",
+    "name": "Suicune",
+    "dex": 245,
+    "type": "water",
+    "addedAt": "2024-09-02",
+    "members": [
+      {
+        "name": "Suicune",
+        "dex": 245,
+        "sprite": 245
+      }
+    ]
+  },
+  {
+    "id": "larvitar",
+    "name": "Larvitar",
+    "dex": 246,
+    "type": "rock",
+    "addedAt": "2023-07-17",
+    "members": [
+      {
+        "name": "Larvitar",
+        "dex": 246,
+        "sprite": 246
+      },
+      {
+        "name": "Pupitar",
+        "dex": 247,
+        "sprite": 247
+      },
+      {
+        "name": "Tyranitar",
+        "dex": 248,
+        "sprite": 248
+      }
+    ]
+  },
+  {
+    "id": "treecko",
+    "name": "Treecko",
+    "dex": 252,
+    "type": "grass",
+    "addedAt": "2025-07-14",
+    "members": [
+      {
+        "name": "Treecko",
+        "dex": 252,
+        "sprite": 252
+      },
+      {
+        "name": "Grovyle",
+        "dex": 253,
+        "sprite": 253
+      },
+      {
+        "name": "Sceptile",
+        "dex": 254,
+        "sprite": 254
+      }
+    ]
+  },
+  {
+    "id": "torchic",
+    "name": "Torchic",
+    "dex": 255,
+    "type": "fire",
+    "addedAt": "2025-07-14",
+    "members": [
+      {
+        "name": "Torchic",
+        "dex": 255,
+        "sprite": 255
+      },
+      {
+        "name": "Combusken",
+        "dex": 256,
+        "sprite": 256
+      },
+      {
+        "name": "Blaziken",
+        "dex": 257,
+        "sprite": 257
+      }
+    ]
+  },
+  {
+    "id": "mudkip",
+    "name": "Mudkip",
+    "dex": 258,
+    "type": "water",
+    "addedAt": "2025-07-14",
+    "members": [
+      {
+        "name": "Mudkip",
+        "dex": 258,
+        "sprite": 258
+      },
+      {
+        "name": "Marshtomp",
+        "dex": 259,
+        "sprite": 259
+      },
+      {
+        "name": "Swampert",
+        "dex": 260,
+        "sprite": 260
+      }
+    ]
+  },
+  {
+    "id": "ralts",
+    "name": "Ralts",
+    "dex": 280,
+    "type": "psychic",
+    "addedAt": "2024-01-24",
+    "members": [
+      {
+        "name": "Ralts",
+        "dex": 280,
+        "sprite": 280
+      },
+      {
+        "name": "Kirlia",
+        "dex": 281,
+        "sprite": 281
+      },
+      {
+        "name": "Gardevoir",
+        "dex": 282,
+        "sprite": 282
+      },
+      {
+        "name": "Gallade",
+        "dex": 475,
+        "sprite": 475
+      }
+    ]
+  },
+  {
+    "id": "slakoth",
+    "name": "Slakoth",
+    "dex": 287,
+    "type": "normal",
+    "addedAt": "2023-07-17",
+    "members": [
+      {
+        "name": "Slakoth",
+        "dex": 287,
+        "sprite": 287
+      },
+      {
+        "name": "Vigoroth",
+        "dex": 288,
+        "sprite": 288
+      },
+      {
+        "name": "Slaking",
+        "dex": 289,
+        "sprite": 289
+      }
+    ]
+  },
+  {
+    "id": "sableye",
+    "name": "Sableye",
+    "dex": 302,
+    "type": "dark",
+    "addedAt": "2023-07-17",
+    "members": [
+      {
+        "name": "Sableye",
+        "dex": 302,
+        "sprite": 302
+      }
+    ]
+  },
+  {
+    "id": "mawile",
+    "name": "Mawile",
+    "dex": 303,
+    "type": "steel",
+    "addedAt": "2025-06-09",
+    "members": [
+      {
+        "name": "Mawile",
+        "dex": 303,
+        "sprite": 303
+      }
+    ]
+  },
+  {
+    "id": "aron",
+    "name": "Aron",
+    "dex": 304,
+    "type": "steel",
+    "addedAt": "2024-10-02",
+    "members": [
+      {
+        "name": "Aron",
+        "dex": 304,
+        "sprite": 304
+      },
+      {
+        "name": "Lairon",
+        "dex": 305,
+        "sprite": 305
+      },
+      {
+        "name": "Aggron",
+        "dex": 306,
+        "sprite": 306
+      }
+    ]
+  },
+  {
+    "id": "plusle",
+    "name": "Plusle",
+    "dex": 311,
+    "type": "electric",
+    "addedAt": "2025-07-14",
+    "members": [
+      {
+        "name": "Plusle",
+        "dex": 311,
+        "sprite": 311
+      }
+    ]
+  },
+  {
+    "id": "minun",
+    "name": "Minun",
+    "dex": 312,
+    "type": "electric",
+    "addedAt": "2025-07-14",
+    "members": [
+      {
+        "name": "Minun",
+        "dex": 312,
+        "sprite": 312
+      }
+    ]
+  },
+  {
+    "id": "gulpin",
+    "name": "Gulpin",
+    "dex": 316,
+    "type": "poison",
+    "addedAt": "2023-07-17",
+    "members": [
+      {
+        "name": "Gulpin",
+        "dex": 316,
+        "sprite": 316
+      },
+      {
+        "name": "Swalot",
+        "dex": 317,
+        "sprite": 317
+      }
+    ]
+  },
+  {
+    "id": "trapinch",
+    "name": "Trapinch",
+    "dex": 328,
+    "type": "ground",
+    "addedAt": "2025-11-06",
+    "members": [
+      {
+        "name": "Trapinch",
+        "dex": 328,
+        "sprite": 328
+      },
+      {
+        "name": "Vibrava",
+        "dex": 329,
+        "sprite": 329
+      },
+      {
+        "name": "Flygon",
+        "dex": 330,
+        "sprite": 330
+      }
+    ]
+  },
+  {
+    "id": "swablu",
+    "name": "Swablu",
+    "dex": 333,
+    "type": "flying",
+    "addedAt": "2023-07-17",
+    "members": [
+      {
+        "name": "Swablu",
+        "dex": 333,
+        "sprite": 333
+      },
+      {
+        "name": "Altaria",
+        "dex": 334,
+        "sprite": 334
+      }
+    ]
+  },
+  {
+    "id": "shuppet",
+    "name": "Shuppet",
+    "dex": 353,
+    "type": "ghost",
+    "addedAt": "2023-10-30",
+    "members": [
+      {
+        "name": "Shuppet",
+        "dex": 353,
+        "sprite": 353
+      },
+      {
+        "name": "Banette",
+        "dex": 354,
+        "sprite": 354
+      }
+    ]
+  },
+  {
+    "id": "absol",
+    "name": "Absol",
+    "dex": 359,
+    "type": "dark",
+    "addedAt": "2023-07-17",
+    "members": [
+      {
+        "name": "Absol",
+        "dex": 359,
+        "sprite": 359
+      }
+    ]
+  },
+  {
+    "id": "spheal",
+    "name": "Spheal",
+    "dex": 363,
+    "type": "ice",
+    "addedAt": "2023-07-17",
+    "members": [
+      {
+        "name": "Spheal",
+        "dex": 363,
+        "sprite": 363
+      },
+      {
+        "name": "Sealeo",
+        "dex": 364,
+        "sprite": 364
+      },
+      {
+        "name": "Walrein",
+        "dex": 365,
+        "sprite": 365
+      }
+    ]
+  },
+  {
+    "id": "bagon",
+    "name": "Bagon",
+    "dex": 371,
+    "type": "dragon",
+    "addedAt": "2025-11-06",
+    "members": [
+      {
+        "name": "Bagon",
+        "dex": 371,
+        "sprite": 371
+      },
+      {
+        "name": "Shelgon",
+        "dex": 372,
+        "sprite": 372
+      },
+      {
+        "name": "Salamence",
+        "dex": 373,
+        "sprite": 373
+      }
+    ]
+  },
+  {
+    "id": "latias",
+    "name": "Latias",
+    "dex": 380,
+    "type": "dragon",
+    "addedAt": "2026-04-06",
+    "members": [
+      {
+        "name": "Latias",
+        "dex": 380,
+        "sprite": 380
+      }
+    ]
+  },
+  {
+    "id": "latios",
+    "name": "Latios",
+    "dex": 381,
+    "type": "dragon",
+    "addedAt": "2026-06-08",
+    "members": [
+      {
+        "name": "Latios",
+        "dex": 381,
+        "sprite": 381
+      }
+    ]
+  },
+  {
+    "id": "turtwig",
+    "name": "Turtwig",
+    "dex": 387,
+    "type": "grass",
+    "addedAt": "2026-07-13",
+    "members": [
+      {
+        "name": "Turtwig",
+        "dex": 387,
+        "sprite": 387
+      },
+      {
+        "name": "Grotle",
+        "dex": 388,
+        "sprite": 388
+      },
+      {
+        "name": "Torterra",
+        "dex": 389,
+        "sprite": 389
+      }
+    ]
+  },
+  {
+    "id": "chimchar",
+    "name": "Chimchar",
+    "dex": 390,
+    "type": "fire",
+    "addedAt": "2026-07-13",
+    "members": [
+      {
+        "name": "Chimchar",
+        "dex": 390,
+        "sprite": 390
+      },
+      {
+        "name": "Monferno",
+        "dex": 391,
+        "sprite": 391
+      },
+      {
+        "name": "Infernape",
+        "dex": 392,
+        "sprite": 392
+      }
+    ]
+  },
+  {
+    "id": "piplup",
+    "name": "Piplup",
+    "dex": 393,
+    "type": "water",
+    "addedAt": "2026-07-13",
+    "members": [
+      {
+        "name": "Piplup",
+        "dex": 393,
+        "sprite": 393
+      },
+      {
+        "name": "Prinplup",
+        "dex": 394,
+        "sprite": 394
+      },
+      {
+        "name": "Empoleon",
+        "dex": 395,
+        "sprite": 395
+      }
+    ]
+  },
+  {
+    "id": "shinx",
+    "name": "Shinx",
+    "dex": 403,
+    "type": "electric",
+    "addedAt": "2024-10-02",
+    "members": [
+      {
+        "name": "Shinx",
+        "dex": 403,
+        "sprite": 403
+      },
+      {
+        "name": "Luxio",
+        "dex": 404,
+        "sprite": 404
+      },
+      {
+        "name": "Luxray",
+        "dex": 405,
+        "sprite": 405
+      }
+    ]
+  },
+  {
+    "id": "drifloon",
+    "name": "Drifloon",
+    "dex": 425,
+    "type": "ghost",
+    "addedAt": "2024-10-11",
+    "members": [
+      {
+        "name": "Drifloon",
+        "dex": 425,
+        "sprite": 425
+      },
+      {
+        "name": "Drifblim",
+        "dex": 426,
+        "sprite": 426
+      }
+    ]
+  },
+  {
+    "id": "spiritomb",
+    "name": "Spiritomb",
+    "dex": 442,
+    "type": "dark",
+    "addedAt": "2025-12-01",
+    "members": [
+      {
+        "name": "Spiritomb",
+        "dex": 442,
+        "sprite": 442
+      }
+    ]
+  },
+  {
+    "id": "riolu",
+    "name": "Riolu",
+    "dex": 447,
+    "type": "fighting",
+    "addedAt": "2023-07-17",
+    "members": [
+      {
+        "name": "Riolu",
+        "dex": 447,
+        "sprite": 447
+      },
+      {
+        "name": "Lucario",
+        "dex": 448,
+        "sprite": 448
+      }
+    ]
+  },
+  {
+    "id": "croagunk",
+    "name": "Croagunk",
+    "dex": 453,
+    "type": "poison",
+    "addedAt": "2023-07-17",
+    "members": [
+      {
+        "name": "Croagunk",
+        "dex": 453,
+        "sprite": 453
+      },
+      {
+        "name": "Toxicroak",
+        "dex": 454,
+        "sprite": 454
+      }
+    ]
+  },
+  {
+    "id": "snover",
+    "name": "Snover",
+    "dex": 459,
+    "type": "ice",
+    "addedAt": "2023-12-18",
+    "members": [
+      {
+        "name": "Snover",
+        "dex": 459,
+        "sprite": 459
+      },
+      {
+        "name": "Abomasnow",
+        "dex": 460,
+        "sprite": 460
+      }
+    ]
+  },
+  {
+    "id": "cresselia",
+    "name": "Cresselia",
+    "dex": 488,
+    "type": "psychic",
+    "addedAt": "2025-03-31",
+    "members": [
+      {
+        "name": "Cresselia",
+        "dex": 488,
+        "sprite": 488
+      }
+    ]
+  },
+  {
+    "id": "darkrai",
+    "name": "Darkrai",
+    "dex": 491,
+    "type": "dark",
+    "addedAt": "2025-04-07",
+    "members": [
+      {
+        "name": "Darkrai",
+        "dex": 491,
+        "sprite": 491
+      }
+    ]
+  },
+  {
+    "id": "munna",
+    "name": "Munna",
+    "dex": 517,
+    "type": "psychic",
+    "addedAt": "2025-03-17",
+    "members": [
+      {
+        "name": "Munna",
+        "dex": 517,
+        "sprite": 517
+      },
+      {
+        "name": "Musharna",
+        "dex": 518,
+        "sprite": 518
+      }
+    ]
+  },
+  {
+    "id": "dwebble",
+    "name": "Dwebble",
+    "dex": 557,
+    "type": "bug",
+    "addedAt": "2025-11-06",
+    "members": [
+      {
+        "name": "Dwebble",
+        "dex": 557,
+        "sprite": 557
+      },
+      {
+        "name": "Crustle",
+        "dex": 558,
+        "sprite": 558
+      }
+    ]
+  },
+  {
+    "id": "foongus",
+    "name": "Foongus",
+    "dex": 590,
+    "type": "poison",
+    "addedAt": "2026-10-05",
+    "members": [
+      {
+        "name": "Foongus",
+        "dex": 590,
+        "sprite": 590
+      },
+      {
+        "name": "Amoonguss",
+        "dex": 591,
+        "sprite": 591
+      }
+    ]
+  },
+  {
+    "id": "rufflet",
+    "name": "Rufflet",
+    "dex": 627,
+    "type": "flying",
+    "addedAt": "2025-01-20",
+    "members": [
+      {
+        "name": "Rufflet",
+        "dex": 627,
+        "sprite": 627
+      },
+      {
+        "name": "Braviary",
+        "dex": 628,
+        "sprite": 628
+      }
+    ]
+  },
+  {
+    "id": "tyrunt",
+    "name": "Tyrunt",
+    "dex": 696,
+    "type": "rock",
+    "addedAt": "2026-05-11",
+    "members": [
+      {
+        "name": "Tyrunt",
+        "dex": 696,
+        "sprite": 696
+      },
+      {
+        "name": "Tyrantrum",
+        "dex": 697,
+        "sprite": 697
+      }
+    ]
+  },
+  {
+    "id": "hawlucha",
+    "name": "Hawlucha",
+    "dex": 701,
+    "type": "flying",
+    "addedAt": "2026-08-10",
+    "members": [
+      {
+        "name": "Hawlucha",
+        "dex": 701,
+        "sprite": 701
+      }
+    ]
+  },
+  {
+    "id": "dedenne",
+    "name": "Dedenne",
+    "dex": 702,
+    "type": "electric",
+    "addedAt": "2024-03-11",
+    "members": [
+      {
+        "name": "Dedenne",
+        "dex": 702,
+        "sprite": 702
+      }
+    ]
+  },
+  {
+    "id": "pumpkaboo",
+    "name": "Pumpkaboo",
+    "dex": 710,
+    "type": "ghost",
+    "addedAt": "2025-10-22",
+    "members": [
+      {
+        "name": "Pumpkaboo",
+        "dex": 710,
+        "sprite": 710
+      },
+      {
+        "name": "Gourgeist",
+        "dex": 711,
+        "sprite": 711
+      }
+    ]
+  },
+  {
+    "id": "noibat",
+    "name": "Noibat",
+    "dex": 714,
+    "type": "dragon",
+    "addedAt": "2026-03-23",
+    "members": [
+      {
+        "name": "Noibat",
+        "dex": 714,
+        "sprite": 714
+      },
+      {
+        "name": "Noivern",
+        "dex": 715,
+        "sprite": 715
+      }
+    ]
+  },
+  {
+    "id": "grubbin",
+    "name": "Grubbin",
+    "dex": 736,
+    "type": "bug",
+    "addedAt": "2024-10-02",
+    "members": [
+      {
+        "name": "Grubbin",
+        "dex": 736,
+        "sprite": 736
+      },
+      {
+        "name": "Charjabug",
+        "dex": 737,
+        "sprite": 737
+      },
+      {
+        "name": "Vikavolt",
+        "dex": 738,
+        "sprite": 738
+      }
+    ]
+  },
+  {
+    "id": "cutiefly",
+    "name": "Cutiefly",
+    "dex": 742,
+    "type": "fairy",
+    "addedAt": "2026-02-09",
+    "members": [
+      {
+        "name": "Cutiefly",
+        "dex": 742,
+        "sprite": 742
+      },
+      {
+        "name": "Ribombee",
+        "dex": 743,
+        "sprite": 743
+      }
+    ]
+  },
+  {
+    "id": "stufful",
+    "name": "Stufful",
+    "dex": 759,
+    "type": "fighting",
+    "addedAt": "2024-01-24",
+    "members": [
+      {
+        "name": "Stufful",
+        "dex": 759,
+        "sprite": 759
+      },
+      {
+        "name": "Bewear",
+        "dex": 760,
+        "sprite": 760
+      }
+    ]
+  },
+  {
+    "id": "comfey",
+    "name": "Comfey",
+    "dex": 764,
+    "type": "fairy",
+    "addedAt": "2024-04-22",
+    "members": [
+      {
+        "name": "Comfey",
+        "dex": 764,
+        "sprite": 764
+      }
+    ]
+  },
+  {
+    "id": "togedemaru",
+    "name": "Togedemaru",
+    "dex": 777,
+    "type": "steel",
+    "addedAt": "2025-12-22",
+    "members": [
+      {
+        "name": "Togedemaru",
+        "dex": 777,
+        "sprite": 777
+      }
+    ]
+  },
+  {
+    "id": "mimikyu",
+    "name": "Mimikyu",
+    "dex": 778,
+    "type": "ghost",
+    "addedAt": "2024-10-28",
+    "members": [
+      {
+        "name": "Mimikyu",
+        "dex": 778,
+        "sprite": 778
+      }
+    ]
+  },
+  {
+    "id": "drampa",
+    "name": "Drampa",
+    "dex": 780,
+    "type": "dragon",
+    "addedAt": "2026-05-25",
+    "members": [
+      {
+        "name": "Drampa",
+        "dex": 780,
+        "sprite": 780
+      }
+    ]
+  },
+  {
+    "id": "cramorant",
+    "name": "Cramorant",
+    "dex": 845,
+    "type": "flying",
+    "addedAt": "2024-06-17",
+    "members": [
+      {
+        "name": "Cramorant",
+        "dex": 845,
+        "sprite": 845
+      }
+    ]
+  },
+  {
+    "id": "toxel",
+    "name": "Toxel",
+    "dex": 848,
+    "type": "poison",
+    "addedAt": "2025-08-11",
+    "members": [
+      {
+        "name": "Toxel",
+        "dex": 848,
+        "sprite": 848
+      },
+      {
+        "name": "Toxtricity",
+        "dex": 849,
+        "sprite": 849
+      }
+    ]
+  },
+  {
+    "id": "sprigatito",
+    "name": "Sprigatito",
+    "dex": 906,
+    "type": "grass",
+    "addedAt": "2024-07-15",
+    "members": [
+      {
+        "name": "Sprigatito",
+        "dex": 906,
+        "sprite": 906
+      },
+      {
+        "name": "Floragato",
+        "dex": 907,
+        "sprite": 907
+      },
+      {
+        "name": "Meowscarada",
+        "dex": 908,
+        "sprite": 908
+      }
+    ]
+  },
+  {
+    "id": "fuecoco",
+    "name": "Fuecoco",
+    "dex": 909,
+    "type": "fire",
+    "addedAt": "2024-07-15",
+    "members": [
+      {
+        "name": "Fuecoco",
+        "dex": 909,
+        "sprite": 909
+      },
+      {
+        "name": "Crocalor",
+        "dex": 910,
+        "sprite": 910
+      },
+      {
+        "name": "Skeledirge",
+        "dex": 911,
+        "sprite": 911
+      }
+    ]
+  },
+  {
+    "id": "quaxly",
+    "name": "Quaxly",
+    "dex": 912,
+    "type": "water",
+    "addedAt": "2024-07-15",
+    "members": [
+      {
+        "name": "Quaxly",
+        "dex": 912,
+        "sprite": 912
+      },
+      {
+        "name": "Quaxwell",
+        "dex": 913,
+        "sprite": 913
+      },
+      {
+        "name": "Quaquaval",
+        "dex": 914,
+        "sprite": 914
+      }
+    ]
+  },
+  {
+    "id": "pawmi",
+    "name": "Pawmi",
+    "dex": 921,
+    "type": "electric",
+    "addedAt": "2024-12-23",
+    "members": [
+      {
+        "name": "Pawmi",
+        "dex": 921,
+        "sprite": 921
+      },
+      {
+        "name": "Pawmo",
+        "dex": 922,
+        "sprite": 922
+      },
+      {
+        "name": "Pawmot",
+        "dex": 923,
+        "sprite": 923
+      }
+    ]
+  },
+  {
+    "id": "tinkatink",
+    "name": "Tinkatink",
+    "dex": 957,
+    "type": "fairy",
+    "addedAt": "2026-08-17",
+    "members": [
+      {
+        "name": "Tinkatink",
+        "dex": 957,
+        "sprite": 957
+      },
+      {
+        "name": "Tinkatuff",
+        "dex": 958,
+        "sprite": 958
+      },
+      {
+        "name": "Tinkaton",
+        "dex": 959,
+        "sprite": 959
+      }
+    ]
+  },
+  {
+    "id": "cetoddle",
+    "name": "Cetoddle",
+    "dex": 974,
+    "type": "ice",
+    "addedAt": "2025-12-22",
+    "members": [
+      {
+        "name": "Cetoddle",
+        "dex": 974,
+        "sprite": 974
+      },
+      {
+        "name": "Cetitan",
+        "dex": 975,
+        "sprite": 975
+      }
+    ]
+  }
+]
