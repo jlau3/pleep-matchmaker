@@ -4,7 +4,7 @@ Pokémon Sleep players vote on every candy line: **want**, **don't want** or **u
 
 - **Voting**: card-by-card voting for anything unvoted, plus a searchable grid to change any vote. Matchmake saves skipped lines as undecided.
 - **Friends**: look up players by exact Discord name, IGN or friend code, and manage your friend list (up to 50).
-- **Tier list**: which candy to prioritize, ranked S/A/B/C/Avoid by your friends' net votes, with an Everyone toggle for community totals.
+- **Tier list**: which candy to prioritize, ranked S/A/B/C/Avoid by your friends' net votes, filterable by island, with an Everyone toggle for community totals.
 - **Matchmake**: players open to new friends whose votes line up with yours.
 - **Profile**: IGN, friend code, visibility toggles, blocked players, sign out, delete account.
 
@@ -97,13 +97,13 @@ Players will see only the new lines at the top of **Voting** next time they open
 
 ### Island spawns
 
-`src/data/islands.json` lists the islands, but the `lines` arrays are empty because there's no public spawn-pool dataset in the sources above. Until they're filled in, every island view falls back to a single "All islands" group. To fill them in, add candy line ids (the `id` field in `candy-lines.json`) to each island:
+`src/data/islands.json` is generated from Serebii's location pages by `scripts/build_islands.py`, which maps every listed species to its candy line. Re-run it after `build_lines.py` when the game adds Pokémon or islands:
 
-```json
-{ "id": "cyan-beach", "name": "Cyan Beach", "lines": ["pikachu", "squirtle", "psyduck"] }
+```bash
+python3 scripts/build_islands.py
 ```
 
-A line can appear on several islands. Lines not listed on any island show under "Island not mapped yet".
+The script fails loudly if a species can't be matched (add it to `ALIASES`) or a page layout changes. Lines on no island (currently Mew, Darkrai, Turtwig, Chimchar) only show under "All islands" in the Tier list filter.
 
 ## Tests
 
