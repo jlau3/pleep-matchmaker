@@ -15,6 +15,9 @@ create index friends_friend_idx on public.friends (friend_id);
 
 alter table public.friends enable row level security;
 
+revoke all on public.friends from anon, authenticated;
+grant select, insert, delete on public.friends to authenticated;
+
 create policy "own friends read" on public.friends
   for select to authenticated using (user_id = (select auth.uid()));
 create policy "own friends insert" on public.friends

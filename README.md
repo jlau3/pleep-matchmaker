@@ -39,7 +39,7 @@ A match is shown when it's **≥ 25%** with **≥ 3 lines you both want**, the o
 
 ### 1. Supabase
 
-1. Create a project at [supabase.com](https://supabase.com) (free tier).
+1. Create a project at [supabase.com](https://supabase.com) (free tier). Turn **Data API** on (the app talks to the database through it), and **automatic RLS** on. Leave **auto-expose new tables** off: the migrations grant exactly the access the app needs.
 2. Apply the migrations in `supabase/migrations/` in order: paste each into the SQL editor, or use `supabase link` and `supabase db push` with the Supabase CLI.
 3. Under **Project Settings → API**, copy the project URL and the anon key.
 

@@ -58,9 +58,14 @@ create policy "own profile read" on public.profiles
 create policy "own profile update" on public.profiles
   for update to authenticated using (id = (select auth.uid())) with check (id = (select auth.uid()));
 
+-- Explicit grants, so this works whether or not the project auto-exposes new
+-- tables. anon gets nothing; RLS narrows authenticated to its own rows.
+revoke all on public.profiles, public.preferences, public.blocks from anon, authenticated;
+grant select on public.profiles to authenticated;
 -- Discord fields and timestamps are maintained by triggers, not the client.
-revoke insert, update, delete on public.profiles from anon, authenticated;
 grant update (ign, friend_code, open_to_friends, allow_lookup) on public.profiles to authenticated;
+grant select, insert, update, delete on public.preferences to authenticated;
+grant select, insert, delete on public.blocks to authenticated;
 
 create policy "own prefs read" on public.preferences
   for select to authenticated using (user_id = (select auth.uid()));

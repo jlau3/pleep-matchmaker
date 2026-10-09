@@ -168,7 +168,11 @@ do $$ begin
     assert false, 'anon lookup';
   exception when insufficient_privilege then null;
   end;
-  assert (select count(*) from public.profiles) = 0, 'anon profiles';
+  begin
+    perform count(*) from public.profiles;
+    assert false, 'anon profiles';
+  exception when insufficient_privilege then null;
+  end;
 end $$;
 reset role;
 
