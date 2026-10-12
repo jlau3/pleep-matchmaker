@@ -8,8 +8,9 @@ const STEPS: { title: string; body: React.ReactNode; href: string; cta: string }
     title: "Vote on every candy",
     body: (
       <>
-        Mark each Pokémon Sleep candy line <b>Want</b>, <b>Don&apos;t Want</b> or leave it <b>Undecided</b>. Tap the ★ to
-        pick your Top {MAX_TOP}: they count double everywhere.
+        Mark each Pokémon Sleep candy line <b>Want</b>, <b>Don&apos;t Want</b> or leave it <b>Neutral</b>. Tap the ★ to
+        pick your Top {MAX_TOP}: your personal favourites. They don&apos;t move the Tier List, so a niche pick never
+        counts against you. Friends can see them and send you that candy anyway, wherever it ranks.
       </>
     ),
     href: "/vote",
@@ -31,7 +32,7 @@ const STEPS: { title: string; body: React.ReactNode; href: string; cta: string }
     body: (
       <>
         Look them up by exact Discord name, IGN or friend code and add up to {MAX_FRIENDS}. Each player shows a fit %: how
-        well they want what your friends want, and don&apos;t turn down what your friends want.
+        closely their wants and don&apos;t-wants line up with your current friends list.
       </>
     ),
     href: "/friends",

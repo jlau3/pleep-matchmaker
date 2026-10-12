@@ -9,12 +9,9 @@ export const CHOICES: Choice[] = ["want", "undecided", "dont_want"];
 /** Mirrors public.max_top(): how many wants a player can star as their Top 3. */
 export const MAX_TOP = 3;
 
-/** Mirrors public.top_multiplier(): a starred want counts this many times over, in matching and on the tier list. */
-export const TOP_MULTIPLIER = 2;
-
 export const CHOICE_LABEL: Record<Choice, string> = {
   want: "Want",
-  undecided: "Undecided",
+  undecided: "Neutral",
   dont_want: "Don't Want",
 };
 

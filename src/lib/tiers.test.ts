@@ -74,23 +74,28 @@ describe("relative tiers by net score", () => {
     expect(ids(tiers, "C")).toEqual([c.id]);
   });
 
-  it("lets a starred want outweigh a don't-want", () => {
-    const [a] = [...LINES_BY_ID.values()];
-    // 1 starred want (2) - 1 don't-want = 1: ranked, not C.
-    const tiers = buildTiers(new Map([[a.id, { wants: 1, dontWants: 1, tops: 1 }]]), 2, [a]);
-    expect(ids(tiers, "S")).toEqual([a.id]);
-  });
-
-  it("counts a starred want double", () => {
+  it("doesn't let stars change the score", () => {
     const [a, b] = [...LINES_BY_ID.values()];
     const votes = new Map([
-      [a.id, { wants: 2, dontWants: 0, tops: 0 }],
-      [b.id, { wants: 1, dontWants: 0, tops: 1 }],
+      [a.id, { wants: 1, dontWants: 1, tops: 1 }], // starred, but 1 - 1 = 0: C
+      [b.id, { wants: 1, dontWants: 0, tops: 0 }],
     ]);
-    // Both score 2 -> tied, both S; the share shown is plain wants.
     const tiers = buildTiers(votes, 2, [a, b]);
+    expect(ids(tiers, "S")).toEqual([b.id]);
+    expect(ids(tiers, "C")).toEqual([a.id]);
+  });
+
+  it("breaks score ties by Top 3 stars before anything else", () => {
+    // mewtwo has the biggest rarity weight and eevee the most don't-wants, but
+    // eevee's star puts it first among the lines tied on score 2.
+    const [mewtwo, eevee] = ["mewtwo", "eevee"].map((id) => LINES_BY_ID.get(id)!);
+    const votes = new Map([
+      [mewtwo.id, { wants: 2, dontWants: 0, tops: 0 }],
+      [eevee.id, { wants: 3, dontWants: 1, tops: 1 }],
+    ]);
+    const tiers = buildTiers(votes, 4, [mewtwo, eevee]);
+    expect(ids(tiers, "S")).toEqual([eevee.id, mewtwo.id]);
     expect(tiers.get("S")!.map((r) => r.score)).toEqual([2, 2]);
-    expect(tiers.get("S")!.map((r) => r.wantShare)).toEqual([1, 0.5]);
   });
 
   it("puts everything in C with no voters", () => {
@@ -120,11 +125,11 @@ describe("buildTiers", () => {
     // pikachu and eevee have 2 stars; charmander and squirtle tie on 1 and every
     // other key, so dex order breaks the tie. bulbasaur has no stars.
     expect(ids(tiers, "top")).toEqual(["pikachu", "eevee", "charmander", "squirtle"]);
-    // Score: pikachu/eevee 2 + 2, charmander/squirtle 2 + 1, bulbasaur 2 - 1.
-    // 5 lines above 0: S is the top run (pikachu, eevee), the one-star pair lands in B.
-    expect(ids(tiers, "S")).toEqual(["pikachu", "eevee"]);
-    expect(ids(tiers, "B")).toEqual(["charmander", "squirtle"]);
-    expect(tiers.get("S")![0].score).toBe(4);
+    // Stars don't score: the four starred lines all score 2 and share S, ordered
+    // by stars; bulbasaur (2 - 1) falls to C.
+    expect(ids(tiers, "S")).toEqual(["pikachu", "eevee", "charmander", "squirtle"]);
+    expect(ids(tiers, "C")).toEqual(["bulbasaur"]);
+    expect(tiers.get("S")![0].score).toBe(2);
     const placed = [...tiers.entries()].filter(([id]) => id !== "top").flatMap(([, r]) => r).map((r) => r.line.id);
     expect(placed.sort()).toEqual([...lineIds].sort());
     expect(tiers.get("top")![0].tops).toBe(2);
@@ -154,13 +159,13 @@ describe("buildTiers", () => {
     // pikachu (3) S, squirtle (2) B; charmander (1 - 2) is Avoid; nobody voted on bulbasaur: C.
     expect(ids(tiers, "S")).toEqual(["pikachu"]);
     expect(ids(tiers, "B")).toEqual(["squirtle"]);
-    expect(tiers.get("S")![0]).toMatchObject({ wants: 3, unsure: 0, dontWants: 0, wantShare: 1, dontShare: 0 });
+    expect(tiers.get("S")![0]).toMatchObject({ wants: 3, neutral: 0, dontWants: 0, wantShare: 1, dontShare: 0 });
     expect(ids(tiers, "avoid")).toEqual(["charmander"]);
     expect(ids(tiers, "C")).toEqual(["bulbasaur"]);
   });
 
-  it("ranks 39 want + 11 don't tiers below 39 want + 11 unsure", () => {
-    // 50 voters. pikachu: 39 want, 11 unsure (39). eevee: 39 want, 11 don't (28).
+  it("ranks 39 want + 11 don't tiers below 39 want + 11 neutral", () => {
+    // 50 voters. pikachu: 39 want, 11 neutral (39). eevee: 39 want, 11 don't (28).
     // Seven lines in between score 35..29 (wants only).
     const [pikachu, eevee] = ["pikachu", "eevee"].map((id) => LINES_BY_ID.get(id)!);
     const fillers = [...LINES_BY_ID.values()].filter((l) => l !== pikachu && l !== eevee).slice(0, 7);
@@ -173,7 +178,7 @@ describe("buildTiers", () => {
     // 9 lines above 0: S = 2, A = 2, B = 2, C = 3. eevee ranks last.
     expect(ids(tiers, "S")[0]).toBe(pikachu.id);
     expect(ids(tiers, "C").at(-1)).toBe(eevee.id);
-    expect(tiers.get("C")!.at(-1)).toMatchObject({ score: 28, unsure: 0, dontShare: 0.22 });
+    expect(tiers.get("C")!.at(-1)).toMatchObject({ score: 28, neutral: 0, dontShare: 0.22 });
   });
 
   it("keeps Avoid lines in the Top 3 row, so nobody's pick is left out", () => {

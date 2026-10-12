@@ -10,17 +10,17 @@ export function MatchPct({ pct }: { pct: number | null | undefined }) {
   const low = pct < LOW_FIT_PCT;
   return (
     <div
-      className="shrink-0 text-right leading-none"
+      className="shrink-0 whitespace-nowrap text-right leading-none"
       title={
         low
-          ? "Most of what they want isn't on your friends' lists, or they don't want what your friends do"
-          : "How well their wants and don't-wants line up with what your friends want"
+          ? "Their wants and don't-wants mostly don't line up with your current friends list"
+          : "How closely their wants and don't-wants line up with your current friends list"
       }
     >
-      <div className={`text-2xl font-bold ${low ? "text-amber-600 dark:text-amber-400" : "text-want"}`}>{pct}%</div>
-      <div className={`text-xs ${low ? "font-semibold text-amber-700 dark:text-amber-300" : "text-slate-500"}`}>
+      <span className={`text-2xl font-bold ${low ? "text-amber-600 dark:text-amber-400" : "text-want"}`}>{pct}%</span>{" "}
+      <span className={`text-xs ${low ? "font-semibold text-amber-700 dark:text-amber-300" : "text-slate-500"}`}>
         {low ? "low fit" : "fit"}
-      </div>
+      </span>
     </div>
   );
 }

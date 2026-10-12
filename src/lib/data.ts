@@ -37,7 +37,7 @@ export async function loadOwnVotes(
 }
 
 /**
- * Saves every line the user has no vote on as "undecided", so Undecided is
+ * Saves every line the user has no vote on as "undecided" (shown as Neutral), so Neutral is
  * the stored default from the first visit. Returns the full vote map plus the
  * ids that were new (not seen before).
  */
