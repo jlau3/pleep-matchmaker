@@ -21,9 +21,10 @@ export async function middleware(request: NextRequest) {
     },
   });
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // getClaims refreshes an expired session (writing new cookies via setAll) and
+  // then verifies the JWT locally, instead of asking Supabase Auth every request.
+  const { data } = await supabase.auth.getClaims();
+  const user = data?.claims?.sub ? { id: data.claims.sub } : null;
 
   if (!user && PROTECTED.some((path) => request.nextUrl.pathname.startsWith(path))) {
     return NextResponse.redirect(new URL("/", request.url));

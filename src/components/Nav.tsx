@@ -1,12 +1,10 @@
 import Link from "next/link";
 import { NavLinks } from "./NavLinks";
-import { createClient } from "@/lib/supabase/server";
+import { getAuth } from "@/lib/supabase/server";
 
 export async function Nav() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { userId } = await getAuth();
+  const user = userId !== null;
 
   return (
     <header className="sticky top-0 z-20 header-night text-white shadow-md">

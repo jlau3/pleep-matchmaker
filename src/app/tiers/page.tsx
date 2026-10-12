@@ -5,8 +5,9 @@ import { TierBoard } from "@/components/TierBoard";
 import { ISLANDS, LINES } from "@/lib/lines";
 import { loadOwnChoices } from "@/lib/data";
 import { requireUser } from "@/lib/supabase/server";
+import { loadCommunityStats } from "@/lib/communityStats";
 import { buildTiers, countVotes, type LineVotes } from "@/lib/tiers";
-import type { FriendRow, LineStatRow } from "@/lib/types";
+import type { FriendRow } from "@/lib/types";
 
 type Pool = "friends" | "everyone";
 
@@ -30,16 +31,9 @@ export default async function TiersPage({ searchParams }: { searchParams: Promis
     votes = countVotes(players);
     voters = players.length;
   } else {
-    const [stats, count] = await Promise.all([supabase.rpc("get_line_stats"), supabase.rpc("get_voter_count")]);
-    if (stats.error) throw stats.error;
-    if (count.error) throw count.error;
-    votes = new Map(
-      (stats.data as LineStatRow[]).map((row) => [
-        row.line_id,
-        { wants: Number(row.wants), dontWants: Number(row.dont_wants), tops: Number(row.tops) },
-      ]),
-    );
-    voters = Number(count.data);
+    const community = await loadCommunityStats(supabase);
+    votes = new Map(Object.entries(community.votes));
+    voters = community.voters;
   }
 
   const href = (next: { pool?: Pool; byIsland?: boolean }) => {
@@ -62,7 +56,7 @@ export default async function TiersPage({ searchParams }: { searchParams: Promis
         <h1 className="text-2xl font-bold">Tier List</h1>
         <p className="text-sm text-slate-600 dark:text-slate-300">
           Which candy to prioritize, ranked against each other by net votes (wants minus don&apos;t-wants, Top 3 stars count double) from{" "}
-          {pool === "friends" ? `your ${voters} ${voters === 1 ? "friend" : "friends"}` : `${voters} active players`}.
+          {pool === "friends" ? "your friends" : `${voters} active players`}.
         </p>
       </div>
 

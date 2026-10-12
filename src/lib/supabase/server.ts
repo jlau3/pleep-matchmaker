@@ -1,6 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { cache } from "react";
 import { supabaseEnv } from "./env";
 
 export async function createClient() {
@@ -22,12 +23,23 @@ export async function createClient() {
   });
 }
 
+/**
+ * One Supabase client and signed-in user id per request, shared by the page,
+ * the nav and anything else that asks (React cache). getClaims() verifies the
+ * session JWT locally against the project's published signing keys, so no
+ * round trip to Supabase Auth; with a legacy shared-secret (HS256) project it
+ * falls back to one getUser() call.
+ */
+export const getAuth = cache(async () => {
+  const supabase = await createClient();
+  const { data } = await supabase.auth.getClaims();
+  const userId = typeof data?.claims?.sub === "string" ? data.claims.sub : null;
+  return { supabase, userId };
+});
+
 /** Supabase client plus the signed-in user; redirects to the landing page if signed out. */
 export async function requireUser() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect("/");
-  return { supabase, user };
+  const { supabase, userId } = await getAuth();
+  if (!userId) redirect("/");
+  return { supabase, user: { id: userId } };
 }

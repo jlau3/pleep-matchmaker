@@ -3,23 +3,20 @@ import { signInWithDiscord } from "@/app/actions";
 import { HowItWorks } from "@/components/HowItWorks";
 import { loadOwnChoices } from "@/lib/data";
 import { LINES, lineSpriteUrl } from "@/lib/lines";
-import { createClient } from "@/lib/supabase/server";
+import { getAuth } from "@/lib/supabase/server";
 
 const SHOWCASE = ["pikachu", "eevee", "dratini", "larvitar", "bulbasaur", "charmander", "squirtle"];
 
 export default async function Home({ searchParams }: { searchParams: Promise<{ error?: string; error_description?: string; code?: string; deleted?: string }> }) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { supabase, userId } = await getAuth();
 
   const params = await searchParams;
   // If the callback URL isn't in Supabase's redirect allow list, Supabase falls
   // back to the Site URL root, so finish the sign-in from here too.
   if (params.code) redirect(`/auth/callback?code=${encodeURIComponent(params.code)}`);
 
-  if (user) {
-    const choices = await loadOwnChoices(supabase, user.id);
+  if (userId) {
+    const choices = await loadOwnChoices(supabase, userId);
     redirect(Object.keys(choices).length < LINES.length ? "/vote" : "/tiers");
   }
 
