@@ -2,6 +2,7 @@ import { signOut, unblockUser } from "@/app/actions";
 import { DeleteAccountButton } from "@/components/DeleteAccountButton";
 import { playerName } from "@/components/PlayerHeader";
 import { ProfileForm } from "@/components/ProfileForm";
+import { PROFILE_TABS, SubTabs } from "@/components/SubTabs";
 import { loadOwnProfile } from "@/lib/data";
 import { relativeTime } from "@/lib/format";
 import { requireUser } from "@/lib/supabase/server";
@@ -16,12 +17,15 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
 
   return (
     <div className="mx-auto max-w-md space-y-8">
+      <div className="-mb-4 text-center">
+        <SubTabs tabs={PROFILE_TABS} active="/profile" />
+      </div>
       <section className="flex items-center gap-3">
         {profile.avatar_url && <img src={profile.avatar_url} alt="" className="h-14 w-14 rounded-full" />}
         <div>
           <h1 className="text-xl font-bold">{playerName(profile)}</h1>
           {profile.discord_username && <p className="text-sm text-slate-500">@{profile.discord_username}</p>}
-          <p className="text-xs text-slate-500">Prefs updated {relativeTime(profile.prefs_updated_at)}</p>
+          <p className="text-xs text-slate-500">Votes updated {relativeTime(profile.prefs_updated_at)}</p>
         </div>
       </section>
 

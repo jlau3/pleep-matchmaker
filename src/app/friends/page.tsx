@@ -2,6 +2,7 @@ import Link from "next/link";
 import { FriendButton } from "@/components/FriendButton";
 import { PlayerHeader, playerName } from "@/components/PlayerHeader";
 import { PlayerLists } from "@/components/PlayerLists";
+import { FRIENDS_TABS, SubTabs } from "@/components/SubTabs";
 import { requireUser } from "@/lib/supabase/server";
 import type { FriendRow, LookupRow } from "@/lib/types";
 
@@ -25,7 +26,7 @@ export default async function FriendsPage({ searchParams }: { searchParams: Prom
   return (
     <div className="space-y-8">
       <section className="space-y-3">
-        <h1 className="text-2xl font-bold">Friends</h1>
+        <SubTabs tabs={FRIENDS_TABS} active="/friends" />
         <form className="flex gap-2">
           <input
             name="q"
@@ -62,10 +63,18 @@ export default async function FriendsPage({ searchParams }: { searchParams: Prom
             {friends.length} / {MAX_FRIENDS}
           </span>
         </h2>
+        {friends.length > 0 && friends.length < MAX_FRIENDS && (
+          <p className="mb-3 text-sm text-slate-500">
+            Room for {MAX_FRIENDS - friends.length} more.{" "}
+            <Link href="/matches" className="font-semibold underline">
+              Find new friends →
+            </Link>
+          </p>
+        )}
         {friends.length === 0 ? (
           <p className="text-sm text-slate-500">
             Search for your in-game friends above, or find new ones in{" "}
-            <Link href="/matches" className="underline">Matchmake</Link>. Then check the{" "}
+            <Link href="/matches" className="underline">Find new</Link>. Then check the{" "}
             <Link href="/tiers" className="underline">Tier list</Link> to see which candy they want most.
           </p>
         ) : (

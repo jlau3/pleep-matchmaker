@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { TierBoard } from "@/components/TierBoard";
 import { ISLANDS, LINES } from "@/lib/lines";
+import { loadOwnChoices } from "@/lib/data";
 import { requireUser } from "@/lib/supabase/server";
 import { buildTiers, countVotes, type LineVotes } from "@/lib/tiers";
 import type { FriendRow, LineStatRow } from "@/lib/types";
@@ -8,7 +9,8 @@ import type { FriendRow, LineStatRow } from "@/lib/types";
 type Pool = "friends" | "everyone";
 
 export default async function TiersPage({ searchParams }: { searchParams: Promise<{ pool?: string; split?: string }> }) {
-  const { supabase } = await requireUser();
+  const { supabase, user } = await requireUser();
+  const unvoted = LINES.length - Object.keys(await loadOwnChoices(supabase, user.id)).length;
   const params = await searchParams;
   const pool: Pool = params.pool === "everyone" ? "everyone" : "friends";
   const mappedIslands = ISLANDS.filter((island) => island.lines.length > 0);
@@ -55,6 +57,15 @@ export default async function TiersPage({ searchParams }: { searchParams: Promis
           {pool === "friends" ? `your ${voters} ${voters === 1 ? "friend" : "friends"}` : `${voters} active players`}.
         </p>
       </div>
+
+      {unvoted > 0 && (
+        <Link
+          href="/vote"
+          className="block rounded-xl bg-amber-100 px-4 py-3 text-sm font-semibold text-amber-900 dark:bg-amber-900/30 dark:text-amber-200"
+        >
+          {unvoted} {unvoted === 1 ? "candy" : "candies"} to vote on →
+        </Link>
+      )}
 
       <div className="flex flex-wrap gap-2">
         <Link href={href({ pool: "friends" })} className={pill(pool === "friends")}>
