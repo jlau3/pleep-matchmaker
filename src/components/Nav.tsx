@@ -17,7 +17,7 @@ export async function Nav() {
           href="/about"
           aria-label="How it works"
           title="How it works"
-          className="ml-auto flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-white/40 font-bold text-white/80 hover:bg-white/15 hover:text-white"
+          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-white/40 font-bold text-white/80 hover:bg-white/15 hover:text-white"
         >
           ?
         </Link>

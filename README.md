@@ -44,7 +44,7 @@ Tiers are relative. Lines scoring above 0 are ranked and split by position:
 | C | the rest, plus lines at exactly 0 (nobody voted, or a split room) |
 | Avoid | below 0: more people don't want it than want it |
 
-Lines that tie share a tier, placed by the tie's middle rank, so with few voters (lots of ties) the sizes stay close to the targets. Fixed % cutoffs crowded S and Avoid with a small, decisive player base, and would keep drifting as the pool grows. The shares live in `TIER_SHARES` in `src/lib/tiers.ts`. Every card shows **"78% want · 22% don't"** (plain shares of the pool, stars not weighted, the don't part hidden at 0), so you can see why a popular candy ranks where it does. In By Island view the ranking is within each island.
+Lines that tie share a tier, placed by the tie's middle rank, so with few voters (lots of ties) the sizes stay close to the targets. Fixed % cutoffs crowded S and Avoid with a small, decisive player base, and would keep drifting as the pool grows. The shares live in `TIER_SHARES` in `src/lib/tiers.ts`. Every card shows its **score** ("+28 score", green above 0, red below) next to the want / unsure / don't-want counts, so you can see why a popular candy ranks where it does. In By Island view the ranking is within each island.
 
 Above S, the **Top 3** row repeats the 9 lines that show up most often in players' Top 3, with **Show all** to expand to every starred line, including ones in Avoid so nobody's pick is left out (ties broken like the rest of the list). They stay in their regular tier too, so nothing shifts. Every card shows its star count.
 

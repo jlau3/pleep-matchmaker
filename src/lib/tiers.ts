@@ -62,11 +62,11 @@ export interface RankedLine {
   score: number;
   tops: number;
   /**
-   * Share of the pool who want it, 0 to 1, stars not weighted ("78% want").
-   * Null with no voters. Shown with dontShare so a rank can be read at a glance.
+   * Share of the pool who want it, 0 to 1, stars not weighted. Null with no
+   * voters (the board shows the score only when someone has voted).
    */
   wantShare: number | null;
-  /** Share of the pool who don't want it ("22% don't"). Null with no voters. */
+  /** Share of the pool who don't want it. Null with no voters. */
   dontShare: number | null;
 }
 

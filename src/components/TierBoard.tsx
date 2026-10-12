@@ -12,6 +12,9 @@ const TIER_STYLE: Record<string, string> = {
 
 const panel = "card p-3";
 
+/** "+28", "0", "−5" (a real minus sign, so it lines up with the plus). */
+const formatScore = (score: number) => (score > 0 ? `+${score}` : score < 0 ? `−${-score}` : "0");
+
 function VoteCard({ ranked }: { ranked: RankedLine }) {
   return (
     <li className="flex items-center gap-3 rounded-2xl bg-white p-2 dark:bg-night-deep">
@@ -20,16 +23,12 @@ function VoteCard({ ranked }: { ranked: RankedLine }) {
         <div className="flex items-baseline justify-between gap-2">
           <span className="truncate font-semibold">{ranked.line.name}</span>
           {ranked.wantShare !== null && (
-            <span className="shrink-0 text-sm font-bold">
-              <span className={ranked.wantShare > 0 ? "text-want" : "text-slate-400"}>
-                {Math.round(ranked.wantShare * 100)}% <span className="text-xs font-normal text-slate-500">want</span>
-              </span>
-              {ranked.dontShare !== null && ranked.dontShare > 0 && (
-                <span className="text-dont">
-                  {" · "}
-                  {Math.round(ranked.dontShare * 100)}% <span className="text-xs font-normal">don&apos;t</span>
-                </span>
-              )}
+            <span
+              className={`shrink-0 text-sm font-bold ${
+                ranked.score > 0 ? "text-want" : ranked.score < 0 ? "text-dont" : "text-slate-400"
+              }`}
+            >
+              {formatScore(ranked.score)} <span className="text-xs font-normal text-slate-500">score</span>
             </span>
           )}
         </div>

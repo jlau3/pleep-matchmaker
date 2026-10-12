@@ -9,7 +9,7 @@ const STEPS: { title: string; body: React.ReactNode; href: string; cta: string }
     body: (
       <>
         Mark each Pokémon Sleep candy line <b>Want</b>, <b>Don&apos;t Want</b> or leave it <b>Undecided</b>. Tap the ★ to
-        pick your Top {MAX_TOP}: they count double everywhere.
+        pick your Top {MAX_TOP}.
       </>
     ),
     href: "/vote",
@@ -31,7 +31,7 @@ const STEPS: { title: string; body: React.ReactNode; href: string; cta: string }
     body: (
       <>
         Look them up by exact Discord name, IGN or friend code and add up to {MAX_FRIENDS}. Each player shows a fit %: how
-        well they want what your friends want, and don&apos;t turn down what your friends want.
+        closely their wants and don&apos;t-wants line up with your current friends list.
       </>
     ),
     href: "/friends",
