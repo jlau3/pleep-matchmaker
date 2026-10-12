@@ -9,15 +9,17 @@ export interface Tier {
 }
 
 /**
- * Tiers are relative: lines are ranked by weighted net votes (wants minus
- * don't-wants, stars counting TOP_MULTIPLIER times), and among lines with a
- * positive net the top TIER_SHARES.S go to S, the next TIER_SHARES.A to A, the
- * next TIER_SHARES.B to B, the rest to C. Lines that tie on net always share a
- * tier, placed by the tie's middle rank (the best-ranked tie is always S). Net 0 (no votes or an even split) is
- * C, net below 0 is Avoid.
+ * The tier list answers "which candy should I send my friends?", so it ranks
+ * by demand, not by net votes: demand = wants, with a Top 3 star counting
+ * TOP_MULTIPLIER times. A don't-want adds nothing (it is zero demand from that
+ * player) and never cancels someone else's want: 3 wants and 3 don't-wants is
+ * still 3 people who'd like that candy.
  *
- * Fixed % cutoffs crowded S and Avoid with a small, decisive player base, and
- * would drift as the pool grows; shares give every pool a usable spread.
+ * Tiers are relative: lines with any demand are ranked, and the top
+ * TIER_SHARES.S go to S, the next TIER_SHARES.A to A, the next TIER_SHARES.B to
+ * B, the rest to C. Lines that tie on demand share a tier, placed by the tie's
+ * middle rank (the best-ranked tie is always S). With no demand at all, a line
+ * is Avoid if anyone said don't want, otherwise C.
  *
  * Above S, the Top 3 row repeats the TOP_ROW_SIZE lines the pool starred most.
  * They also stay in their regular tier, so the rest of the list never shifts.
@@ -31,11 +33,11 @@ const pct = (x: number) => Math.round(x * 100);
 
 export const TIERS: Tier[] = [
   { id: "top", label: "Top 3", hint: `the ${TOP_ROW_SIZE} candies most often in players' Top 3` },
-  { id: "S", label: "S", hint: `top ${pct(TIER_SHARES.S)}% of liked candies` },
-  { id: "A", label: "A", hint: `next ${pct(TIER_SHARES.A)}% of liked candies` },
-  { id: "B", label: "B", hint: `next ${pct(TIER_SHARES.B)}% of liked candies` },
-  { id: "C", label: "C", hint: "the rest, including no votes and even splits" },
-  { id: "avoid", label: "Avoid", hint: "more don't want it than want it" },
+  { id: "S", label: "S", hint: `top ${pct(TIER_SHARES.S)}% most wanted` },
+  { id: "A", label: "A", hint: `next ${pct(TIER_SHARES.A)}%` },
+  { id: "B", label: "B", hint: `next ${pct(TIER_SHARES.B)}%` },
+  { id: "C", label: "C", hint: "the rest, including candies nobody has voted on" },
+  { id: "avoid", label: "Avoid", hint: "nobody wants it and someone said don't want" },
 ];
 
 export interface LineVotes {
@@ -51,26 +53,27 @@ export interface RankedLine {
   dontWants: number;
   /** Voters in the pool who neither want nor don't want it (undecided or skipped). */
   unsure: number;
-  net: number;
+  /** Wants with stars weighted (see demandVotes); what tiers rank on. */
+  demand: number;
   tops: number;
   /**
-   * Plain agreement for display: (wants - don't-wants) / voters, from -1 to 1,
-   * stars not weighted. Null with no voters. Tiers are relative, so this is how
-   * strong the support behind a rank actually is.
+   * Share of the pool who want it, 0 to 1, stars not weighted ("72% want it").
+   * Null with no voters. Tiers are relative, so this shows how strong the
+   * demand behind a rank actually is.
    */
-  agreement: number | null;
+  wantShare: number | null;
 }
 
 /**
- * Net votes with Top 3 stars weighted: a starred want counts TOP_MULTIPLIER
- * times (so +2 instead of +1), the same weighting matching uses.
+ * Demand with Top 3 stars weighted: a starred want counts TOP_MULTIPLIER times
+ * (so 2 instead of 1), the same weighting matching uses. Don't-wants add nothing.
  */
-export function netVotes(votes: LineVotes): number {
-  return votes.wants + (TOP_MULTIPLIER - 1) * (votes.tops ?? 0) - votes.dontWants;
+export function demandVotes(votes: LineVotes): number {
+  return votes.wants + (TOP_MULTIPLIER - 1) * (votes.tops ?? 0);
 }
 
 const byRank = (a: RankedLine, b: RankedLine) =>
-  b.net - a.net || b.line.weight - a.line.weight || b.wants - a.wants || a.line.dex - b.line.dex;
+  b.demand - a.demand || b.line.weight - a.line.weight || a.dontWants - b.dontWants || a.line.dex - b.line.dex;
 
 /**
  * Buckets lines into tiers (see TIER_SHARES), best first inside each tier (weighted net, then rarity
@@ -89,9 +92,9 @@ export function buildTiers(
       wants: v.wants,
       dontWants: v.dontWants,
       unsure: Math.max(0, voters - v.wants - v.dontWants),
-      net: netVotes(v),
+      demand: demandVotes(v),
       tops: v.tops ?? 0,
-      agreement: voters > 0 ? (v.wants - v.dontWants) / voters : null,
+      wantShare: voters > 0 ? v.wants / voters : null,
     };
   });
   const top = all
@@ -100,12 +103,13 @@ export function buildTiers(
     .slice(0, TOP_ROW_SIZE);
   const out = new Map<TierId, RankedLine[]>(TIERS.map((t) => [t.id, []]));
   out.set("top", top);
-  for (const r of all) if (r.net <= 0) out.get(r.net < 0 ? "avoid" : "C")!.push(r);
+  // No demand: Avoid if anyone said don't want, otherwise C (nobody has an opinion).
+  for (const r of all) if (r.demand === 0) out.get(r.dontWants > 0 ? "avoid" : "C")!.push(r);
 
-  // Positive lines fill S/A/B/C by rank. A run of lines tied on net all go to
+  // Wanted lines fill S/A/B/C by rank. A run of lines tied on demand all go to
   // the tier of the run's middle position, so with few voters (lots of ties)
   // tier sizes stay near their targets instead of one tie swallowing S.
-  const positive = all.filter((r) => r.net > 0).sort(byRank);
+  const positive = all.filter((r) => r.demand > 0).sort(byRank);
   const n = positive.length;
   const ends: [Exclude<TierId, "top" | "avoid">, number][] = [
     ["S", Math.ceil(TIER_SHARES.S * n)],
@@ -115,7 +119,7 @@ export function buildTiers(
   ];
   for (let start = 0; start < n; ) {
     let end = start;
-    while (end + 1 < n && positive[end + 1].net === positive[start].net) end++;
+    while (end + 1 < n && positive[end + 1].demand === positive[start].demand) end++;
     const mid = Math.floor((start + end) / 2);
     // The best-ranked run is always S, so S is never empty (e.g. one friend's wants all tie).
     const tier = start === 0 ? "S" : ends.find(([, e]) => mid < e)![0];

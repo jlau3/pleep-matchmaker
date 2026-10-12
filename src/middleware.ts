@@ -2,7 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { supabaseEnv } from "@/lib/supabase/env";
 
-const PROTECTED = ["/vote", "/friends", "/tiers", "/matches", "/profile", "/pick", "/collection", "/lookup", "/popular"];
+const PROTECTED = ["/vote", "/friends", "/tiers", "/matches", "/profile", "/pick", "/collection", "/lookup", "/popular", "/feedback"];
 const SEEN_COOKIE = "pm_seen";
 
 export async function middleware(request: NextRequest) {

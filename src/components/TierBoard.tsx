@@ -19,11 +19,9 @@ function VoteCard({ ranked }: { ranked: RankedLine }) {
       <div className="min-w-0 flex-1">
         <div className="flex items-baseline justify-between gap-2">
           <span className="truncate font-semibold">{ranked.line.name}</span>
-          {ranked.agreement !== null && (
-            <span
-              className={`shrink-0 text-sm font-bold ${ranked.agreement < 0 ? "text-dont" : "text-want"}`}
-            >
-              {Math.round(ranked.agreement * 100)}% <span className="text-xs font-normal text-slate-500">support</span>
+          {ranked.wantShare !== null && (
+            <span className={`shrink-0 text-sm font-bold ${ranked.wantShare > 0 ? "text-want" : "text-slate-400"}`}>
+              {Math.round(ranked.wantShare * 100)}% <span className="text-xs font-normal text-slate-500">want it</span>
             </span>
           )}
         </div>

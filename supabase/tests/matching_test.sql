@@ -35,7 +35,7 @@ union all
 select '00000000-0000-0000-0000-00000000000b'::uuid, 'd' || g, 'dont_want'::public.choice from generate_series(1, 3) g;
 
 -- c: same as b but 2 of b's extra wants become dont-wants on a's lines w9, w10.
--- Score 6*3 + 3*1 - 2*3 = 15; best = (10 a-wants + 2 c-wants) * 3 + 3 = 39 -> 38%.
+-- Clashes score 0 (soften_clash migration): 6*3 + 3*1 + 2*0 = 21; best = (10 a-wants + 2 c-wants) * 3 + 3 = 39 -> 54%.
 insert into public.preferences (user_id, line_id, choice)
 select '00000000-0000-0000-0000-00000000000c'::uuid, 'w' || g, 'want'::public.choice from generate_series(1, 6) g
 union all
@@ -69,7 +69,7 @@ begin
   assert r.friend_code is not null, 'contact info returned for match';
 
   select * into r from public.get_matches() where discord_username = 'cara';
-  assert r.match_pct = 38, format('cara pct %s', r.match_pct);
+  assert r.match_pct = 54, format('cara pct %s', r.match_pct);
 
   assert not exists (select 1 from public.get_matches() where discord_username = 'dan'), 'dan below min shared wants';
   assert not exists (select 1 from public.get_matches() where discord_username = 'eve'), 'eve stale';

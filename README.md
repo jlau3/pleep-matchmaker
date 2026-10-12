@@ -18,17 +18,17 @@ Per candy line, comparing your pick (A) with theirs (B):
 
 | A \ B | Want | Don't want | Undecided |
 |---|---|---|---|
-| **Want** | +3 | −3 | 0 |
-| **Don't want** | −3 | +1 | 0 |
+| **Want** | +3 | 0 | 0 |
+| **Don't want** | 0 | +1 | 0 |
 | **Undecided** | 0 | 0 | skipped |
 
 Only lines where at least one of you picked want or don't want count. Each counted line's best case is 3 if either side wants it, otherwise 1.
 
 `match % = max(0, score) / sum of best cases`
 
-Want vs undecided lowers the % through the denominator alone. Want vs don't want lowers it twice as hard.
+Want vs undecided and want vs don't want both lower the % only through the denominator: a don't-want means "I don't need this candy", not a clash, so it isn't punished.
 
-**Top 3:** each player can star up to 3 of their wants. A line either player starred counts double: both want is +6, a clash is −6, and its best case doubles too, so the % stays between 0 and 100. `public.max_top()` and `public.top_multiplier()` hold the numbers.
+**Top 3:** each player can star up to 3 of their wants. A line either player starred counts double: both want is +6, and its best case doubles too, so the % stays between 0 and 100. `public.max_top()` and `public.top_multiplier()` hold the numbers.
 
 A match is shown when it's **≥ 25%** with **≥ 3 lines you both want**, the other player is open to new friends, has room on their friend list (under 50), has a friend code set, and was seen in the last **4 months**. A full friend list hides a player from matches automatically, without changing their setting, until they remove someone. All of these knobs live in `public.match_config()` in the first migration.
 
@@ -36,23 +36,23 @@ My Friends shows the same % for each friend, without the 25% / 3-shared-wants cu
 
 ## Tier list rules
 
-Net votes = wants minus don't-wants among the pool (your friends who have voted, or every player active in the last 4 months), with a Top 3 star counting double: a starred want is +2, a plain want +1. Your own votes don't count.
+The tier list answers "which candy should I send my friends?", so it ranks by **demand**: how many people in the pool (your friends who have voted, or every player active in the last 4 months) want each candy, with a Top 3 star counting double. A don't-want adds nothing and never cancels someone else's want: 3 wants and 3 don't-wants is still 3 people who'd like that candy. Your own votes don't count.
 
-Tiers are relative. Lines with a positive net are ranked, and split by position:
+Tiers are relative. Lines with any demand are ranked and split by position:
 
 | Tier | Which lines |
 |---|---|
-| S | top 15% of liked lines |
+| S | top 15% most wanted |
 | A | next 20% |
 | B | next 30% |
-| C | the rest, plus net 0 (no votes or an even split) |
-| Avoid | net negative |
+| C | the rest, plus lines nobody has voted on |
+| Avoid | nobody wants it and someone said don't want |
 
-Lines that tie on net always share a tier, placed by the tie's middle rank, so with few voters (lots of ties) the sizes stay close to the targets. Fixed % cutoffs crowded S and Avoid with a small, decisive player base (32 S and 43 Avoid out of 107 at about 10 players), and would keep drifting as the pool grows; position-based tiers give every pool a usable spread. The shares live in `TIER_SHARES` in `src/lib/tiers.ts`. Because tiers are relative, every card also shows a **support %** (wants minus don't-wants over the whole pool, stars not weighted; labelled "support" in the UI) so you can see how strong the support behind a rank is. In By Island view the ranking is within each island.
+Lines that tie on demand share a tier, placed by the tie's middle rank, so with few voters (lots of ties) the sizes stay close to the targets. Fixed % cutoffs crowded S and Avoid with a small, decisive player base (32 S and 43 Avoid out of 107 at about 10 players), and would keep drifting as the pool grows. The shares live in `TIER_SHARES` in `src/lib/tiers.ts`. Every card shows **"% want it"** (plain wants over the pool, stars not weighted) so you can see how strong the demand behind a rank is. In By Island view the ranking is within each island.
 
 Above S, the **Top 3** row repeats the 9 lines that show up most often in players' Top 3 (ties broken like the rest of the list). They stay in their regular tier too, so nothing shifts. Every card shows its star count.
 
-Inside a tier, lines sort by net votes, then a rarity weight, then wants. The weight only breaks ties and never moves a line between tiers: legendary 0.4, mythical 0.3, pseudo-legendary 0.2, 16-pip rare spawns 0.1, everything else 0. `scripts/build_lines.py` derives it from each line's first stage (EXP curve and friendship points).
+Inside a tier, lines sort by demand, then a rarity weight, then fewer don't-wants, then dex. So 39 wants + 11 unsure sits just above 39 wants + 11 don't-wants, in the same tier. The rarity weight only breaks ties and never moves a line between tiers: legendary 0.4, mythical 0.3, pseudo-legendary 0.2, 16-pip rare spawns 0.1, everything else 0. `scripts/build_lines.py` derives it from each line's first stage (EXP curve and friendship points).
 
 ## Privacy
 
@@ -87,7 +87,7 @@ npm run dev
 
 ### 4. Deploy to Vercel
 
-Import the repo in Vercel and set `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` and `CRON_SECRET`. `vercel.json` schedules a daily ping to `/api/keepalive`, because Supabase pauses free projects after a week without database traffic.
+Import the repo in Vercel and set `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` and `CRON_SECRET`. Optional: `DISCORD_FEEDBACK_WEBHOOK_URL` (server-only; the footer's **Send feedback** form posts to that Discord channel, signed-in players only, mentions disabled, one message a minute per browser) and `NEXT_PUBLIC_DONATION_URL` (shows a small "Buy me a coffee or help with server costs" link in the footer). `vercel.json` schedules a daily ping to `/api/keepalive`, because Supabase pauses free projects after a week without database traffic.
 
 ## Pokémon data
 

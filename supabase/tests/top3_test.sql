@@ -17,23 +17,23 @@ select '00000000-0000-0000-0003-000000000002'::uuid, 'td', 'dont_want'::public.c
 set role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0003-000000000001', false);
 
--- Before any stars: ta,tb,tc +3 each, td -3, te 0; best 5*3 = 15 -> 6/15 = 40%.
+-- Before any stars: ta,tb,tc +3 each, td clash 0, te 0; best 5*3 = 15 -> 9/15 = 60%.
 do $$ begin
-  assert (select match_pct from public.get_matches() where discord_username = 'tom') = 40, 'pct without stars';
+  assert (select match_pct from public.get_matches() where discord_username = 'tom') = 60, 'pct without stars';
 end $$;
 
--- Star ta: it counts double. 6+3+3-3 = 9; best 6+3+3+3+3 = 18 -> 50%.
+-- Star ta: it counts double. 6+3+3+0 = 12; best 6+3+3+3+3 = 18 -> 67%.
 update public.preferences set top = true where user_id = auth.uid() and line_id = 'ta';
 do $$ begin
-  assert (select match_pct from public.get_matches() where discord_username = 'tom') = 50,
+  assert (select match_pct from public.get_matches() where discord_username = 'tom') = 67,
     format('pct with star %s', (select match_pct from public.get_matches() where discord_username = 'tom'));
 end $$;
 
 -- pair_match_pct (friends list) agrees with get_matches for a qualifying pair.
 reset role;
 do $$ begin
-  assert public.pair_match_pct('00000000-0000-0000-0003-000000000001', '00000000-0000-0000-0003-000000000002') = 50, 'pair pct';
-  assert public.pair_match_pct('00000000-0000-0000-0003-000000000002', '00000000-0000-0000-0003-000000000001') = 50, 'pair pct symmetric';
+  assert public.pair_match_pct('00000000-0000-0000-0003-000000000001', '00000000-0000-0000-0003-000000000002') = 67, 'pair pct';
+  assert public.pair_match_pct('00000000-0000-0000-0003-000000000002', '00000000-0000-0000-0003-000000000001') = 67, 'pair pct symmetric';
 end $$;
 set role authenticated;
 
@@ -94,9 +94,9 @@ end $$;
 -- Friend list match % uses the get_matches formula without its thresholds
 -- (tom and tara share only 2 wants, so they aren't a "match").
 -- tara: ta*, tb*, te* want, td want, tc don't; tom: ta tb tc want, td don't.
--- ta +6/6, tb +6/6, tc -3/3, td -3/3, te 0/6 -> 6/24 = 25%.
+-- ta +6/6, tb +6/6, tc 0/3, td 0/3 (clashes), te 0/6 -> 12/24 = 50%.
 do $$ begin
-  assert (select match_pct from public.get_friends() where discord_username = 'tara') = 25,
+  assert (select match_pct from public.get_friends() where discord_username = 'tara') = 50,
     format('friend pct %s', (select match_pct from public.get_friends() where discord_username = 'tara'));
   assert not exists (select 1 from public.get_matches() where discord_username = 'tara'), 'below match thresholds';
 end $$;
