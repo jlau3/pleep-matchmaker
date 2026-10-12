@@ -46,7 +46,7 @@ Tiers are relative. Lines scoring above 0 are ranked and split by position:
 
 Lines that tie share a tier, placed by the tie's middle rank, so with few voters (lots of ties) the sizes stay close to the targets. Fixed % cutoffs crowded S and Avoid with a small, decisive player base, and would keep drifting as the pool grows. The shares live in `TIER_SHARES` in `src/lib/tiers.ts`. Every card shows **"78% want · 22% don't"** (plain shares of the pool, stars not weighted, the don't part hidden at 0), so you can see why a popular candy ranks where it does. In By Island view the ranking is within each island.
 
-Above S, the **Top 3** row repeats the 9 lines that show up most often in players' Top 3, with **Show all** to expand to every starred line, leaving out anything in Avoid (ties broken like the rest of the list). They stay in their regular tier too, so nothing shifts. Every card shows its star count.
+Above S, the **Top 3** row repeats the 9 lines that show up most often in players' Top 3, with **Show all** to expand to every starred line, including ones in Avoid so nobody's pick is left out (ties broken like the rest of the list). They stay in their regular tier too, so nothing shifts. Every card shows its star count.
 
 Inside a tier, lines sort by score, then a rarity weight, then fewer don't-wants, then dex. The rarity weight only breaks ties and never moves a line between tiers: legendary 0.4, mythical 0.3, pseudo-legendary 0.2, 16-pip rare spawns 0.1, everything else 0. `scripts/build_lines.py` derives it from each line's first stage (EXP curve and friendship points).
 

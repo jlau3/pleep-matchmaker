@@ -22,7 +22,7 @@ export interface Tier {
  * wants) is Avoid; exactly 0 (no votes, or a split room) is C.
  *
  * Above S, the Top 3 row repeats every line the pool starred, most stars
- * first, leaving out Avoid lines. The board shows the first TOP_ROW_SIZE and
+ * first, Avoid lines included (nobody's pick is left out). The board shows the first TOP_ROW_SIZE and
  * folds the rest behind "Show all". They also stay in their regular tier, so
  * the rest of the list never shifts.
  */
@@ -84,7 +84,7 @@ const byRank = (a: RankedLine, b: RankedLine) =>
 /**
  * Buckets lines into tiers (see TIER_SHARES), best first inside each tier (net
  * score, then rarity weight, then fewer don't-wants, then dex). The Top 3 row
- * holds every starred line outside Avoid, ordered by stars and then the same keys.
+ * holds every starred line, ordered by stars and then the same keys.
  */
 export function buildTiers(
   votes: Map<string, LineVotes>,
@@ -105,7 +105,7 @@ export function buildTiers(
     };
   });
   const top = all
-    .filter((r) => r.tops > 0 && r.score >= 0)
+    .filter((r) => r.tops > 0)
     .sort((a, b) => b.tops - a.tops || byRank(a, b));
   const out = new Map<TierId, RankedLine[]>(TIERS.map((t) => [t.id, []]));
   out.set("top", top);

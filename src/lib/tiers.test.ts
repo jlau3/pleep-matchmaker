@@ -176,7 +176,7 @@ describe("buildTiers", () => {
     expect(tiers.get("C")!.at(-1)).toMatchObject({ score: 28, unsure: 0, dontShare: 0.22 });
   });
 
-  it("keeps Avoid lines out of the Top 3 row", () => {
+  it("keeps Avoid lines in the Top 3 row, so nobody's pick is left out", () => {
     const [a, b] = [...LINES_BY_ID.values()];
     const votes = new Map([
       [a.id, { wants: 5, dontWants: 11, tops: 5 }], // 10 - 11 = -1
@@ -184,6 +184,6 @@ describe("buildTiers", () => {
     ]);
     const tiers = buildTiers(votes, 16, [a, b]);
     expect(ids(tiers, "avoid")).toEqual([a.id]);
-    expect(ids(tiers, "top")).toEqual([b.id]);
+    expect(ids(tiers, "top")).toEqual([a.id, b.id]);
   });
 });
