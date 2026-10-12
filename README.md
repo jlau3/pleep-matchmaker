@@ -46,7 +46,7 @@ Net votes = wants minus don't-wants among the pool (your friends who have voted,
 
 Cutoffs live in `TIER_CUTOFFS` in `src/lib/tiers.ts`.
 
-Above S, the **Top 3** row repeats the 3 lines the pool starred most (ties broken like the rest of the list). They stay in their regular tier too, so nothing shifts. Every card shows its star count.
+Above S, the **Top 3** row repeats the 9 lines that show up most often in players' Top 3 (ties broken like the rest of the list). They stay in their regular tier too, so nothing shifts. Every card shows its star count.
 
 Inside a tier, lines sort by net votes, then a rarity weight, then wants. The weight only breaks ties and never moves a line between tiers: legendary 0.4, mythical 0.3, pseudo-legendary 0.2, 16-pip rare spawns 0.1, everything else 0. `scripts/build_lines.py` derives it from each line's first stage (EXP curve and friendship points).
 

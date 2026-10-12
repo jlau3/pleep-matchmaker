@@ -1,4 +1,4 @@
-import { type CandyLine, LINES, MAX_TOP } from "./lines";
+import { type CandyLine, LINES } from "./lines";
 
 export type TierId = "top" | "S" | "A" | "B" | "C" | "avoid";
 
@@ -12,13 +12,16 @@ export interface Tier {
  * Ranking is by net votes (wants minus don't-wants) as a share of the voters
  * in the pool, so a candy that splits the room ranks below one nobody minds.
  * Lines with no votes or an even split (net 0) land at the bottom of C.
- * Above S, the Top 3 row repeats the MAX_TOP lines the pool starred most. They
+ * Above S, the Top 3 row repeats the TOP_ROW_SIZE lines the pool starred most. They
  * also stay in their regular tier, so the rest of the list never shifts.
  */
 export const TIER_CUTOFFS = { S: 0.6, A: 0.35, B: 0.15 } as const;
 
+/** How many of the most-starred lines the Top 3 row shows. */
+export const TOP_ROW_SIZE = 9;
+
 export const TIERS: Tier[] = [
-  { id: "top", label: "Top 3", hint: "most starred as players' Top 3" },
+  { id: "top", label: "Top 3", hint: `the ${TOP_ROW_SIZE} candies most often in players' Top 3` },
   { id: "S", label: "S", hint: `${TIER_CUTOFFS.S * 100}%+ net want it` },
   { id: "A", label: "A", hint: `${TIER_CUTOFFS.A * 100}–${TIER_CUTOFFS.S * 100 - 1}%` },
   { id: "B", label: "B", hint: `${TIER_CUTOFFS.B * 100}–${TIER_CUTOFFS.A * 100 - 1}%` },
@@ -59,7 +62,7 @@ const byRank = (a: RankedLine, b: RankedLine) =>
 
 /**
  * Buckets lines into tiers, best first inside each tier (net, then rarity
- * weight, then wants, then dex). The Top 3 row repeats the MAX_TOP most-starred
+ * weight, then wants, then dex). The Top 3 row repeats the TOP_ROW_SIZE most-starred
  * lines, ordered by stars and then the same keys.
  */
 export function buildTiers(
@@ -81,7 +84,7 @@ export function buildTiers(
   const top = all
     .filter((r) => r.tops > 0)
     .sort((a, b) => b.tops - a.tops || byRank(a, b))
-    .slice(0, MAX_TOP);
+    .slice(0, TOP_ROW_SIZE);
   const out = new Map<TierId, RankedLine[]>(TIERS.map((t) => [t.id, []]));
   out.set("top", top);
   for (const r of all) out.get(tierFor(r, voters))!.push(r);

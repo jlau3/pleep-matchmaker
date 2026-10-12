@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { LINES_BY_ID } from "./lines";
-import { buildTiers, countVotes, tierFor } from "./tiers";
+import { buildTiers, countVotes, TOP_ROW_SIZE, tierFor } from "./tiers";
 
 describe("tierFor", () => {
   it.each([
@@ -19,6 +19,13 @@ describe("tierFor", () => {
 });
 
 describe("buildTiers", () => {
+  it("caps the Top 3 row at TOP_ROW_SIZE lines", () => {
+    const ids = [...LINES_BY_ID.keys()].slice(0, TOP_ROW_SIZE + 3);
+    const votes = countVotes(ids.map((id) => ({ wants: [id], dont_wants: [], top_wants: [id] })));
+    const lines = ids.map((id) => LINES_BY_ID.get(id)!);
+    expect(buildTiers(votes, ids.length, lines).get("top")).toHaveLength(TOP_ROW_SIZE);
+  });
+
   it("repeats the most-starred lines in a Top 3 row without moving them out of their tier", () => {
     const ids = ["bulbasaur", "charmander", "squirtle", "pikachu", "eevee"];
     const lines = ids.map((id) => LINES_BY_ID.get(id)!);
@@ -29,8 +36,8 @@ describe("buildTiers", () => {
     ]);
     const tiers = buildTiers(votes, 3, lines);
     // pikachu and eevee have 2 stars; charmander and squirtle tie on 1 and every
-    // other key, so dex order keeps charmander.
-    expect(tiers.get("top")!.map((r) => r.line.id)).toEqual(["pikachu", "eevee", "charmander"]);
+    // other key, so dex order breaks the tie. bulbasaur has no stars.
+    expect(tiers.get("top")!.map((r) => r.line.id)).toEqual(["pikachu", "eevee", "charmander", "squirtle"]);
     expect(tiers.get("S")!.map((r) => r.line.id)).toEqual(["charmander", "squirtle", "pikachu", "eevee"]);
     const placed = [...tiers.entries()].filter(([id]) => id !== "top").flatMap(([, r]) => r).map((r) => r.line.id);
     expect(placed.sort()).toEqual([...ids].sort());
