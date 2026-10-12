@@ -3,10 +3,12 @@
 Pokémon Sleep players vote on every candy line: **want**, **don't want** or **undecided**. Three tabs:
 
 - **Tier list** (home): which candy to prioritize, ranked S/A/B/C/Avoid by your friends' net votes, with toggles for All Islands / By Island and My Friends / Everyone. A banner links to voting when there are unvoted candies.
-- **Friends**: *My Friends* to look up players by exact Discord name, IGN or friend code and manage your list (up to 50); *Find New* for matchmaking against players open to new friends.
+- **Friends**: player search (exact Discord name, IGN or friend code) on both sub-tabs, carried over when you switch; *My Friends* lists your friends (up to 50) with your match % for each; *Find New* is matchmaking against players open to new friends, leaving out anyone you already added.
 - **Profile**: *My Votes* (every candy in dex order, List or Grid view, with a ★ on each card to pick your Top 3 wants, pinned at the top) and *Settings* (IGN, friend code, visibility toggles, blocked players, sign out, delete account).
 
 New players go straight to My votes after signing in, and land on the Tier list once everything is voted.
+
+A **How it works** card explains the app on the sign-in page, opens on a new player's first visit to My Votes, and lives at `/about` (the **?** in the header). It ends with an **Invite friends** button (native share sheet on phones, copied message elsewhere); My Friends and the Tier List show a dismissible reminder (hidden for two weeks when closed) asking about Pokémon Sleep friends who haven't signed up yet, with the same button.
 
 Stack: Next.js 15 (App Router) + Supabase (Postgres, Discord OAuth) + Tailwind. Built to run on the Vercel and Supabase free tiers.
 
@@ -34,19 +36,21 @@ My Friends shows the same % for each friend, without the 25% / 3-shared-wants cu
 
 ## Tier list rules
 
-Net votes = wants minus don't-wants among the pool (your friends who have voted, or every player active in the last 4 months). Your own votes don't count.
+Net votes = wants minus don't-wants among the pool (your friends who have voted, or every player active in the last 4 months), with a Top 3 star counting double: a starred want is +2, a plain want +1. Your own votes don't count.
 
-| Tier | Net votes as a share of voters |
+Tiers are relative. Lines with a positive net are ranked, and split by position:
+
+| Tier | Which lines |
 |---|---|
-| S | 60% or more |
-| A | 35–59% |
-| B | 15–34% |
-| C | under 15%, including no votes and even splits |
+| S | top 15% of liked lines |
+| A | next 20% |
+| B | next 30% |
+| C | the rest, plus net 0 (no votes or an even split) |
 | Avoid | net negative |
 
-Cutoffs live in `TIER_CUTOFFS` in `src/lib/tiers.ts`.
+Lines that tie on net always share a tier, placed by the tie's middle rank, so with few voters (lots of ties) the sizes stay close to the targets. Fixed % cutoffs crowded S and Avoid with a small, decisive player base (32 S and 43 Avoid out of 107 at about 10 players), and would keep drifting as the pool grows; position-based tiers give every pool a usable spread. The shares live in `TIER_SHARES` in `src/lib/tiers.ts`. Because tiers are relative, every card also shows its **net %** (wants minus don't-wants over the whole pool, stars not weighted) so you can see how strong the support behind a rank is. In By Island view the ranking is within each island.
 
-Above S, the **Top 3** row repeats the 3 lines the pool starred most (ties broken like the rest of the list). They stay in their regular tier too, so nothing shifts. Every card shows its star count.
+Above S, the **Top 3** row repeats the 9 lines that show up most often in players' Top 3 (ties broken like the rest of the list). They stay in their regular tier too, so nothing shifts. Every card shows its star count.
 
 Inside a tier, lines sort by net votes, then a rarity weight, then wants. The weight only breaks ties and never moves a line between tiers: legendary 0.4, mythical 0.3, pseudo-legendary 0.2, 16-pip rare spawns 0.1, everything else 0. `scripts/build_lines.py` derives it from each line's first stage (EXP curve and friendship points).
 
@@ -54,7 +58,7 @@ Inside a tier, lines sort by net votes, then a rarity weight, then wants. The we
 
 - Row level security: users read and write only their own rows.
 - Other players' data only comes out of `security definer` functions (`get_matches`, `lookup_players`, `get_friends`, `get_line_stats`, `get_voter_count`), which apply blocks, staleness, `open_to_friends` and `allow_lookup`.
-- Lookup is exact-match only, so the player list can't be scrolled or enumerated. Players can turn lookup off in Profile, which also hides their picks from people who added them as a friend.
+- Lookup is exact-match only, so the player list can't be scrolled or enumerated. It ignores letter case, extra spaces and Unicode width/accent encoding differences (`public.search_key`), but never matches part of a name. Players can turn lookup off in Profile, which also hides their picks from people who added them as a friend.
 - Blocking hides both players from each other everywhere and removes any friend link.
 - Deleting an account removes the auth user, which cascades to everything else.
 
@@ -101,6 +105,17 @@ npm run data
 ```
 
 New lines are saved as Undecided for every player the next time they open **My Votes**.
+
+### Automatic updates
+
+Two scheduled GitHub Actions keep this current:
+
+- **Data refresh** (`.github/workflows/data-refresh.yml`, daily): reruns `build_lines.py`, `build_icons.py --missing-only` (only new sprites and ones still without a Serebii icon, tracked in `scripts/icons-state.json`) and `build_islands.py`. If anything changed, `scripts/check_data.py` blocks the update when a line id would disappear (votes would orphan), a sprite is missing or an island names an unknown line. Then typecheck and tests run, and a `data/refresh` PR is opened or updated with a summary of new lines, members and spawns. Nothing ships until you merge it.
+- **News watch** (`.github/workflows/news-watch.yml`, every 6 hours): reads the [official news list](https://www.pokemonsleep.net/en/news/) (it has no RSS feed) and posts new headlines, so you know a release is coming.
+
+Both ping Discord when the `DISCORD_WEBHOOK_URL` repository secret is set (Server Settings → Integrations → Webhooks in Discord; GitHub repo → Settings → Secrets and variables → Actions). The data job also needs **Settings → Actions → General → Allow GitHub Actions to create and approve pull requests**. Either can be run by hand from the Actions tab.
+
+Lines released in the last 14 days get a **new candy card** at the top of My Votes, with spawn islands and what players have voted so far.
 
 ### Island spawns
 

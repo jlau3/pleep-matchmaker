@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { InviteButton } from "@/components/InviteButton";
+import { InviteReminder } from "@/components/InviteReminder";
 import { TierBoard } from "@/components/TierBoard";
 import { ISLANDS, LINES } from "@/lib/lines";
 import { loadOwnChoices } from "@/lib/data";
@@ -18,9 +20,11 @@ export default async function TiersPage({ searchParams }: { searchParams: Promis
 
   let votes: Map<string, LineVotes>;
   let voters: number;
+  let friendCount = 0;
   if (pool === "friends") {
     const { data, error } = await supabase.rpc("get_friends");
     if (error) throw error;
+    friendCount = (data as FriendRow[]).length;
     const players = (data as FriendRow[]).filter((f) => f.visible && f.wants.length + f.dont_wants.length > 0);
     votes = countVotes(players);
     voters = players.length;
@@ -56,7 +60,7 @@ export default async function TiersPage({ searchParams }: { searchParams: Promis
       <div>
         <h1 className="text-2xl font-bold">Tier List</h1>
         <p className="text-sm text-slate-600 dark:text-slate-300">
-          Which candy to prioritize, ranked by net votes (wants minus don&apos;t-wants) from{" "}
+          Which candy to prioritize, ranked against each other by net votes (wants minus don&apos;t-wants, Top 3 stars count double) from{" "}
           {pool === "friends" ? `your ${voters} ${voters === 1 ? "friend" : "friends"}` : `${voters} active players`}.
         </p>
       </div>
@@ -69,6 +73,8 @@ export default async function TiersPage({ searchParams }: { searchParams: Promis
           {unvoted} new {unvoted === 1 ? "candy" : "candies"} to vote on →
         </Link>
       )}
+
+      {pool === "friends" && voters > 0 && <InviteReminder friendCount={friendCount} />}
 
       <div className="flex flex-wrap gap-2">
         <Link href={href({ pool: "friends" })} className={pill(pool === "friends")}>
@@ -93,7 +99,11 @@ export default async function TiersPage({ searchParams }: { searchParams: Promis
         <p className="py-8 text-center text-slate-500">
           {pool === "friends" ? (
             <>
-              No votes from friends yet. <Link href="/friends" className="underline">Add friends</Link> to build your tier list.
+              No votes from friends yet. <Link href="/friends" className="underline">Add friends</Link> or invite them to
+              build your tier list.
+              <span className="mt-4 block">
+                <InviteButton />
+              </span>
             </>
           ) : (
             "No votes yet."

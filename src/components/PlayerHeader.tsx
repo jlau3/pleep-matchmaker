@@ -56,7 +56,7 @@ export function PlayerHeader({
         </div>
         {isFriend !== undefined && (
           <div className="pt-1">
-            <FriendButton userId={player.user_id} isFriend={isFriend} />
+            <FriendButton userId={player.user_id} isFriend={isFriend} name={name} />
           </div>
         )}
       </div>

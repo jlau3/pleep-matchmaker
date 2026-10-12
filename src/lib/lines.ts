@@ -9,6 +9,9 @@ export const CHOICES: Choice[] = ["want", "undecided", "dont_want"];
 /** Mirrors public.max_top(): how many wants a player can star as their Top 3. */
 export const MAX_TOP = 3;
 
+/** Mirrors public.top_multiplier(): a starred want counts this many times over, in matching and on the tier list. */
+export const TOP_MULTIPLIER = 2;
+
 export const CHOICE_LABEL: Record<Choice, string> = {
   want: "Want",
   undecided: "Undecided",
@@ -43,6 +46,14 @@ export interface Island {
 export const LINES: CandyLine[] = linesData;
 export const LINES_BY_ID = new Map(LINES.map((line) => [line.id, line]));
 export const ISLANDS: Island[] = islandsData;
+
+/** Lines released in the last `days` days get the new candy card on My Votes. */
+export const NEW_LINE_DAYS = 14;
+
+export function recentLines(now = new Date(), days = NEW_LINE_DAYS): CandyLine[] {
+  const cutoff = now.getTime() - days * 24 * 3600 * 1000;
+  return LINES.filter((line) => new Date(`${line.addedAt}T00:00:00Z`).getTime() >= cutoff);
+}
 
 export function isChoice(value: unknown): value is Choice {
   return typeof value === "string" && (CHOICES as string[]).includes(value);

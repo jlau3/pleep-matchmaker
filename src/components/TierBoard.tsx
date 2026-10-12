@@ -16,8 +16,18 @@ function VoteCard({ ranked }: { ranked: RankedLine }) {
   return (
     <li className="flex items-center gap-3 rounded-2xl bg-white p-2 dark:bg-night-deep">
       <img src={lineSpriteUrl(ranked.line)} alt="" loading="lazy" className="h-14 w-14 shrink-0 rounded-full bg-sky object-contain dark:bg-night" />
-      <div className="min-w-0">
-        <div className="truncate font-semibold">{ranked.line.name}</div>
+      <div className="min-w-0 flex-1">
+        <div className="flex items-baseline justify-between gap-2">
+          <span className="truncate font-semibold">{ranked.line.name}</span>
+          {ranked.agreement !== null && (
+            <span
+              title="Wants minus don't-wants, as a share of everyone in the pool"
+              className={`shrink-0 text-sm font-bold ${ranked.agreement < 0 ? "text-dont" : "text-want"}`}
+            >
+              {Math.round(ranked.agreement * 100)}% <span className="text-xs font-normal text-slate-500">net</span>
+            </span>
+          )}
+        </div>
         <div className="flex flex-wrap gap-x-2 text-xs">
           <span className="text-want">{ranked.wants} want</span>
           <span className="text-meh">{ranked.unsure} unsure</span>

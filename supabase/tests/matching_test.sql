@@ -107,6 +107,9 @@ begin
   assert not exists (select 1 from public.lookup_players('bo')), 'no partial match';
   assert exists (select 1 from public.lookup_players('@Bob')), 'leading @ and case ignored';
   assert exists (select 1 from public.lookup_players('ign_cara')), 'by ign';
+  assert exists (select 1 from public.lookup_players('IGN_CARA')), 'ign any case';
+  assert exists (select 1 from public.lookup_players('  ign_cara  ')), 'surrounding spaces';
+  assert exists (select 1 from public.lookup_players('ＩＧＮ＿ＣＡＲＡ')), 'full-width';
   select * into r from public.lookup_players('ign_bob');
   assert cardinality(r.wants) = 10 and cardinality(r.dont_wants) = 3, 'lookup returns prefs';
 end $$;

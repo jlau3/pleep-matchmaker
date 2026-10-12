@@ -2,58 +2,29 @@ import Link from "next/link";
 import { FriendButton } from "@/components/FriendButton";
 import { PlayerHeader, playerName } from "@/components/PlayerHeader";
 import { PlayerLists } from "@/components/PlayerLists";
+import { InviteReminder } from "@/components/InviteReminder";
+import { PlayerSearch, searchQuery } from "@/components/PlayerSearch";
 import { FRIENDS_TABS, SubTabs } from "@/components/SubTabs";
 import { MAX_FRIENDS } from "@/lib/data";
 import { requireUser } from "@/lib/supabase/server";
-import type { FriendRow, LookupRow } from "@/lib/types";
+import type { FriendRow } from "@/lib/types";
 
 const card = "card p-4";
 
 export default async function FriendsPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
   const { supabase } = await requireUser();
-  const q = ((await searchParams).q ?? "").trim().slice(0, 64);
+  const q = await searchQuery(searchParams);
 
-  const [friendsResult, lookupResult] = await Promise.all([
-    supabase.rpc("get_friends"),
-    q ? supabase.rpc("lookup_players", { q }) : Promise.resolve({ data: [], error: null }),
-  ]);
+  const friendsResult = await supabase.rpc("get_friends");
   if (friendsResult.error) throw friendsResult.error;
-  if (lookupResult.error) throw lookupResult.error;
   const friends = friendsResult.data as FriendRow[];
-  const results = lookupResult.data as LookupRow[];
   const friendIds = new Set(friends.map((f) => f.user_id));
 
   return (
     <div className="space-y-8">
       <section className="space-y-3">
-        <SubTabs tabs={FRIENDS_TABS} active="/friends" />
-        <form className="flex gap-2">
-          <input
-            name="q"
-            defaultValue={q}
-            placeholder="Exact Discord name, IGN or friend code"
-            className="min-w-0 flex-1 field"
-          />
-          <button type="submit" className="btn-primary px-5 py-2">
-            Search
-          </button>
-        </form>
-
-        {q && results.length === 0 && (
-          <p className="py-4 text-center text-sm text-slate-500">
-            No one found. Names have to match exactly, and some players turn lookup off.
-          </p>
-        )}
-        {results.length > 0 && (
-          <ul className="space-y-3">
-            {results.map((player) => (
-              <li key={player.user_id} className={card}>
-                <PlayerHeader player={player} isFriend={friendIds.has(player.user_id)} />
-                <PlayerLists wants={player.wants} dontWants={player.dont_wants} topWants={player.top_wants} />
-              </li>
-            ))}
-          </ul>
-        )}
+        <SubTabs tabs={FRIENDS_TABS} active="/friends" query={q ? `q=${encodeURIComponent(q)}` : undefined} />
+        <PlayerSearch supabase={supabase} q={q} friendIds={friendIds} />
       </section>
 
       <section>
@@ -63,6 +34,11 @@ export default async function FriendsPage({ searchParams }: { searchParams: Prom
             {friends.length} / {MAX_FRIENDS}
           </span>
         </h2>
+        {friends.length < MAX_FRIENDS && (
+          <div className="mb-3">
+            <InviteReminder friendCount={friends.length} />
+          </div>
+        )}
         {friends.length > 0 && friends.length < MAX_FRIENDS && (
           <p className="mb-3 text-sm text-slate-500">
             Room for {MAX_FRIENDS - friends.length} more.{" "}
@@ -103,7 +79,7 @@ export default async function FriendsPage({ searchParams }: { searchParams: Prom
                       <strong>{playerName(friend)}</strong>
                       <span className="ml-2 text-slate-500">has made their list private</span>
                     </span>
-                    <FriendButton userId={friend.user_id} isFriend />
+                    <FriendButton userId={friend.user_id} isFriend name={playerName(friend)} />
                   </div>
                 )}
               </li>

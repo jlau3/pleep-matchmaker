@@ -1,13 +1,13 @@
 import Link from "next/link";
 
-/** Pill switch between the pages that share one top-level tab. */
-export function SubTabs({ tabs, active }: { tabs: { href: string; label: string }[]; active: string }) {
+/** Pill switch between the pages that share one top-level tab. `query` (e.g. "q=bob") is kept when switching. */
+export function SubTabs({ tabs, active, query }: { tabs: { href: string; label: string }[]; active: string; query?: string }) {
   return (
     <nav className="mb-4 inline-flex rounded-full bg-white p-1 shadow-sm dark:bg-night">
       {tabs.map((tab) => (
         <Link
           key={tab.href}
-          href={tab.href}
+          href={query ? `${tab.href}?${query}` : tab.href}
           aria-current={tab.href === active ? "page" : undefined}
           className={`rounded-full px-4 py-1.5 text-sm font-semibold ${
             tab.href === active

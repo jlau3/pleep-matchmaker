@@ -1,17 +1,21 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
-import { setChoice, setTop } from "@/app/actions";
-import { CHOICE_LABEL, type Choice, LINES, lineSpriteUrl, MAX_TOP } from "@/lib/lines";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { setChoice, setTop, swapTop } from "@/app/actions";
+import { CHOICE_LABEL, type Choice, LINES, LINES_BY_ID, lineSpriteUrl, MAX_TOP } from "@/lib/lines";
 import { rethrowIfNavigation, SAVE_FAILED } from "@/lib/saveError";
+import type { LineVotes } from "@/lib/tiers";
 import { CollectionGrid } from "./CollectionGrid";
 import { PickFlow } from "./PickFlow";
+import { NewCandyCard } from "./NewCandyCard";
 import { StarButton } from "./StarButton";
+import { SwapTopDialog } from "./SwapTopDialog";
 
 type Filter = "all" | Choice;
 type View = "list" | "grid";
 const VIEW_KEY = "pm_vote_view";
+const NEW_DISMISSED_KEY = "pm_new_candy_dismissed";
 
 const FILTERS: { value: Filter; label: string }[] = [
   { value: "all", label: "All" },
@@ -34,16 +38,19 @@ export function VoteBoard({
   initial,
   initialTops,
   firstVisit,
+  newCandy,
 }: {
   initial: Record<string, Choice>;
   initialTops: string[];
   firstVisit: boolean;
+  /** Recently released lines and what players have voted on them so far. */
+  newCandy?: { ids: string[]; votes: Record<string, LineVotes>; voters: number };
 }) {
   const [choices, setChoices] = useState(initial);
   const [tops, setTops] = useState(() => new Set(initialTops));
   const [error, setError] = useState<string | null>(null);
-  /** A hint that needs no reload, unlike a failed save. */
-  const [notice, setNotice] = useState<string | null>(null);
+  /** Line the player tried to star while their Top 3 was full; opens the swap prompt. */
+  const [swapFor, setSwapFor] = useState<string | null>(null);
   const [view, setView] = useState<View>("list");
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<Filter>("all");
@@ -95,7 +102,6 @@ export function VoteBoard({
       });
     };
     setError(null);
-    setNotice(null);
     apply(next.choice, next.top);
     let failure: string | undefined;
     try {
@@ -121,13 +127,64 @@ export function VoteBoard({
       return;
     }
     if (tops.size >= MAX_TOP) {
-      setNotice(`You can star up to ${MAX_TOP}. Unstar one first.`);
+      setSwapFor(lineId);
       return;
     }
     save(lineId, { choice: "want", top: true }, () => setTop(lineId, true));
   }
 
+  /** Swap prompt: drop `outId` from the Top 3 and star `swapFor` instead. */
+  async function swap(outId: string) {
+    const inId = swapFor;
+    if (!inId) return;
+    setSwapFor(null);
+    const previous = { tops, inChoice: choices[inId] };
+    setError(null);
+    setTops((current) => new Set([...current].filter((id) => id !== outId)).add(inId));
+    setChoices((current) => ({ ...current, [inId]: "want" }));
+    let failure: string | undefined;
+    try {
+      failure = (await swapTop(outId, inId)).error;
+    } catch (e) {
+      rethrowIfNavigation(e);
+      failure = SAVE_FAILED;
+    }
+    if (failure) {
+      setError(failure);
+      setTops(previous.tops);
+      setChoices((current) => {
+        const out = { ...current };
+        if (previous.inChoice) out[inId] = previous.inChoice;
+        else delete out[inId];
+        return out;
+      });
+    }
+  }
+
   const topLines = LINES.filter((line) => tops.has(line.id));
+  // null until storage is read, so a closed card never flashes on load.
+  const [dismissedNew, setDismissedNew] = useState<Set<string> | null>(null);
+  useEffect(() => {
+    try {
+      setDismissedNew(new Set(JSON.parse(localStorage.getItem(NEW_DISMISSED_KEY) ?? "[]")));
+    } catch {
+      setDismissedNew(new Set()); // Storage unavailable: cards show until voted on.
+    }
+  }, []);
+  function dismissNew(lineId: string) {
+    const next = new Set(dismissedNew ?? []).add(lineId);
+    setDismissedNew(next);
+    try {
+      localStorage.setItem(NEW_DISMISSED_KEY, JSON.stringify([...next]));
+    } catch {
+      // Not remembered; fine.
+    }
+  }
+  // Which new lines get a card is fixed at load (undecided, not starred), so a card stays put while you vote on it
+  // and is gone next visit. Closing it hides it for good in this browser.
+  const [pinnedNew] = useState(() => (newCandy?.ids ?? []).filter((id) => (initial[id] ?? "undecided") === "undecided" && !initialTops.includes(id)));
+  const newCards = dismissedNew ? pinnedNew.filter((id) => !dismissedNew.has(id) && LINES_BY_ID.has(id)) : [];
+  const cancelSwap = useCallback(() => setSwapFor(null), []);
 
   return (
     <div>
@@ -148,11 +205,6 @@ export function VoteBoard({
             Matchmake
           </Link>
         </div>
-        {notice && !error && (
-          <p role="status" className="mt-2 text-sm font-semibold text-sun-deep">
-            {notice}
-          </p>
-        )}
         {error && (
           <div role="alert" className="mt-2 flex items-center justify-between gap-3 text-sm text-dont">
             <span>{error}</span>
@@ -169,9 +221,23 @@ export function VoteBoard({
         </p>
       )}
 
+      {newCards.map((id) => (
+        <NewCandyCard
+          key={id}
+          line={LINES_BY_ID.get(id)!}
+          votes={newCandy!.votes[id]}
+          voters={newCandy!.voters}
+          choice={choices[id]}
+          starred={tops.has(id)}
+          onChoose={(choice) => choose(id, choice)}
+          onStar={() => toggleTop(id)}
+          onDismiss={() => dismissNew(id)}
+        />
+      ))}
+
       <section className="card mb-4 p-3" aria-label="Your Top 3">
         <h2 className="font-bold">Your Top {MAX_TOP}</h2>
-        <p className="mb-2 text-xs text-slate-500">Tap ★ on a candy to star it as a top want. These count double in matching.</p>
+        <p className="mb-2 text-xs text-slate-500">Tap ★ on a candy to star it as a top want. These count double in matching and on the tier list.</p>
         <ul className="grid grid-cols-3 gap-2">
           {Array.from({ length: MAX_TOP }, (_, i) => {
             const line = topLines[i];
@@ -231,6 +297,10 @@ export function VoteBoard({
         <PickFlow lines={visible} choices={choices} onChoose={choose} tops={tops} onStar={toggleTop} />
       ) : (
         <CollectionGrid lines={visible} choices={choices} onChoose={choose} tops={tops} onStar={toggleTop} />
+      )}
+
+      {swapFor && LINES_BY_ID.has(swapFor) && (
+        <SwapTopDialog incoming={LINES_BY_ID.get(swapFor)!} tops={topLines} onSwap={swap} onCancel={cancelSwap} />
       )}
 
       <div className="mx-auto mt-10 max-w-md text-center">

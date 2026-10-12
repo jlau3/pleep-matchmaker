@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ISLANDS, LINES, LINES_BY_ID, linesFromIds } from "./lines";
+import { ISLANDS, LINES, LINES_BY_ID, linesFromIds, recentLines } from "./lines";
 
 describe("candy line data", () => {
   it("has unique ids and at least one member per line", () => {
@@ -29,5 +29,14 @@ describe("island data", () => {
   it("has every island populated", () => {
     expect(ISLANDS.length).toBe(9);
     for (const island of ISLANDS) expect(island.lines.length).toBeGreaterThan(0);
+  });
+});
+
+describe("recentLines", () => {
+  it("returns lines released within the window", () => {
+    const newest = [...LINES].sort((a, b) => b.addedAt.localeCompare(a.addedAt))[0];
+    const day = new Date(`${newest.addedAt}T00:00:00Z`);
+    expect(recentLines(new Date(day.getTime() + 13 * 864e5)).map((l) => l.id)).toContain(newest.id);
+    expect(recentLines(new Date(day.getTime() + 15 * 864e5)).map((l) => l.id)).not.toContain(newest.id);
   });
 });
