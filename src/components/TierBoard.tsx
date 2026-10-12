@@ -7,7 +7,6 @@ const TIER_STYLE: Record<string, string> = {
   B: "bg-sun text-[#5b3e00] shadow-[0_3px_0_var(--color-sun-deep)]",
   C: "bg-[#a8dd7a] text-[#2f5a12] shadow-[0_3px_0_#7cba4c]",
   avoid: "bg-meh text-white shadow-[0_3px_0_#6b778a]",
-  none: "bg-slate-200 text-slate-600 dark:bg-slate-700 dark:text-slate-300",
 };
 
 const panel = "card p-3";
@@ -55,14 +54,6 @@ export function TierBoard({ tiers }: { tiers: Map<TierId, RankedLine[]> }) {
             ))}
           </ul>
         );
-        if (tier.id === "none") {
-          return (
-            <details key={tier.id} className={panel}>
-              <summary className="flex items-center gap-3">{header}</summary>
-              {cards}
-            </details>
-          );
-        }
         return (
           <section key={tier.id} className={panel}>
             <div className="flex items-center gap-3">{header}</div>

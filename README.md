@@ -37,9 +37,8 @@ Net votes = wants minus don't-wants among the pool (your friends who have voted,
 | S | 60% or more |
 | A | 35–59% |
 | B | 15–34% |
-| C | under 15% |
+| C | under 15%, including no votes and even splits |
 | Avoid | net negative |
-| No votes | net zero |
 
 Cutoffs live in `TIER_CUTOFFS` in `src/lib/tiers.ts`.
 
