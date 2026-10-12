@@ -33,8 +33,8 @@ select '00000000-0000-0000-0000-00000000000b'::uuid, 'x' || g, 'want'::public.ch
 union all
 select '00000000-0000-0000-0000-00000000000b'::uuid, 'd' || g, 'dont_want'::public.choice from generate_series(1, 3) g;
 
--- c: like b with only 2 extra wants, and dont-wants on a's lines w9, w10
--- (don't-wants don't affect fit): 6 / 8 = 75%.
+-- c: like b with only 2 extra wants, and dont-wants on a's lines w9, w10,
+-- which each cost a full want: 6 / (8 + 2) = 60%.
 insert into public.preferences (user_id, line_id, choice)
 select '00000000-0000-0000-0000-00000000000c'::uuid, 'w' || g, 'want'::public.choice from generate_series(1, 6) g
 union all
@@ -57,7 +57,7 @@ update public.profiles set last_seen_at = now() - interval '5 months' where id =
 set role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-00000000000a', false);
 
-select discord_username, match_pct, fit_wants from public.get_matches();
+select discord_username, match_pct, fit_wants, fit_dont_wants from public.get_matches();
 
 do $$
 declare r record;
@@ -68,7 +68,8 @@ begin
   assert r.friend_code is not null, 'contact info returned for match';
 
   select * into r from public.get_matches() where discord_username = 'cara';
-  assert r.match_pct = 75, format('cara pct %s', r.match_pct);
+  assert r.match_pct = 60, format('cara pct %s', r.match_pct);
+  assert r.fit_dont_wants = '{w10,w9}', format('cara dont-wants %s', r.fit_dont_wants);
 
   assert not exists (select 1 from public.get_matches() where discord_username = 'dan'), 'dan below min shared wants';
   assert not exists (select 1 from public.get_matches() where discord_username = 'eve'), 'eve stale';

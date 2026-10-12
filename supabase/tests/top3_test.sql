@@ -18,16 +18,17 @@ set role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0003-000000000001', false);
 
 -- tara has no friends, so her own wants are the group. Before any stars all
--- shares are 1 and tom's three wants are all in it: 100%.
+-- shares are 1. tom's three wants are all in it, but he doesn't want td, which
+-- tara wants: 3 / (3 + 1) = 75%.
 do $$ begin
-  assert (select match_pct from public.get_matches() where discord_username = 'tom') = 100, 'pct without stars';
+  assert (select match_pct from public.get_matches() where discord_username = 'tom') = 75, 'pct without stars';
 end $$;
 
 -- Star ta: it's now the group's top line (share 1), the rest drop to 0.5.
--- tom: (1 + 0.5 + 0.5) / 3 = 67%.
+-- tom: (1 + 0.5 + 0.5) / (3 + 0.5 for td) = 57%.
 update public.preferences set top = true where user_id = auth.uid() and line_id = 'ta';
 do $$ begin
-  assert (select match_pct from public.get_matches() where discord_username = 'tom') = 67,
+  assert (select match_pct from public.get_matches() where discord_username = 'tom') = 57,
     format('pct with star %s', (select match_pct from public.get_matches() where discord_username = 'tom'));
 end $$;
 
@@ -86,16 +87,16 @@ do $$ begin
 end $$;
 
 -- tara is tom's only friend, so for her own fit the group falls back to tom's
--- wants (ta, tb, tc, share 1 each). tara wants ta*, tb*, te* (weight 2) and td:
--- (2 + 2) / 7 = 57%. No thresholds on My Friends.
+-- wants (ta, tb, tc, share 1 each). tara wants ta*, tb*, te* (weight 2) and td,
+-- and doesn't want tc: (2 + 2) / (7 + 1) = 50%. No thresholds on My Friends.
 do $$ begin
-  assert (select match_pct from public.get_friends() where discord_username = 'tara') = 57,
+  assert (select match_pct from public.get_friends() where discord_username = 'tara') = 50,
     format('friend pct %s', (select match_pct from public.get_friends() where discord_username = 'tara'));
 end $$;
 
 -- Player search shows the same % (tom looking up tara), and none for yourself.
 do $$ begin
-  assert (select match_pct from public.lookup_players('tara')) = 57, 'lookup pct';
+  assert (select match_pct from public.lookup_players('tara')) = 50, 'lookup pct';
   assert (select match_pct from public.lookup_players('tom')) is null, 'no pct for yourself';
 end $$;
 

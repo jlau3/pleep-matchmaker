@@ -31,7 +31,7 @@ const STEPS: { title: string; body: React.ReactNode; href: string; cta: string }
     body: (
       <>
         Look them up by exact Discord name, IGN or friend code and add up to {MAX_FRIENDS}. Each player shows a fit %: how
-        much of what they want your friends want too.
+        well they want what your friends want, and don&apos;t turn down what your friends want.
       </>
     ),
     href: "/friends",

@@ -106,6 +106,14 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
                 {/* Kept in the order Find New returns: most-wanted by your friends first. */}
                 <LineChips lines={match.fit_wants.flatMap((id) => LINES_BY_ID.get(id) ?? [])} />
               </div>
+              {match.fit_dont_wants.length > 0 && (
+                <div className="mt-3">
+                  <h3 className="mb-2 text-sm font-semibold text-dont">
+                    Doesn&apos;t want, but your friends do ({match.fit_dont_wants.length})
+                  </h3>
+                  <LineChips lines={match.fit_dont_wants.flatMap((id) => LINES_BY_ID.get(id) ?? [])} />
+                </div>
+              )}
             </li>
           ))}
         </ul>

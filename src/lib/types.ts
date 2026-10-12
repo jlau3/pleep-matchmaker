@@ -16,6 +16,8 @@ export interface MatchRow extends PlayerContact {
   match_pct: number;
   /** Their wants that your friends want too, most-wanted first. */
   fit_wants: string[];
+  /** Candy your friends want that they don't, most-wanted first: what they'd rather not be sent. */
+  fit_dont_wants: string[];
 }
 
 export interface LookupRow extends PlayerContact {

@@ -10,7 +10,8 @@ insert into auth.users (id, raw_user_meta_data) values
   ('00000000-0000-0000-0005-000000000004', '{"name":"cone#0"}'),
   ('00000000-0000-0000-0005-000000000005', '{"name":"ctwo#0"}'),
   ('00000000-0000-0000-0005-000000000006', '{"name":"dub#0"}'),
-  ('00000000-0000-0000-0005-000000000007', '{"name":"ex#0"}');
+  ('00000000-0000-0000-0005-000000000007', '{"name":"ex#0"}'),
+  ('00000000-0000-0000-0005-000000000008', '{"name":"cthree#0"}');
 update public.profiles set friend_code = '5555' || right(id::text, 8) where id::text like '00000000-0000-0000-0005-%';
 
 insert into public.preferences (user_id, line_id, choice, top) values
@@ -29,6 +30,13 @@ insert into public.preferences (user_id, line_id, choice, top) values
   ('00000000-0000-0000-0005-000000000005', 'fa', 'want', false),
   ('00000000-0000-0000-0005-000000000005', 'fb', 'want', false),
   ('00000000-0000-0000-0005-000000000005', 'fc', 'want', false);
+-- c3: wants fb, fc, zz but doesn't want fa, the group's top line:
+-- (1/3 + 1/3) / (3 + 1) = 17%. (c1's don't-want fx costs nothing: no one wants it.)
+insert into public.preferences (user_id, line_id, choice) values
+  ('00000000-0000-0000-0005-000000000008', 'fb', 'want'),
+  ('00000000-0000-0000-0005-000000000008', 'fc', 'want'),
+  ('00000000-0000-0000-0005-000000000008', 'zz', 'want'),
+  ('00000000-0000-0000-0005-000000000008', 'fa', 'dont_want');
 insert into public.preferences (user_id, line_id, choice)
 select '00000000-0000-0000-0005-000000000005'::uuid, 'y' || g, 'want'::public.choice from generate_series(1, 6) g;
 
@@ -50,6 +58,7 @@ begin
   assert r.fit_wants = '{fa,fb,fc}', format('fit wants ordered by demand %s', r.fit_wants);
   assert not exists (select 1 from public.get_matches() where discord_username = 'ctwo'), 'c2 below min_pct';
   assert (select match_pct from public.lookup_players('ctwo')) = 19, 'search shows low fit';
+  assert (select match_pct from public.lookup_players('cthree')) = 17, 'don''t-want on a top line costs a want';
   -- Each friend is compared with the rest of the list:
   -- f1 (fa* fb) vs f2 (fa, fc): 2 / 3 = 67%; f2 (fa, fc) vs f1 (fa 1, fb 0.5): 1 / 2 = 50%.
   assert (select match_pct from public.get_friends() where discord_username = 'fone') = 67, 'f1 fit';

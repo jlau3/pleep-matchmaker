@@ -2,6 +2,7 @@ import { LOW_FIT_PCT } from "@/lib/fit";
 
 /**
  * How well a player fits your friends' wants, shown top right of their card.
+ * Counts their wants and their don't-wants against what your friends want.
  * Low fits get a quiet amber "low fit" instead of the green "fit". Nothing when unknown.
  */
 export function MatchPct({ pct }: { pct: number | null | undefined }) {
@@ -10,7 +11,11 @@ export function MatchPct({ pct }: { pct: number | null | undefined }) {
   return (
     <div
       className="shrink-0 text-right leading-none"
-      title={low ? "Most of what they want isn't on your friends' lists" : "How much of what they want your friends want too"}
+      title={
+        low
+          ? "Most of what they want isn't on your friends' lists, or they don't want what your friends do"
+          : "How well their wants and don't-wants line up with what your friends want"
+      }
     >
       <div className={`text-2xl font-bold ${low ? "text-amber-600 dark:text-amber-400" : "text-want"}`}>{pct}%</div>
       <div className={`text-xs ${low ? "font-semibold text-amber-700 dark:text-amber-300" : "text-slate-500"}`}>

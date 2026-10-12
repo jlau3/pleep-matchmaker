@@ -17,11 +17,14 @@ Stack: Next.js 15 (App Router) + Supabase (Postgres, Discord OAuth) + Tailwind. 
 The % on Find New, search results and My Friends is **fit**: how well a player's wants line up with what **your friends** want, not with your own votes.
 
 1. **Group demand.** For each line, count how many of your friends want it, a Top 3 star counting double (`public.top_multiplier()`), same as the Tier List. Friends with a private list don't count. Each line's share is its demand relative to your friends' most-wanted line, so the top line is 1 and a line half as many friends want is 0.5.
-2. **Fit.** `fit % = sum over their wants of (weight x share) / sum of their want weights`, where a starred want weighs 2. 100% means everything they want is among your friends' most-wanted candy; a want none of your friends share counts 0. Their don't-wants and undecided lines don't matter.
+2. **Fit.** `fit % = sum over their wants of (weight x share) / (sum of their want weights + sum over their don't-wants of share)`, where a starred want weighs 2.
+   - 100% means everything they want is among your friends' most-wanted candy and they don't turn any of it down. A want none of your friends share counts 0.
+   - Don't-wants count as much as wants (`public.dont_want_weight()` = 1): friends send each other candy, and getting candy you don't want annoys people at least as much as missing a want. A don't-want costs in proportion to how much your friends want that line, so turning down their top candy costs a full want and turning down candy nobody wants costs nothing.
+   - Undecided lines don't count.
 
 On My Friends, each friend is compared with the *rest* of your list. Until any friend has voted, your own wants stand in for the group, so new players still get suggestions.
 
-Find New shows players at **≥ 25% fit** with **≥ 3 wants your friends share**, who are open to new friends, have room on their list (under 50), have a friend code set, and were seen in the last **4 months**. Results list the wants they share with your friends, most-wanted first. The knobs live in `public.match_config()`.
+Find New shows players at **≥ 25% fit** with **≥ 3 wants your friends share**, who are open to new friends, have room on their list (under 50), have a friend code set, and were seen in the last **4 months**. Results list the wants they share with your friends and the candy your friends want that they don't, most-wanted first. The knobs live in `public.match_config()`.
 
 Anywhere else, a fit under 25% shows as an amber **low fit** (`LOW_FIT_PCT` in `src/lib/fit.ts`, kept equal to Find New's cutoff): most of what they want, your friends don't.
 
