@@ -75,7 +75,7 @@ export default async function FriendsPage({ searchParams }: { searchParams: Prom
           <p className="text-sm text-slate-500">
             Search for your in-game friends above, or find new ones in{" "}
             <Link href="/matches" className="underline">Find new</Link>. Then check the{" "}
-            <Link href="/tiers" className="underline">Tier list</Link> to see which candy they want most.
+            <Link href="/tiers" className="underline">Tier List</Link> to see which candy they want most.
           </p>
         ) : (
           <ul className="space-y-3">
