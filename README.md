@@ -8,7 +8,7 @@ Pokémon Sleep players vote on every candy line: **want**, **don't want** or **u
 
 New players go straight to My votes after signing in, and land on the Tier list once everything is voted.
 
-A **How it works** card explains the app on the sign-in page, opens on a new player's first visit to My Votes, and lives at `/about` (the **?** in the header).
+A **How it works** card explains the app on the sign-in page, opens on a new player's first visit to My Votes, and lives at `/about` (the **?** in the header). It ends with an **Invite friends** button (native share sheet on phones, copied message elsewhere); the Tier List shows the same button in a reminder when some of your friends haven't voted yet.
 
 Stack: Next.js 15 (App Router) + Supabase (Postgres, Discord OAuth) + Tailwind. Built to run on the Vercel and Supabase free tiers.
 

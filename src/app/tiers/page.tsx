@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { InviteButton } from "@/components/InviteButton";
 import { TierBoard } from "@/components/TierBoard";
 import { ISLANDS, LINES } from "@/lib/lines";
 import { loadOwnChoices } from "@/lib/data";
@@ -18,10 +19,14 @@ export default async function TiersPage({ searchParams }: { searchParams: Promis
 
   let votes: Map<string, LineVotes>;
   let voters: number;
+  /** Friends who can share their picks but haven't voted on anything yet. */
+  let silentFriends = 0;
   if (pool === "friends") {
     const { data, error } = await supabase.rpc("get_friends");
     if (error) throw error;
-    const players = (data as FriendRow[]).filter((f) => f.visible && f.wants.length + f.dont_wants.length > 0);
+    const visible = (data as FriendRow[]).filter((f) => f.visible);
+    const players = visible.filter((f) => f.wants.length + f.dont_wants.length > 0);
+    silentFriends = visible.length - players.length;
     votes = countVotes(players);
     voters = players.length;
   } else {
@@ -70,6 +75,18 @@ export default async function TiersPage({ searchParams }: { searchParams: Promis
         </Link>
       )}
 
+      {pool === "friends" && silentFriends > 0 && (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-sun/25 px-4 py-3 text-sm">
+          <span>
+            <strong>
+              {silentFriends} {silentFriends === 1 ? "friend hasn't" : "friends haven't"}
+            </strong>{" "}
+            voted yet. Ping them on Discord to add their wants.
+          </span>
+          <InviteButton />
+        </div>
+      )}
+
       <div className="flex flex-wrap gap-2">
         <Link href={href({ pool: "friends" })} className={pill(pool === "friends")}>
           My Friends
@@ -93,7 +110,11 @@ export default async function TiersPage({ searchParams }: { searchParams: Promis
         <p className="py-8 text-center text-slate-500">
           {pool === "friends" ? (
             <>
-              No votes from friends yet. <Link href="/friends" className="underline">Add friends</Link> to build your tier list.
+              No votes from friends yet. <Link href="/friends" className="underline">Add friends</Link> or invite them to
+              build your tier list.
+              <span className="mt-4 block">
+                <InviteButton />
+              </span>
             </>
           ) : (
             "No votes yet."

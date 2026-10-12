@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { MAX_TOP } from "@/lib/lines";
 import { MAX_FRIENDS } from "@/lib/data";
+import { InviteButton } from "./InviteButton";
 
 const STEPS: { title: string; body: React.ReactNode; href: string; cta: string }[] = [
   {
@@ -74,6 +75,14 @@ export function HowItWorks({ links = true }: { links?: boolean }) {
           </li>
         ))}
       </ol>
+      <div className="mt-5 rounded-2xl bg-sun/25 p-4">
+        <h3 className="font-bold">Bring your friends along</h3>
+        <p className="mb-3 text-sm text-slate-700 dark:text-slate-200">
+          The tier list only knows what your friends have voted. Ping your Pokémon Sleep friends on Discord and ask them
+          to add their wants and Top 3.
+        </p>
+        <InviteButton />
+      </div>
       <p className="mt-5 text-xs text-slate-500">
         Your friend code and IGN are only shown to matches and to people who look you up by exact name. You can turn off
         matching or lookup in Profile → Settings, and stay hidden from matches automatically once your friend list is full.
