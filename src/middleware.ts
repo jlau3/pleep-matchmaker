@@ -27,7 +27,11 @@ export async function middleware(request: NextRequest) {
   const user = data?.claims?.sub ? { id: data.claims.sub } : null;
 
   if (!user && PROTECTED.some((path) => request.nextUrl.pathname.startsWith(path))) {
-    return NextResponse.redirect(new URL("/", request.url));
+    // Remember where they were headed (e.g. a shared /friends?q=name link) so
+    // signing in can bring them back there.
+    const target = new URL("/", request.url);
+    target.searchParams.set("next", request.nextUrl.pathname + request.nextUrl.search);
+    return NextResponse.redirect(target);
   }
 
   // "Last seen" = any logged-in visit. The cookie keeps it to one write per 10 minutes.

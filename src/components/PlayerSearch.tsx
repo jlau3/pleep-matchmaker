@@ -1,4 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import Link from "next/link";
 import type { LookupRow } from "@/lib/types";
 import { MatchPct } from "./MatchPct";
 import { PlayerHeader } from "./PlayerHeader";
@@ -13,7 +14,17 @@ export async function searchQuery(searchParams: Promise<{ q?: string }>): Promis
  * Exact-name player search with results, shared by My Friends and Find New.
  * The form submits to the current page, and SubTabs carries ?q= across tabs.
  */
-export async function PlayerSearch({ supabase, q, friendIds }: { supabase: SupabaseClient; q: string; friendIds: Set<string> }) {
+export async function PlayerSearch({
+  supabase,
+  q,
+  friendIds,
+  viewerId,
+}: {
+  supabase: SupabaseClient;
+  q: string;
+  friendIds: Set<string>;
+  viewerId: string;
+}) {
   let results: LookupRow[] = [];
   if (q) {
     const { data, error } = await supabase.rpc("lookup_players", { q });
@@ -37,7 +48,18 @@ export async function PlayerSearch({ supabase, q, friendIds }: { supabase: Supab
         <ul className="space-y-3">
           {results.map((player) => (
             <li key={player.user_id} className="card p-4">
-              <PlayerHeader player={player} isFriend={friendIds.has(player.user_id)} aside={<MatchPct pct={player.match_pct} />} />
+              <PlayerHeader player={player} isFriend={friendIds.has(player.user_id)} aside={
+                  player.match_pct === null && player.user_id !== viewerId ? (
+                    <Link href="/vote" className="shrink-0 text-right text-xs font-semibold text-want underline">
+                      Vote to see
+                      <br />
+                      your match %
+                    </Link>
+                  ) : (
+                    <MatchPct pct={player.match_pct} />
+                  )
+                }
+              />
               <PlayerLists wants={player.wants} dontWants={player.dont_wants} topWants={player.top_wants} />
             </li>
           ))}

@@ -1,8 +1,46 @@
 -- Player search shows your match % with each result, so a "look me up on
 -- Pleep Matchmaker" post on Discord leads straight to a compatibility number.
 -- Same pair_match_pct as My Friends (no Find New thresholds). Null when you
--- look yourself up. Only players with lookup on are ever returned, as before.
--- Safe to re-run.
+-- look yourself up, and until you've voted on something (pair_match_pct now
+-- returns null then instead of a misleading 0%). Only players with lookup on
+-- are ever returned, as before. Safe to re-run.
+
+create or replace function public.pair_match_pct(a uuid, b uuid)
+returns int
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  with
+  cfg as (select * from public.match_config()),
+  mine as (
+    select line_id, choice, top from public.preferences where user_id = a and choice <> 'undecided'
+  ),
+  theirs as (
+    select line_id, choice, top from public.preferences where user_id = b and choice <> 'undecided'
+  ),
+  scored as (
+    select m.choice as ca, t.choice as cb,
+           case when coalesce(m.top, false) or coalesce(t.top, false) then public.top_multiplier() else 1 end as mult
+    from mine m
+    full join theirs t on t.line_id = m.line_id
+  ),
+  agg as (
+    select
+      sum(s.mult * case
+            when s.ca = 'want' and s.cb = 'want' then cfg.w_both_want
+            when s.ca = 'dont_want' and s.cb = 'dont_want' then cfg.w_both_dont
+            when (s.ca = 'want' and s.cb = 'dont_want') or (s.ca = 'dont_want' and s.cb = 'want') then cfg.w_conflict
+            else 0
+          end) as score,
+      sum(s.mult * case when s.ca = 'want' or s.cb = 'want' then cfg.w_both_want else cfg.w_both_dont end) as best
+    from scored s, cfg
+  )
+  -- No % until the caller has voted: with nothing to compare it would read 0%.
+  select case when best > 0 and exists (select 1 from mine) then round(100.0 * greatest(score, 0) / best)::int end from agg
+$$;
+
 
 drop function if exists public.lookup_players(text);
 

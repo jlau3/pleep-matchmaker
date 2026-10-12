@@ -107,6 +107,14 @@ do $$ begin
   assert (select match_pct from public.lookup_players('tom')) is null, 'no pct for yourself';
 end $$;
 
+-- Someone who hasn't voted yet gets no % rather than 0%.
+reset role;
+insert into auth.users (id, raw_user_meta_data) values ('00000000-0000-0000-0003-000000000009', '{"name":"newbie#0"}');
+do $$ begin
+  assert public.pair_match_pct('00000000-0000-0000-0003-000000000009', '00000000-0000-0000-0003-000000000001') is null, 'no votes, no pct';
+end $$;
+set role authenticated;
+
 -- The Tier List asks without match %.
 do $$ begin
   assert (select match_pct from public.get_friends(false) where discord_username = 'tara') is null, 'no pct when with_match is false';

@@ -57,7 +57,7 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
     <div className="space-y-4">
       <div>
         <SubTabs tabs={FRIENDS_TABS} active="/matches" query={q ? `q=${encodeURIComponent(q)}` : undefined} />
-        <PlayerSearch supabase={supabase} q={q} friendIds={friendIds} />
+        <PlayerSearch supabase={supabase} q={q} friendIds={friendIds} viewerId={user.id} />
         <p className="mt-4 text-sm text-slate-600 dark:text-slate-300">
           Players open to new friends whose candy votes line up with yours.
         </p>
@@ -71,6 +71,7 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
       <FriendPostCard
         friendCode={profile.friend_code}
         handle={profile.discord_username ? `@${profile.discord_username}` : profile.ign}
+        searchName={profile.discord_username ?? profile.ign}
         topNames={linesFromIds(tops).map((line) => line.name)}
         wantNames={linesFromIds(Object.keys(choices).filter((id) => choices[id] === "want"))
           .sort((a, b) => b.weight - a.weight || a.dex - b.dex)

@@ -1,13 +1,16 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { headers } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { normalizeFriendCode } from "@/lib/format";
+import { NEXT_COOKIE, safeNextPath } from "@/lib/nextPath";
 import { isChoice, LINES_BY_ID, MAX_TOP } from "@/lib/lines";
 import { createClient, requireUser } from "@/lib/supabase/server";
 
-export async function signInWithDiscord() {
+export async function signInWithDiscord(form?: FormData) {
+  const next = safeNextPath(form?.get("next"));
+  if (next) (await cookies()).set(NEXT_COOKIE, next, { maxAge: 600, httpOnly: true, sameSite: "lax", path: "/" });
   const supabase = await createClient();
   const h = await headers();
   const origin = h.get("origin") ?? `https://${h.get("host")}`;

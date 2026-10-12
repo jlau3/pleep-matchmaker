@@ -1,4 +1,6 @@
+import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
+import { NEXT_COOKIE, safeNextPath } from "@/lib/nextPath";
 import { createClient } from "@/lib/supabase/server";
 
 export async function GET(request: Request) {
@@ -9,7 +11,14 @@ export async function GET(request: Request) {
   if (code) {
     const supabase = await createClient();
     const { error } = await supabase.auth.exchangeCodeForSession(code);
-    if (!error) return NextResponse.redirect(`${origin}/`);
+    if (!error) {
+      // Back to where they were headed before signing in, if anywhere.
+      const store = await cookies();
+      const next = safeNextPath(store.get(NEXT_COOKIE)?.value);
+      const res = NextResponse.redirect(`${origin}${next ?? "/"}`);
+      if (next) res.cookies.delete(NEXT_COOKIE);
+      return res;
+    }
     message = error.message;
   }
   return NextResponse.redirect(`${origin}/?error=${encodeURIComponent(message ?? "No sign-in code received")}`);

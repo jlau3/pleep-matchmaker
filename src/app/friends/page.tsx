@@ -13,7 +13,7 @@ import type { FriendRow } from "@/lib/types";
 const card = "card p-4";
 
 export default async function FriendsPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
-  const { supabase } = await requireUser();
+  const { supabase, user } = await requireUser();
   const q = await searchQuery(searchParams);
 
   const friendsResult = await supabase.rpc("get_friends");
@@ -25,7 +25,7 @@ export default async function FriendsPage({ searchParams }: { searchParams: Prom
     <div className="space-y-8">
       <section className="space-y-3">
         <SubTabs tabs={FRIENDS_TABS} active="/friends" query={q ? `q=${encodeURIComponent(q)}` : undefined} />
-        <PlayerSearch supabase={supabase} q={q} friendIds={friendIds} />
+        <PlayerSearch supabase={supabase} q={q} friendIds={friendIds} viewerId={user.id} />
       </section>
 
       <section>
