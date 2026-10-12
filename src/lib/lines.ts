@@ -6,6 +6,9 @@ export type Choice = "want" | "undecided" | "dont_want";
 /** Display order of the three buckets. */
 export const CHOICES: Choice[] = ["want", "undecided", "dont_want"];
 
+/** Mirrors public.max_top(): how many wants a player can star as their Top 3. */
+export const MAX_TOP = 3;
+
 export const CHOICE_LABEL: Record<Choice, string> = {
   want: "Want",
   undecided: "Undecided",

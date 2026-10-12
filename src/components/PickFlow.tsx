@@ -9,10 +9,14 @@ export function PickFlow({
   lines,
   choices,
   onChoose,
+  tops,
+  onStar,
 }: {
   lines: CandyLine[];
   choices: Record<string, Choice>;
   onChoose: (lineId: string, choice: Choice) => void;
+  tops: Set<string>;
+  onStar: (lineId: string) => void;
 }) {
   const cardRefs = useRef(new Map<string, HTMLLIElement>());
 
@@ -33,7 +37,13 @@ export function PickFlow({
             if (el) cardRefs.current.set(line.id, el);
           }}
         >
-          <LineCard line={line} choice={choices[line.id]} onChoose={(choice) => choose(index, line, choice)} />
+          <LineCard
+            line={line}
+            choice={choices[line.id]}
+            onChoose={(choice) => choose(index, line, choice)}
+            starred={tops.has(line.id)}
+            onStar={() => onStar(line.id)}
+          />
         </li>
       ))}
     </ol>

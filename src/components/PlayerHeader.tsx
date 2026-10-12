@@ -28,9 +28,13 @@ export function PlayerHeader({
         <div className="h-12 w-12 shrink-0 rounded-full bg-slate-200 dark:bg-slate-700" />
       )}
       <div className="min-w-0 flex-1 space-y-1">
-        <div>
-          <span className="font-semibold">{name}</span>
-          {player.discord_username && <span className="ml-2 text-sm text-slate-500">@{player.discord_username}</span>}
+        {/* aside sits in the name row only, so the rows below get the full width. */}
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <span className="font-semibold">{name}</span>
+            {player.discord_username && <span className="ml-2 text-sm text-slate-500">@{player.discord_username}</span>}
+          </div>
+          {aside}
         </div>
         <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
           {player.ign && (
@@ -39,7 +43,7 @@ export function PlayerHeader({
             </span>
           )}
           {player.friend_code && (
-            <span className="flex items-center gap-2">
+            <span className="flex items-center gap-2 whitespace-nowrap">
               FC <strong className="font-mono">{formatFriendCode(player.friend_code)}</strong>
               <CopyButton text={player.friend_code} label="friend code" />
             </span>
@@ -56,7 +60,6 @@ export function PlayerHeader({
           </div>
         )}
       </div>
-      {aside}
     </div>
   );
 }

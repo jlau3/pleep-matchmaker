@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { normalizeFriendCode } from "@/lib/format";
-import { isChoice, LINES_BY_ID } from "@/lib/lines";
+import { isChoice, LINES_BY_ID, MAX_TOP } from "@/lib/lines";
 import { createClient, requireUser } from "@/lib/supabase/server";
 
 export async function signInWithDiscord() {
@@ -31,6 +31,20 @@ export async function setChoice(lineId: string, choice: string): Promise<{ error
   const { error } = await supabase
     .from("preferences")
     .upsert({ user_id: user.id, line_id: lineId, choice }, { onConflict: "user_id,line_id" });
+  if (error) return { error: "Couldn't save, try again" };
+  return {};
+}
+
+/** Stars or unstars a line as Top 3. Starring also makes it a want. */
+export async function setTop(lineId: string, top: boolean): Promise<{ error?: string }> {
+  if (!LINES_BY_ID.has(lineId)) return { error: "Invalid choice" };
+  const { supabase, user } = await requireUser();
+  const { error } = top
+    ? await supabase
+        .from("preferences")
+        .upsert({ user_id: user.id, line_id: lineId, choice: "want", top: true }, { onConflict: "user_id,line_id" })
+    : await supabase.from("preferences").update({ top: false }).eq("user_id", user.id).eq("line_id", lineId);
+  if (error?.message === "top_limit") return { error: `You can star up to ${MAX_TOP}. Unstar one first.` };
   if (error) return { error: "Couldn't save, try again" };
   return {};
 }

@@ -29,7 +29,10 @@ export default async function TiersPage({ searchParams }: { searchParams: Promis
     if (stats.error) throw stats.error;
     if (count.error) throw count.error;
     votes = new Map(
-      (stats.data as LineStatRow[]).map((row) => [row.line_id, { wants: Number(row.wants), dontWants: Number(row.dont_wants) }]),
+      (stats.data as LineStatRow[]).map((row) => [
+        row.line_id,
+        { wants: Number(row.wants), dontWants: Number(row.dont_wants), tops: Number(row.tops) },
+      ]),
     );
     voters = Number(count.data);
   }
