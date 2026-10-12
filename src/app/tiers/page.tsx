@@ -56,7 +56,7 @@ export default async function TiersPage({ searchParams }: { searchParams: Promis
       <div>
         <h1 className="text-2xl font-bold">Tier List</h1>
         <p className="text-sm text-slate-600 dark:text-slate-300">
-          Which candy to prioritize, ranked by net votes (wants minus don&apos;t-wants) from{" "}
+          Which candy to prioritize, ranked by net votes (wants minus don&apos;t-wants, Top 3 stars count double) from{" "}
           {pool === "friends" ? `your ${voters} ${voters === 1 ? "friend" : "friends"}` : `${voters} active players`}.
         </p>
       </div>

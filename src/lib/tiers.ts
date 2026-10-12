@@ -1,4 +1,4 @@
-import { type CandyLine, LINES } from "./lines";
+import { type CandyLine, LINES, TOP_MULTIPLIER } from "./lines";
 
 export type TierId = "top" | "S" | "A" | "B" | "C" | "avoid";
 
@@ -46,9 +46,17 @@ export interface RankedLine {
   tops: number;
 }
 
-/** The regular tier from net votes alone; the Top 3 row is picked in buildTiers. */
+/**
+ * Net votes with Top 3 stars weighted: a starred want counts TOP_MULTIPLIER
+ * times (so +2 instead of +1), the same weighting matching uses.
+ */
+export function netVotes(votes: LineVotes): number {
+  return votes.wants + (TOP_MULTIPLIER - 1) * (votes.tops ?? 0) - votes.dontWants;
+}
+
+/** The regular tier from weighted net votes; the Top 3 row is picked in buildTiers. */
 export function tierFor(votes: LineVotes, voters: number): Exclude<TierId, "top"> {
-  const net = votes.wants - votes.dontWants;
+  const net = netVotes(votes);
   if (net < 0) return "avoid";
   const share = voters === 0 ? 0 : net / voters;
   if (share >= TIER_CUTOFFS.S) return "S";
@@ -61,7 +69,7 @@ const byRank = (a: RankedLine, b: RankedLine) =>
   b.net - a.net || b.line.weight - a.line.weight || b.wants - a.wants || a.line.dex - b.line.dex;
 
 /**
- * Buckets lines into tiers, best first inside each tier (net, then rarity
+ * Buckets lines into tiers, best first inside each tier (weighted net, then rarity
  * weight, then wants, then dex). The Top 3 row repeats the TOP_ROW_SIZE most-starred
  * lines, ordered by stars and then the same keys.
  */
@@ -77,7 +85,7 @@ export function buildTiers(
       wants: v.wants,
       dontWants: v.dontWants,
       unsure: Math.max(0, voters - v.wants - v.dontWants),
-      net: v.wants - v.dontWants,
+      net: netVotes(v),
       tops: v.tops ?? 0,
     };
   });

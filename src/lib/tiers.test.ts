@@ -13,6 +13,11 @@ describe("tierFor", () => {
     [{ wants: 0, dontWants: 0 }, 10, "C"],
     [{ wants: 1, dontWants: 3 }, 10, "avoid"],
     [{ wants: 0, dontWants: 0 }, 0, "C"],
+    // Stars count double: 2 wants (both starred) = net 4 of 10 -> A, not B.
+    [{ wants: 2, dontWants: 0, tops: 2 }, 10, "A"],
+    [{ wants: 2, dontWants: 0, tops: 0 }, 10, "B"],
+    // A starred want can outweigh a don't-want.
+    [{ wants: 1, dontWants: 2, tops: 1 }, 10, "C"],
   ] as const)("%o of %i voters -> %s", (votes, voters, tier) => {
     expect(tierFor(votes, voters)).toBe(tier);
   });
@@ -38,7 +43,9 @@ describe("buildTiers", () => {
     // pikachu and eevee have 2 stars; charmander and squirtle tie on 1 and every
     // other key, so dex order breaks the tie. bulbasaur has no stars.
     expect(tiers.get("top")!.map((r) => r.line.id)).toEqual(["pikachu", "eevee", "charmander", "squirtle"]);
-    expect(tiers.get("S")!.map((r) => r.line.id)).toEqual(["charmander", "squirtle", "pikachu", "eevee"]);
+    // In S, the two-star lines (net 2 + 2) rank above the one-star lines (2 + 1).
+    expect(tiers.get("S")!.map((r) => r.line.id)).toEqual(["pikachu", "eevee", "charmander", "squirtle"]);
+    expect(tiers.get("S")![0].net).toBe(4);
     const placed = [...tiers.entries()].filter(([id]) => id !== "top").flatMap(([, r]) => r).map((r) => r.line.id);
     expect(placed.sort()).toEqual([...ids].sort());
     expect(tiers.get("top")![0].tops).toBe(2);

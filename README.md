@@ -34,7 +34,7 @@ My Friends shows the same % for each friend, without the 25% / 3-shared-wants cu
 
 ## Tier list rules
 
-Net votes = wants minus don't-wants among the pool (your friends who have voted, or every player active in the last 4 months). Your own votes don't count.
+Net votes = wants minus don't-wants among the pool (your friends who have voted, or every player active in the last 4 months), with a Top 3 star counting double: a starred want is +2, a plain want +1. Your own votes don't count.
 
 | Tier | Net votes as a share of voters |
 |---|---|
