@@ -49,6 +49,19 @@ export async function setTop(lineId: string, top: boolean): Promise<{ error?: st
   return {};
 }
 
+/**
+ * Replaces one Top 3 star with another: unstar `outId`, then star `inId`
+ * (which also makes it a want). If the second step fails the first is undone.
+ */
+export async function swapTop(outId: string, inId: string): Promise<{ error?: string }> {
+  if (!LINES_BY_ID.has(outId) || !LINES_BY_ID.has(inId)) return { error: "Invalid choice" };
+  const unstar = await setTop(outId, false);
+  if (unstar.error) return unstar;
+  const star = await setTop(inId, true);
+  if (star.error) await setTop(outId, true);
+  return star;
+}
+
 export interface ProfileFormState {
   error?: string;
   saved?: boolean;

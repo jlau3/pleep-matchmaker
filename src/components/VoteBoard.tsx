@@ -1,13 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
-import { setChoice, setTop } from "@/app/actions";
-import { CHOICE_LABEL, type Choice, LINES, lineSpriteUrl, MAX_TOP } from "@/lib/lines";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { setChoice, setTop, swapTop } from "@/app/actions";
+import { CHOICE_LABEL, type Choice, LINES, LINES_BY_ID, lineSpriteUrl, MAX_TOP } from "@/lib/lines";
 import { rethrowIfNavigation, SAVE_FAILED } from "@/lib/saveError";
 import { CollectionGrid } from "./CollectionGrid";
 import { PickFlow } from "./PickFlow";
 import { StarButton } from "./StarButton";
+import { SwapTopDialog } from "./SwapTopDialog";
 
 type Filter = "all" | Choice;
 type View = "list" | "grid";
@@ -42,8 +43,8 @@ export function VoteBoard({
   const [choices, setChoices] = useState(initial);
   const [tops, setTops] = useState(() => new Set(initialTops));
   const [error, setError] = useState<string | null>(null);
-  /** A hint that needs no reload, unlike a failed save. */
-  const [notice, setNotice] = useState<string | null>(null);
+  /** Line the player tried to star while their Top 3 was full; opens the swap prompt. */
+  const [swapFor, setSwapFor] = useState<string | null>(null);
   const [view, setView] = useState<View>("list");
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<Filter>("all");
@@ -95,7 +96,6 @@ export function VoteBoard({
       });
     };
     setError(null);
-    setNotice(null);
     apply(next.choice, next.top);
     let failure: string | undefined;
     try {
@@ -121,13 +121,42 @@ export function VoteBoard({
       return;
     }
     if (tops.size >= MAX_TOP) {
-      setNotice(`You can star up to ${MAX_TOP}. Unstar one first.`);
+      setSwapFor(lineId);
       return;
     }
     save(lineId, { choice: "want", top: true }, () => setTop(lineId, true));
   }
 
+  /** Swap prompt: drop `outId` from the Top 3 and star `swapFor` instead. */
+  async function swap(outId: string) {
+    const inId = swapFor;
+    if (!inId) return;
+    setSwapFor(null);
+    const previous = { tops, inChoice: choices[inId] };
+    setError(null);
+    setTops((current) => new Set([...current].filter((id) => id !== outId)).add(inId));
+    setChoices((current) => ({ ...current, [inId]: "want" }));
+    let failure: string | undefined;
+    try {
+      failure = (await swapTop(outId, inId)).error;
+    } catch (e) {
+      rethrowIfNavigation(e);
+      failure = SAVE_FAILED;
+    }
+    if (failure) {
+      setError(failure);
+      setTops(previous.tops);
+      setChoices((current) => {
+        const out = { ...current };
+        if (previous.inChoice) out[inId] = previous.inChoice;
+        else delete out[inId];
+        return out;
+      });
+    }
+  }
+
   const topLines = LINES.filter((line) => tops.has(line.id));
+  const cancelSwap = useCallback(() => setSwapFor(null), []);
 
   return (
     <div>
@@ -148,11 +177,6 @@ export function VoteBoard({
             Matchmake
           </Link>
         </div>
-        {notice && !error && (
-          <p role="status" className="mt-2 text-sm font-semibold text-sun-deep">
-            {notice}
-          </p>
-        )}
         {error && (
           <div role="alert" className="mt-2 flex items-center justify-between gap-3 text-sm text-dont">
             <span>{error}</span>
@@ -171,7 +195,7 @@ export function VoteBoard({
 
       <section className="card mb-4 p-3" aria-label="Your Top 3">
         <h2 className="font-bold">Your Top {MAX_TOP}</h2>
-        <p className="mb-2 text-xs text-slate-500">Tap ★ on a candy to star it as a top want. These count double in matching.</p>
+        <p className="mb-2 text-xs text-slate-500">Tap ★ on a candy to star it as a top want. These count double in matching and on the tier list.</p>
         <ul className="grid grid-cols-3 gap-2">
           {Array.from({ length: MAX_TOP }, (_, i) => {
             const line = topLines[i];
@@ -231,6 +255,10 @@ export function VoteBoard({
         <PickFlow lines={visible} choices={choices} onChoose={choose} tops={tops} onStar={toggleTop} />
       ) : (
         <CollectionGrid lines={visible} choices={choices} onChoose={choose} tops={tops} onStar={toggleTop} />
+      )}
+
+      {swapFor && LINES_BY_ID.has(swapFor) && (
+        <SwapTopDialog incoming={LINES_BY_ID.get(swapFor)!} tops={topLines} onSwap={swap} onCancel={cancelSwap} />
       )}
 
       <div className="mx-auto mt-10 max-w-md text-center">
