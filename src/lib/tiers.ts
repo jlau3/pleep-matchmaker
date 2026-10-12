@@ -12,7 +12,7 @@ export interface Tier {
  * The tier list answers "which candy should I send my friends?". Getting candy
  * you don't want annoys people as much as missing one you do, so it ranks by
  * net score: wants minus DONT_WANT_WEIGHT per don't-want. 39 wants + 11
- * don't-wants (28) ranks below 30 wants + 20 unsure (30). Top 3 stars don't
+ * don't-wants (28) ranks below 30 wants + 20 neutral (30). Top 3 stars don't
  * change the score; they're the first tie-breaker.
  *
  * Tiers are relative: lines scoring above 0 are ranked, and the top
@@ -56,8 +56,8 @@ export interface RankedLine {
   line: CandyLine;
   wants: number;
   dontWants: number;
-  /** Voters in the pool who neither want nor don't want it (undecided or skipped). */
-  unsure: number;
+  /** Voters in the pool who neither want nor don't want it (Neutral, or not voted yet). */
+  neutral: number;
   /** Net score (see netScore); what tiers rank on. */
   score: number;
   tops: number;
@@ -72,7 +72,7 @@ export interface RankedLine {
 
 /**
  * Net score: each want counts 1 (starred or not) and each don't-want takes off
- * DONT_WANT_WEIGHT. Undecided counts 0.
+ * DONT_WANT_WEIGHT. Neutral counts 0.
  */
 export function netScore(votes: LineVotes): number {
   return votes.wants - DONT_WANT_WEIGHT * votes.dontWants;
@@ -102,7 +102,7 @@ export function buildTiers(
       line,
       wants: v.wants,
       dontWants: v.dontWants,
-      unsure: Math.max(0, voters - v.wants - v.dontWants),
+      neutral: Math.max(0, voters - v.wants - v.dontWants),
       score: netScore(v),
       tops: v.tops ?? 0,
       wantShare: voters > 0 ? v.wants / voters : null,

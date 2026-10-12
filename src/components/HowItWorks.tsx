@@ -8,7 +8,7 @@ const STEPS: { title: string; body: React.ReactNode; href: string; cta: string }
     title: "Vote on every candy",
     body: (
       <>
-        Mark each Pokémon Sleep candy line <b>Want</b>, <b>Don&apos;t Want</b> or leave it <b>Undecided</b>. Tap the ★ to
+        Mark each Pokémon Sleep candy line <b>Want</b>, <b>Don&apos;t Want</b> or leave it <b>Neutral</b>. Tap the ★ to
         pick your Top {MAX_TOP}.
       </>
     ),

@@ -34,7 +34,7 @@ function VoteCard({ ranked }: { ranked: RankedLine }) {
         </div>
         <div className="flex flex-wrap gap-x-2 text-xs">
           <span className="text-want">{ranked.wants} want</span>
-          <span className="text-meh">{ranked.unsure} unsure</span>
+          <span className="text-meh">{ranked.neutral} neutral</span>
           <span className="text-dont">{ranked.dontWants} don&apos;t want</span>
           {ranked.tops > 0 && <span className="font-semibold text-sun-deep">★ {ranked.tops}</span>}
         </div>

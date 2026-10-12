@@ -159,13 +159,13 @@ describe("buildTiers", () => {
     // pikachu (3) S, squirtle (2) B; charmander (1 - 2) is Avoid; nobody voted on bulbasaur: C.
     expect(ids(tiers, "S")).toEqual(["pikachu"]);
     expect(ids(tiers, "B")).toEqual(["squirtle"]);
-    expect(tiers.get("S")![0]).toMatchObject({ wants: 3, unsure: 0, dontWants: 0, wantShare: 1, dontShare: 0 });
+    expect(tiers.get("S")![0]).toMatchObject({ wants: 3, neutral: 0, dontWants: 0, wantShare: 1, dontShare: 0 });
     expect(ids(tiers, "avoid")).toEqual(["charmander"]);
     expect(ids(tiers, "C")).toEqual(["bulbasaur"]);
   });
 
-  it("ranks 39 want + 11 don't tiers below 39 want + 11 unsure", () => {
-    // 50 voters. pikachu: 39 want, 11 unsure (39). eevee: 39 want, 11 don't (28).
+  it("ranks 39 want + 11 don't tiers below 39 want + 11 neutral", () => {
+    // 50 voters. pikachu: 39 want, 11 neutral (39). eevee: 39 want, 11 don't (28).
     // Seven lines in between score 35..29 (wants only).
     const [pikachu, eevee] = ["pikachu", "eevee"].map((id) => LINES_BY_ID.get(id)!);
     const fillers = [...LINES_BY_ID.values()].filter((l) => l !== pikachu && l !== eevee).slice(0, 7);
@@ -178,7 +178,7 @@ describe("buildTiers", () => {
     // 9 lines above 0: S = 2, A = 2, B = 2, C = 3. eevee ranks last.
     expect(ids(tiers, "S")[0]).toBe(pikachu.id);
     expect(ids(tiers, "C").at(-1)).toBe(eevee.id);
-    expect(tiers.get("C")!.at(-1)).toMatchObject({ score: 28, unsure: 0, dontShare: 0.22 });
+    expect(tiers.get("C")!.at(-1)).toMatchObject({ score: 28, neutral: 0, dontShare: 0.22 });
   });
 
   it("keeps Avoid lines in the Top 3 row, so nobody's pick is left out", () => {

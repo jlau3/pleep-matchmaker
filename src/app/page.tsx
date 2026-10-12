@@ -37,7 +37,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ e
         <img src="/logo.png" alt="" className="mx-auto mb-2 h-16 w-16" />
         <h1 className="mb-3 text-3xl font-extrabold">Pleep Matchmaker</h1>
         <p className="mb-8 text-slate-600 dark:text-slate-300">
-          Sort every Pokémon Sleep candy line into want, don't want or undecided. See what candy your friends want, and
+          Sort every Pokémon Sleep candy line into want, don't want or neutral. See what candy your friends want, and
           find new friends who want the same candy you do.
         </p>
         {signInError && (

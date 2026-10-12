@@ -14,7 +14,7 @@ export const TOP_MULTIPLIER = 2;
 
 export const CHOICE_LABEL: Record<Choice, string> = {
   want: "Want",
-  undecided: "Undecided",
+  undecided: "Neutral",
   dont_want: "Don't Want",
 };
 

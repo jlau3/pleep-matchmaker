@@ -28,7 +28,7 @@ const pill = (active: boolean) =>
   `rounded-full border px-3 py-1 text-sm ${active ? "pill-active border-transparent" : "border-slate-300 dark:border-slate-700"}`;
 
 /**
- * Profile > My Votes. Every line is already saved (Undecided by default).
+ * Profile > My Votes. Every line is already saved (Neutral by default).
  * List view is one big card per line in a single column; grid view is a
  * compact multi-column layout. The choice is remembered per browser. Lines
  * are always in dex order. The star on each card picks up to MAX_TOP wants as
@@ -198,7 +198,7 @@ export function VoteBoard({
               <strong>{counts.dont_want}</strong> don&apos;t want
             </span>
             <span className="text-meh">
-              <strong>{counts.undecided}</strong> undecided
+              <strong>{counts.undecided}</strong> neutral
             </span>
           </span>
           <Link href="/matches" className="btn-primary shrink-0 px-4 py-1.5">
@@ -217,7 +217,7 @@ export function VoteBoard({
 
       {firstVisit && (
         <p className="mb-4 text-center text-sm text-slate-500">
-          Pick Want or Don&apos;t Want on the candies you care about. Everything else stays Undecided.
+          Pick Want or Don&apos;t Want on the candies you care about. Everything else stays Neutral.
         </p>
       )}
 

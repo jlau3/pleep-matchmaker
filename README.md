@@ -1,6 +1,6 @@
 # Pleep Matchmaker
 
-Pokémon Sleep players vote on every candy line: **want**, **don't want** or **undecided**. Three tabs:
+Pokémon Sleep players vote on every candy line: **want**, **don't want** or **neutral**. Three tabs:
 
 - **Tier list** (home): which candy to prioritize, ranked S/A/B/C/Avoid by what your friends want and don't want, with toggles for All Islands / By Island and My Friends / Everyone. A banner links to voting when there are unvoted candies.
 - **Friends**: player search (exact Discord name, IGN or friend code) on both sub-tabs, carried over when you switch; *My Friends* lists your friends (up to 50) with each one's fit with the rest of your list; *Find New* is matchmaking against players open to new friends, leaving out anyone you already added. Search results show each player's fit with your friends, and Find New has a **Share a friend post** card (Copy, plus Share on phones): a "looking for friends" message for Discord, Reddit or group chats with your friend code, Top 3 and a pointer to look you up here.
@@ -20,7 +20,7 @@ The % on Find New, search results and My Friends is **fit**: how well a player's
 2. **Fit.** `fit % = sum over their wants of (weight x share) / (sum of their want weights + sum over their don't-wants of share)`, where a starred want weighs 2.
    - 100% means everything they want is among your friends' most-wanted candy and they don't turn any of it down. A want none of your friends share counts 0.
    - Don't-wants count as much as wants (`public.dont_want_weight()` = 1): friends send each other candy, and getting candy you don't want annoys people at least as much as missing a want. A don't-want costs in proportion to how much your friends want that line, so turning down their top candy costs a full want and turning down candy nobody wants costs nothing.
-   - Undecided lines don't count.
+   - Neutral lines don't count.
 
 On My Friends, each friend is compared with the *rest* of your list. Until any friend has voted, your own wants stand in for the group, so new players still get suggestions.
 
@@ -32,7 +32,7 @@ Anywhere else, a fit under 25% shows as an amber **low fit** (`LOW_FIT_PCT` in `
 
 ## Tier list rules
 
-The tier list answers "which candy should I send my friends?". Getting candy you don't want annoys people as much as missing one you do, so it ranks by **net score**: wants minus don't-wants (`DONT_WANT_WEIGHT` = 1, the same weight fit uses). Top 3 stars don't change the score; they're the first tie-breaker. The pool is your friends who have voted, or every player active in the last 4 months. Your own votes don't count. Example with 50 players: 39 want + 11 unsure scores 39, 30 want + 20 unsure scores 30, and 39 want + 11 don't-want scores 28, below both.
+The tier list answers "which candy should I send my friends?". Getting candy you don't want annoys people as much as missing one you do, so it ranks by **net score**: wants minus don't-wants (`DONT_WANT_WEIGHT` = 1, the same weight fit uses). Top 3 stars don't change the score; they're the first tie-breaker. The pool is your friends who have voted, or every player active in the last 4 months. Your own votes don't count. Example with 50 players: 39 want + 11 neutral scores 39, 30 want + 20 neutral scores 30, and 39 want + 11 don't-want scores 28, below both.
 
 Tiers are relative. Lines scoring above 0 are ranked and split by position:
 
@@ -44,7 +44,7 @@ Tiers are relative. Lines scoring above 0 are ranked and split by position:
 | C | the rest, plus lines at exactly 0 (nobody voted, or a split room) |
 | Avoid | below 0: more people don't want it than want it |
 
-Lines that tie share a tier, placed by the tie's middle rank, so with few voters (lots of ties) the sizes stay close to the targets. Fixed % cutoffs crowded S and Avoid with a small, decisive player base, and would keep drifting as the pool grows. The shares live in `TIER_SHARES` in `src/lib/tiers.ts`. Every card shows its net score as a plain number ("+28" in green, "0" in grey, "−5" in red, no label) next to the want / unsure / don't-want counts, so you can see why a popular candy ranks where it does. In By Island view the ranking is within each island.
+Lines that tie share a tier, placed by the tie's middle rank, so with few voters (lots of ties) the sizes stay close to the targets. Fixed % cutoffs crowded S and Avoid with a small, decisive player base, and would keep drifting as the pool grows. The shares live in `TIER_SHARES` in `src/lib/tiers.ts`. Every card shows its net score as a plain number ("+28" in green, "0" in grey, "−5" in red, no label) next to the want / neutral / don't-want counts, so you can see why a popular candy ranks where it does. In By Island view the ranking is within each island.
 
 Above S, the **Top 3** row repeats the 9 lines that show up most often in players' Top 3, with **Show all** to expand to every starred line, including ones in Avoid so nobody's pick is left out (ties broken like the rest of the list). They stay in their regular tier too, so nothing shifts. Every card shows its star count.
 
@@ -106,7 +106,7 @@ pip install pillow
 npm run data
 ```
 
-New lines are saved as Undecided for every player the next time they open **My Votes**.
+New lines are saved as Neutral for every player the next time they open **My Votes**.
 
 ### Automatic updates
 
