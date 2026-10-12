@@ -5,8 +5,9 @@ import { addFriend, removeFriend } from "@/app/actions";
 import { rethrowIfNavigation, SAVE_FAILED } from "@/lib/saveError";
 
 /**
- * Add / remove friend. Removing asks "Are you sure?" inline first (native
- * confirm() is suppressed in some in-app browsers, e.g. Discord's).
+ * Add / remove friend. Removing asks inline first (native confirm() is
+ * suppressed in some in-app browsers, e.g. Discord's), and asks whether they
+ * stopped playing: that answer feeds the inactive reports Find New uses.
  */
 export function FriendButton({ userId, isFriend, name }: { userId: string; isFriend: boolean; name?: string }) {
   const [friend, setFriend] = useState(isFriend);
@@ -14,11 +15,11 @@ export function FriendButton({ userId, isFriend, name }: { userId: string; isFri
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
-  function toggle() {
+  function toggle(inactive = false) {
     setError(null);
     startTransition(async () => {
       try {
-        const result = friend ? await removeFriend(userId) : await addFriend(userId);
+        const result = friend ? await removeFriend(userId, inactive) : await addFriend(userId);
         if (result.error) setError(result.error);
         else setFriend(!friend);
         setConfirming(false);
@@ -32,14 +33,22 @@ export function FriendButton({ userId, isFriend, name }: { userId: string; isFri
   if (confirming) {
     return (
       <span role="alertdialog" aria-label="Remove friend?" className="inline-flex flex-wrap items-center gap-2 text-sm">
-        <span className="font-semibold">Remove {name ?? "this friend"}?</span>
+        <span className="font-semibold">Remove {name ?? "this friend"}? Have they stopped playing?</span>
         <button
           type="button"
           disabled={pending}
-          onClick={toggle}
+          onClick={() => toggle(true)}
           className="rounded-lg bg-dont px-3 py-1 font-semibold text-white disabled:opacity-50"
         >
-          {pending ? "Removing…" : "Yes, remove"}
+          {pending ? "Removing…" : "Yes, inactive"}
+        </button>
+        <button
+          type="button"
+          disabled={pending}
+          onClick={() => toggle(false)}
+          className="rounded-lg bg-dont px-3 py-1 font-semibold text-white disabled:opacity-50"
+        >
+          No, just remove
         </button>
         <button
           type="button"

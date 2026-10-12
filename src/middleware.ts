@@ -2,7 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { supabaseEnv } from "@/lib/supabase/env";
 
-const PROTECTED = ["/vote", "/friends", "/tiers", "/matches", "/profile", "/pick", "/collection", "/lookup", "/popular"];
+const PROTECTED = ["/vote", "/friends", "/tiers", "/matches", "/profile", "/pick", "/collection", "/lookup", "/popular", "/feedback"];
 const SEEN_COOKIE = "pm_seen";
 
 export async function middleware(request: NextRequest) {
@@ -21,12 +21,17 @@ export async function middleware(request: NextRequest) {
     },
   });
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // getClaims refreshes an expired session (writing new cookies via setAll) and
+  // then verifies the JWT locally, instead of asking Supabase Auth every request.
+  const { data } = await supabase.auth.getClaims();
+  const user = data?.claims?.sub ? { id: data.claims.sub } : null;
 
   if (!user && PROTECTED.some((path) => request.nextUrl.pathname.startsWith(path))) {
-    return NextResponse.redirect(new URL("/", request.url));
+    // Remember where they were headed (e.g. a shared /friends?q=name link) so
+    // signing in can bring them back there.
+    const target = new URL("/", request.url);
+    target.searchParams.set("next", request.nextUrl.pathname + request.nextUrl.search);
+    return NextResponse.redirect(target);
   }
 
   // "Last seen" = any logged-in visit. The cookie keeps it to one write per 10 minutes.
@@ -39,5 +44,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|sprites/|api/keepalive|favicon.ico).*)"],
+  matcher: ["/((?!_next/static|_next/image|sprites/|api/keepalive|api/kofi|favicon.ico).*)"],
 };

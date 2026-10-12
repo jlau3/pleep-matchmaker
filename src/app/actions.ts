@@ -1,13 +1,16 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { headers } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { normalizeFriendCode } from "@/lib/format";
+import { NEXT_COOKIE, safeNextPath } from "@/lib/nextPath";
 import { isChoice, LINES_BY_ID, MAX_TOP } from "@/lib/lines";
 import { createClient, requireUser } from "@/lib/supabase/server";
 
-export async function signInWithDiscord() {
+export async function signInWithDiscord(form?: FormData) {
+  const next = safeNextPath(form?.get("next"));
+  if (next) (await cookies()).set(NEXT_COOKIE, next, { maxAge: 600, httpOnly: true, sameSite: "lax", path: "/" });
   const supabase = await createClient();
   const h = await headers();
   const origin = h.get("origin") ?? `https://${h.get("host")}`;
@@ -90,10 +93,15 @@ export async function updateProfile(_prev: ProfileFormState, form: FormData): Pr
   return { saved: true };
 }
 
-export async function blockUser(userId: string) {
+// Plain insert: players can insert and delete blocks but not update them, so an
+// upsert (INSERT ... ON CONFLICT DO UPDATE) is refused. A duplicate means "already blocked".
+export async function blockUser(userId: string): Promise<{ error?: string }> {
   const { supabase, user } = await requireUser();
-  await supabase.from("blocks").upsert({ blocker_id: user.id, blocked_id: userId }, { onConflict: "blocker_id,blocked_id" });
+  if (userId === user.id) return { error: "You can't block yourself." };
+  const { error } = await supabase.from("blocks").insert({ blocker_id: user.id, blocked_id: userId });
+  if (error && error.code !== "23505") return { error: "Couldn't block, try again" };
   revalidatePath("/", "layout");
+  return {};
 }
 
 const FRIEND_ERRORS: Record<string, string> = {
@@ -110,19 +118,27 @@ export async function addFriend(friendId: string): Promise<{ error?: string }> {
   return {};
 }
 
-export async function removeFriend(friendId: string): Promise<{ error?: string }> {
+/**
+ * Removes a friend. `inactive` records that they stopped playing, which keeps
+ * them out of your Find New and, once enough people say so, everyone's (until
+ * they come back). A failed report doesn't undo the removal.
+ */
+export async function removeFriend(friendId: string, inactive = false): Promise<{ error?: string }> {
   const { supabase, user } = await requireUser();
   const { error } = await supabase.from("friends").delete().eq("user_id", user.id).eq("friend_id", friendId);
   if (error) return { error: "Couldn't remove friend, try again" };
+  if (inactive) await supabase.rpc("report_inactive", { player: friendId });
   revalidatePath("/friends");
   revalidatePath("/tiers");
   return {};
 }
 
-export async function unblockUser(userId: string) {
+export async function unblockUser(userId: string): Promise<{ error?: string }> {
   const { supabase, user } = await requireUser();
-  await supabase.from("blocks").delete().eq("blocker_id", user.id).eq("blocked_id", userId);
-  revalidatePath("/profile");
+  const { error } = await supabase.from("blocks").delete().eq("blocker_id", user.id).eq("blocked_id", userId);
+  if (error) return { error: "Couldn't unblock, try again" };
+  revalidatePath("/", "layout");
+  return {};
 }
 
 export async function deleteAccount() {

@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { M_PLUS_Rounded_1c } from "next/font/google";
 import { Nav } from "@/components/Nav";
+import { SupportFooter } from "@/components/SupportFooter";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -24,7 +25,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className={rounded.variable}>
       <body className="min-h-dvh antialiased">
         <Nav />
-        <main className="mx-auto max-w-5xl px-4 pb-24 pt-4">{children}</main>
+        <main className="mx-auto max-w-5xl px-4 pb-16 pt-4">{children}</main>
+        <SupportFooter />
       </body>
     </html>
   );

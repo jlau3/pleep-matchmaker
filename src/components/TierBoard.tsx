@@ -1,5 +1,5 @@
 import { lineSpriteUrl } from "@/lib/lines";
-import { type RankedLine, type TierId, TIERS } from "@/lib/tiers";
+import { type RankedLine, type TierId, TIERS, TOP_ROW_SIZE } from "@/lib/tiers";
 
 const TIER_STYLE: Record<string, string> = {
   top: "bg-gradient-to-br from-sun to-[#ff8fab] text-[#5b3e00] shadow-[0_3px_0_var(--color-sun-deep)]",
@@ -19,12 +19,17 @@ function VoteCard({ ranked }: { ranked: RankedLine }) {
       <div className="min-w-0 flex-1">
         <div className="flex items-baseline justify-between gap-2">
           <span className="truncate font-semibold">{ranked.line.name}</span>
-          {ranked.agreement !== null && (
-            <span
-              title="Wants minus don't-wants, as a share of everyone in the pool"
-              className={`shrink-0 text-sm font-bold ${ranked.agreement < 0 ? "text-dont" : "text-want"}`}
-            >
-              {Math.round(ranked.agreement * 100)}% <span className="text-xs font-normal text-slate-500">net</span>
+          {ranked.wantShare !== null && (
+            <span className="shrink-0 text-sm font-bold">
+              <span className={ranked.wantShare > 0 ? "text-want" : "text-slate-400"}>
+                {Math.round(ranked.wantShare * 100)}% <span className="text-xs font-normal text-slate-500">want</span>
+              </span>
+              {ranked.dontShare !== null && ranked.dontShare > 0 && (
+                <span className="text-dont">
+                  {" · "}
+                  {Math.round(ranked.dontShare * 100)}% <span className="text-xs font-normal">don&apos;t</span>
+                </span>
+              )}
             </span>
           )}
         </div>
@@ -55,16 +60,32 @@ export function TierBoard({ tiers }: { tiers: Map<TierId, RankedLine[]> }) {
               {tier.label}
             </span>
             <span className="text-sm text-slate-500">
-              {ranked.length} · {tier.hint}
+              {tier.id === "top" && ranked.length > TOP_ROW_SIZE ? `${TOP_ROW_SIZE} of ${ranked.length}` : ranked.length} · {tier.hint}
             </span>
           </>
         );
-        const cards = (
+        const grid = (rows: RankedLine[]) => (
           <ul className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
-            {ranked.map((r) => (
+            {rows.map((r) => (
               <VoteCard key={r.line.id} ranked={r} />
             ))}
           </ul>
+        );
+        // The Top 3 row shows its first TOP_ROW_SIZE lines; the rest of the starred lines fold away.
+        const folded = tier.id === "top" ? ranked.slice(TOP_ROW_SIZE) : [];
+        const cards = (
+          <>
+            {grid(folded.length > 0 ? ranked.slice(0, TOP_ROW_SIZE) : ranked)}
+            {folded.length > 0 && (
+              <details className="group mt-2">
+                <summary className="cursor-pointer list-none text-sm font-semibold text-slate-500 underline">
+                  <span className="group-open:hidden">Show all {ranked.length} Top 3 picks</span>
+                  <span className="hidden group-open:inline">Show fewer</span>
+                </summary>
+                {grid(folded)}
+              </details>
+            )}
+          </>
         );
         return (
           <section key={tier.id} className={panel}>

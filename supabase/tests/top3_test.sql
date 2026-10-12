@@ -17,25 +17,20 @@ select '00000000-0000-0000-0003-000000000002'::uuid, 'td', 'dont_want'::public.c
 set role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0003-000000000001', false);
 
--- Before any stars: ta,tb,tc +3 each, td -3, te 0; best 5*3 = 15 -> 6/15 = 40%.
+-- tara has no friends, so her own wants are the group. Before any stars all
+-- shares are 1. tom's three wants are all in it, but he doesn't want td, which
+-- tara wants: 3 / (3 + 1) = 75%.
 do $$ begin
-  assert (select match_pct from public.get_matches() where discord_username = 'tom') = 40, 'pct without stars';
+  assert (select match_pct from public.get_matches() where discord_username = 'tom') = 75, 'pct without stars';
 end $$;
 
--- Star ta: it counts double. 6+3+3-3 = 9; best 6+3+3+3+3 = 18 -> 50%.
+-- Star ta: it's now the group's top line (share 1), the rest drop to 0.5.
+-- tom: (1 + 0.5 + 0.5) / (3 + 0.5 for td) = 57%.
 update public.preferences set top = true where user_id = auth.uid() and line_id = 'ta';
 do $$ begin
-  assert (select match_pct from public.get_matches() where discord_username = 'tom') = 50,
+  assert (select match_pct from public.get_matches() where discord_username = 'tom') = 57,
     format('pct with star %s', (select match_pct from public.get_matches() where discord_username = 'tom'));
 end $$;
-
--- pair_match_pct (friends list) agrees with get_matches for a qualifying pair.
-reset role;
-do $$ begin
-  assert public.pair_match_pct('00000000-0000-0000-0003-000000000001', '00000000-0000-0000-0003-000000000002') = 50, 'pair pct';
-  assert public.pair_match_pct('00000000-0000-0000-0003-000000000002', '00000000-0000-0000-0003-000000000001') = 50, 'pair pct symmetric';
-end $$;
-set role authenticated;
 
 -- Cap at three.
 update public.preferences set top = true where user_id = auth.uid() and line_id in ('tb', 'tc');
@@ -91,14 +86,32 @@ do $$ begin
   assert (select tops from public.get_line_stats() where line_id = 'ta') = 1, 'line stats tops';
 end $$;
 
--- Friend list match % uses the get_matches formula without its thresholds
--- (tom and tara share only 2 wants, so they aren't a "match").
--- tara: ta*, tb*, te* want, td want, tc don't; tom: ta tb tc want, td don't.
--- ta +6/6, tb +6/6, tc -3/3, td -3/3, te 0/6 -> 6/24 = 25%.
+-- tara is tom's only friend, so for her own fit the group falls back to tom's
+-- wants (ta, tb, tc, share 1 each). tara wants ta*, tb*, te* (weight 2) and td,
+-- and doesn't want tc: (2 + 2) / (7 + 1) = 50%. No thresholds on My Friends.
 do $$ begin
-  assert (select match_pct from public.get_friends() where discord_username = 'tara') = 25,
+  assert (select match_pct from public.get_friends() where discord_username = 'tara') = 50,
     format('friend pct %s', (select match_pct from public.get_friends() where discord_username = 'tara'));
-  assert not exists (select 1 from public.get_matches() where discord_username = 'tara'), 'below match thresholds';
+end $$;
+
+-- Player search shows the same % (tom looking up tara), and none for yourself.
+do $$ begin
+  assert (select match_pct from public.lookup_players('tara')) = 50, 'lookup pct';
+  assert (select match_pct from public.lookup_players('tom')) is null, 'no pct for yourself';
+end $$;
+
+-- No friends' votes and no votes of your own: nothing to compare, no %.
+reset role;
+insert into auth.users (id, raw_user_meta_data) values ('00000000-0000-0000-0003-000000000009', '{"name":"newbie#0"}');
+do $$ begin
+  assert public.fit_pct('00000000-0000-0000-0003-000000000009', '00000000-0000-0000-0003-000000000001') is null, 'no group, no pct';
+end $$;
+set role authenticated;
+
+-- The Tier List asks without match %.
+do $$ begin
+  assert (select match_pct from public.get_friends(false) where discord_username = 'tara') is null, 'no pct when with_match is false';
+  assert (select top_wants from public.get_friends(false) where discord_username = 'tara') = '{ta,tb,te}', 'votes still returned';
 end $$;
 
 -- A friend who hides their list shows no %.
@@ -113,8 +126,13 @@ end $$;
 -- Not callable directly.
 do $$ begin
   begin
-    perform public.pair_match_pct(auth.uid(), auth.uid());
-    assert false, 'pair_match_pct should not be callable';
+    perform public.fit_pct(auth.uid(), auth.uid());
+    assert false, 'fit_pct should not be callable';
+  exception when insufficient_privilege then null;
+  end;
+  begin
+    perform public.group_demand(auth.uid());
+    assert false, 'group_demand should not be callable';
   exception when insufficient_privilege then null;
   end;
 end $$;

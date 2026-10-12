@@ -18,11 +18,22 @@ export async function loadOwnChoices(supabase: SupabaseClient, userId: string): 
   return out;
 }
 
-/** Line ids the caller starred as Top 3. */
-export async function loadOwnTops(supabase: SupabaseClient, userId: string): Promise<string[]> {
-  const { data, error } = await supabase.from("preferences").select("line_id").eq("user_id", userId).eq("top", true);
+/** The caller's picks and Top 3 stars in one query (My Votes needs both). */
+export async function loadOwnVotes(
+  supabase: SupabaseClient,
+  userId: string,
+): Promise<{ choices: Record<string, Choice>; tops: string[] }> {
+  const { data, error } = await supabase.from("preferences").select("line_id, choice, top").eq("user_id", userId);
   if (error) throw error;
-  return data.map((row) => row.line_id as string);
+  const known = new Set(LINES.map((line) => line.id));
+  const choices: Record<string, Choice> = {};
+  const tops: string[] = [];
+  for (const row of data) {
+    if (!known.has(row.line_id) || !isChoice(row.choice)) continue;
+    choices[row.line_id] = row.choice;
+    if (row.top) tops.push(row.line_id);
+  }
+  return { choices, tops };
 }
 
 /**

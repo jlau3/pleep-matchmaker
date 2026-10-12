@@ -1,25 +1,25 @@
 import { redirect } from "next/navigation";
 import { signInWithDiscord } from "@/app/actions";
 import { HowItWorks } from "@/components/HowItWorks";
+import { safeNextPath } from "@/lib/nextPath";
 import { loadOwnChoices } from "@/lib/data";
 import { LINES, lineSpriteUrl } from "@/lib/lines";
-import { createClient } from "@/lib/supabase/server";
+import { getAuth } from "@/lib/supabase/server";
 
 const SHOWCASE = ["pikachu", "eevee", "dratini", "larvitar", "bulbasaur", "charmander", "squirtle"];
 
-export default async function Home({ searchParams }: { searchParams: Promise<{ error?: string; error_description?: string; code?: string; deleted?: string }> }) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+export default async function Home({ searchParams }: { searchParams: Promise<{ error?: string; error_description?: string; code?: string; deleted?: string; next?: string }> }) {
+  const { supabase, userId } = await getAuth();
 
   const params = await searchParams;
   // If the callback URL isn't in Supabase's redirect allow list, Supabase falls
   // back to the Site URL root, so finish the sign-in from here too.
   if (params.code) redirect(`/auth/callback?code=${encodeURIComponent(params.code)}`);
 
-  if (user) {
-    const choices = await loadOwnChoices(supabase, user.id);
+  const next = safeNextPath(params.next);
+  if (userId) {
+    if (next) redirect(next);
+    const choices = await loadOwnChoices(supabase, userId);
     redirect(Object.keys(choices).length < LINES.length ? "/vote" : "/tiers");
   }
 
@@ -47,6 +47,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ e
         )}
         {params.deleted && <p className="mb-4 text-sm text-slate-500">Your account has been deleted.</p>}
         <form action={signInWithDiscord}>
+          {next && <input type="hidden" name="next" value={next} />}
           <button type="submit" className="w-full rounded-full bg-[#5865F2] px-6 py-3 text-lg font-extrabold text-white shadow-[0_3px_0_#3c45a5] hover:brightness-105 active:translate-y-[2px] active:shadow-[0_1px_0_#3c45a5]">
             Sign in with Discord
           </button>

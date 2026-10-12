@@ -1,31 +1,24 @@
 import { HowItWorks } from "@/components/HowItWorks";
 import { PROFILE_TABS, SubTabs } from "@/components/SubTabs";
 import { VoteBoard } from "@/components/VoteBoard";
-import { loadOwnChoices, loadOwnTops, seedUndecided } from "@/lib/data";
+import { loadCommunityStats } from "@/lib/communityStats";
+import { loadOwnVotes, seedUndecided } from "@/lib/data";
 import { LINES, recentLines } from "@/lib/lines";
 import type { LineVotes } from "@/lib/tiers";
-import type { LineStatRow } from "@/lib/types";
 import { requireUser } from "@/lib/supabase/server";
 
 export default async function VotePage() {
   const { supabase, user } = await requireUser();
-  const [own, tops] = await Promise.all([loadOwnChoices(supabase, user.id), loadOwnTops(supabase, user.id)]);
+  const { choices: own, tops } = await loadOwnVotes(supabase, user.id);
   const { choices, newIds } = await seedUndecided(supabase, user.id, own);
 
   // Community votes for the new candy cards; only fetched while something is new.
   const recent = recentLines().map((line) => line.id);
   let newCandy: { ids: string[]; votes: Record<string, LineVotes>; voters: number } | undefined;
   if (recent.length > 0 && newIds.length < LINES.length) {
-    const [stats, count] = await Promise.all([supabase.rpc("get_line_stats"), supabase.rpc("get_voter_count")]);
-    if (stats.error) throw stats.error;
-    if (count.error) throw count.error;
-    const votes: Record<string, LineVotes> = {};
-    for (const row of stats.data as LineStatRow[]) {
-      if (recent.includes(row.line_id)) {
-        votes[row.line_id] = { wants: Number(row.wants), dontWants: Number(row.dont_wants), tops: Number(row.tops) };
-      }
-    }
-    newCandy = { ids: recent, votes, voters: Number(count.data) };
+    const community = await loadCommunityStats(supabase);
+    const votes = Object.fromEntries(recent.filter((id) => community.votes[id]).map((id) => [id, community.votes[id]]));
+    newCandy = { ids: recent, votes, voters: community.voters };
   }
   return (
     <div>

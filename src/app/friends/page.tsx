@@ -3,6 +3,7 @@ import { FriendButton } from "@/components/FriendButton";
 import { PlayerHeader, playerName } from "@/components/PlayerHeader";
 import { PlayerLists } from "@/components/PlayerLists";
 import { InviteReminder } from "@/components/InviteReminder";
+import { MatchPct } from "@/components/MatchPct";
 import { PlayerSearch, searchQuery } from "@/components/PlayerSearch";
 import { FRIENDS_TABS, SubTabs } from "@/components/SubTabs";
 import { MAX_FRIENDS } from "@/lib/data";
@@ -12,7 +13,7 @@ import type { FriendRow } from "@/lib/types";
 const card = "card p-4";
 
 export default async function FriendsPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
-  const { supabase } = await requireUser();
+  const { supabase, user } = await requireUser();
   const q = await searchQuery(searchParams);
 
   const friendsResult = await supabase.rpc("get_friends");
@@ -24,7 +25,7 @@ export default async function FriendsPage({ searchParams }: { searchParams: Prom
     <div className="space-y-8">
       <section className="space-y-3">
         <SubTabs tabs={FRIENDS_TABS} active="/friends" query={q ? `q=${encodeURIComponent(q)}` : undefined} />
-        <PlayerSearch supabase={supabase} q={q} friendIds={friendIds} />
+        <PlayerSearch supabase={supabase} q={q} friendIds={friendIds} viewerId={user.id} />
       </section>
 
       <section>
@@ -62,14 +63,7 @@ export default async function FriendsPage({ searchParams }: { searchParams: Prom
                     <PlayerHeader
                       player={friend}
                       isFriend
-                      aside={
-                        friend.match_pct !== null && (
-                          <div className="shrink-0 text-right leading-none">
-                            <div className="text-2xl font-bold text-want">{friend.match_pct}%</div>
-                            <div className="text-xs text-slate-500">match</div>
-                          </div>
-                        )
-                      }
+                      aside={<MatchPct pct={friend.match_pct} />}
                     />
                     <PlayerLists wants={friend.wants} dontWants={friend.dont_wants} topWants={friend.top_wants} />
                   </>
