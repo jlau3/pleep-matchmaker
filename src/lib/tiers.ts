@@ -9,23 +9,31 @@ export interface Tier {
 }
 
 /**
- * Ranking is by net votes (wants minus don't-wants) as a share of the voters
- * in the pool, so a candy that splits the room ranks below one nobody minds.
- * Lines with no votes or an even split (net 0) land at the bottom of C.
- * Above S, the Top 3 row repeats the TOP_ROW_SIZE lines the pool starred most. They
- * also stay in their regular tier, so the rest of the list never shifts.
+ * Tiers are relative: lines are ranked by weighted net votes (wants minus
+ * don't-wants, stars counting TOP_MULTIPLIER times), and among lines with a
+ * positive net the top TIER_SHARES.S go to S, the next TIER_SHARES.A to A, the
+ * next TIER_SHARES.B to B, the rest to C. Lines that tie on net always share a
+ * tier. Net 0 (no votes or an even split) is C, net below 0 is Avoid.
+ *
+ * Fixed % cutoffs crowded S and Avoid with a small, decisive player base, and
+ * would drift as the pool grows; shares give every pool a usable spread.
+ *
+ * Above S, the Top 3 row repeats the TOP_ROW_SIZE lines the pool starred most.
+ * They also stay in their regular tier, so the rest of the list never shifts.
  */
-export const TIER_CUTOFFS = { S: 0.6, A: 0.35, B: 0.15 } as const;
+export const TIER_SHARES = { S: 0.15, A: 0.2, B: 0.3 } as const;
 
 /** How many of the most-starred lines the Top 3 row shows. */
 export const TOP_ROW_SIZE = 9;
 
+const pct = (x: number) => Math.round(x * 100);
+
 export const TIERS: Tier[] = [
   { id: "top", label: "Top 3", hint: `the ${TOP_ROW_SIZE} candies most often in players' Top 3` },
-  { id: "S", label: "S", hint: `${TIER_CUTOFFS.S * 100}%+ net want it` },
-  { id: "A", label: "A", hint: `${TIER_CUTOFFS.A * 100}–${TIER_CUTOFFS.S * 100 - 1}%` },
-  { id: "B", label: "B", hint: `${TIER_CUTOFFS.B * 100}–${TIER_CUTOFFS.A * 100 - 1}%` },
-  { id: "C", label: "C", hint: `under ${TIER_CUTOFFS.B * 100}%` },
+  { id: "S", label: "S", hint: `top ${pct(TIER_SHARES.S)}% of liked candies` },
+  { id: "A", label: "A", hint: `next ${pct(TIER_SHARES.A)}% of liked candies` },
+  { id: "B", label: "B", hint: `next ${pct(TIER_SHARES.B)}% of liked candies` },
+  { id: "C", label: "C", hint: "the rest, including no votes and even splits" },
   { id: "avoid", label: "Avoid", hint: "more don't want it than want it" },
 ];
 
@@ -54,22 +62,11 @@ export function netVotes(votes: LineVotes): number {
   return votes.wants + (TOP_MULTIPLIER - 1) * (votes.tops ?? 0) - votes.dontWants;
 }
 
-/** The regular tier from weighted net votes; the Top 3 row is picked in buildTiers. */
-export function tierFor(votes: LineVotes, voters: number): Exclude<TierId, "top"> {
-  const net = netVotes(votes);
-  if (net < 0) return "avoid";
-  const share = voters === 0 ? 0 : net / voters;
-  if (share >= TIER_CUTOFFS.S) return "S";
-  if (share >= TIER_CUTOFFS.A) return "A";
-  if (share >= TIER_CUTOFFS.B) return "B";
-  return "C";
-}
-
 const byRank = (a: RankedLine, b: RankedLine) =>
   b.net - a.net || b.line.weight - a.line.weight || b.wants - a.wants || a.line.dex - b.line.dex;
 
 /**
- * Buckets lines into tiers, best first inside each tier (weighted net, then rarity
+ * Buckets lines into tiers (see TIER_SHARES), best first inside each tier (weighted net, then rarity
  * weight, then wants, then dex). The Top 3 row repeats the TOP_ROW_SIZE most-starred
  * lines, ordered by stars and then the same keys.
  */
@@ -95,7 +92,23 @@ export function buildTiers(
     .slice(0, TOP_ROW_SIZE);
   const out = new Map<TierId, RankedLine[]>(TIERS.map((t) => [t.id, []]));
   out.set("top", top);
-  for (const r of all) out.get(tierFor(r, voters))!.push(r);
+  for (const r of all) if (r.net <= 0) out.get(r.net < 0 ? "avoid" : "C")!.push(r);
+
+  // Positive lines fill S/A/B/C by rank; a tie on net stays with the line above it.
+  const positive = all.filter((r) => r.net > 0).sort(byRank);
+  const n = positive.length;
+  const ends: [Exclude<TierId, "top" | "avoid">, number][] = [
+    ["S", Math.ceil(TIER_SHARES.S * n)],
+    ["A", Math.ceil((TIER_SHARES.S + TIER_SHARES.A) * n)],
+    ["B", Math.ceil((TIER_SHARES.S + TIER_SHARES.A + TIER_SHARES.B) * n)],
+    ["C", n],
+  ];
+  let tier: Exclude<TierId, "top" | "avoid"> = "S";
+  positive.forEach((r, i) => {
+    if (i === 0 || r.net !== positive[i - 1].net) tier = ends.find(([, end]) => i < end)![0];
+    out.get(tier)!.push(r);
+  });
+
   for (const [id, ranked] of out) {
     if (id !== "top") ranked.sort(byRank);
   }

@@ -36,15 +36,17 @@ My Friends shows the same % for each friend, without the 25% / 3-shared-wants cu
 
 Net votes = wants minus don't-wants among the pool (your friends who have voted, or every player active in the last 4 months), with a Top 3 star counting double: a starred want is +2, a plain want +1. Your own votes don't count.
 
-| Tier | Net votes as a share of voters |
+Tiers are relative. Lines with a positive net are ranked, and split by position:
+
+| Tier | Which lines |
 |---|---|
-| S | 60% or more |
-| A | 35–59% |
-| B | 15–34% |
-| C | under 15%, including no votes and even splits |
+| S | top 15% of liked lines |
+| A | next 20% |
+| B | next 30% |
+| C | the rest, plus net 0 (no votes or an even split) |
 | Avoid | net negative |
 
-Cutoffs live in `TIER_CUTOFFS` in `src/lib/tiers.ts`.
+Lines that tie on net always share a tier, so a big tie at the top can make S larger than 15%. Fixed % cutoffs crowded S and Avoid with a small, decisive player base (32 S and 43 Avoid out of 107 at about 10 players), and would keep drifting as the pool grows; position-based tiers give every pool a usable spread. The shares live in `TIER_SHARES` in `src/lib/tiers.ts`. In By Island view the ranking is within each island.
 
 Above S, the **Top 3** row repeats the 9 lines that show up most often in players' Top 3 (ties broken like the rest of the list). They stay in their regular tier too, so nothing shifts. Every card shows its star count.
 
