@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-const MESSAGE = "I'm sharing Pokémon Sleep candy wishlists on Pleep Matchmaker. Add what you want so we know which Pokémon to keep for each other:";
+const MESSAGE = "I'm sharing Pokémon Sleep candy wishlists on Pleep Matchmaker. Add what you want so we know which candies to send for each other:";
 
 /** Shares (phones) or copies (desktop) an invite with this site's link. */
 export function InviteButton({ className = "" }: { className?: string }) {

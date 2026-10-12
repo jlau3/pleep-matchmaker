@@ -21,10 +21,9 @@ function VoteCard({ ranked }: { ranked: RankedLine }) {
           <span className="truncate font-semibold">{ranked.line.name}</span>
           {ranked.agreement !== null && (
             <span
-              title="Wants minus don't-wants, as a share of everyone in the pool"
               className={`shrink-0 text-sm font-bold ${ranked.agreement < 0 ? "text-dont" : "text-want"}`}
             >
-              {Math.round(ranked.agreement * 100)}% <span className="text-xs font-normal text-slate-500">net</span>
+              {Math.round(ranked.agreement * 100)}% <span className="text-xs font-normal text-slate-500">support</span>
             </span>
           )}
         </div>

@@ -48,7 +48,7 @@ Tiers are relative. Lines with a positive net are ranked, and split by position:
 | C | the rest, plus net 0 (no votes or an even split) |
 | Avoid | net negative |
 
-Lines that tie on net always share a tier, placed by the tie's middle rank, so with few voters (lots of ties) the sizes stay close to the targets. Fixed % cutoffs crowded S and Avoid with a small, decisive player base (32 S and 43 Avoid out of 107 at about 10 players), and would keep drifting as the pool grows; position-based tiers give every pool a usable spread. The shares live in `TIER_SHARES` in `src/lib/tiers.ts`. Because tiers are relative, every card also shows its **net %** (wants minus don't-wants over the whole pool, stars not weighted) so you can see how strong the support behind a rank is. In By Island view the ranking is within each island.
+Lines that tie on net always share a tier, placed by the tie's middle rank, so with few voters (lots of ties) the sizes stay close to the targets. Fixed % cutoffs crowded S and Avoid with a small, decisive player base (32 S and 43 Avoid out of 107 at about 10 players), and would keep drifting as the pool grows; position-based tiers give every pool a usable spread. The shares live in `TIER_SHARES` in `src/lib/tiers.ts`. Because tiers are relative, every card also shows a **support %** (wants minus don't-wants over the whole pool, stars not weighted; labelled "support" in the UI) so you can see how strong the support behind a rank is. In By Island view the ranking is within each island.
 
 Above S, the **Top 3** row repeats the 9 lines that show up most often in players' Top 3 (ties broken like the rest of the list). They stay in their regular tier too, so nothing shifts. Every card shows its star count.
 

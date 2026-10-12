@@ -19,8 +19,8 @@ const STEPS: { title: string; body: React.ReactNode; href: string; cta: string }
     title: "See what your friends want",
     body: (
       <>
-        The Tier List ranks every candy by what your friends (or all players) want, so you know which Pokémon to keep
-        and level for the people you play with.
+        The Tier List ranks every candy by what your friends (or all players) want, so you know which candies to send
+        the people you play with.
       </>
     ),
     href: "/tiers",
