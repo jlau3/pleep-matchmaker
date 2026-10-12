@@ -30,6 +30,8 @@ Want vs undecided lowers the % through the denominator alone. Want vs don't want
 
 A match is shown when it's **≥ 25%** with **≥ 3 lines you both want**, the other player is open to new friends, has room on their friend list (under 50), has a friend code set, and was seen in the last **4 months**. A full friend list hides a player from matches automatically, without changing their setting, until they remove someone. All of these knobs live in `public.match_config()` in the first migration.
 
+My Friends shows the same % for each friend, without the 25% / 3-shared-wants cutoff, so you can see how well your current friends line up.
+
 ## Tier list rules
 
 Net votes = wants minus don't-wants among the pool (your friends who have voted, or every player active in the last 4 months). Your own votes don't count.
@@ -44,7 +46,7 @@ Net votes = wants minus don't-wants among the pool (your friends who have voted,
 
 Cutoffs live in `TIER_CUTOFFS` in `src/lib/tiers.ts`.
 
-Above S, the **Top 3** row holds the 3 lines the pool starred most (ties broken like the rest of the list). Those lines leave their regular tier, so every line appears once. Every card shows its star count.
+Above S, the **Top 3** row repeats the 3 lines the pool starred most (ties broken like the rest of the list). They stay in their regular tier too, so nothing shifts. Every card shows its star count.
 
 Inside a tier, lines sort by net votes, then a rarity weight, then wants. The weight only breaks ties and never moves a line between tiers: legendary 0.4, mythical 0.3, pseudo-legendary 0.2, 16-pip rare spawns 0.1, everything else 0. `scripts/build_lines.py` derives it from each line's first stage (EXP curve and friendship points).
 

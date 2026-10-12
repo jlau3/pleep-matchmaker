@@ -19,7 +19,7 @@ describe("tierFor", () => {
 });
 
 describe("buildTiers", () => {
-  it("lifts the most-starred lines into the Top 3 row, at most three, each line once", () => {
+  it("repeats the most-starred lines in a Top 3 row without moving them out of their tier", () => {
     const ids = ["bulbasaur", "charmander", "squirtle", "pikachu", "eevee"];
     const lines = ids.map((id) => LINES_BY_ID.get(id)!);
     const votes = countVotes([
@@ -31,8 +31,8 @@ describe("buildTiers", () => {
     // pikachu and eevee have 2 stars; charmander and squirtle tie on 1 and every
     // other key, so dex order keeps charmander.
     expect(tiers.get("top")!.map((r) => r.line.id)).toEqual(["pikachu", "eevee", "charmander"]);
-    expect(tiers.get("S")!.map((r) => r.line.id)).toEqual(["squirtle"]);
-    const placed = [...tiers.values()].flat().map((r) => r.line.id);
+    expect(tiers.get("S")!.map((r) => r.line.id)).toEqual(["charmander", "squirtle", "pikachu", "eevee"]);
+    const placed = [...tiers.entries()].filter(([id]) => id !== "top").flatMap(([, r]) => r).map((r) => r.line.id);
     expect(placed.sort()).toEqual([...ids].sort());
     expect(tiers.get("top")![0].tops).toBe(2);
   });

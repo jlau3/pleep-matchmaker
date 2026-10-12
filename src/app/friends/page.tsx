@@ -83,7 +83,18 @@ export default async function FriendsPage({ searchParams }: { searchParams: Prom
               <li key={friend.user_id} className={card}>
                 {friend.visible ? (
                   <>
-                    <PlayerHeader player={friend} isFriend />
+                    <PlayerHeader
+                      player={friend}
+                      isFriend
+                      aside={
+                        friend.match_pct !== null && (
+                          <div className="shrink-0 text-right leading-none">
+                            <div className="text-2xl font-bold text-want">{friend.match_pct}%</div>
+                            <div className="text-xs text-slate-500">match</div>
+                          </div>
+                        )
+                      }
+                    />
                     <PlayerLists wants={friend.wants} dontWants={friend.dont_wants} topWants={friend.top_wants} />
                   </>
                 ) : (

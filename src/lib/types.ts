@@ -58,4 +58,6 @@ export interface FriendRow extends PlayerContact {
   wants: string[];
   dont_wants: string[];
   top_wants: string[];
+  /** Your match % with this friend (same formula as Find New, no thresholds). Null when hidden or nothing to compare. */
+  match_pct: number | null;
 }

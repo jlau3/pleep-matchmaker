@@ -12,8 +12,8 @@ export interface Tier {
  * Ranking is by net votes (wants minus don't-wants) as a share of the voters
  * in the pool, so a candy that splits the room ranks below one nobody minds.
  * Lines with no votes or an even split (net 0) land at the bottom of C.
- * Above S, the Top 3 row holds the MAX_TOP lines the pool starred most; they
- * leave their regular tier so every line appears once.
+ * Above S, the Top 3 row repeats the MAX_TOP lines the pool starred most. They
+ * also stay in their regular tier, so the rest of the list never shifts.
  */
 export const TIER_CUTOFFS = { S: 0.6, A: 0.35, B: 0.15 } as const;
 
@@ -59,7 +59,7 @@ const byRank = (a: RankedLine, b: RankedLine) =>
 
 /**
  * Buckets lines into tiers, best first inside each tier (net, then rarity
- * weight, then wants, then dex). The Top 3 row takes the MAX_TOP most-starred
+ * weight, then wants, then dex). The Top 3 row repeats the MAX_TOP most-starred
  * lines, ordered by stars and then the same keys.
  */
 export function buildTiers(
@@ -82,13 +82,9 @@ export function buildTiers(
     .filter((r) => r.tops > 0)
     .sort((a, b) => b.tops - a.tops || byRank(a, b))
     .slice(0, MAX_TOP);
-  const topIds = new Set(top.map((r) => r.line.id));
-
   const out = new Map<TierId, RankedLine[]>(TIERS.map((t) => [t.id, []]));
   out.set("top", top);
-  for (const r of all) {
-    if (!topIds.has(r.line.id)) out.get(tierFor(r, voters))!.push(r);
-  }
+  for (const r of all) out.get(tierFor(r, voters))!.push(r);
   for (const [id, ranked] of out) {
     if (id !== "top") ranked.sort(byRank);
   }
