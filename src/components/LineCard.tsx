@@ -29,7 +29,7 @@ export function LineCard({
           </li>
         ))}
       </ul>
-      <ChoiceButtons value={choice} onChoose={onChoose} compact={compact} />
+      <ChoiceButtons value={choice ?? "undecided"} onChoose={onChoose} compact={compact} />
     </div>
   );
 }

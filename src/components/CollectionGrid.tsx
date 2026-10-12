@@ -4,14 +4,13 @@ import { useMemo, useState } from "react";
 import { CHOICE_LABEL, LINES, type Choice } from "@/lib/lines";
 import { LineCard } from "./LineCard";
 
-type Filter = "all" | Choice | "unsorted";
+type Filter = "all" | Choice;
 
 const FILTERS: { value: Filter; label: string }[] = [
   { value: "all", label: "All" },
   { value: "want", label: CHOICE_LABEL.want },
   { value: "dont_want", label: CHOICE_LABEL.dont_want },
   { value: "undecided", label: CHOICE_LABEL.undecided },
-  { value: "unsorted", label: "Not voted" },
 ];
 
 /** Searchable, filterable grid of every line with compact vote buttons. */
@@ -29,7 +28,8 @@ export function CollectionGrid({
     const q = query.trim().toLowerCase();
     return LINES.filter((line) => {
       const choice = choices[line.id];
-      if (filter === "unsorted" ? choice !== undefined : filter !== "all" && choice !== filter) return false;
+      // A line with no vote counts as undecided, same as in matching and the tier list.
+      if (filter !== "all" && (choice ?? "undecided") !== filter) return false;
       return !q || line.members.some((member) => member.name.toLowerCase().includes(q));
     });
   }, [choices, query, filter]);
