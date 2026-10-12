@@ -13,7 +13,8 @@ export interface Tier {
  * don't-wants, stars counting TOP_MULTIPLIER times), and among lines with a
  * positive net the top TIER_SHARES.S go to S, the next TIER_SHARES.A to A, the
  * next TIER_SHARES.B to B, the rest to C. Lines that tie on net always share a
- * tier. Net 0 (no votes or an even split) is C, net below 0 is Avoid.
+ * tier, placed by the tie's middle rank (the best-ranked tie is always S). Net 0 (no votes or an even split) is
+ * C, net below 0 is Avoid.
  *
  * Fixed % cutoffs crowded S and Avoid with a small, decisive player base, and
  * would drift as the pool grows; shares give every pool a usable spread.
@@ -52,6 +53,12 @@ export interface RankedLine {
   unsure: number;
   net: number;
   tops: number;
+  /**
+   * Plain agreement for display: (wants - don't-wants) / voters, from -1 to 1,
+   * stars not weighted. Null with no voters. Tiers are relative, so this is how
+   * strong the support behind a rank actually is.
+   */
+  agreement: number | null;
 }
 
 /**
@@ -84,6 +91,7 @@ export function buildTiers(
       unsure: Math.max(0, voters - v.wants - v.dontWants),
       net: netVotes(v),
       tops: v.tops ?? 0,
+      agreement: voters > 0 ? (v.wants - v.dontWants) / voters : null,
     };
   });
   const top = all
@@ -94,7 +102,9 @@ export function buildTiers(
   out.set("top", top);
   for (const r of all) if (r.net <= 0) out.get(r.net < 0 ? "avoid" : "C")!.push(r);
 
-  // Positive lines fill S/A/B/C by rank; a tie on net stays with the line above it.
+  // Positive lines fill S/A/B/C by rank. A run of lines tied on net all go to
+  // the tier of the run's middle position, so with few voters (lots of ties)
+  // tier sizes stay near their targets instead of one tie swallowing S.
   const positive = all.filter((r) => r.net > 0).sort(byRank);
   const n = positive.length;
   const ends: [Exclude<TierId, "top" | "avoid">, number][] = [
@@ -103,11 +113,15 @@ export function buildTiers(
     ["B", Math.ceil((TIER_SHARES.S + TIER_SHARES.A + TIER_SHARES.B) * n)],
     ["C", n],
   ];
-  let tier: Exclude<TierId, "top" | "avoid"> = "S";
-  positive.forEach((r, i) => {
-    if (i === 0 || r.net !== positive[i - 1].net) tier = ends.find(([, end]) => i < end)![0];
-    out.get(tier)!.push(r);
-  });
+  for (let start = 0; start < n; ) {
+    let end = start;
+    while (end + 1 < n && positive[end + 1].net === positive[start].net) end++;
+    const mid = Math.floor((start + end) / 2);
+    // The best-ranked run is always S, so S is never empty (e.g. one friend's wants all tie).
+    const tier = start === 0 ? "S" : ends.find(([, e]) => mid < e)![0];
+    for (let i = start; i <= end; i++) out.get(tier)!.push(positive[i]);
+    start = end + 1;
+  }
 
   for (const [id, ranked] of out) {
     if (id !== "top") ranked.sort(byRank);

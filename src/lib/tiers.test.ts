@@ -28,6 +28,24 @@ describe("relative tiers", () => {
     expect(tiers.get("S")!.map((r) => r.net)).toEqual([20, 19, 18, 18]);
   });
 
+  it("places a big tie by its middle rank so it can't swallow S", () => {
+    const { lines, votes } = ladder(20);
+    // Lines ranked 2nd to 11th all tie on net 10: middle rank 6 -> A.
+    for (const line of lines.slice(9, 19)) votes.set(line.id, { wants: 10, dontWants: 0 });
+    const tiers = buildTiers(votes, 20, lines);
+    expect(tiers.get("S")!.map((r) => r.net)).toEqual([20]);
+    expect(tiers.get("A")!.length).toBe(10);
+    expect(new Set(tiers.get("A")!.map((r) => r.net))).toEqual(new Set([10]));
+  });
+
+  it("puts a single friend's wants (all tied) in S", () => {
+    const lines = [...LINES_BY_ID.values()].slice(0, 30);
+    const votes = countVotes([{ wants: lines.slice(0, 20).map((l) => l.id), dont_wants: [] }]);
+    const tiers = buildTiers(votes, 1, lines);
+    expect(tiers.get("S")!.length).toBe(20);
+    expect(tiers.get("C")!.length).toBe(10);
+  });
+
   it("puts net 0 in C and net below 0 in Avoid, whatever the ranks", () => {
     const { lines, votes } = ladder(3);
     const extra = [...LINES_BY_ID.values()].slice(3, 6);
@@ -117,5 +135,8 @@ describe("buildTiers", () => {
     const charmander = tiers.get("avoid")![0];
     expect([charmander.wants, charmander.unsure, charmander.dontWants]).toEqual([1, 0, 2]);
     expect(tiers.get("B")![0]).toMatchObject({ wants: 2, unsure: 1, dontWants: 0 });
+    // Display agreement ignores star weighting: (1 - 2) / 3.
+    expect(charmander.agreement).toBeCloseTo(-1 / 3);
+    expect(buildTiers(votes, 0, lines).get("C")![0].agreement).toBeNull();
   });
 });
