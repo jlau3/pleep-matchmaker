@@ -8,7 +8,7 @@ import { MatchmakeButton } from "./MatchmakeButton";
 import { PickFlow } from "./PickFlow";
 
 /**
- * The Voting tab. Lines without a vote when the page loaded get the big card
+ * Profile > My votes. Lines without a vote when the page loaded get the big card
  * flow; every line is editable in the grid. Both share one set of votes, and
  * every click saves immediately.
  */

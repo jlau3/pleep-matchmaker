@@ -1,12 +1,12 @@
 # Pleep Matchmaker
 
-Pokémon Sleep players vote on every candy line: **want**, **don't want** or **undecided**. Five tabs:
+Pokémon Sleep players vote on every candy line: **want**, **don't want** or **undecided**. Three tabs:
 
-- **Voting**: card-by-card voting for anything unvoted, plus a searchable grid to change any vote. Matchmake saves skipped lines as undecided.
-- **Friends**: look up players by exact Discord name, IGN or friend code, and manage your friend list (up to 50).
-- **Tier list**: which candy to prioritize, ranked S/A/B/C/Avoid by your friends' net votes, with toggles for All islands / By island and My friends / Everyone.
-- **Matchmake**: players open to new friends whose votes line up with yours.
-- **Profile**: IGN, friend code, visibility toggles, blocked players, sign out, delete account.
+- **Tier list** (home): which candy to prioritize, ranked S/A/B/C/Avoid by your friends' net votes, with toggles for All islands / By island and My friends / Everyone. A banner links to voting when there are unvoted candies.
+- **Friends**: *My friends* to look up players by exact Discord name, IGN or friend code and manage your list (up to 50); *Find new* for matchmaking against players open to new friends.
+- **Profile**: *My votes* (card-by-card voting for anything unvoted, plus a searchable grid to change any vote) and *Settings* (IGN, friend code, visibility toggles, blocked players, sign out, delete account).
+
+New players go straight to My votes after signing in, and land on the Tier list once everything is voted.
 
 Stack: Next.js 15 (App Router) + Supabase (Postgres, Discord OAuth) + Tailwind. Built to run on the Vercel and Supabase free tiers.
 

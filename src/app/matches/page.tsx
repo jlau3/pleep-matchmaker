@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { LineChips } from "@/components/LineChips";
 import { PlayerHeader } from "@/components/PlayerHeader";
+import { FRIENDS_TABS, SubTabs } from "@/components/SubTabs";
 import { loadFriendIds, loadOwnChoices, loadOwnProfile } from "@/lib/data";
 import { LINES, linesFromIds } from "@/lib/lines";
 import { requireUser } from "@/lib/supabase/server";
@@ -45,9 +46,9 @@ export default async function MatchesPage() {
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-2xl font-bold">Matchmake</h1>
+        <SubTabs tabs={FRIENDS_TABS} active="/matches" />
         <p className="text-sm text-slate-600 dark:text-slate-300">
-          Players open to new friends whose candy list lines up with yours.
+          Players open to new friends whose candy votes line up with yours.
         </p>
       </div>
       {notices.map((notice, i) => (
