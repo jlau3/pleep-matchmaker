@@ -4,7 +4,7 @@ import { useRef } from "react";
 import type { CandyLine, Choice } from "@/lib/lines";
 import { LineCard } from "./LineCard";
 
-/** One big card per line, top to bottom. A first pick scrolls to the next card. */
+/** One big card per line in a single column. Deciding an undecided card scrolls to the next one. */
 export function PickFlow({
   lines,
   choices,
@@ -17,7 +17,7 @@ export function PickFlow({
   const cardRefs = useRef(new Map<string, HTMLLIElement>());
 
   function choose(index: number, line: CandyLine, choice: Choice) {
-    if (!choices[line.id]) {
+    if ((choices[line.id] ?? "undecided") === "undecided") {
       const next = lines[index + 1];
       if (next) cardRefs.current.get(next.id)?.scrollIntoView({ behavior: "smooth", block: "center" });
     }

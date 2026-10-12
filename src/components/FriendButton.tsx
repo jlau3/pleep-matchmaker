@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { addFriend, removeFriend } from "@/app/actions";
+import { rethrowIfNavigation, SAVE_FAILED } from "@/lib/saveError";
 
 export function FriendButton({ userId, isFriend }: { userId: string; isFriend: boolean }) {
   const [friend, setFriend] = useState(isFriend);
@@ -11,9 +12,14 @@ export function FriendButton({ userId, isFriend }: { userId: string; isFriend: b
   function toggle() {
     setError(null);
     startTransition(async () => {
-      const result = friend ? await removeFriend(userId) : await addFriend(userId);
-      if (result.error) setError(result.error);
-      else setFriend(!friend);
+      try {
+        const result = friend ? await removeFriend(userId) : await addFriend(userId);
+        if (result.error) setError(result.error);
+        else setFriend(!friend);
+      } catch (e) {
+        rethrowIfNavigation(e);
+        setError(SAVE_FAILED);
+      }
     });
   }
 

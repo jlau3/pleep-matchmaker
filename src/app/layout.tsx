@@ -8,7 +8,14 @@ export const metadata: Metadata = {
   description: "Find Pokémon Sleep friends who want the same candy you do.",
 };
 
-const rounded = M_PLUS_Rounded_1c({ subsets: ["latin"], weight: ["400", "700", "800"], variable: "--font-rounded" });
+const rounded = M_PLUS_Rounded_1c({
+  subsets: ["latin"],
+  weight: ["400", "700", "800"],
+  variable: "--font-rounded",
+  // The font is split into ~100 unicode-range files per weight; preloading would
+  // fetch all of them. Without preload the browser loads only the slices it uses.
+  preload: false,
+});
 
 export const viewport: Viewport = { width: "device-width", initialScale: 1 };
 
