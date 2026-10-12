@@ -9,7 +9,8 @@ const STEPS: { title: string; body: React.ReactNode; href: string; cta: string }
     body: (
       <>
         Mark each Pokémon Sleep candy line <b>Want</b>, <b>Don&apos;t Want</b> or leave it <b>Neutral</b>. Tap the ★ to
-        pick your Top {MAX_TOP}.
+        pick your Top {MAX_TOP}: your personal favourites. They don&apos;t move the Tier List, so a niche pick never
+        counts against you. Friends can see them and send you that candy anyway, wherever it ranks.
       </>
     ),
     href: "/vote",
