@@ -19,6 +19,17 @@ describe("tierFor", () => {
 });
 
 describe("buildTiers", () => {
+  it("breaks net ties by rarity weight before wants", () => {
+    const lines = ["pikachu", "ditto", "larvitar", "mewtwo"].map((id) => LINES_BY_ID.get(id)!);
+    const votes = countVotes([
+      { wants: ["pikachu", "ditto", "larvitar", "mewtwo"], dont_wants: [] },
+      { wants: ["pikachu"], dont_wants: [] },
+      { wants: [], dont_wants: ["pikachu"] },
+    ]);
+    // All net 1; Pikachu has the most wants but no rarity weight.
+    expect(buildTiers(votes, 3, lines).get("B")!.map((r) => r.line.id)).toEqual(["mewtwo", "larvitar", "ditto", "pikachu"]);
+  });
+
   it("buckets and orders lines", () => {
     const lines = ["bulbasaur", "charmander", "squirtle", "pikachu"].map((id) => LINES_BY_ID.get(id)!);
     const votes = countVotes([

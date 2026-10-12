@@ -47,7 +47,7 @@ export function tierFor(votes: LineVotes, voters: number): TierId {
   return "C";
 }
 
-/** Buckets lines into tiers, best first inside each tier (net, then wants, then dex). */
+/** Buckets lines into tiers, best first inside each tier (net, then rarity weight, then wants, then dex). */
 export function buildTiers(
   votes: Map<string, LineVotes>,
   voters: number,
@@ -65,7 +65,7 @@ export function buildTiers(
     });
   }
   for (const ranked of out.values()) {
-    ranked.sort((a, b) => b.net - a.net || b.wants - a.wants || a.line.dex - b.line.dex);
+    ranked.sort((a, b) => b.net - a.net || b.line.weight - a.line.weight || b.wants - a.wants || a.line.dex - b.line.dex);
   }
   return out;
 }
