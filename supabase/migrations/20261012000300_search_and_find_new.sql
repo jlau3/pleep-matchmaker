@@ -1,3 +1,5 @@
+-- Safe to run more than once (everything is create or replace / if not exists).
+--
 -- 1. Friend search ignores more than letter case.
 --
 -- search_key folds a name to: Unicode NFKC (full-width "ＳＮＯＲＬＡＸ" -> "SNORLAX",
@@ -6,7 +8,7 @@
 -- sides. Still exact-match only: no partial matches, so the player list
 -- can't be enumerated.
 
-create function public.search_key(t text)
+create or replace function public.search_key(t text)
 returns text
 language sql
 immutable
@@ -16,9 +18,9 @@ as $$
   select lower(regexp_replace(btrim(normalize(t, NFKC)), '\s+', ' ', 'g'))
 $$;
 
-create index profiles_discord_username_key_idx on public.profiles (public.search_key(discord_username));
-create index profiles_discord_display_name_key_idx on public.profiles (public.search_key(discord_display_name));
-create index profiles_ign_key_idx on public.profiles (public.search_key(ign));
+create index if not exists profiles_discord_username_key_idx on public.profiles (public.search_key(discord_username));
+create index if not exists profiles_discord_display_name_key_idx on public.profiles (public.search_key(discord_display_name));
+create index if not exists profiles_ign_key_idx on public.profiles (public.search_key(ign));
 
 create or replace function public.lookup_players(q text)
 returns table (
