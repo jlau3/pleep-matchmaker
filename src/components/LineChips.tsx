@@ -8,7 +8,7 @@ export function LineChips({ lines, counts }: { lines: CandyLine[]; counts?: Map<
       {lines.map((line) => (
         <li
           key={line.id}
-          className="flex items-center gap-1 rounded-full border border-slate-200 bg-slate-50 py-0.5 pl-0.5 pr-2.5 text-sm dark:border-slate-700 dark:bg-slate-800"
+          className="flex items-center gap-1 rounded-full bg-white py-0.5 shadow-sm pl-0.5 pr-2.5 text-sm dark:bg-night"
         >
           <img src={lineSpriteUrl(line)} alt="" loading="lazy" className="h-7 w-7 object-contain" />
           {line.name}

@@ -2,20 +2,20 @@ import { lineSpriteUrl } from "@/lib/lines";
 import { type RankedLine, type TierId, TIERS } from "@/lib/tiers";
 
 const TIER_STYLE: Record<string, string> = {
-  S: "bg-rose-500 text-white",
-  A: "bg-orange-400 text-white",
-  B: "bg-amber-300 text-slate-900",
-  C: "bg-lime-300 text-slate-900",
-  avoid: "bg-slate-500 text-white",
+  S: "bg-[#ff8fab] text-white shadow-[0_3px_0_#e0607f]",
+  A: "bg-[#ffb36b] text-white shadow-[0_3px_0_#e08a3a]",
+  B: "bg-sun text-[#5b3e00] shadow-[0_3px_0_var(--color-sun-deep)]",
+  C: "bg-[#a8dd7a] text-[#2f5a12] shadow-[0_3px_0_#7cba4c]",
+  avoid: "bg-meh text-white shadow-[0_3px_0_#6b778a]",
   none: "bg-slate-200 text-slate-600 dark:bg-slate-700 dark:text-slate-300",
 };
 
-const panel = "rounded-2xl border border-slate-200 bg-white p-3 dark:border-slate-800 dark:bg-slate-900";
+const panel = "card p-3";
 
 function VoteCard({ ranked }: { ranked: RankedLine }) {
   return (
-    <li className="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 p-2 dark:border-slate-700 dark:bg-slate-800">
-      <img src={lineSpriteUrl(ranked.line)} alt="" loading="lazy" className="h-14 w-14 shrink-0 object-contain" />
+    <li className="flex items-center gap-3 rounded-2xl bg-white p-2 dark:bg-night-deep">
+      <img src={lineSpriteUrl(ranked.line)} alt="" loading="lazy" className="h-14 w-14 shrink-0 rounded-full bg-sky object-contain dark:bg-night" />
       <div className="min-w-0">
         <div className="truncate font-semibold">{ranked.line.name}</div>
         <div className="flex flex-wrap gap-x-2 text-xs">

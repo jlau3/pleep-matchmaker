@@ -68,7 +68,7 @@ export default async function MatchesPage() {
       ) : (
         <ul className="space-y-4">
           {matches.map((match) => (
-            <li key={match.user_id} className="rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
+            <li key={match.user_id} className="card p-4">
               <PlayerHeader
                 player={match}
                 isFriend={friendIds.has(match.user_id)}

@@ -39,12 +39,12 @@ export function VoteBoard({ initial }: { initial: Record<string, Choice> }) {
 
   return (
     <div>
-      <div className="sticky top-[49px] z-10 -mx-4 mb-4 border-b border-slate-200 bg-slate-50/95 px-4 py-2 backdrop-blur dark:border-slate-800 dark:bg-slate-950/95">
+      <div className="sticky top-[49px] z-10 -mx-4 mb-4 bg-sky/95 px-4 py-2 shadow-sm backdrop-blur dark:bg-night-deep/95">
         <div className="flex items-center justify-between gap-3 text-sm">
           <span>
             <strong>{voted}</strong> / {LINES.length} voted
           </span>
-          <MatchmakeButton className="rounded-lg bg-slate-900 px-3 py-1.5 font-semibold text-white dark:bg-white dark:text-slate-900" />
+          <MatchmakeButton className="btn-primary px-4 py-1.5" />
         </div>
         <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-800">
           <div className="h-full bg-want transition-all" style={{ width: `${(voted / LINES.length) * 100}%` }} />
@@ -65,7 +65,7 @@ export function VoteBoard({ initial }: { initial: Record<string, Choice> }) {
           </p>
           <PickFlow lines={unvoted} choices={choices} onChoose={choose} />
           <div className="mx-auto mt-10 max-w-md text-center">
-            <MatchmakeButton className="block w-full rounded-2xl bg-want px-6 py-4 text-lg font-bold text-white" />
+            <MatchmakeButton className="btn-primary block w-full px-6 py-4 text-lg" />
             <p className="mt-2 text-xs text-slate-500">Anything you skipped is saved as undecided.</p>
           </div>
           {unvoted.length < LINES.length && (

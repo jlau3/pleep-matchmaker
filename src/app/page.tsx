@@ -26,13 +26,14 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ e
   const showcase = LINES.filter((line) => SHOWCASE.includes(line.id));
 
   return (
-    <div className="mx-auto max-w-md py-12 text-center">
+    <div className="card mx-auto mt-8 max-w-md px-6 py-10 text-center">
       <div className="mb-6 flex justify-center -space-x-3">
         {showcase.map((line) => (
-          <img key={line.id} src={lineSpriteUrl(line)} alt="" className="h-14 w-14 object-contain" />
+          <img key={line.id} src={lineSpriteUrl(line)} alt="" className="h-14 w-14 rounded-full bg-sky object-contain ring-4 ring-cream dark:ring-night" />
         ))}
       </div>
-      <h1 className="mb-3 text-3xl font-bold">Pleep Matchmaker</h1>
+      <img src="/logo.png" alt="" className="mx-auto mb-2 h-16 w-16" />
+      <h1 className="mb-3 text-3xl font-extrabold">Pleep Matchmaker</h1>
       <p className="mb-8 text-slate-600 dark:text-slate-300">
         Sort every Pokémon Sleep candy line into want, don't want or undecided. See what candy your friends want, and
         find new friends who want the same candy you do.
@@ -44,7 +45,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ e
       )}
       {params.deleted && <p className="mb-4 text-sm text-slate-500">Your account has been deleted.</p>}
       <form action={signInWithDiscord}>
-        <button type="submit" className="w-full rounded-xl bg-[#5865F2] px-6 py-3 text-lg font-semibold text-white hover:bg-[#4752c4]">
+        <button type="submit" className="w-full rounded-full bg-[#5865F2] px-6 py-3 text-lg font-extrabold text-white shadow-[0_3px_0_#3c45a5] hover:brightness-105 active:translate-y-[2px] active:shadow-[0_1px_0_#3c45a5]">
           Sign in with Discord
         </button>
       </form>

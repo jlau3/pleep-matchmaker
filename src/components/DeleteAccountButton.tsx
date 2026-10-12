@@ -14,7 +14,7 @@ export function DeleteAccountButton() {
           startTransition(() => deleteAccount());
         }
       }}
-      className="rounded-lg border-2 border-dont px-4 py-2 font-semibold text-dont hover:bg-dont/10 disabled:opacity-50"
+      className="rounded-full border-2 border-dont px-4 py-2 font-semibold text-dont hover:bg-dont/10 disabled:opacity-50"
     >
       {pending ? "Deleting…" : "Delete account"}
     </button>

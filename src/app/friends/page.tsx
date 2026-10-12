@@ -7,7 +7,7 @@ import { requireUser } from "@/lib/supabase/server";
 import type { FriendRow, LookupRow } from "@/lib/types";
 
 const MAX_FRIENDS = 50;
-const card = "rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900";
+const card = "card p-4";
 
 export default async function FriendsPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
   const { supabase } = await requireUser();
@@ -32,9 +32,9 @@ export default async function FriendsPage({ searchParams }: { searchParams: Prom
             name="q"
             defaultValue={q}
             placeholder="Exact Discord name, IGN or friend code"
-            className="min-w-0 flex-1 rounded-lg border border-slate-300 bg-white px-3 py-2 dark:border-slate-700 dark:bg-slate-900"
+            className="min-w-0 flex-1 field"
           />
-          <button type="submit" className="rounded-lg bg-slate-900 px-4 py-2 font-semibold text-white dark:bg-white dark:text-slate-900">
+          <button type="submit" className="btn-primary px-5 py-2">
             Search
           </button>
         </form>
