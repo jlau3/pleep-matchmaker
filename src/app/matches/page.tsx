@@ -2,7 +2,7 @@ import Link from "next/link";
 import { LineChips } from "@/components/LineChips";
 import { PlayerHeader } from "@/components/PlayerHeader";
 import { FRIENDS_TABS, SubTabs } from "@/components/SubTabs";
-import { loadFriendIds, loadOwnChoices, loadOwnProfile } from "@/lib/data";
+import { loadFriendIds, loadOwnChoices, loadOwnProfile, MAX_FRIENDS } from "@/lib/data";
 import { LINES, linesFromIds } from "@/lib/lines";
 import { requireUser } from "@/lib/supabase/server";
 import type { MatchRow } from "@/lib/types";
@@ -28,7 +28,14 @@ export default async function MatchesPage() {
         Add your friend code in <Link href="/profile" className="underline">Profile</Link> so others can find you.
       </>,
     );
-  if (!profile.open_to_friends)
+  if (friendIds.size >= MAX_FRIENDS)
+    notices.push(
+      <>
+        Your friend list is full ({MAX_FRIENDS}/{MAX_FRIENDS}), so you're hidden from other people's matches.{" "}
+        <Link href="/friends" className="underline">Remove someone</Link> to show up again.
+      </>,
+    );
+  else if (!profile.open_to_friends)
     notices.push(
       <>
         You're hidden from other people's matches. Turn on "Open to new friends" in{" "}

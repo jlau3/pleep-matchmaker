@@ -3,10 +3,10 @@ import { FriendButton } from "@/components/FriendButton";
 import { PlayerHeader, playerName } from "@/components/PlayerHeader";
 import { PlayerLists } from "@/components/PlayerLists";
 import { FRIENDS_TABS, SubTabs } from "@/components/SubTabs";
+import { MAX_FRIENDS } from "@/lib/data";
 import { requireUser } from "@/lib/supabase/server";
 import type { FriendRow, LookupRow } from "@/lib/types";
 
-const MAX_FRIENDS = 50;
 const card = "card p-4";
 
 export default async function FriendsPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
