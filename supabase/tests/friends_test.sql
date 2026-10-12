@@ -85,4 +85,31 @@ do $$ begin
   assert (select count(*) from public.friends where user_id <> auth.uid()) = 0, 'friends RLS';
 end $$;
 
+-- A full friend list (f1 has 50) hides you from other people's matches,
+-- without touching open_to_friends; dropping below the cap brings you back.
+-- (Blocking f2 above dropped f1 to 49; top back up.)
+insert into public.friends (user_id, friend_id) values (auth.uid(), '00000000-0000-0000-0001-000000000099');
+reset role;
+update public.profiles set friend_code = '111122223333' where discord_username in ('f1', 'f4');
+insert into public.preferences (user_id, line_id, choice)
+select u::uuid, l, 'want'::public.choice
+from unnest(array['00000000-0000-0000-0001-000000000001', '00000000-0000-0000-0001-000000000004']) u,
+     unnest(array['a1', 'a2', 'a3']) l;
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-0001-000000000004', false);
+set role authenticated;
+do $$ begin
+  assert not exists (select 1 from public.get_matches() where discord_username = 'f1'), 'full list hidden from matches';
+  assert exists (select 1 from public.lookup_players('f1')), 'full list still found by lookup';
+end $$;
+reset role;
+delete from public.friends where user_id = '00000000-0000-0000-0001-000000000001' and friend_id = '00000000-0000-0000-0001-000000000052';
+set role authenticated;
+do $$ begin
+  assert exists (select 1 from public.get_matches() where discord_username = 'f1'), 'back in matches below cap';
+end $$;
+reset role;
+do $$ begin
+  assert (select open_to_friends from public.profiles where discord_username = 'f1'), 'setting untouched';
+end $$;
+
 \echo 'ALL FRIENDS TESTS PASSED'

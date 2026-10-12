@@ -3,14 +3,18 @@ import { DeleteAccountButton } from "@/components/DeleteAccountButton";
 import { playerName } from "@/components/PlayerHeader";
 import { ProfileForm } from "@/components/ProfileForm";
 import { PROFILE_TABS, SubTabs } from "@/components/SubTabs";
-import { loadOwnProfile } from "@/lib/data";
+import { loadFriendIds, loadOwnProfile, MAX_FRIENDS } from "@/lib/data";
 import { relativeTime } from "@/lib/format";
 import { requireUser } from "@/lib/supabase/server";
 import type { BlockedRow } from "@/lib/types";
 
 export default async function ProfilePage({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
   const { supabase, user } = await requireUser();
-  const [profile, blockedResult] = await Promise.all([loadOwnProfile(supabase, user.id), supabase.rpc("get_blocked")]);
+  const [profile, friendIds, blockedResult] = await Promise.all([
+    loadOwnProfile(supabase, user.id),
+    loadFriendIds(supabase, user.id),
+    supabase.rpc("get_blocked"),
+  ]);
   if (blockedResult.error) throw blockedResult.error;
   const blocked = blockedResult.data as BlockedRow[];
   const { error } = await searchParams;
@@ -28,7 +32,7 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
           </div>
         </section>
 
-        <ProfileForm profile={profile} />
+        <ProfileForm profile={profile} friendListFull={friendIds.size >= MAX_FRIENDS} />
 
         <section>
           <h2 className="mb-2 font-semibold">Blocked players</h2>

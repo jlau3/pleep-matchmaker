@@ -5,7 +5,7 @@ import { type ProfileFormState, updateProfile } from "@/app/actions";
 import { formatFriendCode } from "@/lib/format";
 import type { OwnProfile } from "@/lib/types";
 
-export function ProfileForm({ profile }: { profile: OwnProfile }) {
+export function ProfileForm({ profile, friendListFull }: { profile: OwnProfile; friendListFull: boolean }) {
   const [state, action, pending] = useActionState<ProfileFormState, FormData>(updateProfile, {});
   const input = "w-full field";
   return (
@@ -29,7 +29,11 @@ export function ProfileForm({ profile }: { profile: OwnProfile }) {
         <input type="checkbox" name="open_to_friends" defaultChecked={profile.open_to_friends} className="mt-1 h-4 w-4" />
         <span>
           <span className="block text-sm font-medium">Open to new friends</span>
-          <span className="text-xs text-slate-500">Turn off when your friend list is full. You'll be hidden from matches.</span>
+          <span className="text-xs text-slate-500">
+            {friendListFull
+              ? "Your friend list is full, so you're hidden from matches until you remove someone."
+              : "Turn off to hide from matches. You're hidden automatically while your friend list is full."}
+          </span>
         </span>
       </label>
       <label className="flex items-start gap-3">

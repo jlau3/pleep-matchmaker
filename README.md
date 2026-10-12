@@ -26,7 +26,7 @@ Only lines where at least one of you picked want or don't want count. Each count
 
 Want vs undecided lowers the % through the denominator alone. Want vs don't want lowers it twice as hard.
 
-A match is shown when it's **≥ 25%** with **≥ 3 lines you both want**, the other player is open to new friends, has a friend code set, and was seen in the last **4 months**. All of these knobs live in `public.match_config()` in the first migration.
+A match is shown when it's **≥ 25%** with **≥ 3 lines you both want**, the other player is open to new friends, has room on their friend list (under 50), has a friend code set, and was seen in the last **4 months**. A full friend list hides a player from matches automatically, without changing their setting, until they remove someone. All of these knobs live in `public.match_config()` in the first migration.
 
 ## Tier list rules
 
