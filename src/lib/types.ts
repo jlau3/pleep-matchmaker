@@ -20,12 +20,15 @@ export interface MatchRow extends PlayerContact {
 export interface LookupRow extends PlayerContact {
   wants: string[];
   dont_wants: string[];
+  /** Starred subset of wants (Top 3). */
+  top_wants: string[];
 }
 
 export interface LineStatRow {
   line_id: string;
   wants: number;
   dont_wants: number;
+  tops: number;
 }
 
 export interface BlockedRow {
@@ -54,4 +57,5 @@ export interface FriendRow extends PlayerContact {
   visible: boolean;
   wants: string[];
   dont_wants: string[];
+  top_wants: string[];
 }

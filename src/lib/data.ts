@@ -18,10 +18,17 @@ export async function loadOwnChoices(supabase: SupabaseClient, userId: string): 
   return out;
 }
 
+/** Line ids the caller starred as Top 3. */
+export async function loadOwnTops(supabase: SupabaseClient, userId: string): Promise<string[]> {
+  const { data, error } = await supabase.from("preferences").select("line_id").eq("user_id", userId).eq("top", true);
+  if (error) throw error;
+  return data.map((row) => row.line_id as string);
+}
+
 /**
  * Saves every line the user has no vote on as "undecided", so Undecided is
  * the stored default from the first visit. Returns the full vote map plus the
- * ids that were new (not seen before), which get the card flow.
+ * ids that were new (not seen before).
  */
 export async function seedUndecided(
   supabase: SupabaseClient,

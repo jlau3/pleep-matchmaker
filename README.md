@@ -4,7 +4,7 @@ Pokémon Sleep players vote on every candy line: **want**, **don't want** or **u
 
 - **Tier list** (home): which candy to prioritize, ranked S/A/B/C/Avoid by your friends' net votes, with toggles for All Islands / By Island and My Friends / Everyone. A banner links to voting when there are unvoted candies.
 - **Friends**: *My Friends* to look up players by exact Discord name, IGN or friend code and manage your list (up to 50); *Find New* for matchmaking against players open to new friends.
-- **Profile**: *My Votes* (card-by-card voting for anything unvoted, plus a searchable grid to change any vote) and *Settings* (IGN, friend code, visibility toggles, blocked players, sign out, delete account).
+- **Profile**: *My Votes* (every candy in dex order, List or Grid view, with a ★ on each card to pick your Top 3 wants, pinned at the top) and *Settings* (IGN, friend code, visibility toggles, blocked players, sign out, delete account).
 
 New players go straight to My votes after signing in, and land on the Tier list once everything is voted.
 
@@ -26,6 +26,8 @@ Only lines where at least one of you picked want or don't want count. Each count
 
 Want vs undecided lowers the % through the denominator alone. Want vs don't want lowers it twice as hard.
 
+**Top 3:** each player can star up to 3 of their wants. A line either player starred counts double: both want is +6, a clash is −6, and its best case doubles too, so the % stays between 0 and 100. `public.max_top()` and `public.top_multiplier()` hold the numbers.
+
 A match is shown when it's **≥ 25%** with **≥ 3 lines you both want**, the other player is open to new friends, has room on their friend list (under 50), has a friend code set, and was seen in the last **4 months**. A full friend list hides a player from matches automatically, without changing their setting, until they remove someone. All of these knobs live in `public.match_config()` in the first migration.
 
 ## Tier list rules
@@ -41,6 +43,8 @@ Net votes = wants minus don't-wants among the pool (your friends who have voted,
 | Avoid | net negative |
 
 Cutoffs live in `TIER_CUTOFFS` in `src/lib/tiers.ts`.
+
+Above S, the **Top 3** row holds the 3 lines the pool starred most (ties broken like the rest of the list). Those lines leave their regular tier, so every line appears once. Every card shows its star count.
 
 Inside a tier, lines sort by net votes, then a rarity weight, then wants. The weight only breaks ties and never moves a line between tiers: legendary 0.4, mythical 0.3, pseudo-legendary 0.2, 16-pip rare spawns 0.1, everything else 0. `scripts/build_lines.py` derives it from each line's first stage (EXP curve and friendship points).
 
@@ -94,7 +98,7 @@ pip install pillow
 npm run data
 ```
 
-Players will see only the new lines at the top of **Voting** next time they open it.
+New lines are saved as Undecided for every player the next time they open **My Votes**.
 
 ### Island spawns
 

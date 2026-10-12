@@ -49,7 +49,7 @@ export default async function FriendsPage({ searchParams }: { searchParams: Prom
             {results.map((player) => (
               <li key={player.user_id} className={card}>
                 <PlayerHeader player={player} isFriend={friendIds.has(player.user_id)} />
-                <PlayerLists wants={player.wants} dontWants={player.dont_wants} />
+                <PlayerLists wants={player.wants} dontWants={player.dont_wants} topWants={player.top_wants} />
               </li>
             ))}
           </ul>
@@ -84,7 +84,7 @@ export default async function FriendsPage({ searchParams }: { searchParams: Prom
                 {friend.visible ? (
                   <>
                     <PlayerHeader player={friend} isFriend />
-                    <PlayerLists wants={friend.wants} dontWants={friend.dont_wants} />
+                    <PlayerLists wants={friend.wants} dontWants={friend.dont_wants} topWants={friend.top_wants} />
                   </>
                 ) : (
                   <div className="flex items-center justify-between gap-3 text-sm">

@@ -2,6 +2,7 @@ import { lineSpriteUrl } from "@/lib/lines";
 import { type RankedLine, type TierId, TIERS } from "@/lib/tiers";
 
 const TIER_STYLE: Record<string, string> = {
+  top: "bg-gradient-to-br from-sun to-[#ff8fab] text-[#5b3e00] shadow-[0_3px_0_var(--color-sun-deep)]",
   S: "bg-[#ff8fab] text-white shadow-[0_3px_0_#e0607f]",
   A: "bg-[#ffb36b] text-white shadow-[0_3px_0_#e08a3a]",
   B: "bg-sun text-[#5b3e00] shadow-[0_3px_0_var(--color-sun-deep)]",
@@ -21,6 +22,7 @@ function VoteCard({ ranked }: { ranked: RankedLine }) {
           <span className="text-want">{ranked.wants} want</span>
           <span className="text-meh">{ranked.unsure} unsure</span>
           <span className="text-dont">{ranked.dontWants} don&apos;t want</span>
+          {ranked.tops > 0 && <span className="font-semibold text-sun-deep">★ {ranked.tops}</span>}
         </div>
       </div>
     </li>
