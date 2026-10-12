@@ -7,7 +7,7 @@ import type { OwnProfile } from "@/lib/types";
 
 export function ProfileForm({ profile }: { profile: OwnProfile }) {
   const [state, action, pending] = useActionState<ProfileFormState, FormData>(updateProfile, {});
-  const input = "w-full rounded-lg border border-slate-300 bg-white px-3 py-2 dark:border-slate-700 dark:bg-slate-900";
+  const input = "w-full field";
   return (
     <form action={action} className="space-y-4">
       <label className="block space-y-1">
@@ -45,7 +45,7 @@ export function ProfileForm({ profile }: { profile: OwnProfile }) {
         <button
           type="submit"
           disabled={pending}
-          className="rounded-lg bg-slate-900 px-4 py-2 font-semibold text-white disabled:opacity-50 dark:bg-white dark:text-slate-900"
+          className="btn-primary px-5 py-2"
         >
           {pending ? "Saving…" : "Save"}
         </button>

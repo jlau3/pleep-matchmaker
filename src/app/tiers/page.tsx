@@ -44,7 +44,7 @@ export default async function TiersPage({ searchParams }: { searchParams: Promis
   const pill = (active: boolean) =>
     `rounded-full border px-3 py-1 text-sm ${
       active
-        ? "border-slate-900 bg-slate-900 text-white dark:border-white dark:bg-white dark:text-slate-900"
+        ? "pill-active border-transparent"
         : "border-slate-300 dark:border-slate-700"
     }`;
 
@@ -102,7 +102,7 @@ export default async function TiersPage({ searchParams }: { searchParams: Promis
               const tiers = buildTiers(votes, voters, LINES.filter((line) => island.lines.includes(line.id)));
               const top = (["S", "A"] as const).map((t) => `${tiers.get(t)!.length} ${t}`).join(" · ");
               return (
-                <details key={island.id} className="rounded-2xl border border-slate-200 bg-white p-3 dark:border-slate-800 dark:bg-slate-900">
+                <details key={island.id} className="card p-3">
                   <summary className="flex items-center justify-between gap-3 font-semibold">
                     {island.name}
                     <span className="text-sm font-normal text-slate-500">{top}</span>

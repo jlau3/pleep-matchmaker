@@ -42,7 +42,7 @@ export function CollectionGrid({
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search Pokémon"
-          className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 dark:border-slate-700 dark:bg-slate-900"
+          className="w-full field"
         />
         <div className="flex flex-wrap gap-2">
           {FILTERS.map((f) => (
@@ -52,7 +52,7 @@ export function CollectionGrid({
               onClick={() => setFilter(f.value)}
               className={`rounded-full border px-3 py-1 text-sm ${
                 filter === f.value
-                  ? "border-slate-900 bg-slate-900 text-white dark:border-white dark:bg-white dark:text-slate-900"
+                  ? "pill-active border-transparent"
                   : "border-slate-300 dark:border-slate-700"
               }`}
             >

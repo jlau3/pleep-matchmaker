@@ -3,7 +3,7 @@ import Link from "next/link";
 /** Pill switch between the pages that share one top-level tab. */
 export function SubTabs({ tabs, active }: { tabs: { href: string; label: string }[]; active: string }) {
   return (
-    <nav className="mb-4 inline-flex rounded-full border border-slate-300 p-1 dark:border-slate-700">
+    <nav className="mb-4 inline-flex rounded-full bg-white p-1 shadow-sm dark:bg-night">
       {tabs.map((tab) => (
         <Link
           key={tab.href}
@@ -11,7 +11,7 @@ export function SubTabs({ tabs, active }: { tabs: { href: string; label: string 
           aria-current={tab.href === active ? "page" : undefined}
           className={`rounded-full px-4 py-1.5 text-sm font-semibold ${
             tab.href === active
-              ? "bg-slate-900 text-white dark:bg-white dark:text-slate-900"
+              ? "pill-active"
               : "text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white"
           }`}
         >
