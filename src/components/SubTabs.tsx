@@ -23,11 +23,11 @@ export function SubTabs({ tabs, active }: { tabs: { href: string; label: string 
 }
 
 export const FRIENDS_TABS = [
-  { href: "/friends", label: "My friends" },
-  { href: "/matches", label: "Find new" },
+  { href: "/friends", label: "My Friends" },
+  { href: "/matches", label: "Find New" },
 ];
 
 export const PROFILE_TABS = [
-  { href: "/vote", label: "My votes" },
+  { href: "/vote", label: "My Votes" },
   { href: "/profile", label: "Settings" },
 ];

@@ -69,7 +69,7 @@ export default async function TiersPage({ searchParams }: { searchParams: Promis
 
       <div className="flex flex-wrap gap-2">
         <Link href={href({ pool: "friends" })} className={pill(pool === "friends")}>
-          My friends
+          My Friends
         </Link>
         <Link href={href({ pool: "everyone" })} className={pill(pool === "everyone")}>
           Everyone
@@ -78,10 +78,10 @@ export default async function TiersPage({ searchParams }: { searchParams: Promis
       {mappedIslands.length > 0 && (
         <div className="flex flex-wrap gap-2">
           <Link href={href({ byIsland: false })} className={pill(!byIsland)}>
-            All islands
+            All Islands
           </Link>
           <Link href={href({ byIsland: true })} className={pill(byIsland)}>
-            By island
+            By Island
           </Link>
         </div>
       )}

@@ -58,7 +58,7 @@ export default async function FriendsPage({ searchParams }: { searchParams: Prom
 
       <section>
         <h2 className="mb-3 text-lg font-semibold">
-          My friends{" "}
+          My Friends{" "}
           <span className="text-sm font-normal text-slate-500">
             {friends.length} / {MAX_FRIENDS}
           </span>
@@ -74,7 +74,7 @@ export default async function FriendsPage({ searchParams }: { searchParams: Prom
         {friends.length === 0 ? (
           <p className="text-sm text-slate-500">
             Search for your in-game friends above, or find new ones in{" "}
-            <Link href="/matches" className="underline">Find new</Link>. Then check the{" "}
+            <Link href="/matches" className="underline">Find New</Link>. Then check the{" "}
             <Link href="/tiers" className="underline">Tier List</Link> to see which candy they want most.
           </p>
         ) : (
