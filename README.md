@@ -16,8 +16,9 @@ Stack: Next.js 15 (App Router) + Supabase (Postgres, Discord OAuth) + Tailwind. 
 
 The % on Find New, search results and My Friends is **fit**: how well a player's wants line up with what **your friends** want, not with your own votes.
 
-1. **Group demand.** For each line, count how many of your friends want it, a Top 3 star counting double (`public.top_multiplier()`). Friends with a private list don't count. Each line's share is its demand relative to your friends' most-wanted line, so the top line is 1 and a line half as many friends want is 0.5.
-2. **Fit.** `fit % = sum over their wants of (weight x share) / (sum of their want weights + sum over their don't-wants of share)`, where a starred want weighs 2.
+1. **Group demand.** For each line, count how many of your friends want it. Friends with a private list don't count. Each line's share is its demand relative to your friends' most-wanted line, so the top line is 1 and a line half as many friends want is 0.5.
+2. **Fit.** `fit % = sum over their wants of share / (number of their wants + sum over their don't-wants of share)`.
+   - **Top 3 stars don't count in fit** (or in the tier score). They're a personal "good to know" for friends who want to send someone their favourites, shown on each player's list.
    - 100% means everything they want is among your friends' most-wanted candy and they don't turn any of it down. A want none of your friends share counts 0.
    - Don't-wants count as much as wants (`public.dont_want_weight()` = 1): friends send each other candy, and getting candy you don't want annoys people at least as much as missing a want. A don't-want costs in proportion to how much your friends want that line, so turning down their top candy costs a full want and turning down candy nobody wants costs nothing.
    - Neutral lines don't count.
