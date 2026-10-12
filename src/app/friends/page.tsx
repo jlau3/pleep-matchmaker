@@ -2,6 +2,7 @@ import Link from "next/link";
 import { FriendButton } from "@/components/FriendButton";
 import { PlayerHeader, playerName } from "@/components/PlayerHeader";
 import { PlayerLists } from "@/components/PlayerLists";
+import { InviteReminder } from "@/components/InviteReminder";
 import { PlayerSearch, searchQuery } from "@/components/PlayerSearch";
 import { FRIENDS_TABS, SubTabs } from "@/components/SubTabs";
 import { MAX_FRIENDS } from "@/lib/data";
@@ -33,6 +34,11 @@ export default async function FriendsPage({ searchParams }: { searchParams: Prom
             {friends.length} / {MAX_FRIENDS}
           </span>
         </h2>
+        {friends.length < MAX_FRIENDS && (
+          <div className="mb-3">
+            <InviteReminder friendCount={friends.length} />
+          </div>
+        )}
         {friends.length > 0 && friends.length < MAX_FRIENDS && (
           <p className="mb-3 text-sm text-slate-500">
             Room for {MAX_FRIENDS - friends.length} more.{" "}
@@ -65,13 +71,7 @@ export default async function FriendsPage({ searchParams }: { searchParams: Prom
                         )
                       }
                     />
-                    {friend.wants.length + friend.dont_wants.length === 0 ? (
-                      <p className="mt-3 text-sm text-slate-500">
-                        Hasn&apos;t voted yet. Ping them on Discord to add their wants.
-                      </p>
-                    ) : (
-                      <PlayerLists wants={friend.wants} dontWants={friend.dont_wants} topWants={friend.top_wants} />
-                    )}
+                    <PlayerLists wants={friend.wants} dontWants={friend.dont_wants} topWants={friend.top_wants} />
                   </>
                 ) : (
                   <div className="flex items-center justify-between gap-3 text-sm">

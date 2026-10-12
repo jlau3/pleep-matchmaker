@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { InviteButton } from "@/components/InviteButton";
+import { InviteReminder } from "@/components/InviteReminder";
 import { TierBoard } from "@/components/TierBoard";
 import { ISLANDS, LINES } from "@/lib/lines";
 import { loadOwnChoices } from "@/lib/data";
@@ -19,14 +20,12 @@ export default async function TiersPage({ searchParams }: { searchParams: Promis
 
   let votes: Map<string, LineVotes>;
   let voters: number;
-  /** Friends who can share their picks but haven't voted on anything yet. */
-  let silentFriends = 0;
+  let friendCount = 0;
   if (pool === "friends") {
     const { data, error } = await supabase.rpc("get_friends");
     if (error) throw error;
-    const visible = (data as FriendRow[]).filter((f) => f.visible);
-    const players = visible.filter((f) => f.wants.length + f.dont_wants.length > 0);
-    silentFriends = visible.length - players.length;
+    friendCount = (data as FriendRow[]).length;
+    const players = (data as FriendRow[]).filter((f) => f.visible && f.wants.length + f.dont_wants.length > 0);
     votes = countVotes(players);
     voters = players.length;
   } else {
@@ -75,17 +74,7 @@ export default async function TiersPage({ searchParams }: { searchParams: Promis
         </Link>
       )}
 
-      {pool === "friends" && silentFriends > 0 && (
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-sun/25 px-4 py-3 text-sm">
-          <span>
-            <strong>
-              {silentFriends} {silentFriends === 1 ? "friend hasn't" : "friends haven't"}
-            </strong>{" "}
-            voted yet. Ping them on Discord to add their wants.
-          </span>
-          <InviteButton />
-        </div>
-      )}
+      {pool === "friends" && voters > 0 && <InviteReminder friendCount={friendCount} />}
 
       <div className="flex flex-wrap gap-2">
         <Link href={href({ pool: "friends" })} className={pill(pool === "friends")}>
