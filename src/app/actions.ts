@@ -90,10 +90,15 @@ export async function updateProfile(_prev: ProfileFormState, form: FormData): Pr
   return { saved: true };
 }
 
-export async function blockUser(userId: string) {
+// Plain insert: players can insert and delete blocks but not update them, so an
+// upsert (INSERT ... ON CONFLICT DO UPDATE) is refused. A duplicate means "already blocked".
+export async function blockUser(userId: string): Promise<{ error?: string }> {
   const { supabase, user } = await requireUser();
-  await supabase.from("blocks").upsert({ blocker_id: user.id, blocked_id: userId }, { onConflict: "blocker_id,blocked_id" });
+  if (userId === user.id) return { error: "You can't block yourself." };
+  const { error } = await supabase.from("blocks").insert({ blocker_id: user.id, blocked_id: userId });
+  if (error && error.code !== "23505") return { error: "Couldn't block, try again" };
   revalidatePath("/", "layout");
+  return {};
 }
 
 const FRIEND_ERRORS: Record<string, string> = {
@@ -119,10 +124,12 @@ export async function removeFriend(friendId: string): Promise<{ error?: string }
   return {};
 }
 
-export async function unblockUser(userId: string) {
+export async function unblockUser(userId: string): Promise<{ error?: string }> {
   const { supabase, user } = await requireUser();
-  await supabase.from("blocks").delete().eq("blocker_id", user.id).eq("blocked_id", userId);
-  revalidatePath("/profile");
+  const { error } = await supabase.from("blocks").delete().eq("blocker_id", user.id).eq("blocked_id", userId);
+  if (error) return { error: "Couldn't unblock, try again" };
+  revalidatePath("/", "layout");
+  return {};
 }
 
 export async function deleteAccount() {

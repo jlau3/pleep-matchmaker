@@ -1,4 +1,5 @@
-import { signOut, unblockUser } from "@/app/actions";
+import { signOut } from "@/app/actions";
+import { BlockButton } from "@/components/BlockButton";
 import { DeleteAccountButton } from "@/components/DeleteAccountButton";
 import { playerName } from "@/components/PlayerHeader";
 import { ProfileForm } from "@/components/ProfileForm";
@@ -46,11 +47,7 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
                     {playerName(row)}
                     {row.discord_username && <span className="ml-2 text-slate-500">@{row.discord_username}</span>}
                   </span>
-                  <form action={unblockUser.bind(null, row.user_id)}>
-                    <button type="submit" className="text-xs underline">
-                      Unblock
-                    </button>
-                  </form>
+                  <BlockButton userId={row.user_id} name={playerName(row)} blocked />
                 </li>
               ))}
             </ul>
