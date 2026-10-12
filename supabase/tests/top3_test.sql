@@ -101,6 +101,12 @@ do $$ begin
   assert not exists (select 1 from public.get_matches() where discord_username = 'tara'), 'below match thresholds';
 end $$;
 
+-- The Tier List asks without match %.
+do $$ begin
+  assert (select match_pct from public.get_friends(false) where discord_username = 'tara') is null, 'no pct when with_match is false';
+  assert (select top_wants from public.get_friends(false) where discord_username = 'tara') = '{ta,tb,te}', 'votes still returned';
+end $$;
+
 -- A friend who hides their list shows no %.
 reset role;
 update public.profiles set allow_lookup = false where discord_username = 'tara';
