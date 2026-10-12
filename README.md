@@ -32,7 +32,7 @@ Anywhere else, a fit under 25% shows as an amber **low fit** (`LOW_FIT_PCT` in `
 
 ## Tier list rules
 
-The tier list answers "which candy should I send my friends?". Getting candy you don't want annoys people as much as missing one you do, so it ranks by **net score**: wants, with a Top 3 star counting double, minus don't-wants (`DONT_WANT_WEIGHT` = 1, the same weight fit uses). The pool is your friends who have voted, or every player active in the last 4 months. Your own votes don't count. Example with 50 players: 39 want + 11 unsure scores 39, 30 want + 20 unsure scores 30, and 39 want + 11 don't-want scores 28, below both.
+The tier list answers "which candy should I send my friends?". Getting candy you don't want annoys people as much as missing one you do, so it ranks by **net score**: wants minus don't-wants (`DONT_WANT_WEIGHT` = 1, the same weight fit uses). Top 3 stars don't change the score; they're the first tie-breaker. The pool is your friends who have voted, or every player active in the last 4 months. Your own votes don't count. Example with 50 players: 39 want + 11 unsure scores 39, 30 want + 20 unsure scores 30, and 39 want + 11 don't-want scores 28, below both.
 
 Tiers are relative. Lines scoring above 0 are ranked and split by position:
 
@@ -44,11 +44,11 @@ Tiers are relative. Lines scoring above 0 are ranked and split by position:
 | C | the rest, plus lines at exactly 0 (nobody voted, or a split room) |
 | Avoid | below 0: more people don't want it than want it |
 
-Lines that tie share a tier, placed by the tie's middle rank, so with few voters (lots of ties) the sizes stay close to the targets. Fixed % cutoffs crowded S and Avoid with a small, decisive player base, and would keep drifting as the pool grows. The shares live in `TIER_SHARES` in `src/lib/tiers.ts`. Every card shows its **score** ("+28 score", green above 0, red below) next to the want / unsure / don't-want counts, so you can see why a popular candy ranks where it does. In By Island view the ranking is within each island.
+Lines that tie share a tier, placed by the tie's middle rank, so with few voters (lots of ties) the sizes stay close to the targets. Fixed % cutoffs crowded S and Avoid with a small, decisive player base, and would keep drifting as the pool grows. The shares live in `TIER_SHARES` in `src/lib/tiers.ts`. Every card shows its net score as a plain number ("+28" in green, "0" in grey, "−5" in red, no label) next to the want / unsure / don't-want counts, so you can see why a popular candy ranks where it does. In By Island view the ranking is within each island.
 
 Above S, the **Top 3** row repeats the 9 lines that show up most often in players' Top 3, with **Show all** to expand to every starred line, including ones in Avoid so nobody's pick is left out (ties broken like the rest of the list). They stay in their regular tier too, so nothing shifts. Every card shows its star count.
 
-Inside a tier, lines sort by score, then a rarity weight, then fewer don't-wants, then dex. The rarity weight only breaks ties and never moves a line between tiers: legendary 0.4, mythical 0.3, pseudo-legendary 0.2, 16-pip rare spawns 0.1, everything else 0. `scripts/build_lines.py` derives it from each line's first stage (EXP curve and friendship points).
+Inside a tier, lines sort by score, then Top 3 stars, then a rarity weight, then fewer don't-wants, then dex. Lines tied on score share a tier whatever their stars, so stars only order them. The rarity weight only breaks ties and never moves a line between tiers: legendary 0.4, mythical 0.3, pseudo-legendary 0.2, 16-pip rare spawns 0.1, everything else 0. `scripts/build_lines.py` derives it from each line's first stage (EXP curve and friendship points).
 
 ## Privacy
 

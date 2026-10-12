@@ -1,4 +1,4 @@
-import { type CandyLine, LINES, TOP_MULTIPLIER } from "./lines";
+import { type CandyLine, LINES } from "./lines";
 
 export type TierId = "top" | "S" | "A" | "B" | "C" | "avoid";
 
@@ -11,9 +11,9 @@ export interface Tier {
 /**
  * The tier list answers "which candy should I send my friends?". Getting candy
  * you don't want annoys people as much as missing one you do, so it ranks by
- * net score: wants, with a Top 3 star counting TOP_MULTIPLIER times, minus
- * DONT_WANT_WEIGHT per don't-want. 39 wants + 11 don't-wants (28) ranks below
- * 30 wants + 20 unsure (30).
+ * net score: wants minus DONT_WANT_WEIGHT per don't-want. 39 wants + 11
+ * don't-wants (28) ranks below 30 wants + 20 unsure (30). Top 3 stars don't
+ * change the score; they're the first tie-breaker.
  *
  * Tiers are relative: lines scoring above 0 are ranked, and the top
  * TIER_SHARES.S go to S, the next TIER_SHARES.A to A, the next TIER_SHARES.B to
@@ -22,8 +22,8 @@ export interface Tier {
  * wants) is Avoid; exactly 0 (no votes, or a split room) is C.
  *
  * Above S, the Top 3 row repeats every line the pool starred, most stars
- * first, Avoid lines included (nobody's pick is left out). The board shows the first TOP_ROW_SIZE and
- * folds the rest behind "Show all". They also stay in their regular tier, so
+ * first, Avoid lines included (nobody's pick is left out). The board shows the
+ * first TOP_ROW_SIZE and folds the rest behind "Show all". They also stay in their regular tier, so
  * the rest of the list never shifts.
  */
 export const TIER_SHARES = { S: 0.15, A: 0.2, B: 0.3 } as const;
@@ -71,19 +71,24 @@ export interface RankedLine {
 }
 
 /**
- * Net score: a want counts 1, a starred want TOP_MULTIPLIER (so 2), and each
- * don't-want takes off DONT_WANT_WEIGHT. Undecided counts 0.
+ * Net score: each want counts 1 (starred or not) and each don't-want takes off
+ * DONT_WANT_WEIGHT. Undecided counts 0.
  */
 export function netScore(votes: LineVotes): number {
-  return votes.wants + (TOP_MULTIPLIER - 1) * (votes.tops ?? 0) - DONT_WANT_WEIGHT * votes.dontWants;
+  return votes.wants - DONT_WANT_WEIGHT * votes.dontWants;
 }
 
 const byRank = (a: RankedLine, b: RankedLine) =>
-  b.score - a.score || b.line.weight - a.line.weight || a.dontWants - b.dontWants || a.line.dex - b.line.dex;
+  b.score - a.score ||
+  b.tops - a.tops ||
+  b.line.weight - a.line.weight ||
+  a.dontWants - b.dontWants ||
+  a.line.dex - b.line.dex;
 
 /**
  * Buckets lines into tiers (see TIER_SHARES), best first inside each tier (net
- * score, then rarity weight, then fewer don't-wants, then dex). The Top 3 row
+ * score, then Top 3 stars, then rarity weight, then fewer don't-wants, then
+ * dex). Lines that tie on score share a tier whatever their stars. The Top 3 row
  * holds every starred line, ordered by stars and then the same keys.
  */
 export function buildTiers(

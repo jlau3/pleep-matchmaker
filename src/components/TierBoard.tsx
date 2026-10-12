@@ -28,7 +28,7 @@ function VoteCard({ ranked }: { ranked: RankedLine }) {
                 ranked.score > 0 ? "text-want" : ranked.score < 0 ? "text-dont" : "text-slate-400"
               }`}
             >
-              {formatScore(ranked.score)} <span className="text-xs font-normal text-slate-500">score</span>
+              {formatScore(ranked.score)}
             </span>
           )}
         </div>

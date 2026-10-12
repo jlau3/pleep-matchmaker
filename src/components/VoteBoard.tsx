@@ -237,7 +237,7 @@ export function VoteBoard({
 
       <section className="card mb-4 p-3" aria-label="Your Top 3">
         <h2 className="font-bold">Your Top {MAX_TOP}</h2>
-        <p className="mb-2 text-xs text-slate-500">Tap ★ on a candy to star it as a top want. These count double in matching and on the tier list.</p>
+        <p className="mb-2 text-xs text-slate-500">Tap ★ on a candy to star it as a top want.</p>
         <ul className="grid grid-cols-3 gap-2">
           {Array.from({ length: MAX_TOP }, (_, i) => {
             const line = topLines[i];
