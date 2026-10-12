@@ -49,7 +49,7 @@ export default async function FriendsPage({ searchParams }: { searchParams: Prom
             {results.map((player) => (
               <li key={player.user_id} className={card}>
                 <PlayerHeader player={player} isFriend={friendIds.has(player.user_id)} />
-                <PlayerLists wants={player.wants} dontWants={player.dont_wants} open />
+                <PlayerLists wants={player.wants} dontWants={player.dont_wants} />
               </li>
             ))}
           </ul>
