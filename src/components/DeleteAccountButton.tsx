@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { deleteAccount } from "@/app/actions";
+import { rethrowIfNavigation, SAVE_FAILED } from "@/lib/saveError";
 
 /**
  * Two-step delete: the first click opens an in-page "Are you sure?" panel.
@@ -11,6 +12,7 @@ import { deleteAccount } from "@/app/actions";
 export function DeleteAccountButton() {
   const [confirming, setConfirming] = useState(false);
   const [pending, startTransition] = useTransition();
+  const [failed, setFailed] = useState(false);
 
   if (!confirming) {
     return (
@@ -32,11 +34,25 @@ export function DeleteAccountButton() {
       <p className="mt-1 text-sm">
         This permanently deletes your profile, all your votes and your friend list. It can&apos;t be undone.
       </p>
+      {failed && (
+        <p role="alert" className="mt-2 text-sm text-dont">
+          {SAVE_FAILED}
+        </p>
+      )}
       <div className="mt-3 flex flex-wrap gap-2">
         <button
           type="button"
           disabled={pending}
-          onClick={() => startTransition(() => deleteAccount())}
+          onClick={() =>
+            startTransition(async () => {
+              try {
+                await deleteAccount();
+              } catch (e) {
+                rethrowIfNavigation(e);
+                setFailed(true);
+              }
+            })
+          }
           className="rounded-full bg-dont px-4 py-2 font-bold text-white disabled:opacity-60"
         >
           {pending ? "Deleting…" : "Yes, delete my account"}
