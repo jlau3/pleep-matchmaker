@@ -62,35 +62,3 @@ export function linesFromIds(ids: Iterable<string>): CandyLine[] {
   }
   return out.sort((a, b) => a.dex - b.dex);
 }
-
-export interface IslandGroup<T> {
-  id: string;
-  name: string;
-  items: T[];
-}
-
-/**
- * Splits items by the islands their line spawns on, keeping the input order
- * inside each group. A line on several islands appears under each. Lines on no
- * mapped island land in a trailing group; with no island data at all, one
- * "All islands" group is returned.
- */
-export function groupByIsland<T extends { id: string }>(
-  items: T[],
-  islands: Island[] = ISLANDS,
-): IslandGroup<T>[] {
-  if (items.length === 0) return [];
-  const mapped = islands.filter((island) => island.lines.length > 0);
-  if (mapped.length === 0) return [{ id: "all", name: "All islands", items }];
-
-  const groups: IslandGroup<T>[] = [];
-  for (const island of mapped) {
-    const onIsland = new Set(island.lines);
-    const hits = items.filter((item) => onIsland.has(item.id));
-    if (hits.length > 0) groups.push({ id: island.id, name: island.name, items: hits });
-  }
-  const covered = new Set(mapped.flatMap((island) => island.lines));
-  const rest = items.filter((item) => !covered.has(item.id));
-  if (rest.length > 0) groups.push({ id: "unmapped", name: "Island not mapped yet", items: rest });
-  return groups;
-}

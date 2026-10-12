@@ -38,14 +38,14 @@ export default async function MatchesPage() {
     notices.push(
       <>
         {unsorted} {unsorted === 1 ? "line isn't" : "lines aren't"} sorted yet.{" "}
-        <Link href="/pick" className="underline">Sort them</Link>
+        <Link href="/vote" className="underline">Vote on them</Link>
       </>,
     );
 
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-2xl font-bold">Find new friends</h1>
+        <h1 className="text-2xl font-bold">Matchmake</h1>
         <p className="text-sm text-slate-600 dark:text-slate-300">
           Players open to new friends whose candy list lines up with yours.
         </p>
@@ -58,7 +58,7 @@ export default async function MatchesPage() {
 
       {picked === 0 ? (
         <p className="py-8 text-center text-slate-500">
-          Mark some lines as want or don't want first. <Link href="/pick" className="underline">Start sorting</Link>
+          Mark some lines as want or don't want first. <Link href="/vote" className="underline">Start voting</Link>
         </p>
       ) : matches.length === 0 ? (
         <p className="py-8 text-center text-slate-500">

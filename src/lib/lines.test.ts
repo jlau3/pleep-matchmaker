@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { groupByIsland, LINES, LINES_BY_ID, linesFromIds } from "./lines";
+import { ISLANDS, LINES, LINES_BY_ID, linesFromIds } from "./lines";
 
 describe("candy line data", () => {
   it("has unique ids and at least one member per line", () => {
@@ -20,24 +20,14 @@ describe("linesFromIds", () => {
   });
 });
 
-describe("groupByIsland", () => {
-  const items = [{ id: "a" }, { id: "b" }, { id: "c" }];
-  it("returns one group when no island data exists", () => {
-    expect(groupByIsland(items, [{ id: "x", name: "X", lines: [] }])).toEqual([{ id: "all", name: "All islands", items }]);
+describe("island data", () => {
+  it("only references known candy lines", () => {
+    for (const island of ISLANDS) {
+      for (const id of island.lines) expect(LINES_BY_ID.has(id), `${island.id}: ${id}`).toBe(true);
+    }
   });
-  it("splits by island, repeats shared lines, and collects unmapped", () => {
-    const groups = groupByIsland(items, [
-      { id: "x", name: "X", lines: ["a", "b"] },
-      { id: "y", name: "Y", lines: ["b"] },
-      { id: "z", name: "Z", lines: ["zz"] },
-    ]);
-    expect(groups.map((g) => [g.id, g.items.map((i) => i.id)])).toEqual([
-      ["x", ["a", "b"]],
-      ["y", ["b"]],
-      ["unmapped", ["c"]],
-    ]);
-  });
-  it("returns nothing for no items", () => {
-    expect(groupByIsland([])).toEqual([]);
+  it("has every island populated", () => {
+    expect(ISLANDS.length).toBe(9);
+    for (const island of ISLANDS) expect(island.lines.length).toBeGreaterThan(0);
   });
 });

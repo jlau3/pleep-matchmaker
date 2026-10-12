@@ -125,6 +125,22 @@ do $$ begin
   assert (select dont_wants from public.get_line_stats() where line_id = 'd1') = 3, 'd1 dont a,b,c';
 end $$;
 
+-- Voter count: active users with a want/dont vote. Other test files leave
+-- voters behind, so check deltas: stale e and undecided-only users don't count.
+reset role;
+create temp table vc as select public.get_voter_count() as n;
+insert into auth.users (id, raw_user_meta_data) values ('00000000-0000-0000-0000-0000000000f0', '{"name":"meh#0"}');
+insert into public.preferences values ('00000000-0000-0000-0000-0000000000f0', 'w1', 'undecided');
+do $$ begin
+  assert public.get_voter_count() = (select n from vc), 'undecided-only not counted';
+end $$;
+update public.profiles set last_seen_at = now() where discord_username = 'eve';
+do $$ begin
+  assert public.get_voter_count() = (select n from vc) + 1, 'stale user counted once active';
+end $$;
+update public.profiles set last_seen_at = now() - interval '5 months' where discord_username = 'eve';
+set role authenticated;
+
 -- prefs_updated_at only moves on a real change.
 reset role;
 update public.profiles set prefs_updated_at = '2020-01-01' where discord_username = 'alice';

@@ -2,12 +2,10 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 
 const LINKS = [
+  { href: "/vote", label: "Voting" },
   { href: "/friends", label: "Friends" },
-  { href: "/pick", label: "Sort" },
-  { href: "/collection", label: "My list" },
-  { href: "/matches", label: "Find friends" },
-  { href: "/lookup", label: "Look up" },
-  { href: "/popular", label: "Popular" },
+  { href: "/tiers", label: "Tier list" },
+  { href: "/matches", label: "Matchmake" },
   { href: "/profile", label: "Profile" },
 ];
 
