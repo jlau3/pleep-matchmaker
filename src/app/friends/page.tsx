@@ -3,6 +3,7 @@ import { FriendButton } from "@/components/FriendButton";
 import { PlayerHeader, playerName } from "@/components/PlayerHeader";
 import { PlayerLists } from "@/components/PlayerLists";
 import { InviteReminder } from "@/components/InviteReminder";
+import { MatchPct } from "@/components/MatchPct";
 import { PlayerSearch, searchQuery } from "@/components/PlayerSearch";
 import { FRIENDS_TABS, SubTabs } from "@/components/SubTabs";
 import { MAX_FRIENDS } from "@/lib/data";
@@ -62,14 +63,7 @@ export default async function FriendsPage({ searchParams }: { searchParams: Prom
                     <PlayerHeader
                       player={friend}
                       isFriend
-                      aside={
-                        friend.match_pct !== null && (
-                          <div className="shrink-0 text-right leading-none">
-                            <div className="text-2xl font-bold text-want">{friend.match_pct}%</div>
-                            <div className="text-xs text-slate-500">match</div>
-                          </div>
-                        )
-                      }
+                      aside={<MatchPct pct={friend.match_pct} />}
                     />
                     <PlayerLists wants={friend.wants} dontWants={friend.dont_wants} topWants={friend.top_wants} />
                   </>

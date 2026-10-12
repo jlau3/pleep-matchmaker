@@ -22,6 +22,8 @@ export interface LookupRow extends PlayerContact {
   dont_wants: string[];
   /** Starred subset of wants (Top 3). */
   top_wants: string[];
+  /** Your match % with this player (same formula as My Friends). Null for yourself. */
+  match_pct: number | null;
 }
 
 export interface LineStatRow {

@@ -1,5 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { LookupRow } from "@/lib/types";
+import { MatchPct } from "./MatchPct";
 import { PlayerHeader } from "./PlayerHeader";
 import { PlayerLists } from "./PlayerLists";
 
@@ -36,7 +37,7 @@ export async function PlayerSearch({ supabase, q, friendIds }: { supabase: Supab
         <ul className="space-y-3">
           {results.map((player) => (
             <li key={player.user_id} className="card p-4">
-              <PlayerHeader player={player} isFriend={friendIds.has(player.user_id)} />
+              <PlayerHeader player={player} isFriend={friendIds.has(player.user_id)} aside={<MatchPct pct={player.match_pct} />} />
               <PlayerLists wants={player.wants} dontWants={player.dont_wants} topWants={player.top_wants} />
             </li>
           ))}

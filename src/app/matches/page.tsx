@@ -3,7 +3,8 @@ import { LineChips } from "@/components/LineChips";
 import { PlayerHeader } from "@/components/PlayerHeader";
 import { PlayerSearch, searchQuery } from "@/components/PlayerSearch";
 import { FRIENDS_TABS, SubTabs } from "@/components/SubTabs";
-import { loadFriendIds, loadOwnChoices, loadOwnProfile, MAX_FRIENDS } from "@/lib/data";
+import { FriendPostCard } from "@/components/FriendPostCard";
+import { loadFriendIds, loadOwnProfile, loadOwnVotes, MAX_FRIENDS } from "@/lib/data";
 import { LINES, linesFromIds } from "@/lib/lines";
 import { requireUser } from "@/lib/supabase/server";
 import type { MatchRow } from "@/lib/types";
@@ -11,8 +12,8 @@ import type { MatchRow } from "@/lib/types";
 export default async function MatchesPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
   const { supabase, user } = await requireUser();
   const q = await searchQuery(searchParams);
-  const [choices, profile, friendIds, matchesResult] = await Promise.all([
-    loadOwnChoices(supabase, user.id),
+  const [{ choices, tops }, profile, friendIds, matchesResult] = await Promise.all([
+    loadOwnVotes(supabase, user.id),
     loadOwnProfile(supabase, user.id),
     loadFriendIds(supabase, user.id),
     supabase.rpc("get_matches"),
@@ -66,6 +67,16 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
           {notice}
         </p>
       ))}
+
+      <FriendPostCard
+        friendCode={profile.friend_code}
+        handle={profile.discord_username ? `@${profile.discord_username}` : profile.ign}
+        topNames={linesFromIds(tops).map((line) => line.name)}
+        wantNames={linesFromIds(Object.keys(choices).filter((id) => choices[id] === "want"))
+          .sort((a, b) => b.weight - a.weight || a.dex - b.dex)
+          .slice(0, 3)
+          .map((line) => line.name)}
+      />
 
       {picked === 0 ? (
         <p className="py-8 text-center text-slate-500">

@@ -101,6 +101,12 @@ do $$ begin
   assert not exists (select 1 from public.get_matches() where discord_username = 'tara'), 'below match thresholds';
 end $$;
 
+-- Player search shows the same % (tom looking up tara), and none for yourself.
+do $$ begin
+  assert (select match_pct from public.lookup_players('tara')) = 50, 'lookup pct';
+  assert (select match_pct from public.lookup_players('tom')) is null, 'no pct for yourself';
+end $$;
+
 -- The Tier List asks without match %.
 do $$ begin
   assert (select match_pct from public.get_friends(false) where discord_username = 'tara') is null, 'no pct when with_match is false';
