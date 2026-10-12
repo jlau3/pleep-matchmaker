@@ -56,7 +56,7 @@ Inside a tier, lines sort by net votes, then a rarity weight, then wants. The we
 
 - Row level security: users read and write only their own rows.
 - Other players' data only comes out of `security definer` functions (`get_matches`, `lookup_players`, `get_friends`, `get_line_stats`, `get_voter_count`), which apply blocks, staleness, `open_to_friends` and `allow_lookup`.
-- Lookup is exact-match only, so the player list can't be scrolled or enumerated. Players can turn lookup off in Profile, which also hides their picks from people who added them as a friend.
+- Lookup is exact-match only, so the player list can't be scrolled or enumerated. It ignores letter case, extra spaces and Unicode width/accent encoding differences (`public.search_key`), but never matches part of a name. Players can turn lookup off in Profile, which also hides their picks from people who added them as a friend.
 - Blocking hides both players from each other everywhere and removes any friend link.
 - Deleting an account removes the auth user, which cascades to everything else.
 
