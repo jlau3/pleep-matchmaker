@@ -103,7 +103,7 @@ export default async function FriendsPage({ searchParams }: { searchParams: Prom
                       <strong>{playerName(friend)}</strong>
                       <span className="ml-2 text-slate-500">has made their list private</span>
                     </span>
-                    <FriendButton userId={friend.user_id} isFriend />
+                    <FriendButton userId={friend.user_id} isFriend name={playerName(friend)} />
                   </div>
                 )}
               </li>
