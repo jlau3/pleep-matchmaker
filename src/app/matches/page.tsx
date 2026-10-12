@@ -1,14 +1,16 @@
 import Link from "next/link";
 import { LineChips } from "@/components/LineChips";
 import { PlayerHeader } from "@/components/PlayerHeader";
+import { PlayerSearch, searchQuery } from "@/components/PlayerSearch";
 import { FRIENDS_TABS, SubTabs } from "@/components/SubTabs";
 import { loadFriendIds, loadOwnChoices, loadOwnProfile, MAX_FRIENDS } from "@/lib/data";
 import { LINES, linesFromIds } from "@/lib/lines";
 import { requireUser } from "@/lib/supabase/server";
 import type { MatchRow } from "@/lib/types";
 
-export default async function MatchesPage() {
+export default async function MatchesPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
   const { supabase, user } = await requireUser();
+  const q = await searchQuery(searchParams);
   const [choices, profile, friendIds, matchesResult] = await Promise.all([
     loadOwnChoices(supabase, user.id),
     loadOwnProfile(supabase, user.id),
@@ -53,8 +55,9 @@ export default async function MatchesPage() {
   return (
     <div className="space-y-4">
       <div>
-        <SubTabs tabs={FRIENDS_TABS} active="/matches" />
-        <p className="text-sm text-slate-600 dark:text-slate-300">
+        <SubTabs tabs={FRIENDS_TABS} active="/matches" query={q ? `q=${encodeURIComponent(q)}` : undefined} />
+        <PlayerSearch supabase={supabase} q={q} friendIds={friendIds} />
+        <p className="mt-4 text-sm text-slate-600 dark:text-slate-300">
           Players open to new friends whose candy votes line up with yours.
         </p>
       </div>

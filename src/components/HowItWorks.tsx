@@ -1,0 +1,84 @@
+import Link from "next/link";
+import { MAX_TOP } from "@/lib/lines";
+import { MAX_FRIENDS } from "@/lib/data";
+
+const STEPS: { title: string; body: React.ReactNode; href: string; cta: string }[] = [
+  {
+    title: "Vote on every candy",
+    body: (
+      <>
+        Mark each Pokémon Sleep candy line <b>Want</b>, <b>Don&apos;t Want</b> or leave it <b>Undecided</b>. Tap the ★ to
+        pick your Top {MAX_TOP}: they count double everywhere.
+      </>
+    ),
+    href: "/vote",
+    cta: "My Votes",
+  },
+  {
+    title: "See what your friends want",
+    body: (
+      <>
+        The Tier List ranks every candy by what your friends (or all players) want, so you know which Pokémon to keep
+        and level for the people you play with.
+      </>
+    ),
+    href: "/tiers",
+    cta: "Tier List",
+  },
+  {
+    title: "Add your in-game friends",
+    body: (
+      <>
+        Look them up by exact Discord name, IGN or friend code and add up to {MAX_FRIENDS}. Each friend shows how well your
+        votes match.
+      </>
+    ),
+    href: "/friends",
+    cta: "My Friends",
+  },
+  {
+    title: "Find new friends",
+    body: (
+      <>
+        Find New matches you with players who want the same candy. Copy their friend code and add them in Pokémon
+        Sleep.
+      </>
+    ),
+    href: "/matches",
+    cta: "Find New",
+  },
+];
+
+/**
+ * What the app does, in four steps. Shown on the sign-in page, opened on a
+ * new player's first visit to My Votes, and at /about (linked from the nav).
+ */
+export function HowItWorks({ links = true }: { links?: boolean }) {
+  return (
+    <div>
+      <ol className="space-y-4">
+        {STEPS.map((step, i) => (
+          <li key={step.title} className="flex gap-3">
+            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-sun font-extrabold text-[#5b3e00]">
+              {i + 1}
+            </span>
+            <div>
+              <h3 className="font-bold">{step.title}</h3>
+              <p className="text-sm text-slate-600 dark:text-slate-300">{step.body}</p>
+              {links && (
+                <Link href={step.href} className="text-sm font-semibold underline">
+                  {step.cta} →
+                </Link>
+              )}
+            </div>
+          </li>
+        ))}
+      </ol>
+      <p className="mt-5 text-xs text-slate-500">
+        Your friend code and IGN are only shown to matches and to people who look you up by exact name. You can turn off
+        matching or lookup in Profile → Settings, and stay hidden from matches automatically once your friend list is full.
+        Players inactive for 4 months drop out of matching.
+      </p>
+    </div>
+  );
+}

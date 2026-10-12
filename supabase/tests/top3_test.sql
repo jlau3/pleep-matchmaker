@@ -69,6 +69,17 @@ do $$ begin
   assert not (select top from public.preferences where user_id = auth.uid() and line_id = 'tz'), 'non-want star dropped';
 end $$;
 
+-- Find New leaves out people you already added.
+reset role;
+insert into public.friends (user_id, friend_id) values ('00000000-0000-0000-0003-000000000001', '00000000-0000-0000-0003-000000000002');
+set role authenticated;
+do $$ begin
+  assert not exists (select 1 from public.get_matches() where discord_username = 'tom'), 'friend not in Find New';
+end $$;
+reset role;
+delete from public.friends where user_id = '00000000-0000-0000-0003-000000000001';
+set role authenticated;
+
 -- Friends, lookup and community stats expose the stars.
 reset role;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0003-000000000002', false);
