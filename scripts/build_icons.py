@@ -4,7 +4,11 @@ Replace public/sprites/*.webp with the in-game Pokémon Sleep icons from
 Serebii. Run after build_lines.py; any sprite without a Serebii icon keeps
 the PokeAPI artwork build_lines.py downloaded.
 
-    python3 scripts/build_icons.py
+scripts/icons-state.json records which sprites have been checked and which
+are still on PokeAPI art, so the daily job can skip everything else:
+
+    python3 scripts/build_icons.py                 # every sprite
+    python3 scripts/build_icons.py --missing-only  # new sprites + ones still without a Serebii icon
 """
 import io
 import json
@@ -20,6 +24,7 @@ BASE = "https://www.serebii.net/pokemonsleep/pokemon/icon/{}.png"
 ROOT = Path(__file__).resolve().parent.parent
 LINES_JSON = ROOT / "src" / "data" / "candy-lines.json"
 OUT = ROOT / "public" / "sprites"
+STATE_JSON = Path(__file__).resolve().parent / "icons-state.json"
 SIZE = 128
 
 # Sprite ids (PokeAPI form ids, or dex numbers) whose Serebii file name isn't
@@ -45,7 +50,12 @@ def fetch(url: str) -> bytes | None:
 
 def main() -> int:
     lines = json.loads(LINES_JSON.read_text())
-    sprites = sorted({m["sprite"] for line in lines for m in line["members"]})
+    all_sprites = sorted({m["sprite"] for line in lines for m in line["members"]})
+    state = json.loads(STATE_JSON.read_text()) if STATE_JSON.exists() else {"checked": [], "missing": []}
+    sprites = all_sprites
+    if "--missing-only" in sys.argv:
+        checked, still = set(state["checked"]), set(state["missing"])
+        sprites = [s for s in all_sprites if s not in checked or s in still]
     missing = []
     for sprite in sprites:
         name = FORM_ICONS.get(sprite, f"{sprite:03d}")
@@ -58,6 +68,12 @@ def main() -> int:
         img.save(OUT / f"{sprite}.webp", "WEBP", quality=88, method=6)
         time.sleep(0.2)
     print(f"{len(sprites) - len(missing)} icons from Serebii, {len(missing)} kept as PokeAPI art: {missing}")
+    fetched_now = set(sprites)
+    state = {
+        "checked": sorted(set(state["checked"]) | fetched_now),
+        "missing": sorted((set(state["missing"]) - fetched_now) | set(missing)),
+    }
+    STATE_JSON.write_text(json.dumps(state) + "\n")
     return 0
 
 

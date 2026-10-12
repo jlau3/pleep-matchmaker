@@ -1,0 +1,101 @@
+# Daily: rebuild the candy lines, sprites and island spawns from upstream
+# (nitoyon/pokesleep-tool roster, Serebii icons and location pages). If
+# anything changed and the safety checks pass, open or update a PR and ping
+# Discord. Nothing reaches players until the PR is merged.
+#
+# Needs: Settings -> Actions -> General -> "Allow GitHub Actions to create and
+# approve pull requests". Optional secret DISCORD_WEBHOOK_URL for the ping.
+name: Data refresh
+
+on:
+  schedule:
+    - cron: "17 13 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: data-refresh
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pillow
+
+      - name: Rebuild data
+        run: |
+          python3 scripts/build_lines.py
+          python3 scripts/build_icons.py --missing-only
+          python3 scripts/build_islands.py
+
+      - name: Anything changed?
+        id: diff
+        run: |
+          git add -A
+          if git diff --cached --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "No changes upstream."
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            git diff --cached --stat
+          fi
+          git reset -q
+
+      - name: Safety checks
+        if: steps.diff.outputs.changed == 'true'
+        run: python3 scripts/check_data.py summary.md
+
+      - uses: actions/setup-node@v4
+        if: steps.diff.outputs.changed == 'true'
+        with:
+          node-version: 20
+          cache: npm
+      - name: Typecheck and tests
+        if: steps.diff.outputs.changed == 'true'
+        run: |
+          npm ci
+          npm run typecheck
+          npm test
+
+      - name: Open or update PR
+        id: pr
+        if: steps.diff.outputs.changed == 'true'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          branch: data/refresh
+          delete-branch: true
+          title: "Game data refresh"
+          commit-message: "Refresh game data from upstream"
+          body-path: summary.md
+          add-paths: |
+            src/data/**
+            public/sprites/**
+            scripts/icons-state.json
+
+      - name: Ping Discord
+        if: steps.pr.outputs.pull-request-operation == 'created' || steps.pr.outputs.pull-request-operation == 'updated'
+        run: |
+          [ -n "$DISCORD_WEBHOOK_URL" ] || { echo "No DISCORD_WEBHOOK_URL secret; skipping ping."; exit 0; }
+          jq -n --arg op "${{ steps.pr.outputs.pull-request-operation }}" --arg url "${{ steps.pr.outputs.pull-request-url }}" --rawfile summary summary.md \
+            '{content: ("**Pleep Matchmaker data refresh** (PR " + $op + ")\n" + $summary + "\nReview and merge: " + $url)[0:1900]}' \
+            | curl -sSf -H "Content-Type: application/json" -d @- "$DISCORD_WEBHOOK_URL"
+
+      - name: Ping Discord on failure
+        if: failure()
+        run: |
+          [ -n "$DISCORD_WEBHOOK_URL" ] || exit 0
+          jq -n --arg url "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" \
+            '{content: ("**Pleep Matchmaker data refresh failed.** A safety check or upstream source broke: " + $url)}' \
+            | curl -sSf -H "Content-Type: application/json" -d @- "$DISCORD_WEBHOOK_URL"

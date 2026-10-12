@@ -5,14 +5,17 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { setChoice, setTop, swapTop } from "@/app/actions";
 import { CHOICE_LABEL, type Choice, LINES, LINES_BY_ID, lineSpriteUrl, MAX_TOP } from "@/lib/lines";
 import { rethrowIfNavigation, SAVE_FAILED } from "@/lib/saveError";
+import type { LineVotes } from "@/lib/tiers";
 import { CollectionGrid } from "./CollectionGrid";
 import { PickFlow } from "./PickFlow";
+import { NewCandyCard } from "./NewCandyCard";
 import { StarButton } from "./StarButton";
 import { SwapTopDialog } from "./SwapTopDialog";
 
 type Filter = "all" | Choice;
 type View = "list" | "grid";
 const VIEW_KEY = "pm_vote_view";
+const NEW_DISMISSED_KEY = "pm_new_candy_dismissed";
 
 const FILTERS: { value: Filter; label: string }[] = [
   { value: "all", label: "All" },
@@ -35,10 +38,13 @@ export function VoteBoard({
   initial,
   initialTops,
   firstVisit,
+  newCandy,
 }: {
   initial: Record<string, Choice>;
   initialTops: string[];
   firstVisit: boolean;
+  /** Recently released lines and what players have voted on them so far. */
+  newCandy?: { ids: string[]; votes: Record<string, LineVotes>; voters: number };
 }) {
   const [choices, setChoices] = useState(initial);
   const [tops, setTops] = useState(() => new Set(initialTops));
@@ -156,6 +162,28 @@ export function VoteBoard({
   }
 
   const topLines = LINES.filter((line) => tops.has(line.id));
+  // null until storage is read, so a closed card never flashes on load.
+  const [dismissedNew, setDismissedNew] = useState<Set<string> | null>(null);
+  useEffect(() => {
+    try {
+      setDismissedNew(new Set(JSON.parse(localStorage.getItem(NEW_DISMISSED_KEY) ?? "[]")));
+    } catch {
+      setDismissedNew(new Set()); // Storage unavailable: cards show until voted on.
+    }
+  }, []);
+  function dismissNew(lineId: string) {
+    const next = new Set(dismissedNew ?? []).add(lineId);
+    setDismissedNew(next);
+    try {
+      localStorage.setItem(NEW_DISMISSED_KEY, JSON.stringify([...next]));
+    } catch {
+      // Not remembered; fine.
+    }
+  }
+  // Which new lines get a card is fixed at load (undecided, not starred), so a card stays put while you vote on it
+  // and is gone next visit. Closing it hides it for good in this browser.
+  const [pinnedNew] = useState(() => (newCandy?.ids ?? []).filter((id) => (initial[id] ?? "undecided") === "undecided" && !initialTops.includes(id)));
+  const newCards = dismissedNew ? pinnedNew.filter((id) => !dismissedNew.has(id) && LINES_BY_ID.has(id)) : [];
   const cancelSwap = useCallback(() => setSwapFor(null), []);
 
   return (
@@ -192,6 +220,20 @@ export function VoteBoard({
           Pick Want or Don&apos;t Want on the candies you care about. Everything else stays Undecided.
         </p>
       )}
+
+      {newCards.map((id) => (
+        <NewCandyCard
+          key={id}
+          line={LINES_BY_ID.get(id)!}
+          votes={newCandy!.votes[id]}
+          voters={newCandy!.voters}
+          choice={choices[id]}
+          starred={tops.has(id)}
+          onChoose={(choice) => choose(id, choice)}
+          onStar={() => toggleTop(id)}
+          onDismiss={() => dismissNew(id)}
+        />
+      ))}
 
       <section className="card mb-4 p-3" aria-label="Your Top 3">
         <h2 className="font-bold">Your Top {MAX_TOP}</h2>
