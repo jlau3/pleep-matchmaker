@@ -1,21 +1,15 @@
 import { PROFILE_TABS, SubTabs } from "@/components/SubTabs";
 import { VoteBoard } from "@/components/VoteBoard";
-import { loadOwnChoices } from "@/lib/data";
+import { loadOwnChoices, seedUndecided } from "@/lib/data";
 import { requireUser } from "@/lib/supabase/server";
 
-export default async function VotePage({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
+export default async function VotePage() {
   const { supabase, user } = await requireUser();
-  const choices = await loadOwnChoices(supabase, user.id);
-  const { error } = await searchParams;
+  const { choices, newIds } = await seedUndecided(supabase, user.id, await loadOwnChoices(supabase, user.id));
   return (
     <div>
       <SubTabs tabs={PROFILE_TABS} active="/vote" />
-      {error === "finish" && (
-        <p role="alert" className="mb-2 text-sm text-dont">
-          Couldn&apos;t save your skipped candies. Try Matchmake again.
-        </p>
-      )}
-      <VoteBoard initial={choices} />
+      <VoteBoard initial={choices} newIds={newIds} />
     </div>
   );
 }

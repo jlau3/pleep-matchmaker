@@ -9,7 +9,7 @@ export const CHOICES: Choice[] = ["want", "undecided", "dont_want"];
 export const CHOICE_LABEL: Record<Choice, string> = {
   want: "Want",
   undecided: "Undecided",
-  dont_want: "Don't want",
+  dont_want: "Don't Want",
 };
 
 export interface LineMember {

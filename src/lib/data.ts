@@ -15,6 +15,30 @@ export async function loadOwnChoices(supabase: SupabaseClient, userId: string): 
   return out;
 }
 
+/**
+ * Saves every line the user has no vote on as "undecided", so Undecided is
+ * the stored default from the first visit. Returns the full vote map plus the
+ * ids that were new (not seen before), which get the card flow.
+ */
+export async function seedUndecided(
+  supabase: SupabaseClient,
+  userId: string,
+  choices: Record<string, Choice>,
+): Promise<{ choices: Record<string, Choice>; newIds: string[] }> {
+  const newIds = LINES.filter((line) => !(line.id in choices)).map((line) => line.id);
+  if (newIds.length === 0) return { choices, newIds };
+  const { error } = await supabase
+    .from("preferences")
+    .upsert(
+      newIds.map((id) => ({ user_id: userId, line_id: id, choice: "undecided" as const })),
+      { onConflict: "user_id,line_id", ignoreDuplicates: true },
+    );
+  if (error) throw error;
+  const seeded = { ...choices };
+  for (const id of newIds) seeded[id] = "undecided";
+  return { choices: seeded, newIds };
+}
+
 export async function loadOwnProfile(supabase: SupabaseClient, userId: string): Promise<OwnProfile> {
   const { data, error } = await supabase
     .from("profiles")

@@ -63,7 +63,7 @@ export default async function TiersPage({ searchParams }: { searchParams: Promis
           href="/vote"
           className="block rounded-xl bg-amber-100 px-4 py-3 text-sm font-semibold text-amber-900 dark:bg-amber-900/30 dark:text-amber-200"
         >
-          {unvoted} {unvoted === 1 ? "candy" : "candies"} to vote on →
+          {unvoted} new {unvoted === 1 ? "candy" : "candies"} to vote on →
         </Link>
       )}
 
