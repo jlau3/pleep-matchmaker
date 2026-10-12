@@ -37,11 +37,12 @@ Net votes = wants minus don't-wants among the pool (your friends who have voted,
 | S | 60% or more |
 | A | 35–59% |
 | B | 15–34% |
-| C | under 15% |
+| C | under 15%, including no votes and even splits |
 | Avoid | net negative |
-| No votes | net zero |
 
 Cutoffs live in `TIER_CUTOFFS` in `src/lib/tiers.ts`.
+
+Inside a tier, lines sort by net votes, then a rarity weight, then wants. The weight only breaks ties and never moves a line between tiers: legendary 0.4, mythical 0.3, pseudo-legendary 0.2, 16-pip rare spawns 0.1, everything else 0. `scripts/build_lines.py` derives it from each line's first stage (EXP curve and friendship points).
 
 ## Privacy
 

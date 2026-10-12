@@ -1,6 +1,6 @@
 import { type CandyLine, LINES } from "./lines";
 
-export type TierId = "S" | "A" | "B" | "C" | "avoid" | "none";
+export type TierId = "S" | "A" | "B" | "C" | "avoid";
 
 export interface Tier {
   id: TierId;
@@ -11,6 +11,7 @@ export interface Tier {
 /**
  * Ranking is by net votes (wants minus don't-wants) as a share of the voters
  * in the pool, so a candy that splits the room ranks below one nobody minds.
+ * Lines with no votes or an even split (net 0) land at the bottom of C.
  */
 export const TIER_CUTOFFS = { S: 0.6, A: 0.35, B: 0.15 } as const;
 
@@ -20,7 +21,6 @@ export const TIERS: Tier[] = [
   { id: "B", label: "B", hint: `${TIER_CUTOFFS.B * 100}–${TIER_CUTOFFS.A * 100 - 1}%` },
   { id: "C", label: "C", hint: `under ${TIER_CUTOFFS.B * 100}%` },
   { id: "avoid", label: "Avoid", hint: "more don't want it than want it" },
-  { id: "none", label: "No votes", hint: "nobody has an opinion yet" },
 ];
 
 export interface LineVotes {
@@ -40,15 +40,14 @@ export interface RankedLine {
 export function tierFor(votes: LineVotes, voters: number): TierId {
   const net = votes.wants - votes.dontWants;
   if (net < 0) return "avoid";
-  if (net === 0 || voters === 0) return "none";
-  const share = net / voters;
+  const share = voters === 0 ? 0 : net / voters;
   if (share >= TIER_CUTOFFS.S) return "S";
   if (share >= TIER_CUTOFFS.A) return "A";
   if (share >= TIER_CUTOFFS.B) return "B";
   return "C";
 }
 
-/** Buckets lines into tiers, best first inside each tier (net, then wants, then dex). */
+/** Buckets lines into tiers, best first inside each tier (net, then rarity weight, then wants, then dex). */
 export function buildTiers(
   votes: Map<string, LineVotes>,
   voters: number,
@@ -66,7 +65,7 @@ export function buildTiers(
     });
   }
   for (const ranked of out.values()) {
-    ranked.sort((a, b) => b.net - a.net || b.wants - a.wants || a.line.dex - b.line.dex);
+    ranked.sort((a, b) => b.net - a.net || b.line.weight - a.line.weight || b.wants - a.wants || a.line.dex - b.line.dex);
   }
   return out;
 }

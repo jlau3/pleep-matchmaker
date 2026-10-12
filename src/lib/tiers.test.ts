@@ -9,16 +9,27 @@ describe("tierFor", () => {
     [{ wants: 5, dontWants: 1 }, 10, "A"],
     [{ wants: 2, dontWants: 0 }, 10, "B"],
     [{ wants: 1, dontWants: 0 }, 10, "C"],
-    [{ wants: 5, dontWants: 5 }, 10, "none"],
-    [{ wants: 0, dontWants: 0 }, 10, "none"],
+    [{ wants: 5, dontWants: 5 }, 10, "C"],
+    [{ wants: 0, dontWants: 0 }, 10, "C"],
     [{ wants: 1, dontWants: 3 }, 10, "avoid"],
-    [{ wants: 0, dontWants: 0 }, 0, "none"],
+    [{ wants: 0, dontWants: 0 }, 0, "C"],
   ] as const)("%o of %i voters -> %s", (votes, voters, tier) => {
     expect(tierFor(votes, voters)).toBe(tier);
   });
 });
 
 describe("buildTiers", () => {
+  it("breaks net ties by rarity weight before wants", () => {
+    const lines = ["pikachu", "ditto", "larvitar", "mewtwo"].map((id) => LINES_BY_ID.get(id)!);
+    const votes = countVotes([
+      { wants: ["pikachu", "ditto", "larvitar", "mewtwo"], dont_wants: [] },
+      { wants: ["pikachu"], dont_wants: [] },
+      { wants: [], dont_wants: ["pikachu"] },
+    ]);
+    // All net 1; Pikachu has the most wants but no rarity weight.
+    expect(buildTiers(votes, 3, lines).get("B")!.map((r) => r.line.id)).toEqual(["mewtwo", "larvitar", "ditto", "pikachu"]);
+  });
+
   it("buckets and orders lines", () => {
     const lines = ["bulbasaur", "charmander", "squirtle", "pikachu"].map((id) => LINES_BY_ID.get(id)!);
     const votes = countVotes([
@@ -29,7 +40,7 @@ describe("buildTiers", () => {
     const tiers = buildTiers(votes, 3, lines);
     expect(tiers.get("S")!.map((r) => r.line.id)).toEqual(["pikachu", "squirtle"]);
     expect(tiers.get("avoid")!.map((r) => r.line.id)).toEqual(["charmander"]);
-    expect(tiers.get("none")!.map((r) => r.line.id)).toEqual(["bulbasaur"]);
+    expect(tiers.get("C")!.map((r) => r.line.id)).toEqual(["bulbasaur"]);
     expect(votes.get("squirtle")).toEqual({ wants: 2, dontWants: 0 });
     const charmander = tiers.get("avoid")![0];
     expect([charmander.wants, charmander.unsure, charmander.dontWants]).toEqual([1, 0, 2]);
