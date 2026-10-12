@@ -30,8 +30,8 @@ const STEPS: { title: string; body: React.ReactNode; href: string; cta: string }
     title: "Add your in-game friends",
     body: (
       <>
-        Look them up by exact Discord name, IGN or friend code and add up to {MAX_FRIENDS}. Each friend shows how well your
-        votes match.
+        Look them up by exact Discord name, IGN or friend code and add up to {MAX_FRIENDS}. Each player shows a fit %: how
+        much of what they want your friends want too.
       </>
     ),
     href: "/friends",
@@ -41,8 +41,8 @@ const STEPS: { title: string; body: React.ReactNode; href: string; cta: string }
     title: "Find new friends",
     body: (
       <>
-        Find New matches you with players who want the same candy. Copy their friend code and add them in Pokémon
-        Sleep.
+        Find New suggests players whose wants fit what your friends already want. Copy their friend code and add them in
+        Pokémon Sleep.
       </>
     ),
     href: "/matches",

@@ -8,7 +8,7 @@ import { formatFriendCode } from "@/lib/format";
  * A ready-to-paste "looking for friends" post for anywhere players gather
  * (Discord, Reddit, group chats): friend code, Top 3
  * (or a few wants), and a pointer to look you up here, where search shows how
- * well your votes match theirs.
+ * well your wants fit the reader's friends.
  */
 export function FriendPostCard({
   friendCode,
@@ -46,14 +46,14 @@ export function FriendPostCard({
   }
 
   const favourites = topNames.length > 0 ? `My Top ${topNames.length} candies: ${topNames.join(", ")}` : wantNames.length > 0 ? `Candies I'm after: ${wantNames.join(", ")}` : null;
-  // The link opens Friends with your name already searched, showing their match % with you.
+  // The link opens Friends with your name already searched, showing how well you fit the reader's friends.
   const link = searchName ? `${origin}/friends?q=${encodeURIComponent(searchName)}` : origin;
   const where = handle ? `Pleep Matchmaker (I'm ${handle})` : "Pleep Matchmaker";
   const message = [
     "🌙 Looking for Pokémon Sleep friends!",
     `Friend code: ${formatFriendCode(friendCode)}`,
     favourites,
-    `See how well our candy wishlists match on ${where}: ${link}`,
+    `See how my candy wishlist fits your friends' on ${where}: ${link}`,
   ]
     .filter(Boolean)
     .join("\n");

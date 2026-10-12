@@ -12,9 +12,10 @@ export interface PlayerContact {
 }
 
 export interface MatchRow extends PlayerContact {
+  /** How well their wants fit what your friends want (see the friends_fit migration). */
   match_pct: number;
-  shared_wants: string[];
-  shared_dont_wants: string[];
+  /** Their wants that your friends want too, most-wanted first. */
+  fit_wants: string[];
 }
 
 export interface LookupRow extends PlayerContact {
@@ -22,7 +23,7 @@ export interface LookupRow extends PlayerContact {
   dont_wants: string[];
   /** Starred subset of wants (Top 3). */
   top_wants: string[];
-  /** Your match % with this player (same formula as My Friends). Null for yourself. */
+  /** How well their wants fit your friends' wants. Null for yourself or with nothing to compare yet. */
   match_pct: number | null;
 }
 
@@ -60,6 +61,6 @@ export interface FriendRow extends PlayerContact {
   wants: string[];
   dont_wants: string[];
   top_wants: string[];
-  /** Your match % with this friend (same formula as Find New, no thresholds). Null when hidden or nothing to compare. */
+  /** How well their wants fit the rest of your friends' wants. Null when hidden or nothing to compare. */
   match_pct: number | null;
 }

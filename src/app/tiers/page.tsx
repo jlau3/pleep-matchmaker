@@ -23,7 +23,7 @@ export default async function TiersPage({ searchParams }: { searchParams: Promis
   let voters: number;
   let friendCount = 0;
   if (pool === "friends") {
-    // Votes only: skip the per-friend match %, which only My Friends shows.
+    // Votes only: skip the per-friend fit %, which only My Friends shows.
     const { data, error } = await supabase.rpc("get_friends", { with_match: false });
     if (error) throw error;
     friendCount = (data as FriendRow[]).length;

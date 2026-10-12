@@ -17,9 +17,8 @@ do $$ begin
   assert (select discord_display_name from public.profiles where id = '00000000-0000-0000-0000-00000000000a') = 'Alice', 'display name sync';
 end $$;
 
--- Worked example from the design discussion.
--- a and b each want 10 lines, share 6; the other 4 are unpicked on the other side.
--- Both dont-want 3 lines. Expected 21 / 45 = 47%.
+-- a has no friends yet, so a's own wants (w1..w10) stand in for the group.
+-- b wants 10 lines, 6 of them a's: fit 6 / 10 = 60%.
 insert into public.preferences (user_id, line_id, choice)
 select '00000000-0000-0000-0000-00000000000a'::uuid, 'w' || g, 'want'::public.choice from generate_series(1, 10) g
 union all
@@ -34,8 +33,8 @@ select '00000000-0000-0000-0000-00000000000b'::uuid, 'x' || g, 'want'::public.ch
 union all
 select '00000000-0000-0000-0000-00000000000b'::uuid, 'd' || g, 'dont_want'::public.choice from generate_series(1, 3) g;
 
--- c: same as b but 2 of b's extra wants become dont-wants on a's lines w9, w10.
--- Clashes score 0 (soften_clash migration): 6*3 + 3*1 + 2*0 = 21; best = (10 a-wants + 2 c-wants) * 3 + 3 = 39 -> 54%.
+-- c: like b with only 2 extra wants, and dont-wants on a's lines w9, w10
+-- (don't-wants don't affect fit): 6 / 8 = 75%.
 insert into public.preferences (user_id, line_id, choice)
 select '00000000-0000-0000-0000-00000000000c'::uuid, 'w' || g, 'want'::public.choice from generate_series(1, 6) g
 union all
@@ -45,7 +44,7 @@ select '00000000-0000-0000-0000-00000000000c'::uuid, 'w' || g, 'dont_want'::publ
 union all
 select '00000000-0000-0000-0000-00000000000c'::uuid, 'd' || g, 'dont_want'::public.choice from generate_series(1, 3) g;
 
--- d: only 2 shared wants, high % otherwise -> below min_shared_wants, hidden.
+-- d: 100% fit but only 2 wants in the group -> below min_shared_wants, hidden.
 insert into public.preferences (user_id, line_id, choice)
 select '00000000-0000-0000-0000-00000000000d'::uuid, 'w' || g, 'want'::public.choice from generate_series(1, 2) g;
 
@@ -58,18 +57,18 @@ update public.profiles set last_seen_at = now() - interval '5 months' where id =
 set role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-00000000000a', false);
 
-select discord_username, match_pct, cardinality(shared_wants) as shared, shared_dont_wants from public.get_matches();
+select discord_username, match_pct, fit_wants from public.get_matches();
 
 do $$
 declare r record;
 begin
   select * into r from public.get_matches() where discord_username = 'bob';
-  assert r.match_pct = 47, format('bob pct %s', r.match_pct);
-  assert cardinality(r.shared_wants) = 6, 'bob shared wants';
+  assert r.match_pct = 60, format('bob pct %s', r.match_pct);
+  assert cardinality(r.fit_wants) = 6, 'bob fit wants';
   assert r.friend_code is not null, 'contact info returned for match';
 
   select * into r from public.get_matches() where discord_username = 'cara';
-  assert r.match_pct = 54, format('cara pct %s', r.match_pct);
+  assert r.match_pct = 75, format('cara pct %s', r.match_pct);
 
   assert not exists (select 1 from public.get_matches() where discord_username = 'dan'), 'dan below min shared wants';
   assert not exists (select 1 from public.get_matches() where discord_username = 'eve'), 'eve stale';

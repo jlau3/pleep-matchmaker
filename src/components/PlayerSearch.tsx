@@ -49,11 +49,12 @@ export async function PlayerSearch({
           {results.map((player) => (
             <li key={player.user_id} className="card p-4">
               <PlayerHeader player={player} isFriend={friendIds.has(player.user_id)} aside={
-                  player.match_pct === null && player.user_id !== viewerId ? (
+                  // No fit while there's nothing to compare against: no friends' votes and none of your own.
+                  player.match_pct === null && player.user_id !== viewerId && player.wants.length > 0 ? (
                     <Link href="/vote" className="shrink-0 text-right text-xs font-semibold text-want underline">
-                      Vote to see
+                      Add friends or vote
                       <br />
-                      your match %
+                      to see their fit
                     </Link>
                   ) : (
                     <MatchPct pct={player.match_pct} />

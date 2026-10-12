@@ -4,8 +4,10 @@ import { PlayerHeader } from "@/components/PlayerHeader";
 import { PlayerSearch, searchQuery } from "@/components/PlayerSearch";
 import { FRIENDS_TABS, SubTabs } from "@/components/SubTabs";
 import { FriendPostCard } from "@/components/FriendPostCard";
+import { MatchPct } from "@/components/MatchPct";
+import { LOW_FIT_PCT } from "@/lib/fit";
 import { loadFriendIds, loadOwnProfile, loadOwnVotes, MAX_FRIENDS } from "@/lib/data";
-import { LINES, linesFromIds } from "@/lib/lines";
+import { LINES, LINES_BY_ID, linesFromIds } from "@/lib/lines";
 import { requireUser } from "@/lib/supabase/server";
 import type { MatchRow } from "@/lib/types";
 
@@ -59,7 +61,8 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
         <SubTabs tabs={FRIENDS_TABS} active="/matches" query={q ? `q=${encodeURIComponent(q)}` : undefined} />
         <PlayerSearch supabase={supabase} q={q} friendIds={friendIds} viewerId={user.id} />
         <p className="mt-4 text-sm text-slate-600 dark:text-slate-300">
-          Players open to new friends whose candy votes line up with yours.
+          Players open to new friends who want the same candy your friends want. Until your friends have voted, your
+          own wants stand in.
         </p>
       </div>
       {notices.map((notice, i) => (
@@ -79,13 +82,15 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
           .map((line) => line.name)}
       />
 
-      {picked === 0 ? (
+      {picked === 0 && friendIds.size === 0 ? (
         <p className="py-8 text-center text-slate-500">
-          Mark some lines as want or don't want first. <Link href="/vote" className="underline">Start voting</Link>
+          Add your friends (or <Link href="/vote" className="underline">vote</Link> on some lines) so we know what your group
+          wants.
         </p>
       ) : matches.length === 0 ? (
         <p className="py-8 text-center text-slate-500">
-          No matches yet. A match needs at least 25% and 3 lines you both want. Check back as more players join.
+          No matches yet. A match needs at least {LOW_FIT_PCT}% fit and 3 lines your friends want. Check back as more
+          players join.
         </p>
       ) : (
         <ul className="space-y-4">
@@ -94,22 +99,13 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
               <PlayerHeader
                 player={match}
                 isFriend={friendIds.has(match.user_id)}
-                aside={<div className="shrink-0 text-right text-3xl font-bold text-want">{match.match_pct}%</div>}
+                aside={<MatchPct pct={match.match_pct} />}
               />
               <div className="mt-4">
-                <h3 className="mb-2 text-sm font-semibold">You both want ({match.shared_wants.length})</h3>
-                <LineChips lines={linesFromIds(match.shared_wants)} />
+                <h3 className="mb-2 text-sm font-semibold">Wants what your friends want ({match.fit_wants.length})</h3>
+                {/* Kept in the order Find New returns: most-wanted by your friends first. */}
+                <LineChips lines={match.fit_wants.flatMap((id) => LINES_BY_ID.get(id) ?? [])} />
               </div>
-              {match.shared_dont_wants.length > 0 && (
-                <details className="mt-3">
-                  <summary className="cursor-pointer text-sm font-semibold text-slate-500">
-                    You both don't want ({match.shared_dont_wants.length})
-                  </summary>
-                  <div className="mt-2">
-                    <LineChips lines={linesFromIds(match.shared_dont_wants)} />
-                  </div>
-                </details>
-              )}
             </li>
           ))}
         </ul>

@@ -118,10 +118,16 @@ export async function addFriend(friendId: string): Promise<{ error?: string }> {
   return {};
 }
 
-export async function removeFriend(friendId: string): Promise<{ error?: string }> {
+/**
+ * Removes a friend. `inactive` records that they stopped playing, which keeps
+ * them out of your Find New and, once enough people say so, everyone's (until
+ * they come back). A failed report doesn't undo the removal.
+ */
+export async function removeFriend(friendId: string, inactive = false): Promise<{ error?: string }> {
   const { supabase, user } = await requireUser();
   const { error } = await supabase.from("friends").delete().eq("user_id", user.id).eq("friend_id", friendId);
   if (error) return { error: "Couldn't remove friend, try again" };
+  if (inactive) await supabase.rpc("report_inactive", { player: friendId });
   revalidatePath("/friends");
   revalidatePath("/tiers");
   return {};

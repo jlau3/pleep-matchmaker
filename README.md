@@ -2,8 +2,8 @@
 
 Pokémon Sleep players vote on every candy line: **want**, **don't want** or **undecided**. Three tabs:
 
-- **Tier list** (home): which candy to prioritize, ranked S/A/B/C/Avoid by your friends' net votes, with toggles for All Islands / By Island and My Friends / Everyone. A banner links to voting when there are unvoted candies.
-- **Friends**: player search (exact Discord name, IGN or friend code) on both sub-tabs, carried over when you switch; *My Friends* lists your friends (up to 50) with your match % for each; *Find New* is matchmaking against players open to new friends, leaving out anyone you already added. Search results show your match % with each player, and Find New has a **Share a friend post** card (Copy, plus Share on phones): a "looking for friends" message for Discord, Reddit or group chats with your friend code, Top 3 and a pointer to look you up here.
+- **Tier list** (home): which candy to prioritize, ranked S/A/B/C/Avoid by how many of your friends want each candy, with toggles for All Islands / By Island and My Friends / Everyone. A banner links to voting when there are unvoted candies.
+- **Friends**: player search (exact Discord name, IGN or friend code) on both sub-tabs, carried over when you switch; *My Friends* lists your friends (up to 50) with each one's fit with the rest of your list; *Find New* is matchmaking against players open to new friends, leaving out anyone you already added. Search results show each player's fit with your friends, and Find New has a **Share a friend post** card (Copy, plus Share on phones): a "looking for friends" message for Discord, Reddit or group chats with your friend code, Top 3 and a pointer to look you up here.
 - **Profile**: *My Votes* (every candy in dex order, List or Grid view, with a ★ on each card to pick your Top 3 wants, pinned at the top) and *Settings* (IGN, friend code, visibility toggles, blocked players, sign out, delete account).
 
 New players go straight to My votes after signing in, and land on the Tier list once everything is voted.
@@ -14,25 +14,18 @@ Stack: Next.js 15 (App Router) + Supabase (Postgres, Discord OAuth) + Tailwind. 
 
 ## How matching works
 
-Per candy line, comparing your pick (A) with theirs (B):
+The % on Find New, search results and My Friends is **fit**: how well a player's wants line up with what **your friends** want, not with your own votes.
 
-| A \ B | Want | Don't want | Undecided |
-|---|---|---|---|
-| **Want** | +3 | 0 | 0 |
-| **Don't want** | 0 | +1 | 0 |
-| **Undecided** | 0 | 0 | skipped |
+1. **Group demand.** For each line, count how many of your friends want it, a Top 3 star counting double (`public.top_multiplier()`), same as the Tier List. Friends with a private list don't count. Each line's share is its demand relative to your friends' most-wanted line, so the top line is 1 and a line half as many friends want is 0.5.
+2. **Fit.** `fit % = sum over their wants of (weight x share) / sum of their want weights`, where a starred want weighs 2. 100% means everything they want is among your friends' most-wanted candy; a want none of your friends share counts 0. Their don't-wants and undecided lines don't matter.
 
-Only lines where at least one of you picked want or don't want count. Each counted line's best case is 3 if either side wants it, otherwise 1.
+On My Friends, each friend is compared with the *rest* of your list. Until any friend has voted, your own wants stand in for the group, so new players still get suggestions.
 
-`match % = max(0, score) / sum of best cases`
+Find New shows players at **≥ 25% fit** with **≥ 3 wants your friends share**, who are open to new friends, have room on their list (under 50), have a friend code set, and were seen in the last **4 months**. Results list the wants they share with your friends, most-wanted first. The knobs live in `public.match_config()`.
 
-Want vs undecided and want vs don't want both lower the % only through the denominator: a don't-want means "I don't need this candy", not a clash, so it isn't punished.
+Anywhere else, a fit under 25% shows as an amber **low fit** (`LOW_FIT_PCT` in `src/lib/fit.ts`, kept equal to Find New's cutoff): most of what they want, your friends don't.
 
-**Top 3:** each player can star up to 3 of their wants. A line either player starred counts double: both want is +6, and its best case doubles too, so the % stays between 0 and 100. `public.max_top()` and `public.top_multiplier()` hold the numbers.
-
-A match is shown when it's **≥ 25%** with **≥ 3 lines you both want**, the other player is open to new friends, has room on their friend list (under 50), has a friend code set, and was seen in the last **4 months**. A full friend list hides a player from matches automatically, without changing their setting, until they remove someone. All of these knobs live in `public.match_config()` in the first migration.
-
-My Friends shows the same % for each friend, without the 25% / 3-shared-wants cutoff, so you can see how well your current friends line up.
+**Inactive reports.** Removing a friend asks whether they stopped playing. A "yes" hides them from your Find New right away and, once 2 people have said so (`public.inactive_reports_to_hide()`), from everyone's. Reports only count while the player hasn't been back since, so returning clears them.
 
 ## Tier list rules
 
@@ -87,7 +80,13 @@ npm run dev
 
 ### 4. Deploy to Vercel
 
-Import the repo in Vercel and set `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` and `CRON_SECRET`. Optional: `DISCORD_FEEDBACK_WEBHOOK_URL` (server-only; the footer's **Send feedback** form posts to that Discord channel, signed-in players only, mentions disabled, one message a minute per browser) and `NEXT_PUBLIC_DONATION_URL` (shows a small "Buy me a coffee or help with server costs" link in the footer). `vercel.json` schedules a daily ping to `/api/keepalive`, because Supabase pauses free projects after a week without database traffic.
+Import the repo in Vercel and set `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` and `CRON_SECRET`. Optional:
+
+- `DISCORD_FEEDBACK_WEBHOOK_URL` (server-only): a webhook in your #feedback channel. The footer's **Send feedback** form posts there; signed-in players only, mentions disabled, one message a minute per browser.
+- `NEXT_PUBLIC_DONATION_URL`: shows a small "Buy me a coffee or help with server costs" link in the footer.
+- `KOFI_VERIFICATION_TOKEN` and `DISCORD_DONATIONS_WEBHOOK_URL` (server-only): donation pings in your #donations channel. In Ko-fi → Settings → More → API, set the webhook URL to `https://<your-site>/api/kofi` and copy the verification token. Private donations show as "Someone" without their message.
+
+`vercel.json` schedules a daily ping to `/api/keepalive`, because Supabase pauses free projects after a week without database traffic.
 
 ## Pokémon data
 
