@@ -4,20 +4,21 @@ import { useState } from "react";
 import { setChoice } from "@/app/actions";
 import { type Choice, LINES } from "@/lib/lines";
 import { CollectionGrid } from "./CollectionGrid";
-import { MatchmakeButton } from "./MatchmakeButton";
+import Link from "next/link";
 import { PickFlow } from "./PickFlow";
 
 /**
- * Profile > My Votes. Lines without a vote when the page loaded get the big card
- * flow; every line is editable in the grid. Both share one set of votes, and
- * every click saves immediately.
+ * Profile > My Votes. Every line is saved as Undecided up front; lines that
+ * were new on this visit get the big card flow, and every line is editable in
+ * the grid. Both share one set of votes, and every click saves immediately.
  */
-export function VoteBoard({ initial }: { initial: Record<string, Choice> }) {
+export function VoteBoard({ initial, newIds }: { initial: Record<string, Choice>; newIds: string[] }) {
   const [choices, setChoices] = useState(initial);
   const [error, setError] = useState<string | null>(null);
   // Fixed at load so cards don't vanish from under the user as they vote.
-  const [unvoted] = useState(() => LINES.filter((line) => !(line.id in initial)));
-  const voted = Object.keys(choices).length;
+  const [unvoted] = useState(() => LINES.filter((line) => newIds.includes(line.id)));
+  const counts = { want: 0, dont_want: 0, undecided: 0 };
+  for (const line of LINES) counts[choices[line.id] ?? "undecided"]++;
 
   async function choose(lineId: string, choice: Choice) {
     const previous = choices[lineId];
@@ -41,13 +42,20 @@ export function VoteBoard({ initial }: { initial: Record<string, Choice> }) {
     <div>
       <div className="sticky top-[49px] z-10 -mx-4 mb-4 bg-sky/95 px-4 py-2 shadow-sm backdrop-blur dark:bg-night-deep/95">
         <div className="flex items-center justify-between gap-3 text-sm">
-          <span>
-            <strong>{voted}</strong> / {LINES.length} voted
+          <span className="flex flex-wrap gap-x-3">
+            <span className="text-want">
+              <strong>{counts.want}</strong> want
+            </span>
+            <span className="text-dont">
+              <strong>{counts.dont_want}</strong> don&apos;t want
+            </span>
+            <span className="text-meh">
+              <strong>{counts.undecided}</strong> undecided
+            </span>
           </span>
-          <MatchmakeButton className="btn-primary px-4 py-1.5" />
-        </div>
-        <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-slate-200 dark:bg-slate-800">
-          <div className="h-full bg-want transition-all" style={{ width: `${(voted / LINES.length) * 100}%` }} />
+          <Link href="/matches" className="btn-primary shrink-0 px-4 py-1.5">
+            Matchmake
+          </Link>
         </div>
         {error && (
           <p role="alert" className="mt-2 text-sm text-dont">
@@ -60,13 +68,15 @@ export function VoteBoard({ initial }: { initial: Record<string, Choice> }) {
         <>
           <p className="mb-4 text-center text-sm text-slate-500">
             {unvoted.length === LINES.length
-              ? "Vote on each candy. Skip anything you don't care about."
-              : `${unvoted.length} new or unvoted ${unvoted.length === 1 ? "candy" : "candies"}.`}
+              ? "Pick Want or Don't Want on the candies you care about. Everything else stays Undecided."
+              : `${unvoted.length} new ${unvoted.length === 1 ? "candy" : "candies"} since your last visit.`}
           </p>
           <PickFlow lines={unvoted} choices={choices} onChoose={choose} />
           <div className="mx-auto mt-10 max-w-md text-center">
-            <MatchmakeButton className="btn-primary block w-full px-6 py-4 text-lg" />
-            <p className="mt-2 text-xs text-slate-500">Anything you skipped is saved as undecided.</p>
+            <Link href="/matches" className="btn-primary block w-full px-6 py-4 text-lg">
+              Matchmake
+            </Link>
+            <p className="mt-2 text-xs text-slate-500">Everything starts as Undecided. Only tap what you want or don&apos;t want.</p>
           </div>
           {unvoted.length < LINES.length && (
             <details className="mt-10">
