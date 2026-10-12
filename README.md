@@ -2,9 +2,9 @@
 
 Pokémon Sleep players vote on every candy line: **want**, **don't want** or **undecided**. Three tabs:
 
-- **Tier list** (home): which candy to prioritize, ranked S/A/B/C/Avoid by your friends' net votes, with toggles for All islands / By island and My friends / Everyone. A banner links to voting when there are unvoted candies.
-- **Friends**: *My friends* to look up players by exact Discord name, IGN or friend code and manage your list (up to 50); *Find new* for matchmaking against players open to new friends.
-- **Profile**: *My votes* (card-by-card voting for anything unvoted, plus a searchable grid to change any vote) and *Settings* (IGN, friend code, visibility toggles, blocked players, sign out, delete account).
+- **Tier list** (home): which candy to prioritize, ranked S/A/B/C/Avoid by your friends' net votes, with toggles for All Islands / By Island and My Friends / Everyone. A banner links to voting when there are unvoted candies.
+- **Friends**: *My Friends* to look up players by exact Discord name, IGN or friend code and manage your list (up to 50); *Find New* for matchmaking against players open to new friends.
+- **Profile**: *My Votes* (card-by-card voting for anything unvoted, plus a searchable grid to change any vote) and *Settings* (IGN, friend code, visibility toggles, blocked players, sign out, delete account).
 
 New players go straight to My votes after signing in, and land on the Tier list once everything is voted.
 
