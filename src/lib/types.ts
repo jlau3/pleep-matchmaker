@@ -18,6 +18,8 @@ export interface MatchRow extends PlayerContact {
   fit_wants: string[];
   /** Candy your friends want that they don't, most-wanted first: what they'd rather not be sent. */
   fit_dont_wants: string[];
+  /** browse_players only: their starred Top 3. */
+  top_wants?: string[];
   /** browse_players only: how many players the current filter lists in all. */
   total_count?: number;
 }

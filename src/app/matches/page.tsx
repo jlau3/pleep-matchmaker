@@ -10,7 +10,7 @@ import { MatchPct } from "@/components/MatchPct";
 import { LOW_FIT_PCT } from "@/lib/fit";
 import { loadFriendIds, loadOwnProfile, loadOwnVotes, MAX_FRIENDS } from "@/lib/data";
 import { LINES, LINES_BY_ID, linesFromIds } from "@/lib/lines";
-import { BROWSE_PAGE_SIZE, BROWSE_SORTS, browseQuery, parseBrowse } from "@/lib/browse";
+import { BROWSE_PAGE_SIZE, BROWSE_SORT_HINTS, BROWSE_SORTS, browseQuery, parseBrowse } from "@/lib/browse";
 import { requireUser } from "@/lib/supabase/server";
 import type { MatchRow } from "@/lib/types";
 
@@ -125,9 +125,12 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
             />
           </div>
         </div>
-        <div className="flex flex-wrap items-center gap-2 text-sm">
-          <span className="text-slate-500">Sort</span>
-          <Pills options={BROWSE_SORTS.map(([id, label]) => [link({ sort: id }), label, opts.sort === id])} />
+        <div className="space-y-1">
+          <div className="flex flex-wrap items-center gap-2 text-sm">
+            <span className="text-slate-500">Sort</span>
+            <Pills options={BROWSE_SORTS.map(([id, label]) => [link({ sort: id }), label, opts.sort === id])} />
+          </div>
+          <p className="text-xs text-slate-500">{BROWSE_SORT_HINTS[opts.sort]}</p>
         </div>
 
         {picked === 0 && friendIds.size === 0 && !opts.everyone ? (
@@ -151,21 +154,7 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
             {matches.map((match) => (
               <li key={match.user_id} className="card p-4">
                 <PlayerHeader player={match} aside={<MatchPct pct={match.match_pct} />} />
-                {match.fit_wants.length > 0 && (
-                  <div className="mt-4">
-                    <h3 className="mb-2 text-sm font-semibold">Wants what your friends want ({match.fit_wants.length})</h3>
-                    {/* Kept in the order browse_players returns: most-wanted by your friends first. */}
-                    <LineChips lines={match.fit_wants.flatMap((id) => LINES_BY_ID.get(id) ?? [])} />
-                  </div>
-                )}
-                {match.fit_dont_wants.length > 0 && (
-                  <div className="mt-3">
-                    <h3 className="mb-2 text-sm font-semibold text-dont">
-                      Doesn&apos;t want, but your friends do ({match.fit_dont_wants.length})
-                    </h3>
-                    <LineChips lines={match.fit_dont_wants.flatMap((id) => LINES_BY_ID.get(id) ?? [])} />
-                  </div>
-                )}
+                <FitLists match={match} />
                 {match.match_pct === null && match.fit_wants.length === 0 && (
                   <p className="mt-3 text-sm text-slate-500">Hasn&apos;t voted on any candy yet.</p>
                 )}
@@ -223,5 +212,44 @@ function Pills({ options }: { options: (readonly [string, string, boolean])[] })
         </Link>
       ))}
     </>
+  );
+}
+
+/**
+ * Same layout as My Friends: their Top 3 always shown, then how they line up
+ * with your friends in a dropdown (most-wanted by your friends first).
+ */
+function FitLists({ match }: { match: MatchRow }) {
+  const tops = match.top_wants ?? [];
+  const chips = (ids: string[]) => ids.flatMap((id) => LINES_BY_ID.get(id) ?? []);
+  if (tops.length === 0 && match.fit_wants.length === 0 && match.fit_dont_wants.length === 0) return null;
+  return (
+    <div className="mt-3 space-y-3">
+      {tops.length > 0 && (
+        <div>
+          <h4 className="mb-2 text-sm font-semibold text-sun-deep">★ Top {tops.length}</h4>
+          <LineChips lines={linesFromIds(tops)} />
+        </div>
+      )}
+      {match.fit_wants.length + match.fit_dont_wants.length > 0 && (
+        <details>
+          <summary className="cursor-pointer text-sm font-semibold">
+            Wants what your friends want {match.fit_wants.length} · Doesn&apos;t want {match.fit_dont_wants.length}
+          </summary>
+          <div className="mt-3 space-y-4">
+            <div>
+              <h4 className="mb-2 text-sm font-semibold text-want">Wants what your friends want</h4>
+              <LineChips lines={chips(match.fit_wants)} />
+            </div>
+            {match.fit_dont_wants.length > 0 && (
+              <div>
+                <h4 className="mb-2 text-sm font-semibold text-dont">Doesn&apos;t want, but your friends do</h4>
+                <LineChips lines={chips(match.fit_dont_wants)} />
+              </div>
+            )}
+          </div>
+        </details>
+      )}
+    </div>
   );
 }

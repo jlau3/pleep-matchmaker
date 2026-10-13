@@ -4,6 +4,13 @@ export const BROWSE_SORTS = [
   ["active", "Recently active"],
   ["shared", "Most in common"],
 ] as const;
+
+/** One line under the sort pills saying what the chosen order means. */
+export const BROWSE_SORT_HINTS: Record<(typeof BROWSE_SORTS)[number][0], string> = {
+  fit: "Highest fit % first: most of what they want is what your friends want, and they don't turn down your friends' favourites.",
+  active: "Most recently online first, so they're likely to accept your friend request soon.",
+  shared: "Most candies in common with your friends first, counted, whatever else they want. A big list can rank high with a lower fit %.",
+};
 export type BrowseSort = (typeof BROWSE_SORTS)[number][0];
 
 export const BROWSE_PAGE_SIZE = 20;
