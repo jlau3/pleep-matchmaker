@@ -2,15 +2,13 @@
 export const BROWSE_SORTS = [
   ["fit", "Best fit"],
   ["you_fit", "You fit theirs"],
-  ["they_fit", "Fits your list"],
   ["active", "Recently active"],
 ] as const;
 
 /** One line under the sort pills saying what the chosen order means. */
 export const BROWSE_SORT_HINTS: Record<(typeof BROWSE_SORTS)[number][0], string> = {
-  fit: "Highest average of both fits first: you'd each send candy the other wants.",
+  fit: "Highest average of both fits first: you'd each send candy the other wants, so they're likely to add you back.",
   you_fit: "Highest first: most of what you want is what their friends want.",
-  they_fit: "Highest first: most of what they want is what your friends want.",
   active: "Most recently online first, so they're likely to accept your friend request soon.",
 };
 export type BrowseSort = (typeof BROWSE_SORTS)[number][0];
