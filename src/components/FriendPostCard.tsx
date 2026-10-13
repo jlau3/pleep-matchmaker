@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useTransition } from "react";
+import { enableLookup } from "@/app/actions";
 import { formatFriendCode } from "@/lib/format";
 
 const callout =
@@ -31,6 +32,8 @@ export function FriendPostCard({
   const [origin, setOrigin] = useState("https://pleep-matchmaker.vercel.app");
   const [copied, setCopied] = useState(false);
   const [canShare, setCanShare] = useState(false);
+  const [turningOn, startTurningOn] = useTransition();
+  const [lookupError, setLookupError] = useState<string | null>(null);
   useEffect(() => {
     setOrigin(window.location.origin);
     setCanShare(typeof navigator.share === "function");
@@ -94,6 +97,9 @@ export function FriendPostCard({
         <span>
           <span className="font-bold">📣 Looking for more friends?</span>{" "}
           <span className="text-slate-700 dark:text-slate-300">Share a post with your friend code.</span>
+          {!allowLookup && (
+            <span className="ml-1 font-semibold text-amber-800 dark:text-amber-200">Lookup is off, so it won&apos;t link to you.</span>
+          )}
         </span>
         <span className="shrink-0 text-xs font-semibold underline group-open:hidden">Show</span>
         <span className="hidden shrink-0 text-xs font-semibold underline group-open:inline">Hide</span>
@@ -112,10 +118,31 @@ export function FriendPostCard({
         </div>
       </div>
       {!allowLookup && (
-        <p className="mb-2 text-xs text-amber-800 dark:text-amber-200">
-          The link to your profile is left out because &quot;Allow lookup&quot; is off. Turn it on in{" "}
-          <Link href="/profile" className="underline">Settings</Link> if you want readers to find you here.
-        </p>
+        <div className="mb-2 flex flex-wrap items-center gap-x-3 gap-y-1 rounded-xl bg-amber-100 px-3 py-2 text-xs text-amber-900 dark:bg-amber-900/30 dark:text-amber-200">
+          <span>
+            &quot;Allow lookup&quot; is off, so readers can&apos;t find you here and the post leaves out your link. Planning to
+            share it? Turn lookup back on.
+          </span>
+          <button
+            type="button"
+            disabled={turningOn}
+            onClick={() =>
+              startTurningOn(async () => {
+                setLookupError(null);
+                try {
+                  const result = await enableLookup();
+                  if (result.error) setLookupError(result.error);
+                } catch {
+                  setLookupError("Couldn't turn it on, try again");
+                }
+              })
+            }
+            className="shrink-0 rounded-full bg-amber-600 px-3 py-1 font-semibold text-white disabled:opacity-60"
+          >
+            {turningOn ? "Turning on…" : "Turn on lookup"}
+          </button>
+          {lookupError && <span className="text-dont">{lookupError}</span>}
+        </div>
       )}
       <pre className="whitespace-pre-wrap rounded-2xl bg-white p-3 font-sans text-sm dark:bg-night-deep">{message}</pre>
     </details>
