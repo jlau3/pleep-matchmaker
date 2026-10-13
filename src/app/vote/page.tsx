@@ -31,7 +31,7 @@ export default async function VotePage() {
           <Link href="/profile" className="font-semibold underline">
             Settings
           </Link>{" "}
-          so friends can recognise and find you.
+          so friends can recognize and find you.
         </p>
       )}
       <VoteBoard initial={choices} initialTops={tops} firstVisit={newIds.length === LINES.length} newCandy={newCandy} />

@@ -48,14 +48,14 @@ export function FriendPostCard({
     );
   }
 
-  const favourites = topNames.length > 0 ? `My Top ${topNames.length} candies: ${topNames.join(", ")}` : wantNames.length > 0 ? `Candies I'm after: ${wantNames.join(", ")}` : null;
+  const favorites = topNames.length > 0 ? `My Top ${topNames.length} candies: ${topNames.join(", ")}` : wantNames.length > 0 ? `Candies I'm after: ${wantNames.join(", ")}` : null;
   // The link opens Friends with your name already searched, showing how well you fit the reader's friends.
   const link = searchName ? `${origin}/friends?q=${encodeURIComponent(searchName)}` : origin;
   const where = handle ? `Pleep Matchmaker (I'm ${handle})` : "Pleep Matchmaker";
   const message = [
     "🌙 Looking for Pokémon Sleep friends!",
     `Friend code: ${formatFriendCode(friendCode)}`,
-    favourites,
+    favorites,
     `See how my candy wishlist fits your friends' on ${where}: ${link}`,
   ]
     .filter(Boolean)
@@ -65,7 +65,7 @@ export function FriendPostCard({
     try {
       await navigator.share({ text: message });
     } catch {
-      // Cancelled or unsupported here; Copy still works.
+      // Canceled or unsupported here; Copy still works.
     }
   }
 

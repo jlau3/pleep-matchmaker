@@ -12,8 +12,8 @@ export interface GuideSection {
 
 export const GUIDE_SECTIONS: GuideSection[] = [
   {
-    id: "who-to-send",
-    title: "Who to send candy to",
+    id: "candy-considerations",
+    title: "Candy Considerations",
     tips: [
       {
         title: "Rare species cost more candy",
@@ -37,11 +37,11 @@ export const GUIDE_SECTIONS: GuideSection[] = [
     ],
   },
   {
-    id: "levelling",
-    title: "What levelling actually does",
+    id: "leveling",
+    title: "What leveling actually does",
     intro: (
       <p>
-        Pokémon help a little faster as they level up, but the effect is tiny, so levelling just for speed isn&apos;t a
+        Pokémon help a little faster as they level up, but the effect is tiny, so leveling just for speed isn&apos;t a
         good use of candy. Level a Pokémon when it&apos;s about to reach a sub skill (levels 10, 25, 50, 70 and 80) or a
         milestone that helps it a lot. What counts as a milestone depends on its specialty:
       </p>
@@ -57,7 +57,7 @@ export const GUIDE_SECTIONS: GuideSection[] = [
           <p>
             Skills like <b>Charge Strength M</b> and <b>Berry Burst</b> add strength for Snorlax, and berries add strength
             too. These Pokémon still want to trigger their skill, but it isn&apos;t their only source of strength, so
-            levelling them to the cap is a real boost.
+            leveling them to the cap is a real boost.
           </p>
         ),
       },
@@ -75,7 +75,7 @@ export const GUIDE_SECTIONS: GuideSection[] = [
         title: "Skill Specialists with support skills: level to their best sub skill, then stop",
         body: (
           <p>
-            Skills like <b>Extra Tasty S</b> and <b>Dream Shard Magnet S</b> have no levelling milestones; their big
+            Skills like <b>Extra Tasty S</b> and <b>Dream Shard Magnet S</b> have no leveling milestones; their big
             boosts come from Main Skill Seeds. The best use of candy is to level them to their best sub skill and stop
             there.
           </p>

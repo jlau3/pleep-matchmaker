@@ -59,7 +59,7 @@ body {
     background-image:
       radial-gradient(1.5px 1.5px at 12% 30%, #fff9 50%, transparent 51%),
       radial-gradient(1px 1px at 28% 70%, #fff8 50%, transparent 51%),
-      /* Placed from the centre, not by %, so it never lands on the ? button (centre - 80px) at any width. */
+      /* Placed from the center, not by %, so it never lands on the ? button (center - 80px) at any width. */
       radial-gradient(1.5px 1.5px at calc(50% + 60px) 22%, #fffa 50%, transparent 51%),
       radial-gradient(1px 1px at 63% 64%, #fff7 50%, transparent 51%),
       radial-gradient(1.5px 1.5px at 81% 35%, #fff9 50%, transparent 51%),
