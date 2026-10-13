@@ -8,9 +8,28 @@ import { VotesChangedRefresh } from "@/components/VotesChangedRefresh";
 import { parseTheme, THEME_COOKIE } from "@/lib/theme";
 import "./globals.css";
 
+const DESCRIPTION =
+  "Vote on the Pokémon Sleep candies you want, see your friends' candy tier list, and find new friends who want the same candy.";
+
+/**
+ * Also drives link previews (Discord, iMessage, X...): title, description, the
+ * public/og.png card and, via themeColor below, the colored bar on Discord embeds.
+ */
 export const metadata: Metadata = {
+  // Absolute base for og:image. Vercel sets the production domain; locally it's dev.
+  metadataBase: new URL(
+    process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : "http://localhost:3000",
+  ),
   title: "Pleep Matchmaker",
-  description: "Find Pokémon Sleep friends who want the same candy you do.",
+  description: DESCRIPTION,
+  openGraph: {
+    type: "website",
+    siteName: "Pleep Matchmaker",
+    title: "Pleep Matchmaker: candy wishlists for Pokémon Sleep friends",
+    description: DESCRIPTION,
+    images: [{ url: "/og.png", width: 1200, height: 630, alt: "Pleep Matchmaker" }],
+  },
+  twitter: { card: "summary_large_image" },
 };
 
 const rounded = M_PLUS_Rounded_1c({
@@ -22,7 +41,7 @@ const rounded = M_PLUS_Rounded_1c({
   preload: false,
 });
 
-export const viewport: Viewport = { width: "device-width", initialScale: 1 };
+export const viewport: Viewport = { width: "device-width", initialScale: 1, themeColor: "#ffd24d" };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   // A theme picked in Settings; "system" adds no class, so CSS follows the device.
