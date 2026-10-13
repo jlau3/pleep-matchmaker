@@ -11,16 +11,18 @@ const TIER_STYLE: Record<string, string> = {
 };
 
 const panel = "card p-3";
+/** The Top 3 row isn't a tier: a dashed gold frame and a gap set it apart from S. */
+const topPanel = "card mb-6 border-2 border-dashed border-sun-deep/60 bg-[#fff3c9] p-3 dark:bg-night";
 
 /**
- * Rating color in five 20-point bands, red (nobody wants it) through grey
+ * Rating color in five 20-point bands, red (nobody wants it) through yellow
  * (wants and don't-wants cancel out, 50) to green (everyone wants it).
  */
 const RATING_BANDS: [number, string][] = [
   [80, "text-emerald-600 dark:text-emerald-400"],
   [60, "text-lime-600 dark:text-lime-400"],
-  [40, "text-slate-500 dark:text-slate-400"],
-  [20, "text-orange-500 dark:text-orange-400"],
+  [40, "text-yellow-600 dark:text-yellow-400"],
+  [20, "text-orange-600 dark:text-orange-400"],
   [0, "text-red-600 dark:text-red-400"],
 ];
 const ratingColor = (rating: number) => RATING_BANDS.find(([min]) => rating >= min)![1];
@@ -94,7 +96,7 @@ export function TierBoard({ tiers }: { tiers: Map<TierId, RankedLine[]> }) {
           </>
         );
         return (
-          <section key={tier.id} className={panel}>
+          <section key={tier.id} className={tier.id === "top" ? topPanel : panel}>
             <div className="flex items-center gap-3">{header}</div>
             {cards}
           </section>
