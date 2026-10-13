@@ -69,4 +69,11 @@ export interface FriendRow extends PlayerContact {
   top_wants: string[];
   /** How well their wants fit the rest of your friends' wants. Null when hidden or nothing to compare. */
   match_pct: number | null;
+  /** They have you on their friend list too. */
+  added_me: boolean;
+}
+
+/** Someone who added you and you haven't added back or dismissed (get_added_me). */
+export interface AddedMeRow extends PlayerContact {
+  added_at: string;
 }

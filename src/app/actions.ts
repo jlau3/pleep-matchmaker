@@ -159,8 +159,17 @@ export async function addFriend(friendId: string): Promise<{ error?: string }> {
   const { supabase, user } = await requireUser();
   const { error } = await supabase.from("friends").insert({ user_id: user.id, friend_id: friendId });
   if (error && error.code !== "23505") return { error: FRIEND_ERRORS[error.message] ?? "Couldn't add friend, try again" };
-  revalidatePath("/friends");
-  revalidatePath("/tiers");
+  // Whole layout: the "added you" banner may need to go.
+  revalidatePath("/", "layout");
+  return {};
+}
+
+/** "Not now" on someone who added you: stops prompting about them (they stay addable by search). */
+export async function dismissAddedYou(adderId: string): Promise<{ error?: string }> {
+  const { supabase, user } = await requireUser();
+  const { error } = await supabase.from("friend_prompt_dismissals").insert({ user_id: user.id, adder_id: adderId });
+  if (error && error.code !== "23505") return { error: "Couldn't update, try again" };
+  revalidatePath("/", "layout");
   return {};
 }
 
