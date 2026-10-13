@@ -1,0 +1,83 @@
+"use client";
+
+import { useEffect, useRef } from "react";
+import { markHelpSeen } from "@/app/actions";
+import { HELP_COOKIE } from "@/lib/help";
+import { HowItWorks } from "./HowItWorks";
+
+/**
+ * The ? in the nav, and the How it works popup it opens over the current page
+ * (a native <dialog>: darkened backdrop, Esc or a click outside closes it).
+ * `autoOpen` opens it by itself, for a player who hasn't seen this
+ * HELP_VERSION; closing it records that on their account.
+ */
+export function HelpModal({
+  signedIn,
+  autoOpen,
+  rememberSeen,
+}: {
+  signedIn: boolean;
+  autoOpen: boolean;
+  /** Cookie value to store when the account has already seen this version (see HELP_COOKIE). */
+  rememberSeen: string | null;
+}) {
+  const dialog = useRef<HTMLDialogElement>(null);
+  const pendingSeen = useRef(autoOpen);
+
+  useEffect(() => {
+    if (autoOpen) dialog.current?.showModal();
+    // Already seen, but this browser hasn't cached that yet: skip the lookup next time.
+    else if (rememberSeen) document.cookie = `${HELP_COOKIE}=${rememberSeen}; path=/; max-age=31536000; samesite=lax`;
+  }, [autoOpen, rememberSeen]);
+
+  function onClose() {
+    if (!pendingSeen.current) return;
+    pendingSeen.current = false;
+    void markHelpSeen().catch(() => {});
+  }
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => dialog.current?.showModal()}
+        aria-label="How it works"
+        title="How it works"
+        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-white/40 font-bold text-white/80 hover:bg-white/15 hover:text-white"
+      >
+        ?
+      </button>
+      <dialog
+        ref={dialog}
+        onClose={onClose}
+        // A click on the backdrop lands on the <dialog> itself; following a link inside closes it too.
+        onClick={(e) => {
+          if (e.target === e.currentTarget || (e.target as HTMLElement).closest("a")) dialog.current?.close();
+        }}
+        aria-labelledby="help-title"
+        className="m-auto max-h-[88dvh] w-[calc(100%-2rem)] max-w-xl overflow-y-auto rounded-3xl bg-cream p-0 text-ink shadow-2xl backdrop:bg-black/60 dark:bg-night dark:text-[#eef1ff]"
+      >
+        <div className="p-6">
+          <div className="mb-1 flex items-start justify-between gap-3">
+            <h2 id="help-title" className="text-2xl font-extrabold">
+              How Pleep Matchmaker works
+            </h2>
+            <button
+              type="button"
+              onClick={() => dialog.current?.close()}
+              aria-label="Close"
+              className="-mr-2 -mt-1 rounded-full px-2 text-2xl leading-none text-slate-500 hover:text-slate-800 dark:hover:text-white"
+            >
+              ×
+            </button>
+          </div>
+          <p className="mb-5 text-sm text-slate-600 dark:text-slate-300">A candy wishlist for Pokémon Sleep players and their friends.</p>
+          <HowItWorks links={signedIn} />
+          <button type="button" onClick={() => dialog.current?.close()} className="btn-primary mt-6 w-full py-2">
+            Got it
+          </button>
+        </div>
+      </dialog>
+    </>
+  );
+}

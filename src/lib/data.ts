@@ -3,8 +3,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { type Choice, isChoice, LINES } from "./lines";
 import type { OwnProfile } from "./types";
 
-/** Mirrors public.max_friends(). */
-export const MAX_FRIENDS = 50;
+export { MAX_FRIENDS } from "./friendship";
 
 /** The caller's picks, keyed by line id. Ids no longer in the data are dropped. */
 export async function loadOwnChoices(supabase: SupabaseClient, userId: string): Promise<Record<string, Choice>> {

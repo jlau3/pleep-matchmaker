@@ -1,3 +1,6 @@
+/** Mirrors public.max_friends(). */
+export const MAX_FRIENDS = 50;
+
 /**
  * Days from adding someone in Pokémon Sleep to the top friendship (closeness)
  * level, 5. Player-reported, not from an official source; change it here if

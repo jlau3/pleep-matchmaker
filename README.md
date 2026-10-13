@@ -8,7 +8,7 @@ Pokémon Sleep players vote on every candy line: **want**, **don't want** or **n
 
 New players go straight to My votes after signing in, and land on the Tier list once everything is voted.
 
-A **How it works** card explains the app on the sign-in page, opens on a new player's first visit to My Votes, and lives at `/about` (the **?** in the header). It ends with an **Invite friends** button (native share sheet on phones, copied message elsewhere); My Friends and the Tier List show a dismissible reminder (hidden for two weeks when closed) asking about Pokémon Sleep friends who haven't signed up yet, with the same button.
+A **How it works** card explains the app on the sign-in page. Signed in, it's a popup over the current page (darkened backdrop; Esc, ×, "Got it" or a tap outside closes it), opened by the **?** next to Profile. It also opens by itself once per account on first sign-in, and once more for everyone whenever `HELP_VERSION` in `src/lib/help.ts` is bumped (tracked in `profiles.help_seen_version`, cached in a per-account cookie). `/about` now redirects home. The card ends with an **Invite friends** button (native share sheet on phones, copied message elsewhere); My Friends and the Tier List show a dismissible reminder (hidden for two weeks when closed) asking about Pokémon Sleep friends who haven't signed up yet, with the same button.
 
 Stack: Next.js 15 (App Router) + Supabase (Postgres, Discord OAuth) + Tailwind. Built to run on the Vercel and Supabase free tiers.
 

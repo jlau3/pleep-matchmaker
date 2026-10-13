@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { normalizeFriendCode } from "@/lib/format";
+import { HELP_COOKIE, HELP_VERSION, helpCookieValue } from "@/lib/help";
 import { NEXT_COOKIE, safeNextPath } from "@/lib/nextPath";
 import { isChoice, LINES_BY_ID, MAX_TOP } from "@/lib/lines";
 import { createClient, requireUser } from "@/lib/supabase/server";
@@ -147,4 +148,11 @@ export async function deleteAccount() {
   if (error) redirect("/profile?error=delete");
   await supabase.auth.signOut();
   redirect("/?deleted=1");
+}
+
+/** Records that the player has seen this HELP_VERSION of the How it works popup. */
+export async function markHelpSeen(): Promise<void> {
+  const { supabase, user } = await requireUser();
+  const { error } = await supabase.from("profiles").update({ help_seen_version: HELP_VERSION }).eq("id", user.id);
+  if (!error) (await cookies()).set(HELP_COOKIE, helpCookieValue(user.id), { path: "/", maxAge: 31536000, sameSite: "lax" });
 }

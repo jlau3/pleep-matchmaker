@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { MAX_TOP } from "@/lib/lines";
-import { MAX_FRIENDS } from "@/lib/data";
+import { MAX_FRIENDS } from "@/lib/friendship";
 import { InviteButton } from "./InviteButton";
 
 const STEPS: { title: string; body: React.ReactNode; href: string; cta: string }[] = [
@@ -52,8 +52,9 @@ const STEPS: { title: string; body: React.ReactNode; href: string; cta: string }
 ];
 
 /**
- * What the app does, in four steps. Shown on the sign-in page, opened on a
- * new player's first visit to My Votes, and at /about (linked from the nav).
+ * What the app does, in four steps. Shown on the sign-in page and in the
+ * How it works popup (HelpModal), which opens from the ? in the nav and by
+ * itself on a player's first sign-in.
  */
 export function HowItWorks({ links = true }: { links?: boolean }) {
   return (
