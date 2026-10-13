@@ -15,7 +15,7 @@ export function InviteButton({ className = "" }: { className?: string }) {
         await navigator.share({ title: "Pleep Matchmaker", text: MESSAGE, url });
         return;
       } catch {
-        // Cancelled or blocked (some in-app browsers): fall back to copying.
+        // Canceled or blocked (some in-app browsers): fall back to copying.
       }
     }
     try {

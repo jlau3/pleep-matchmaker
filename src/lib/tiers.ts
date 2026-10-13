@@ -37,7 +37,7 @@ export const DONT_WANT_WEIGHT = 1;
 const pct = (x: number) => Math.round(x * 100);
 
 export const TIERS: Tier[] = [
-  { id: "top", label: "Top 3", hint: "players' favourites, not part of the ranking" },
+  { id: "top", label: "Top 3", hint: "players' favorites, not part of the ranking" },
   { id: "S", label: "S", hint: `top ${pct(TIER_SHARES.S)}% most wanted` },
   { id: "A", label: "A", hint: `next ${pct(TIER_SHARES.A)}%` },
   { id: "B", label: "B", hint: `next ${pct(TIER_SHARES.B)}%` },

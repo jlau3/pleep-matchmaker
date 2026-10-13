@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef } from "react";
+import type { CrowdHint } from "@/lib/crowd";
 import type { CandyLine, Choice } from "@/lib/lines";
 import { LineCard } from "./LineCard";
 
@@ -11,12 +12,15 @@ export function PickFlow({
   onChoose,
   tops,
   onStar,
+  hints,
 }: {
   lines: CandyLine[];
   choices: Record<string, Choice>;
   onChoose: (lineId: string, choice: Choice) => void;
   tops: Set<string>;
   onStar: (lineId: string) => void;
+  /** Crowd hints per line id, when "Show what others pick" is on. */
+  hints?: Record<string, CrowdHint>;
 }) {
   const cardRefs = useRef(new Map<string, HTMLLIElement>());
 
@@ -43,6 +47,7 @@ export function PickFlow({
             onChoose={(choice) => choose(index, line, choice)}
             starred={tops.has(line.id)}
             onStar={() => onStar(line.id)}
+          hint={hints?.[line.id]}
           />
         </li>
       ))}

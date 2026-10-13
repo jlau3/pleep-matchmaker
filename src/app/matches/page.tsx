@@ -48,7 +48,7 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
   if (!profile.ign && !shownDiscord)
     notices.push(
       <>
-        Add your in-game name in <Link href="/profile" className="underline">Profile</Link> so friends can recognise and find
+        Add your in-game name in <Link href="/profile" className="underline">Profile</Link> so friends can recognize and find
         you{profile.discord_username ? " (your Discord name is hidden)" : ""}.
       </>,
     );

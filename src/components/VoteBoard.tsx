@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { setChoice, setTop, swapTop } from "@/app/actions";
 import { CHOICE_LABEL, type Choice, LINES, LINES_BY_ID, lineSpriteUrl, MAX_TOP } from "@/lib/lines";
+import { type CrowdHint, crowdHint } from "@/lib/crowd";
 import { rethrowIfNavigation, SAVE_FAILED } from "@/lib/saveError";
 import { markVotesChanged } from "@/lib/votesChanged";
 import type { LineVotes } from "@/lib/tiers";
@@ -17,6 +18,7 @@ type Filter = "all" | Choice;
 type View = "list" | "grid";
 const VIEW_KEY = "pm_vote_view";
 const NEW_DISMISSED_KEY = "pm_new_candy_dismissed";
+const CROWD_KEY = "pm_show_crowd";
 
 const FILTERS: { value: Filter; label: string }[] = [
   { value: "all", label: "All" },
@@ -40,12 +42,15 @@ export function VoteBoard({
   initialTops,
   firstVisit,
   newCandy,
+  crowd,
 }: {
   initial: Record<string, Choice>;
   initialTops: string[];
   firstVisit: boolean;
   /** Recently released lines and what players have voted on them so far. */
   newCandy?: { ids: string[]; votes: Record<string, LineVotes>; voters: number };
+  /** Everyone's vote totals for "Show what others pick"; absent while too few have voted. */
+  crowd?: { votes: Record<string, LineVotes>; voters: number };
 }) {
   const [choices, setChoices] = useState(initial);
   const [tops, setTops] = useState(() => new Set(initialTops));
@@ -56,14 +61,34 @@ export function VoteBoard({
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<Filter>("all");
 
+  // "Show what others pick": off by default so players vote their own taste first; remembered per browser.
+  const [showCrowd, setShowCrowd] = useState(false);
+  const hints = useMemo(() => {
+    if (!crowd || !showCrowd) return undefined;
+    const out: Record<string, CrowdHint> = {};
+    for (const line of LINES) out[line.id] = crowdHint(crowd.votes[line.id], crowd.voters);
+    return out;
+  }, [crowd, showCrowd]);
+
   useEffect(() => {
     try {
+      setShowCrowd(localStorage.getItem(CROWD_KEY) === "1");
       const saved = localStorage.getItem(VIEW_KEY);
       if (saved === "list" || saved === "grid") setView(saved);
     } catch {
       // Storage unavailable (private mode, in-app browsers): keep the default.
     }
   }, []);
+
+  function toggleCrowd() {
+    const next = !showCrowd;
+    setShowCrowd(next);
+    try {
+      localStorage.setItem(CROWD_KEY, next ? "1" : "0");
+    } catch {
+      // Not remembered; fine.
+    }
+  }
 
   function changeView(next: View) {
     setView(next);
@@ -292,14 +317,23 @@ export function VoteBoard({
             </button>
           ))}
         </div>
+        {crowd && (
+          <label className="flex cursor-pointer items-center gap-2 text-sm">
+            <input type="checkbox" checked={showCrowd} onChange={toggleCrowd} className="h-4 w-4 accent-[var(--color-night)]" />
+            <span>
+              Show what others pick{" "}
+              <span className="text-slate-500">({crowd.voters} active players)</span>
+            </span>
+          </label>
+        )}
       </div>
 
       {visible.length === 0 ? (
         <p className="py-8 text-center text-slate-500">Nothing here.</p>
       ) : view === "list" ? (
-        <PickFlow lines={visible} choices={choices} onChoose={choose} tops={tops} onStar={toggleTop} />
+        <PickFlow lines={visible} choices={choices} onChoose={choose} tops={tops} onStar={toggleTop} hints={hints} />
       ) : (
-        <CollectionGrid lines={visible} choices={choices} onChoose={choose} tops={tops} onStar={toggleTop} />
+        <CollectionGrid lines={visible} choices={choices} onChoose={choose} tops={tops} onStar={toggleTop} hints={hints} />
       )}
 
       {swapFor && LINES_BY_ID.has(swapFor) && (

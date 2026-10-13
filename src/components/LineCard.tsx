@@ -1,6 +1,7 @@
 "use client";
 
-import { type CandyLine, type Choice, spriteUrl } from "@/lib/lines";
+import type { CrowdHint } from "@/lib/crowd";
+import { type CandyLine, CHOICE_LABEL, type Choice, spriteUrl } from "@/lib/lines";
 import { ChoiceButtons } from "./ChoiceButtons";
 import { StarButton } from "./StarButton";
 
@@ -11,6 +12,7 @@ export function LineCard({
   starred = false,
   onStar,
   compact = false,
+  hint,
 }: {
   line: CandyLine;
   choice?: Choice;
@@ -19,6 +21,8 @@ export function LineCard({
   /** Shows the Top 3 star in the top right corner when set. */
   onStar?: () => void;
   compact?: boolean;
+  /** What other players pick, when "Show what others pick" is on. */
+  hint?: CrowdHint;
 }) {
   const crowded = line.members.length > 4;
   const size = compact ? "h-12 w-12" : crowded ? "h-14 w-14 sm:h-20 sm:w-20" : "h-20 w-20 sm:h-24 sm:w-24";
@@ -36,7 +40,14 @@ export function LineCard({
           </li>
         ))}
       </ul>
-      <ChoiceButtons value={choice ?? "undecided"} onChoose={onChoose} compact={compact} />
+      <ChoiceButtons value={choice ?? "undecided"} onChoose={onChoose} compact={compact} suggested={hint?.lean} />
+      {hint && <p className={`mt-2 text-center text-slate-500 ${compact ? "text-[11px]" : "text-xs"}`}>{hintText(hint)}</p>}
     </div>
   );
+}
+
+function hintText({ lean, wantPct, dontPct }: CrowdHint): string {
+  const shares = `${wantPct}% want · ${dontPct}% don't`;
+  if (lean !== "undecided") return `Most players: ${CHOICE_LABEL[lean]} (${shares})`;
+  return Math.max(wantPct, dontPct) >= 25 ? `Players are split (${shares})` : `Few players feel strongly (${shares})`;
 }
