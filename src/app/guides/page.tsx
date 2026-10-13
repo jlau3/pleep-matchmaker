@@ -1,4 +1,4 @@
-import { GUIDE_SECTIONS } from "@/content/guides";
+import { GUIDE_SECTIONS, META_DISCORD_URL } from "@/content/guides";
 import { activeMetaPost, type MetaPost, publishedMetaPosts } from "@/content/meta";
 import { LINES_BY_ID, lineSpriteUrl } from "@/lib/lines";
 
@@ -35,6 +35,21 @@ export default function GuidesPage() {
           </ul>
         </section>
       ))}
+
+      <section className="card flex flex-wrap items-center justify-between gap-3 p-5">
+        <p className="guide-body">
+          <b>Want to dig deeper into the meta?</b> Come talk team building, sub skills and new releases with other players
+          in the Pokémon Sleep Discord.
+        </p>
+        <a
+          href={META_DISCORD_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="shrink-0 rounded-full bg-[#5865F2] px-5 py-2 font-extrabold text-white shadow-[0_3px_0_#3c45a5] hover:brightness-105"
+        >
+          Join the Discord
+        </a>
+      </section>
 
       {earlier.length > 0 && (
         <section className="space-y-3">

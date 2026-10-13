@@ -3,6 +3,9 @@
  * and a list of tips; edit freely. New-Pokémon notes live in ./meta.tsx and
  * show above these.
  */
+/** Where to send players who want more meta discussion (end of the Guides tab). */
+export const META_DISCORD_URL = "https://discord.gg/pokemonsleep";
+
 export interface GuideSection {
   id: string;
   title: string;
