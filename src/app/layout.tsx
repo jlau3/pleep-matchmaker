@@ -4,6 +4,7 @@ import { M_PLUS_Rounded_1c } from "next/font/google";
 import { AddedYouBanner } from "@/components/AddedYouBanner";
 import { Nav } from "@/components/Nav";
 import { SupportFooter } from "@/components/SupportFooter";
+import { VotesChangedRefresh } from "@/components/VotesChangedRefresh";
 import { parseTheme, THEME_COOKIE } from "@/lib/theme";
 import "./globals.css";
 
@@ -33,6 +34,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <AddedYouBanner />
         <main className="mx-auto max-w-5xl px-4 pb-16 pt-4">{children}</main>
         <SupportFooter />
+        <VotesChangedRefresh />
       </body>
     </html>
   );
