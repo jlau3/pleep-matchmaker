@@ -63,7 +63,7 @@ export function SignInOptions({ next }: { next: string | null }) {
               {state.error}
             </p>
           )}
-          <p className="text-xs text-slate-500">No password. Your email is never shown to other players.</p>
+          <p className="text-xs text-slate-500">No password needed.</p>
         </form>
       )}
     </div>

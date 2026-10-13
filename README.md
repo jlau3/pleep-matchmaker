@@ -123,7 +123,7 @@ Import the repo in Vercel and set `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPAB
 
 - Roster from [nitoyon/pokesleep-tool](https://github.com/nitoyon/pokesleep-tool) (MIT).
 - Sprites are the in-game Pokémon Sleep icons from Serebii (`scripts/build_icons.py`, run after `build_lines.py`), downscaled to 128px webp. Anything Serebii lacks keeps the PokeAPI official artwork that `build_lines.py` downloads.
-- All forms (event costumes, regional variants, sizes) share candy with their base species, so a line is one evolution family. Regional forms get their own sprite inside the line.
+- All forms (event costumes, regional variants, sizes) share candy with their base species, so a line is one evolution family. Regional forms and event costumes (Holiday Pikachu's Santa hat, Halloween Eevee's witch hat, Captain Pikachu, Holiday Spheal) get their own icon inside the line; costumes are listed last, use the Serebii icon (`025-holiday.png` → `public/sprites/25-holiday.webp`), and new ones in the roster are picked up automatically.
 
 When the game adds Pokémon, re-run it and commit the result:
 

@@ -18,7 +18,8 @@ export const CHOICE_LABEL: Record<Choice, string> = {
 export interface LineMember {
   name: string;
   dex: number;
-  sprite: number;
+  /** PokeAPI id (a number), or an event costume like "25-holiday" (Holiday Pikachu). */
+  sprite: number | string;
 }
 
 /** One candy line: an evolution family whose forms all share one candy. */
@@ -56,7 +57,7 @@ export function isChoice(value: unknown): value is Choice {
   return typeof value === "string" && (CHOICES as string[]).includes(value);
 }
 
-export function spriteUrl(sprite: number): string {
+export function spriteUrl(sprite: number | string): string {
   return `/sprites/${sprite}.webp`;
 }
 

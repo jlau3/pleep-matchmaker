@@ -161,6 +161,21 @@
         "name": "Raichu",
         "dex": 26,
         "sprite": 26
+      },
+      {
+        "name": "Holiday Pikachu",
+        "dex": 25,
+        "sprite": "25-holiday"
+      },
+      {
+        "name": "Halloween Pikachu",
+        "dex": 25,
+        "sprite": "25-halloween"
+      },
+      {
+        "name": "Captain Pikachu",
+        "dex": 25,
+        "sprite": "25-captain"
       }
     ]
   },
@@ -706,6 +721,16 @@
         "name": "Sylveon",
         "dex": 700,
         "sprite": 700
+      },
+      {
+        "name": "Halloween Eevee",
+        "dex": 133,
+        "sprite": "133-halloween"
+      },
+      {
+        "name": "Holiday Eevee",
+        "dex": 133,
+        "sprite": "133-holiday"
       }
     ]
   },
@@ -1491,6 +1516,11 @@
         "name": "Walrein",
         "dex": 365,
         "sprite": 365
+      },
+      {
+        "name": "Holiday Spheal",
+        "dex": 363,
+        "sprite": "363-holiday"
       }
     ]
   },

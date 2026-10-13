@@ -1,5 +1,7 @@
+import { existsSync } from "node:fs";
+import path from "node:path";
 import { describe, expect, it } from "vitest";
-import { ISLANDS, LINES, LINES_BY_ID, linesFromIds, recentLines } from "./lines";
+import { ISLANDS, LINES, LINES_BY_ID, lineSpriteUrl, linesFromIds, recentLines } from "./lines";
 
 describe("candy line data", () => {
   it("has unique ids and at least one member per line", () => {
@@ -8,7 +10,13 @@ describe("candy line data", () => {
   });
   it("folds forms into their base line", () => {
     const pikachu = LINES_BY_ID.get("pikachu")!.members.map((m) => m.name);
-    expect(pikachu).toEqual(["Pichu", "Pikachu", "Raichu"]);
+    // Event costumes get their own icon, after the regular members.
+    expect(pikachu).toEqual(["Pichu", "Pikachu", "Raichu", "Holiday Pikachu", "Halloween Pikachu", "Captain Pikachu"]);
+    expect(LINES_BY_ID.get("eevee")!.members.map((m) => m.name)).toEqual(
+      expect.arrayContaining(["Halloween Eevee", "Holiday Eevee"]),
+    );
+    // Sizes still fold into one icon.
+    expect(LINES_BY_ID.get("pumpkaboo")!.members.map((m) => m.name)).toEqual(["Pumpkaboo", "Gourgeist"]);
     expect(LINES_BY_ID.has("toxtricity")).toBe(false);
     expect(LINES_BY_ID.get("wooper")!.members.map((m) => m.name)).toContain("Clodsire");
   });
@@ -38,5 +46,19 @@ describe("recentLines", () => {
     const day = new Date(`${newest.addedAt}T00:00:00Z`);
     expect(recentLines(new Date(day.getTime() + 13 * 864e5)).map((l) => l.id)).toContain(newest.id);
     expect(recentLines(new Date(day.getTime() + 15 * 864e5)).map((l) => l.id)).not.toContain(newest.id);
+  });
+});
+
+describe("sprites", () => {
+  it("has a file for every member's icon, event costumes included", () => {
+    const dir = path.resolve(__dirname, "../../public/sprites");
+    for (const line of LINES_BY_ID.values()) {
+      for (const m of line.members) expect(existsSync(path.join(dir, `${m.sprite}.webp`)), `${m.name}: ${m.sprite}`).toBe(true);
+    }
+  });
+
+  it("names the line after its regular namesake, not a costume", () => {
+    expect(lineSpriteUrl(LINES_BY_ID.get("pikachu")!)).toBe("/sprites/25.webp");
+    expect(lineSpriteUrl(LINES_BY_ID.get("eevee")!)).toBe("/sprites/133.webp");
   });
 });
