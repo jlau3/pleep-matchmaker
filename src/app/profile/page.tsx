@@ -6,22 +6,35 @@ import { BlockButton } from "@/components/BlockButton";
 import { DeleteAccountButton } from "@/components/DeleteAccountButton";
 import { playerName } from "@/components/PlayerHeader";
 import { ProfileForm } from "@/components/ProfileForm";
+import { linkErrorText, SignInMethods } from "@/components/SignInMethods";
 import { PROFILE_TABS, SubTabs } from "@/components/SubTabs";
 import { loadFriendIds, loadOwnProfile, MAX_FRIENDS } from "@/lib/data";
 import { relativeTime } from "@/lib/format";
 import { requireUser } from "@/lib/supabase/server";
 import type { BlockedRow } from "@/lib/types";
 
-export default async function ProfilePage({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
+export default async function ProfilePage({ searchParams }: { searchParams: Promise<{ error?: string; linked?: string }> }) {
   const { supabase, user } = await requireUser();
-  const [profile, friendIds, blockedResult] = await Promise.all([
+  const [profile, friendIds, blockedResult, identitiesResult] = await Promise.all([
     loadOwnProfile(supabase, user.id),
     loadFriendIds(supabase, user.id),
     supabase.rpc("get_blocked"),
+    supabase.auth.getUserIdentities(),
   ]);
   if (blockedResult.error) throw blockedResult.error;
   const blocked = blockedResult.data as BlockedRow[];
-  const { error } = await searchParams;
+  const linkedProviders = (identitiesResult.data?.identities ?? []).map((i) => i.provider);
+  const { error, linked } = await searchParams;
+  const errorText = error ? linkErrorText(error) : null;
+  const linkNotice = errorText
+    ? { tone: "error" as const, text: errorText }
+    : linked === "discord"
+      ? { tone: "ok" as const, text: "Discord linked. Your Discord name now shows to friends; you can hide it above." }
+      : linked === "google"
+        ? { tone: "ok" as const, text: "Google linked. You can now sign in with either." }
+        : linked === "removed"
+          ? { tone: "ok" as const, text: "Sign-in method removed." }
+          : null;
   const theme = parseTheme((await cookies()).get(THEME_COOKIE)?.value);
 
   return (
@@ -38,6 +51,8 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
         </section>
 
         <ProfileForm profile={profile} friendListFull={friendIds.size >= MAX_FRIENDS} />
+
+        <SignInMethods linked={linkedProviders} discordName={profile.discord_username} notice={linkNotice} />
 
         <section>
           <h2 className="mb-2 font-semibold">Theme</h2>
