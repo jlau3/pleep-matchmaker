@@ -101,6 +101,7 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
       <FriendPostCard
         friendCode={profile.friend_code}
         ign={profile.ign}
+        allowLookup={profile.allow_lookup}
         topNames={linesFromIds(tops).map((line) => line.name)}
         wantNames={linesFromIds(Object.keys(choices).filter((id) => choices[id] === "want"))
           .sort((a, b) => b.weight - a.weight || a.dex - b.dex)

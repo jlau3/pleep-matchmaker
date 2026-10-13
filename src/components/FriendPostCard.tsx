@@ -16,12 +16,15 @@ const callout =
 export function FriendPostCard({
   friendCode,
   ign,
+  allowLookup,
   topNames,
   wantNames,
 }: {
   friendCode: string | null;
   /** Your in-game name, so readers recognize you in Pokémon Sleep. */
   ign: string | null;
+  /** With lookup off, search can't find you, so the post leaves the link out. */
+  allowLookup: boolean;
   topNames: string[];
   wantNames: string[];
 }) {
@@ -45,7 +48,14 @@ export function FriendPostCard({
     );
   }
 
-  const favorites = topNames.length > 0 ? `My Top ${topNames.length} candies: ${topNames.join(", ")}` : wantNames.length > 0 ? `Candies I'm after: ${wantNames.join(", ")}` : null;
+  const favorites =
+    topNames.length === 1
+      ? `My top candy: ${topNames[0]}`
+      : topNames.length > 1
+        ? `My Top ${topNames.length} candies: ${topNames.join(", ")}`
+        : wantNames.length > 0
+          ? `Candies I'm after: ${wantNames.join(", ")}`
+          : null;
   // The link opens Friends with your friend code already searched: unique, always set here, and
   // lookup matches it exactly (IGNs can be shared; Discord names can be hidden).
   const link = `${origin}/friends?q=${friendCode}`;
@@ -54,7 +64,7 @@ export function FriendPostCard({
     ign ? `IGN: ${ign}` : null,
     `Friend code: ${formatFriendCode(friendCode)}`,
     favorites,
-    `See how my candy wishlist fits your friends' on Pleep Matchmaker: ${link}`,
+    allowLookup ? `See how my candy wishlist fits your friends' on Pleep Matchmaker: ${link}` : null,
   ]
     .filter(Boolean)
     .join("\n");
@@ -101,6 +111,12 @@ export function FriendPostCard({
           </button>
         </div>
       </div>
+      {!allowLookup && (
+        <p className="mb-2 text-xs text-amber-800 dark:text-amber-200">
+          The link to your profile is left out because &quot;Allow lookup&quot; is off. Turn it on in{" "}
+          <Link href="/profile" className="underline">Settings</Link> if you want readers to find you here.
+        </p>
+      )}
       <pre className="whitespace-pre-wrap rounded-2xl bg-white p-3 font-sans text-sm dark:bg-night-deep">{message}</pre>
     </details>
   );
