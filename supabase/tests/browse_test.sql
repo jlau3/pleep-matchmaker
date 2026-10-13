@@ -1,8 +1,10 @@
 \set ON_ERROR_STOP on
 
--- viewer (no friends, so own wants a,b,c stand in). Candidates:
+-- viewer wants a,b,c. Fit = how much of the viewer's wants each candidate's
+-- Tier List wants (their own wants stand in while they have under 3 friends
+-- with votes). Candidates:
 --   good: wants a,b,c          -> 100% fit, a good fit
---   low:  wants a + 9 others   -> 10% fit, only under "everyone"
+--   low:  wants a + 9 others   -> 33% fit (only a of a,b,c), only under "everyone"
 --   fresh: no votes yet        -> no fit, only under "everyone", listed last
 --   stale / closed / blocked   -> never listed
 insert into auth.users (id, raw_user_meta_data) values
@@ -53,7 +55,7 @@ begin
   assert names = '{br_fresh,br_low,br_good}', format('everyone by activity: %s', names);
 
   assert (select match_pct from public.browse_players('fit', true, 50, 0) where discord_username = 'br_fresh') is null, 'no votes, no fit';
-  assert (select match_pct from public.browse_players('fit', true, 50, 0) where discord_username = 'br_low') = 10, 'low fit';
+  assert (select match_pct from public.browse_players('fit', true, 50, 0) where discord_username = 'br_low') = 33, 'low fit';
   assert not exists (
     select 1 from public.browse_players('fit', true, 50, 0)
     where discord_username in ('br_stale', 'br_closed', 'br_blocked', 'br_viewer')
@@ -72,6 +74,50 @@ begin
   assert not (first_page && second_page), 'pages overlap';
   assert total >= 3, 'total count';
   assert (select count(*) from public.browse_players('fit', true, 500, 0)) <= 50, 'page size capped at 50';
+end $$;
+reset role;
+
+-- Their Tier List, not their own wants, once 3+ friends have voted.
+--   hub: wants only x1, but three friends (f1..f3) all want a,b,c and also
+--        listed the viewer as a friend. Fit 100%: their list wants what the
+--        viewer wants, and the viewer's own votes are left out of it.
+insert into auth.users (id, raw_user_meta_data) values
+  ('00000000-0000-0000-0010-000000000001', '{"name":"br_hub#0"}'),
+  ('00000000-0000-0000-0010-000000000002', '{"name":"br_f1#0"}'),
+  ('00000000-0000-0000-0010-000000000003', '{"name":"br_f2#0"}'),
+  ('00000000-0000-0000-0010-000000000004', '{"name":"br_f3#0"}');
+update public.profiles set friend_code = '6666' || right(id::text, 8), open_to_friends = false
+where id::text like '00000000-0000-0000-0010-%';
+update public.profiles set open_to_friends = true where discord_username = 'br_hub';
+insert into public.preferences (user_id, line_id, choice) values ('00000000-0000-0000-0010-000000000001', 'bx1', 'want');
+insert into public.preferences (user_id, line_id, choice)
+select u::uuid, l, 'want'::public.choice
+from unnest(array['00000000-0000-0000-0010-000000000002', '00000000-0000-0000-0010-000000000003',
+                  '00000000-0000-0000-0010-000000000004']) u,
+     unnest(array['bra', 'brb', 'brc']) l;
+insert into public.friends (user_id, friend_id) values
+  ('00000000-0000-0000-0010-000000000001', '00000000-0000-0000-0010-000000000002'),
+  ('00000000-0000-0000-0010-000000000001', '00000000-0000-0000-0010-000000000003'),
+  ('00000000-0000-0000-0010-000000000001', '00000000-0000-0000-0010-000000000004'),
+  ('00000000-0000-0000-0010-000000000001', '00000000-0000-0000-000d-000000000001');
+
+set role authenticated;
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-000d-000000000001', false);
+do $$ begin
+  assert (select match_pct from public.browse_players('fit', true, 50, 0) where discord_username = 'br_hub') = 100,
+    'scored on their friends'' wants, not their own';
+  assert (select fit_wants from public.browse_players('fit', true, 50, 0) where discord_username = 'br_hub') = '{bra,brb,brc}',
+    'your wants their list covers';
+end $$;
+reset role;
+
+-- With one of the three friends gone, under 3 voters: their own wants (x1) stand in.
+delete from public.friends where user_id = '00000000-0000-0000-0010-000000000001' and friend_id = '00000000-0000-0000-0010-000000000004';
+set role authenticated;
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-000d-000000000001', false);
+do $$ begin
+  assert (select match_pct from public.browse_players('fit', true, 50, 0) where discord_username = 'br_hub') = 0,
+    'under 3 friends with votes: their own wants';
 end $$;
 reset role;
 

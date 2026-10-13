@@ -86,8 +86,7 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
         <SubTabs tabs={FRIENDS_TABS} active="/matches" query={q ? `q=${encodeURIComponent(q)}` : undefined} />
         <PlayerSearch supabase={supabase} q={q} friendIds={friendIds} viewerId={user.id} />
         <p className="mt-4 text-sm text-slate-600 dark:text-slate-300">
-          Players open to new friends who want the same candy your friends want. Until your friends have voted, your
-          own wants stand in.
+          Players open to new friends who are sending candies you want.
         </p>
         <div className="mt-2">
           <FriendshipLevel5 />
@@ -144,7 +143,7 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
               "No one to suggest right now. Check back as more players join."
             ) : (
               <>
-                No good fits yet (at least {LOW_FIT_PCT}% fit and 3 lines your friends want).{" "}
+                No good fits yet (at least {LOW_FIT_PCT}% fit and 3 of your wants on their Tier List).{" "}
                 <Link href={link({ everyone: true })} className="underline">See everyone</Link> instead.
               </>
             )}
@@ -153,7 +152,7 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
           <ul className="space-y-4">
             {matches.map((match) => (
               <li key={match.user_id} className="card p-4">
-                <PlayerHeader player={match} aside={<MatchPct pct={match.match_pct} />} />
+                <PlayerHeader player={match} aside={<MatchPct pct={match.match_pct} theirList />} />
                 <FitLists match={match} />
                 {match.match_pct === null && match.fit_wants.length === 0 && (
                   <p className="mt-3 text-sm text-slate-500">Hasn&apos;t voted on any candy yet.</p>
@@ -216,8 +215,9 @@ function Pills({ options }: { options: (readonly [string, string, boolean])[] })
 }
 
 /**
- * Same layout as My Friends: their Top 3 always shown, then how they line up
- * with your friends in a dropdown (most-wanted by your friends first).
+ * Same layout as My Friends: their Top 3 always shown, then a dropdown of how
+ * their Tier List lines up with you: your wants their friends want (what
+ * they'd send you that you want) and your don't-wants their friends want.
  */
 function FitLists({ match }: { match: MatchRow }) {
   const tops = match.top_wants ?? [];
@@ -234,16 +234,16 @@ function FitLists({ match }: { match: MatchRow }) {
       {match.fit_wants.length + match.fit_dont_wants.length > 0 && (
         <details>
           <summary className="cursor-pointer text-sm font-semibold">
-            Wants what your friends want {match.fit_wants.length} · Doesn&apos;t want {match.fit_dont_wants.length}
+            They&apos;d send you: {match.fit_wants.length} you want · {match.fit_dont_wants.length} you don&apos;t
           </summary>
           <div className="mt-3 space-y-4">
             <div>
-              <h4 className="mb-2 text-sm font-semibold text-want">Wants what your friends want</h4>
+              <h4 className="mb-2 text-sm font-semibold text-want">Your wants their friends want</h4>
               <LineChips lines={chips(match.fit_wants)} />
             </div>
             {match.fit_dont_wants.length > 0 && (
               <div>
-                <h4 className="mb-2 text-sm font-semibold text-dont">Doesn&apos;t want, but your friends do</h4>
+                <h4 className="mb-2 text-sm font-semibold text-dont">Your don&apos;t-wants their friends want</h4>
                 <LineChips lines={chips(match.fit_dont_wants)} />
               </div>
             )}

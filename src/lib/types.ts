@@ -12,11 +12,15 @@ export interface PlayerContact {
 }
 
 export interface MatchRow extends PlayerContact {
-  /** How well their wants fit what your friends want (see the friends_fit migration). Null before they've voted. */
+  /**
+   * Fit %. My Friends (get_friends): how well their wants fit what your friends
+   * want. Find New Friends (browse_players): how much of what you want their
+   * friends want (see the fit_from_their_list migration). Null when unknown.
+   */
   match_pct: number | null;
-  /** Their wants that your friends want too, most-wanted first. */
+  /** get_friends: their wants your friends want too. browse_players: your wants their friends want. Most-wanted first. */
   fit_wants: string[];
-  /** Candy your friends want that they don't, most-wanted first: what they'd rather not be sent. */
+  /** get_friends: candy your friends want that they don't. browse_players: your don't-wants their friends want. */
   fit_dont_wants: string[];
   /** browse_players only: their starred Top 3. */
   top_wants?: string[];
