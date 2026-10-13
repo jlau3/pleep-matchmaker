@@ -22,45 +22,39 @@ export function PlayerHeader({
 }) {
   const name = playerName(player);
   return (
-    <div className="flex items-start gap-3">
-      {player.avatar_url ? (
-        <img src={player.avatar_url} alt="" className="h-12 w-12 shrink-0 rounded-full" />
-      ) : (
-        <div className="h-12 w-12 shrink-0 rounded-full bg-slate-200 dark:bg-slate-700" />
-      )}
-      <div className="min-w-0 flex-1 space-y-1">
-        {/* aside sits in the name row only, so the rows below get the full width. */}
-        <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0">
-            <span className="font-semibold">{name}</span>
-            {player.discord_username && <span className="ml-2 text-sm text-slate-500">@{player.discord_username}</span>}
-          </div>
-          {aside}
+    <div className="space-y-2">
+      {/* Avatar, name and the aside (fits) on top; everything else full width below, flush left. */}
+      <div className="flex items-start gap-3">
+        {player.avatar_url ? (
+          <img src={player.avatar_url} alt="" className="h-12 w-12 shrink-0 rounded-full" />
+        ) : (
+          <div className="h-12 w-12 shrink-0 rounded-full bg-slate-200 dark:bg-slate-700" />
+        )}
+        <div className="min-w-0 flex-1 self-center">
+          <span className="font-semibold">{name}</span>
+          {player.discord_username && <span className="ml-2 text-sm text-slate-500">@{player.discord_username}</span>}
         </div>
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
-          {player.ign && (
-            <span>
-              IGN <strong>{player.ign}</strong>
-            </span>
-          )}
-          {player.friend_code && (
-            <span className="flex items-center gap-2 whitespace-nowrap">
-              FC <strong className="font-mono">{formatFriendCode(player.friend_code)}</strong>
-              <CopyButton text={player.friend_code} label="friend code" />
-            </span>
-          )}
-        </div>
-        <div className="flex flex-wrap items-center gap-x-3 text-xs text-slate-500">
-          <span>Seen {relativeTime(player.last_seen_at)}</span>
-          <span>Prefs updated {relativeTime(player.prefs_updated_at)}</span>
-          <BlockButton userId={player.user_id} name={name} />
-        </div>
-        {isFriend !== undefined && (
-          <div className="pt-1">
-            <FriendButton userId={player.user_id} isFriend={isFriend} name={name} />
-          </div>
+        {aside}
+      </div>
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
+        {player.ign && (
+          <span>
+            IGN <strong>{player.ign}</strong>
+          </span>
+        )}
+        {player.friend_code && (
+          <span className="flex items-center gap-2 whitespace-nowrap">
+            FC <strong className="font-mono">{formatFriendCode(player.friend_code)}</strong>
+            <CopyButton text={player.friend_code} label="friend code" />
+          </span>
         )}
       </div>
+      <div className="flex flex-wrap items-center gap-x-3 text-[13px] text-slate-500">
+        <span>Seen {relativeTime(player.last_seen_at)}</span>
+        <span>Prefs updated {relativeTime(player.prefs_updated_at)}</span>
+        <BlockButton userId={player.user_id} name={name} />
+      </div>
+      {isFriend !== undefined && <FriendButton userId={player.user_id} isFriend={isFriend} name={name} />}
     </div>
   );
 }

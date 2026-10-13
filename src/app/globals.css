@@ -28,6 +28,24 @@
   --color-cream: #fffaf0;
   --color-sky: #e4f2ff;
   --color-ink: #2d3354;
+  /*
+   * Secondary text (text-slate-400/500 across the app) was too faint for some
+   * players. Darker here for light mode, and lifted for dark mode below.
+   */
+  --color-slate-400: #5f6b85;
+  --color-slate-500: #4a5470;
+}
+
+/* Dark mode: the same secondary greys, light enough to read on night blue. */
+:root.dark {
+  --color-slate-400: #b3bdd6;
+  --color-slate-500: #c3cce0;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not(.light) {
+    --color-slate-400: #b3bdd6;
+    --color-slate-500: #c3cce0;
+  }
 }
 
 :root {
