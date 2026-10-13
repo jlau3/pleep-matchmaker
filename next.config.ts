@@ -2,6 +2,23 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   images: { unoptimized: true },
+  // Basic hardening on every page: no framing by other sites (clickjacking),
+  // no MIME sniffing, no full URLs leaked to other sites, and no camera, mic
+  // or location access. Vercel already serves HTTPS with HSTS.
+  async headers() {
+    return [
+      {
+        source: "/:path*",
+        headers: [
+          { key: "X-Frame-Options", value: "DENY" },
+          { key: "Content-Security-Policy", value: "frame-ancestors 'none'" },
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+          { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
+        ],
+      },
+    ];
+  },
   experimental: {
     // Keep pages you've visited (dynamic) and pages loaded ahead in the
     // background (static: NavLinks prefetches every tab) in the browser for 30

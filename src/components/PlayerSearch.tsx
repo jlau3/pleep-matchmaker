@@ -34,7 +34,7 @@ export async function PlayerSearch({
   return (
     <div className="space-y-3">
       <form className="flex gap-2">
-        <input name="q" defaultValue={q} placeholder="Exact Discord name, IGN or friend code" className="min-w-0 flex-1 field" />
+        <input name="q" defaultValue={q} placeholder="Exact name, IGN or friend code" className="min-w-0 flex-1 field" />
         <button type="submit" className="btn-primary px-5 py-2">
           Search
         </button>

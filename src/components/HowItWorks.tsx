@@ -31,7 +31,7 @@ const STEPS: { title: string; body: React.ReactNode; href: string; cta: string }
     title: "Add your in-game friends",
     body: (
       <>
-        Look them up by exact Discord name, IGN or friend code and add up to {MAX_FRIENDS}. Each player shows a fit %: how
+        Look them up by exact name, IGN or friend code and add up to {MAX_FRIENDS}. Each player shows a fit %: how
         closely their wants and don&apos;t-wants line up with your current friends list.
       </>
     ),
@@ -80,7 +80,7 @@ export function HowItWorks({ links = true }: { links?: boolean }) {
       <div className="mt-5 rounded-2xl bg-sun/25 p-4">
         <h3 className="font-bold">Bring your friends along</h3>
         <p className="mb-3 text-sm text-slate-700 dark:text-slate-200">
-          The tier list only knows what your friends have voted. Ping your Pokémon Sleep friends on Discord and ask them
+          The tier list only knows what your friends have voted. Send your Pokémon Sleep friends an invite and ask them
           to add their wants and Top 3.
         </p>
         <InviteButton />
