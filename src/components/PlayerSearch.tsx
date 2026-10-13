@@ -1,7 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import Link from "next/link";
 import type { LookupRow } from "@/lib/types";
-import { MatchPct } from "./MatchPct";
+import { FitPair } from "./FitPair";
 import { PlayerHeader } from "./PlayerHeader";
 import { PlayerLists } from "./PlayerLists";
 
@@ -50,14 +50,14 @@ export async function PlayerSearch({
             <li key={player.user_id} className="card p-4">
               <PlayerHeader player={player} isFriend={friendIds.has(player.user_id)} aside={
                   // No fit while there's nothing to compare against: no friends' votes and none of your own.
-                  player.match_pct === null && player.user_id !== viewerId && player.wants.length > 0 ? (
+                  player.match_pct === null && player.you_fit_pct === null && player.user_id !== viewerId && player.wants.length > 0 ? (
                     <Link href="/vote" className="shrink-0 text-right text-xs font-semibold text-want underline">
                       Add friends or vote
                       <br />
                       to see their fit
                     </Link>
                   ) : (
-                    <MatchPct pct={player.match_pct} />
+                    <FitPair they={player.match_pct} you={player.you_fit_pct} />
                   )
                 }
               />

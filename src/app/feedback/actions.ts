@@ -15,8 +15,8 @@ const COOLDOWN_SECONDS = 60;
 
 /**
  * Posts feedback to the Discord channel behind DISCORD_FEEDBACK_WEBHOOK_URL
- * (server-only env var). Signed-in players only, so every message carries a
- * Discord name to reply to. Mentions are disabled so nobody can ping @everyone.
+ * (server-only env var). Signed-in players only, so every message carries an
+ * account to trace (Discord name if they have one, IGN, user id). Mentions are disabled so nobody can ping @everyone.
  */
 export async function sendFeedback(_prev: FeedbackState, form: FormData): Promise<FeedbackState> {
   const webhook = process.env.DISCORD_FEEDBACK_WEBHOOK_URL;
@@ -31,6 +31,12 @@ export async function sendFeedback(_prev: FeedbackState, form: FormData): Promis
   const page = String(form.get("page") ?? "").slice(0, 200);
   if (message.length < 5) return { error: "Tell us a little more (at least 5 characters)." };
   if (message.length > 1500) return { error: "That's a lot! Please keep it under 1500 characters." };
+
+  // The real limit (1 a minute, 10 a day), kept in the database so a script
+  // can't skip it. If the check itself fails (e.g. its migration hasn't run),
+  // fall back to the cookie above rather than blocking feedback.
+  const slot = await supabase.rpc("claim_feedback_slot");
+  if (!slot.error && slot.data === false) return { error: "Thanks! Give it a minute (or until tomorrow if you've sent a lot today)." };
 
   const profile = await loadOwnProfile(supabase, user.id);
   const who = profile.discord_username ? `@${profile.discord_username}` : user.id;

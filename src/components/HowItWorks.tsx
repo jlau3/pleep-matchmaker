@@ -31,8 +31,10 @@ const STEPS: { title: string; body: React.ReactNode; href: string; cta: string }
     title: "Add your in-game friends",
     body: (
       <>
-        Look them up by exact Discord name, IGN or friend code and add up to {MAX_FRIENDS}. Each player shows a fit %: how
-        closely their wants and don&apos;t-wants line up with your current friends list.
+        Look them up by exact Discord name, IGN or friend code and add up to {MAX_FRIENDS}. Each player shows two fit %s:
+        <b>fits your list</b> (their wants match what your friends want, so the candy you send suits them) and{" "}
+        <b>you fit theirs</b> (your wants match what their friends want, so the candy they send suits you). A low
+        one means one of you mostly gets candy they don&apos;t need.
       </>
     ),
     href: "/friends",
@@ -42,8 +44,8 @@ const STEPS: { title: string; body: React.ReactNode; href: string; cta: string }
     title: "Find new friends",
     body: (
       <>
-        Find New Friends suggests players whose wants fit what your friends already want. Copy their friend code and add them in
-        Pokémon Sleep.
+        Find New Friends suggests players who fit both ways, best fit first: you&apos;d each send candy the other
+        wants, so they&apos;re likely to add you back. Copy their friend code and add them in Pokémon Sleep.
       </>
     ),
     href: "/matches",
@@ -80,7 +82,7 @@ export function HowItWorks({ links = true }: { links?: boolean }) {
       <div className="mt-5 rounded-2xl bg-sun/25 p-4">
         <h3 className="font-bold">Bring your friends along</h3>
         <p className="mb-3 text-sm text-slate-700 dark:text-slate-200">
-          The tier list only knows what your friends have voted. Ping your Pokémon Sleep friends on Discord and ask them
+          The tier list only knows what your friends have voted. Send your Pokémon Sleep friends an invite and ask them
           to add their wants and Top 3.
         </p>
         <InviteButton />
