@@ -10,6 +10,6 @@ describe("Find New Friends options", () => {
 
   it("builds query strings without defaults, keeping the search", () => {
     expect(browseQuery({ sort: "fit", everyone: false, page: 1 })).toBe("");
-    expect(browseQuery({ sort: "shared", everyone: true, page: 2 }, "bob")).toBe("?q=bob&sort=shared&show=all&page=2");
+    expect(browseQuery({ sort: "active", everyone: true, page: 2 }, "bob")).toBe("?q=bob&sort=active&show=all&page=2");
   });
 });

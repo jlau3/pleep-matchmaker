@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { setChoice, setTop, swapTop } from "@/app/actions";
 import { CHOICE_LABEL, type Choice, LINES, LINES_BY_ID, lineSpriteUrl, MAX_TOP } from "@/lib/lines";
 import { rethrowIfNavigation, SAVE_FAILED } from "@/lib/saveError";
+import { markVotesChanged } from "@/lib/votesChanged";
 import type { LineVotes } from "@/lib/tiers";
 import { CollectionGrid } from "./CollectionGrid";
 import { PickFlow } from "./PickFlow";
@@ -102,6 +103,7 @@ export function VoteBoard({
       });
     };
     setError(null);
+    markVotesChanged();
     apply(next.choice, next.top);
     let failure: string | undefined;
     try {
@@ -140,6 +142,7 @@ export function VoteBoard({
     setSwapFor(null);
     const previous = { tops, inChoice: choices[inId] };
     setError(null);
+    markVotesChanged();
     setTops((current) => new Set([...current].filter((id) => id !== outId)).add(inId));
     setChoices((current) => ({ ...current, [inId]: "want" }));
     let failure: string | undefined;

@@ -1,30 +1,54 @@
 import { cookies } from "next/headers";
 import Link from "next/link";
 import { HelpModal } from "./HelpModal";
+import { MetaNoteModal } from "./MetaNoteModal";
 import { NavLinks } from "./NavLinks";
+import { activeMetaPost, META_COOKIE, metaCookieValue } from "@/content/meta";
 import { HELP_COOKIE, HELP_VERSION, helpCookieValue } from "@/lib/help";
+import { LINES_BY_ID, lineSpriteUrl } from "@/lib/lines";
 import { getAuth } from "@/lib/supabase/server";
 
+type Popup = { autoOpen: boolean; rememberSeen: string | null };
+const SHUT: Popup = { autoOpen: false, rememberSeen: null };
+
 /**
- * Whether the How it works popup should open by itself: signed in and this
- * account hasn't seen HELP_VERSION. The cookie skips the lookup once seen; if
- * the lookup fails (e.g. the help_seen migration hasn't run), it stays shut.
+ * Which popups open by themselves for a signed-in player: the active
+ * new-Pokémon note (src/content/meta.tsx) if they haven't closed it, else How
+ * it works if they haven't seen this HELP_VERSION (it then waits for the next
+ * page). Cookies skip the profile lookup once both are seen; if the lookup
+ * fails (e.g. a migration hasn't run), both stay shut.
  */
-async function helpState(userId: string | null) {
-  if (!userId) return { autoOpen: false, rememberSeen: null };
-  const seenValue = helpCookieValue(userId);
-  if ((await cookies()).get(HELP_COOKIE)?.value === seenValue) return { autoOpen: false, rememberSeen: null };
+async function popupState(userId: string | null, metaId: string | null): Promise<{ help: Popup; meta: Popup }> {
+  if (!userId) return { help: SHUT, meta: SHUT };
+  const jar = await cookies();
+  const helpValue = helpCookieValue(userId);
+  const metaValue = metaId ? metaCookieValue(metaId, userId) : null;
+  const helpKnown = jar.get(HELP_COOKIE)?.value === helpValue;
+  const metaKnown = !metaValue || jar.get(META_COOKIE)?.value === metaValue;
+  if (helpKnown && metaKnown) return { help: SHUT, meta: SHUT };
+
+  const columns = metaKnown ? "help_seen_version" : "help_seen_version, meta_seen_id";
   const { supabase } = await getAuth();
-  const { data, error } = await supabase.from("profiles").select("help_seen_version").eq("id", userId).maybeSingle();
-  if (error || !data) return { autoOpen: false, rememberSeen: null };
-  const seen = (data.help_seen_version as number) >= HELP_VERSION;
-  return { autoOpen: !seen, rememberSeen: seen ? seenValue : null };
+  const { data, error } = await supabase.from("profiles").select(columns).eq("id", userId).maybeSingle();
+  if (error || !data) return { help: SHUT, meta: SHUT };
+  const row = data as unknown as { help_seen_version: number; meta_seen_id?: string | null };
+
+  const metaSeen = metaKnown || row.meta_seen_id === metaId;
+  const meta: Popup = metaKnown ? SHUT : { autoOpen: !metaSeen, rememberSeen: metaSeen ? metaValue : null };
+  const helpSeen = helpKnown || row.help_seen_version >= HELP_VERSION;
+  const help: Popup = helpKnown
+    ? SHUT
+    : // The note goes first; How it works waits until it's closed.
+      { autoOpen: !helpSeen && !meta.autoOpen, rememberSeen: helpSeen ? helpValue : null };
+  return { help, meta };
 }
 
 export async function Nav() {
   const { userId } = await getAuth();
   const user = userId !== null;
-  const help = await helpState(userId);
+  const note = activeMetaPost();
+  const popups = await popupState(userId, note?.id ?? null);
+  const noteLine = note?.lineId ? LINES_BY_ID.get(note.lineId) : undefined;
 
   return (
     <header className="sticky top-0 z-20 header-night text-white shadow-md">
@@ -33,8 +57,19 @@ export async function Nav() {
           <img src="/logo.png" alt="Pleep Matchmaker" className="h-8 w-8" />
         </Link>
         {user && <NavLinks />}
-        <HelpModal signedIn={user} autoOpen={help.autoOpen} rememberSeen={help.rememberSeen} />
+        <HelpModal signedIn={user} autoOpen={popups.help.autoOpen} rememberSeen={popups.help.rememberSeen} />
       </nav>
+      {note && (popups.meta.autoOpen || popups.meta.rememberSeen) && (
+        <MetaNoteModal
+          postId={note.id}
+          title={note.title}
+          sprite={noteLine ? lineSpriteUrl(noteLine) : null}
+          autoOpen={popups.meta.autoOpen}
+          rememberSeen={popups.meta.rememberSeen}
+        >
+          {note.body}
+        </MetaNoteModal>
+      )}
     </header>
   );
 }

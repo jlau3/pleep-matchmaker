@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { normalizeFriendCode } from "@/lib/format";
+import { META_COOKIE, META_POSTS, metaCookieValue } from "@/content/meta";
 import { HELP_COOKIE, HELP_VERSION, helpCookieValue } from "@/lib/help";
 import { NEXT_COOKIE, safeNextPath } from "@/lib/nextPath";
 import { isChoice, LINES_BY_ID, MAX_TOP } from "@/lib/lines";
@@ -209,4 +210,12 @@ export async function markHelpSeen(): Promise<void> {
   const { supabase, user } = await requireUser();
   const { error } = await supabase.from("profiles").update({ help_seen_version: HELP_VERSION }).eq("id", user.id);
   if (!error) (await cookies()).set(HELP_COOKIE, helpCookieValue(user.id), { path: "/", maxAge: 31536000, sameSite: "lax" });
+}
+
+/** Records that the player closed the new-Pokémon note `postId` (see src/content/meta.tsx). */
+export async function markMetaSeen(postId: string): Promise<void> {
+  if (!META_POSTS.some((post) => post.id === postId)) return;
+  const { supabase, user } = await requireUser();
+  const { error } = await supabase.from("profiles").update({ meta_seen_id: postId }).eq("id", user.id);
+  if (!error) (await cookies()).set(META_COOKIE, metaCookieValue(postId, user.id), { path: "/", maxAge: 31536000, sameSite: "lax" });
 }

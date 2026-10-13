@@ -3,13 +3,20 @@
 import { useActionState } from "react";
 import { type MagicLinkState, sendMagicLink, signInWithOAuth } from "@/app/actions";
 
-const oauthButton =
-  "w-full rounded-full px-6 py-3 text-lg font-extrabold active:translate-y-[2px]";
+/**
+ * Email sign-in links, off for now: Discord and Google cover most players and
+ * Supabase's built-in mailer only sends a few emails an hour. To bring it
+ * back, set up custom SMTP in Supabase (Auth -> SMTP) and flip this to true;
+ * the action and /auth/confirm route are still in place.
+ */
+const EMAIL_SIGN_IN = false;
+
+const oauthButton = "w-full rounded-full px-6 py-3 text-lg font-extrabold active:translate-y-[2px]";
 
 /**
- * Discord, Google, or an emailed one-time link. Only Discord shows a name to
- * other players (and only if the player allows it); Google and email players
- * are known by their IGN.
+ * Discord, Google, or (when EMAIL_SIGN_IN is on) an emailed one-time link.
+ * Only Discord shows a name to other players (and only if the player allows
+ * it); Google and email players are known by their IGN.
  */
 export function SignInOptions({ next }: { next: string | null }) {
   const [state, emailAction, sending] = useActionState<MagicLinkState, FormData>(sendMagicLink, {});
@@ -38,33 +45,44 @@ export function SignInOptions({ next }: { next: string | null }) {
         </button>
       </form>
 
-      <div className="flex items-center gap-3 py-1 text-xs uppercase tracking-wide text-slate-400">
-        <span className="h-px flex-1 bg-slate-300 dark:bg-slate-600" />
-        or use your email
-        <span className="h-px flex-1 bg-slate-300 dark:bg-slate-600" />
-      </div>
+      {EMAIL_SIGN_IN && (
+        <>
+          <div className="flex items-center gap-3 py-1 text-xs uppercase tracking-wide text-slate-400">
+            <span className="h-px flex-1 bg-slate-300 dark:bg-slate-600" />
+            or use your email
+            <span className="h-px flex-1 bg-slate-300 dark:bg-slate-600" />
+          </div>
 
-      {state.sentTo ? (
-        <p role="status" className="rounded-2xl bg-want/15 px-4 py-3 text-sm font-semibold text-want">
-          Check your inbox at {state.sentTo}. Tap the link in the email to sign in (it works once, for an hour).
-        </p>
-      ) : (
-        <form action={emailAction} className="space-y-2 text-left">
-          {nextField}
-          <label className="block">
-            <span className="sr-only">Email</span>
-            <input name="email" type="email" required autoComplete="email" placeholder="you@example.com" className="field w-full" />
-          </label>
-          <button type="submit" disabled={sending} className="btn-primary w-full py-2">
-            {sending ? "Sending…" : "Email me a sign-in link"}
-          </button>
-          {state.error && (
-            <p role="alert" className="text-sm text-dont">
-              {state.error}
+          {state.sentTo ? (
+            <p role="status" className="rounded-2xl bg-want/15 px-4 py-3 text-sm font-semibold text-want">
+              Check your inbox at {state.sentTo}. Tap the link in the email to sign in (it works once, for an hour).
             </p>
+          ) : (
+            <form action={emailAction} className="space-y-2 text-left">
+              {nextField}
+              <label className="block">
+                <span className="sr-only">Email</span>
+                <input
+                  name="email"
+                  type="email"
+                  required
+                  autoComplete="email"
+                  placeholder="you@example.com"
+                  className="field w-full"
+                />
+              </label>
+              <button type="submit" disabled={sending} className="btn-primary w-full py-2">
+                {sending ? "Sending…" : "Email me a sign-in link"}
+              </button>
+              {state.error && (
+                <p role="alert" className="text-sm text-dont">
+                  {state.error}
+                </p>
+              )}
+              <p className="text-xs text-slate-500">No password needed.</p>
+            </form>
           )}
-          <p className="text-xs text-slate-500">No password needed.</p>
-        </form>
+        </>
       )}
     </div>
   );
