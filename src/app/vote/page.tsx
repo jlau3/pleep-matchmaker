@@ -1,4 +1,3 @@
-import { HowItWorks } from "@/components/HowItWorks";
 import { PROFILE_TABS, SubTabs } from "@/components/SubTabs";
 import { VoteBoard } from "@/components/VoteBoard";
 import { loadCommunityStats } from "@/lib/communityStats";
@@ -23,14 +22,6 @@ export default async function VotePage() {
   return (
     <div>
       <SubTabs tabs={PROFILE_TABS} active="/vote" />
-      {newIds.length === LINES.length && (
-        <details open className="card mb-4 p-4">
-          <summary className="cursor-pointer text-lg font-extrabold">Welcome! Here&apos;s how it works</summary>
-          <div className="mt-4">
-            <HowItWorks />
-          </div>
-        </details>
-      )}
       <VoteBoard initial={choices} initialTops={tops} firstVisit={newIds.length === LINES.length} newCandy={newCandy} />
     </div>
   );
