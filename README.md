@@ -4,7 +4,7 @@ Pokémon Sleep players vote on every candy line: **want**, **don't want** or **n
 
 - **Tier list** (home): which candy to prioritize, ranked S/A/B/C/Avoid by what your friends want and don't want, with toggles for All Islands / By Island and My Friends / Everyone. A banner links to voting when there are unvoted candies.
 - **Friends**: player search (exact Discord name, IGN or friend code) on both sub-tabs, carried over when you switch; *My Friends* lists your friends (up to 50), best fit with the rest of your list first; *Find New Friends* is matchmaking against players open to new friends, leaving out anyone you already added, with the date someone added today would reach friendship level 5 (`DAYS_TO_FRIENDSHIP_LEVEL_5` = 100 in `src/lib/friendship.ts`, player-reported). Search results show each player's fit with your friends, and Find New Friends has a **Share a friend post** card (Copy, plus Share on phones): a "looking for friends" message for Discord, Reddit or group chats with your friend code, Top 3 and a pointer to look you up here.
-- **Profile**: *My Votes* (every candy in dex order, List or Grid view, with a ★ on each card to pick your Top 3 wants, pinned at the top) and *Settings* (IGN, friend code, visibility toggles, blocked players, sign out, delete account).
+- **Profile**: *My Votes* (every candy in dex order, List or Grid view, with a ★ on each card to pick your Top 3 wants, pinned at the top) and *Settings* (IGN, friend code, visibility toggles, **Show my Discord name**, **Theme** (match device, light or dark; saved per device in the `pm_theme` cookie), blocked players, sign out, delete account).
 
 New players go straight to My votes after signing in, and land on the Tier list once everything is voted.
 

@@ -1,4 +1,7 @@
+import { cookies } from "next/headers";
 import { signOut } from "@/app/actions";
+import { ThemePicker } from "@/components/ThemePicker";
+import { parseTheme, THEME_COOKIE } from "@/lib/theme";
 import { BlockButton } from "@/components/BlockButton";
 import { DeleteAccountButton } from "@/components/DeleteAccountButton";
 import { playerName } from "@/components/PlayerHeader";
@@ -19,6 +22,7 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
   if (blockedResult.error) throw blockedResult.error;
   const blocked = blockedResult.data as BlockedRow[];
   const { error } = await searchParams;
+  const theme = parseTheme((await cookies()).get(THEME_COOKIE)?.value);
 
   return (
     <div>
@@ -34,6 +38,12 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
         </section>
 
         <ProfileForm profile={profile} friendListFull={friendIds.size >= MAX_FRIENDS} />
+
+        <section>
+          <h2 className="mb-2 font-semibold">Theme</h2>
+          <ThemePicker initial={theme} />
+          <p className="mt-1 text-xs text-slate-500">Saved on this device.</p>
+        </section>
 
         <section>
           <h2 className="mb-2 font-semibold">Blocked players</h2>
