@@ -10,7 +10,7 @@ New players go straight to My votes after signing in, and land on the Tier list 
 
 A **How it works** card explains the app on the sign-in page. Signed in, it's a popup over the current page (darkened backdrop; Esc, ×, "Got it" or a tap outside closes it), opened by the **?** next to Profile. It also opens by itself once per account on first sign-in, and once more for everyone whenever `HELP_VERSION` in `src/lib/help.ts` is bumped (tracked in `profiles.help_seen_version`, cached in a per-account cookie). `/about` now redirects home. The card ends with an **Invite friends** button (native share sheet on phones, copied message elsewhere); My Friends and the Tier List show a dismissible reminder (hidden for two weeks when closed) asking about Pokémon Sleep friends who haven't signed up yet, with the same button.
 
-Sign in with Discord, Google, or an emailed one-time link (no password). Only Discord shows a name to other players, and only while the player keeps **Show my Discord name** on (Profile → Settings; on for accounts from before the setting, off for new ones). Everyone else is known by IGN.
+Sign in with Discord, Google, or an emailed one-time link (no password). Only Discord shows a name to other players, and only while the player keeps **Show my Discord name** on (Profile → Settings; on by default when you first sign up with Discord, and a later login never changes your choice). Everyone else is known by IGN.
 
 Stack: Next.js 15 (App Router) + Supabase (Postgres, Discord/Google OAuth, email links) + Tailwind. Built to run on the Vercel and Supabase free tiers.
 

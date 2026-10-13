@@ -3,8 +3,6 @@
 insert into auth.users (id, raw_user_meta_data) values
   ('00000000-0000-0000-0003-000000000001', '{"name":"tara#0"}'),
   ('00000000-0000-0000-0003-000000000002', '{"name":"tom#0"}');
--- These players show their Discord name (new accounts start hidden; see show_discord_test.sql).
-update public.profiles set show_discord = true;
 update public.profiles set friend_code = '333300000001' where discord_username = 'tara';
 update public.profiles set friend_code = '333300000002' where discord_username = 'tom';
 

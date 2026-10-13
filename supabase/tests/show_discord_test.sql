@@ -1,11 +1,14 @@
 \set ON_ERROR_STOP on
 
--- New accounts start with the Discord name hidden: others see the IGN only,
--- and can't find them by Discord name.
+-- Discord sign-ups start with the Discord name shown; hiding it leaves others
+-- the IGN only, and they can't find them by Discord name.
 insert into auth.users (id, raw_user_meta_data) values
   ('00000000-0000-0000-000b-000000000001', '{"iss":"https://discord.com/api","provider_id":"91","name":"shy#0","custom_claims":{"global_name":"Shy"},"avatar_url":"https://cdn.discordapp.com/s.png"}'),
   ('00000000-0000-0000-000b-000000000002', '{"iss":"https://discord.com/api","provider_id":"92","name":"viewer#0"}');
-update public.profiles set ign = 'ShySleeper', friend_code = '999900000001' where discord_username = 'shy';
+do $$ begin
+  assert (select bool_and(show_discord) from public.profiles where discord_username in ('shy', 'viewer')), 'discord sign-ups start shown';
+end $$;
+update public.profiles set ign = 'ShySleeper', friend_code = '999900000001', show_discord = false where discord_username = 'shy';
 insert into public.preferences (user_id, line_id, choice)
 select u::uuid, l, 'want'::public.choice
 from unnest(array['00000000-0000-0000-000b-000000000001', '00000000-0000-0000-000b-000000000002']) u,
@@ -16,7 +19,6 @@ select set_config('request.jwt.claim.sub', '00000000-0000-0000-000b-000000000002
 do $$
 declare r record;
 begin
-  assert (select show_discord from public.profiles where id = auth.uid()) = false, 'new accounts start hidden';
   assert not exists (select 1 from public.lookup_players('shy')), 'not found by hidden Discord name';
   assert not exists (select 1 from public.lookup_players('Shy')), 'not found by hidden display name';
   select * into r from public.lookup_players('ShySleeper');

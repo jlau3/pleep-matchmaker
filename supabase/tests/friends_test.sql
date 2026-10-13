@@ -4,8 +4,6 @@
 insert into auth.users (id, raw_user_meta_data)
 select ('00000000-0000-0000-0001-' || lpad(g::text, 12, '0'))::uuid, jsonb_build_object('name', 'f' || g || '#0')
 from generate_series(1, 52) g;
--- These players show their Discord name (new accounts start hidden; see show_discord_test.sql).
-update public.profiles set show_discord = true;
 
 insert into public.preferences (user_id, line_id, choice) values
   ('00000000-0000-0000-0001-000000000002', 'pikachu', 'want'),

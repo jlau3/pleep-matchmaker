@@ -1,7 +1,8 @@
 -- "Show my Discord name": players can hide their Discord name and avatar
 -- from everyone else. Hidden, they show (and are found) by IGN and friend
--- code only. Existing Discord accounts keep showing it; new accounts start
--- hidden and can turn it on in Profile > Settings. Safe to re-run.
+-- code only. On by default for anyone who signs up with Discord (existing
+-- Discord accounts included); Google and email accounts have no Discord name
+-- and stay off. Players change it in Profile > Settings. Safe to re-run.
 
 do $$
 begin
@@ -15,6 +16,49 @@ begin
 end $$;
 
 grant update (show_discord) on public.profiles to authenticated;
+
+-- Discord sign-ups start with it on (see 20261013000100 for the rest).
+create or replace function public.sync_profile_from_auth()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  meta jsonb := coalesce(new.raw_user_meta_data, '{}'::jsonb);
+  -- Discord's claims carry iss https://discord.com/api and Google's
+  -- https://accounts.google.com. Email sign-ups have no iss, name or
+  -- provider_id. Metadata without iss but with a name or provider_id (older
+  -- rows, test fixtures) is treated as Discord, as before.
+  is_discord boolean := case
+    when meta ? 'iss' then meta ->> 'iss' like '%discord.com%'
+    else meta ? 'provider_id' or meta ? 'name'
+  end;
+begin
+  if not is_discord then
+    insert into public.profiles (id) values (new.id) on conflict (id) do nothing;
+    return new;
+  end if;
+
+  -- Signing up with Discord shows the Discord name by default (show_discord
+  -- true on insert only; a later login never flips the player's choice).
+  insert into public.profiles (id, discord_id, discord_username, discord_display_name, avatar_url, show_discord)
+  values (
+    new.id,
+    meta ->> 'provider_id',
+    split_part(coalesce(meta ->> 'name', meta ->> 'full_name', ''), '#', 1),
+    coalesce(meta -> 'custom_claims' ->> 'global_name', meta ->> 'full_name'),
+    meta ->> 'avatar_url',
+    true
+  )
+  on conflict (id) do update set
+    discord_id = excluded.discord_id,
+    discord_username = excluded.discord_username,
+    discord_display_name = excluded.discord_display_name,
+    avatar_url = excluded.avatar_url;
+  return new;
+end;
+$$;
 
 
 create or replace function public.get_matches()

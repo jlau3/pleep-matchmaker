@@ -5,8 +5,6 @@
 insert into auth.users (id, raw_user_meta_data) values
   ('00000000-0000-0000-0008-000000000001', '{"name":"blocker#0"}'),
   ('00000000-0000-0000-0008-000000000002', '{"name":"blockee#0"}');
--- These players show their Discord name (new accounts start hidden; see show_discord_test.sql).
-update public.profiles set show_discord = true;
 update public.profiles set friend_code = '888800000002' where discord_username = 'blockee';
 set role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0008-000000000001', false);

@@ -13,8 +13,6 @@ insert into auth.users (id, raw_user_meta_data) values
   ('00000000-0000-0000-0005-000000000007', '{"name":"ex#0"}'),
   ('00000000-0000-0000-0005-000000000008', '{"name":"cthree#0"}'),
   ('00000000-0000-0000-0005-000000000009', '{"name":"cfour#0"}');
--- These players show their Discord name (new accounts start hidden; see show_discord_test.sql).
-update public.profiles set show_discord = true;
 update public.profiles set friend_code = '5555' || right(id::text, 8) where id::text like '00000000-0000-0000-0005-%';
 
 insert into public.preferences (user_id, line_id, choice, top) values
