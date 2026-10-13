@@ -1,4 +1,3 @@
-import { cookies } from "next/headers";
 import Link from "next/link";
 import { FriendButton } from "@/components/FriendButton";
 import { PlayerHeader, playerName } from "@/components/PlayerHeader";
@@ -11,7 +10,6 @@ import { MAX_FRIENDS } from "@/lib/data";
 import { requireUser } from "@/lib/supabase/server";
 import type { AddedMeRow, FriendRow } from "@/lib/types";
 import { DismissAddedYou } from "@/components/DismissAddedYou";
-import { FRIENDS_VIEW_COOKIE } from "@/components/ViewToggle";
 import { type FriendItem, FriendsBoard } from "@/components/FriendsBoard";
 import { FRIEND_SORTS, friendRank, parseFriendSort } from "@/lib/friendSort";
 
@@ -22,7 +20,6 @@ export default async function FriendsPage({ searchParams }: { searchParams: Prom
   const params = await searchParams;
   const q = await searchQuery(Promise.resolve(params));
   const sort = parseFriendSort(params.sort);
-  const view = (await cookies()).get(FRIENDS_VIEW_COOKIE)?.value === "grid" ? "grid" : "list";
 
   const [friendsResult, addedMeResult] = await Promise.all([supabase.rpc("get_friends"), supabase.rpc("get_added_me")]);
   if (friendsResult.error) throw friendsResult.error;
@@ -88,7 +85,6 @@ export default async function FriendsPage({ searchParams }: { searchParams: Prom
         ) : (
           <FriendsBoard
             initialSort={sort}
-            initialView={view}
             items={friends.map(
               (friend): FriendItem => ({
                 id: friend.user_id,
