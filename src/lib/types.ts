@@ -12,12 +12,14 @@ export interface PlayerContact {
 }
 
 export interface MatchRow extends PlayerContact {
-  /** How well their wants fit what your friends want (see the friends_fit migration). */
-  match_pct: number;
+  /** How well their wants fit what your friends want (see the friends_fit migration). Null before they've voted. */
+  match_pct: number | null;
   /** Their wants that your friends want too, most-wanted first. */
   fit_wants: string[];
   /** Candy your friends want that they don't, most-wanted first: what they'd rather not be sent. */
   fit_dont_wants: string[];
+  /** browse_players only: how many players the current filter lists in all. */
+  total_count?: number;
 }
 
 export interface LookupRow extends PlayerContact {
