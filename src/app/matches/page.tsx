@@ -4,6 +4,7 @@ import { PlayerHeader } from "@/components/PlayerHeader";
 import { PlayerSearch, searchQuery } from "@/components/PlayerSearch";
 import { FRIENDS_TABS, SubTabs } from "@/components/SubTabs";
 import { FriendPostCard } from "@/components/FriendPostCard";
+import { FriendshipLevel5 } from "@/components/FriendshipLevel5";
 import { MatchPct } from "@/components/MatchPct";
 import { LOW_FIT_PCT } from "@/lib/fit";
 import { loadFriendIds, loadOwnProfile, loadOwnVotes, MAX_FRIENDS } from "@/lib/data";
@@ -64,6 +65,9 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
           Players open to new friends who want the same candy your friends want. Until your friends have voted, your
           own wants stand in.
         </p>
+        <div className="mt-2">
+          <FriendshipLevel5 />
+        </div>
       </div>
       {notices.map((notice, i) => (
         <p key={i} className="rounded-lg bg-amber-100 px-3 py-2 text-sm text-amber-900 dark:bg-amber-900/30 dark:text-amber-200">
