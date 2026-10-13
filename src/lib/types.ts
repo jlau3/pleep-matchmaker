@@ -12,13 +12,13 @@ export interface PlayerContact {
 }
 
 export interface MatchRow extends PlayerContact {
-  /** "Fits your list": how well their wants fit what your friends want (see the friends_fit migration). Null when unknown. */
+  /** "For them": how well their wants fit what your friends want (see the friends_fit migration). Null when unknown. */
   match_pct: number | null;
   /** Their wants that your friends want too, most-wanted first: what you'd send them that they want. */
   fit_wants: string[];
   /** Their don't-wants that your friends want, most-wanted first: what they'd rather not be sent. */
   fit_dont_wants: string[];
-  /** browse_players only: "you fit theirs", your wants against their friends' wants. Null when unknown. */
+  /** browse_players only: "for you", your wants against their friends' wants. Null when unknown. */
   you_fit_pct?: number | null;
   /** browse_players only: your wants their friends want (what they'd send you that you want). */
   you_fit_wants?: string[];
@@ -35,9 +35,9 @@ export interface LookupRow extends PlayerContact {
   dont_wants: string[];
   /** Starred subset of wants (Top 3). */
   top_wants: string[];
-  /** "Fits your list": how well their wants fit your friends' wants. Null for yourself or with nothing to compare yet. */
+  /** "For them": how well their wants fit your friends' wants. Null for yourself or with nothing to compare yet. */
   match_pct: number | null;
-  /** "You fit theirs": how much of what you want their friends want. Null for yourself or when unknown. */
+  /** "For you": how much of what you want their friends want. Null for yourself or when unknown. */
   you_fit_pct: number | null;
 }
 
@@ -79,9 +79,9 @@ export interface FriendRow extends PlayerContact {
   wants: string[];
   dont_wants: string[];
   top_wants: string[];
-  /** "Fits your list": how well their wants fit the rest of your friends' wants. Null when hidden or nothing to compare. */
+  /** "For them": how well their wants fit the rest of your friends' wants. Null when hidden or nothing to compare. */
   match_pct: number | null;
-  /** "You fit theirs": how much of what you want their friends want. Null when hidden or unknown. */
+  /** "For you": how much of what you want their friends want. Null when hidden or unknown. */
   you_fit_pct?: number | null;
   /** They have you on their friend list too. */
   added_me: boolean;

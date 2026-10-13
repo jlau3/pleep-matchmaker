@@ -10,9 +10,9 @@ const ACTIVE: Record<Choice, string> = {
 
 /** "Show what others pick": a soft glow on the side the crowd leans to. */
 const GLOW: Record<Choice, string> = {
-  want: "ring-2 ring-want/60 ring-offset-2 ring-offset-cream shadow-[0_0_14px_rgb(63_184_107/0.55)] dark:ring-offset-night",
+  want: "ring-4 ring-want ring-offset-2 ring-offset-cream shadow-[0_0_22px_6px_rgb(63_184_107/0.6)] dark:ring-offset-night",
   undecided: "",
-  dont_want: "ring-2 ring-dont/60 ring-offset-2 ring-offset-cream shadow-[0_0_14px_rgb(236_107_107/0.55)] dark:ring-offset-night",
+  dont_want: "ring-4 ring-dont ring-offset-2 ring-offset-cream shadow-[0_0_22px_6px_rgb(236_107_107/0.6)] dark:ring-offset-night",
 };
 
 const IDLE: Record<Choice, string> = {

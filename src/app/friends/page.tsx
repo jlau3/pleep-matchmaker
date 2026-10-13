@@ -1,3 +1,4 @@
+import { cookies } from "next/headers";
 import Link from "next/link";
 import { FriendButton } from "@/components/FriendButton";
 import { PlayerHeader, playerName } from "@/components/PlayerHeader";
@@ -10,34 +11,31 @@ import { MAX_FRIENDS } from "@/lib/data";
 import { requireUser } from "@/lib/supabase/server";
 import type { AddedMeRow, FriendRow } from "@/lib/types";
 import { DismissAddedYou } from "@/components/DismissAddedYou";
+import { FRIENDS_VIEW_COOKIE, ViewToggle } from "@/components/ViewToggle";
+import { FRIEND_SORT_HINTS, FRIEND_SORTS, parseFriendSort, sortFriends } from "@/lib/friendSort";
 
 const card = "card p-4";
 
-/**
- * Best fit, same as Find New Friends: the average of "fits your list" and "you
- * fit theirs" (either one alone when the other is unknown). No fit yet ranks
- * -1, private lists -2.
- */
-const fitRank = (f: FriendRow) => {
-  if (!f.visible) return -2;
-  const they = f.match_pct ?? f.you_fit_pct;
-  const you = f.you_fit_pct ?? f.match_pct;
-  return they == null || you == null ? -1 : (they + you) / 2;
-};
-
-export default async function FriendsPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
+export default async function FriendsPage({ searchParams }: { searchParams: Promise<{ q?: string; sort?: string }> }) {
   const { supabase, user } = await requireUser();
-  const q = await searchQuery(searchParams);
+  const params = await searchParams;
+  const q = await searchQuery(Promise.resolve(params));
+  const sort = parseFriendSort(params.sort);
+  const view = (await cookies()).get(FRIENDS_VIEW_COOKIE)?.value === "grid" ? "grid" : "list";
+  const sortHref = (id: string) => {
+    const p = new URLSearchParams();
+    if (q) p.set("q", q);
+    if (id !== "fit") p.set("sort", id);
+    const qs = p.toString();
+    return qs ? `/friends?${qs}` : "/friends";
+  };
 
   const [friendsResult, addedMeResult] = await Promise.all([supabase.rpc("get_friends"), supabase.rpc("get_added_me")]);
   if (friendsResult.error) throw friendsResult.error;
   // People who added you and are waiting on you (empty if that lookup isn't available yet).
   const addedMe = (addedMeResult.data ?? []) as AddedMeRow[];
-  // Best fit (both ways) first. Friends with no fit yet (no votes) come next, private lists last;
-  // ties keep the order they were added (sort is stable).
-  const friends = (friendsResult.data as FriendRow[]).sort(
-    (a, b) => fitRank(b) - fitRank(a),
-  );
+  // Chosen order (best fit by default); no numbers yet next, private lists last.
+  const friends = sortFriends(friendsResult.data as FriendRow[], sort);
   const friendIds = new Set(friends.map((f) => f.user_id));
 
   return (
@@ -88,6 +86,32 @@ export default async function FriendsPage({ searchParams }: { searchParams: Prom
             </Link>
           </p>
         )}
+        {friends.length > 1 && (
+          <div className="mb-3 space-y-1">
+            <div className="flex flex-wrap items-center gap-2 text-sm">
+              <span className="text-slate-500">Sort</span>
+              {FRIEND_SORTS.map(([id, label]) => (
+                <Link
+                  key={id}
+                  href={sortHref(id)}
+                  scroll={false}
+                  aria-current={sort === id ? "true" : undefined}
+                  className={`rounded-full border px-3 py-1 ${
+                    sort === id
+                      ? "border-transparent bg-night text-white dark:bg-sun dark:text-[#5b3e00]"
+                      : "border-slate-300 hover:bg-white/60 dark:border-slate-700 dark:hover:bg-night"
+                  }`}
+                >
+                  {label}
+                </Link>
+              ))}
+              <span className="ml-auto">
+                <ViewToggle view={view} />
+              </span>
+            </div>
+            <p className="text-xs text-slate-500">{FRIEND_SORT_HINTS[sort]}</p>
+          </div>
+        )}
         {friends.length === 0 ? (
           <p className="text-sm text-slate-500">
             Search for your in-game friends above, or find new ones in{" "}
@@ -95,7 +119,7 @@ export default async function FriendsPage({ searchParams }: { searchParams: Prom
             <Link href="/tiers" className="underline">Tier List</Link> to see which candy they want most.
           </p>
         ) : (
-          <ul className="space-y-3">
+          <ul className={view === "grid" ? "grid gap-3 md:grid-cols-2" : "space-y-3"}>
             {friends.map((friend) => (
               <li key={friend.user_id} className={card}>
                 {friend.visible ? (
