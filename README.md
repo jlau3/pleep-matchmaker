@@ -3,7 +3,7 @@
 Pokémon Sleep players vote on every candy line: **want**, **don't want** or **neutral**. Three tabs:
 
 - **Tier list** (home): which candy to prioritize, ranked S/A/B/C/Avoid by what your friends want and don't want, with toggles for All Islands / By Island and My Friends / Everyone. A banner links to voting when there are unvoted candies.
-- **Friends**: player search (exact Discord name, IGN or friend code) on both sub-tabs, carried over when you switch; *My Friends* lists your friends (up to 50) with each one's fit with the rest of your list; *Find New* is matchmaking against players open to new friends, leaving out anyone you already added. Search results show each player's fit with your friends, and Find New has a **Share a friend post** card (Copy, plus Share on phones): a "looking for friends" message for Discord, Reddit or group chats with your friend code, Top 3 and a pointer to look you up here.
+- **Friends**: player search (exact Discord name, IGN or friend code) on both sub-tabs, carried over when you switch; *My Friends* lists your friends (up to 50), best fit with the rest of your list first; *Find New Friends* is matchmaking against players open to new friends, leaving out anyone you already added, with the date someone added today would reach friendship level 5 (`DAYS_TO_FRIENDSHIP_LEVEL_5` = 100 in `src/lib/friendship.ts`, player-reported). Search results show each player's fit with your friends, and Find New Friends has a **Share a friend post** card (Copy, plus Share on phones): a "looking for friends" message for Discord, Reddit or group chats with your friend code, Top 3 and a pointer to look you up here.
 - **Profile**: *My Votes* (every candy in dex order, List or Grid view, with a ★ on each card to pick your Top 3 wants, pinned at the top) and *Settings* (IGN, friend code, visibility toggles, blocked players, sign out, delete account).
 
 New players go straight to My votes after signing in, and land on the Tier list once everything is voted.
@@ -14,7 +14,7 @@ Stack: Next.js 15 (App Router) + Supabase (Postgres, Discord OAuth) + Tailwind. 
 
 ## How matching works
 
-The % on Find New, search results and My Friends is **fit**: how well a player's wants line up with what **your friends** want, not with your own votes.
+The % on Find New Friends, search results and My Friends is **fit**: how well a player's wants line up with what **your friends** want, not with your own votes.
 
 1. **Group demand.** For each line, count how many of your friends want it. Friends with a private list don't count. Each line's share is its demand relative to your friends' most-wanted line, so the top line is 1 and a line half as many friends want is 0.5.
 2. **Fit.** `fit % = sum over their wants of share / (number of their wants + sum over their don't-wants of share)`.
@@ -25,11 +25,11 @@ The % on Find New, search results and My Friends is **fit**: how well a player's
 
 On My Friends, each friend is compared with the *rest* of your list. Until any friend has voted, your own wants stand in for the group, so new players still get suggestions.
 
-Find New shows players at **≥ 25% fit** with **≥ 3 wants your friends share**, who are open to new friends, have room on their list (under 50), have a friend code set, and were seen in the last **4 months**. Results list the wants they share with your friends and the candy your friends want that they don't, most-wanted first. The knobs live in `public.match_config()`.
+Find New Friends shows players at **≥ 25% fit** with **≥ 3 wants your friends share**, who are open to new friends, have room on their list (under 50), have a friend code set, and were seen in the last **4 months**. Results list the wants they share with your friends and the candy your friends want that they don't, most-wanted first. The knobs live in `public.match_config()`.
 
-Anywhere else, a fit under 25% shows as an amber **low fit** (`LOW_FIT_PCT` in `src/lib/fit.ts`, kept equal to Find New's cutoff): most of what they want, your friends don't.
+Anywhere else, a fit under 25% shows as an amber **low fit** (`LOW_FIT_PCT` in `src/lib/fit.ts`, kept equal to Find New Friends's cutoff): most of what they want, your friends don't.
 
-**Inactive reports.** Removing a friend asks whether they stopped playing. A "yes" hides them from your Find New right away and, once 2 people have said so (`public.inactive_reports_to_hide()`), from everyone's. Reports only count while the player hasn't been back since, so returning clears them.
+**Inactive reports.** Removing a friend asks whether they stopped playing. A "yes" hides them from your Find New Friends right away and, once 2 people have said so (`public.inactive_reports_to_hide()`), from everyone's. Reports only count while the player hasn't been back since, so returning clears them.
 
 ## Tier list rules
 
@@ -45,7 +45,7 @@ Tiers are relative. Lines scoring above 0 are ranked and split by position:
 | C | the rest, plus lines at exactly 0 (nobody voted, or a split room) |
 | Avoid | below 0: more people don't want it than want it |
 
-Lines that tie share a tier, placed by the tie's middle rank, so with few voters (lots of ties) the sizes stay close to the targets. Fixed % cutoffs crowded S and Avoid with a small, decisive player base, and would keep drifting as the pool grows. The shares live in `TIER_SHARES` in `src/lib/tiers.ts`. Every card shows its net score as a plain number ("+28" in green, "0" in grey, "−5" in red, no label) next to the want / neutral / don't-want counts, so you can see why a popular candy ranks where it does. In By Island view the ranking is within each island.
+Lines that tie share a tier, placed by the tie's middle rank, so with few voters (lots of ties) the sizes stay close to the targets. Fixed % cutoffs crowded S and Avoid with a small, decisive player base, and would keep drifting as the pool grows. The shares live in `TIER_SHARES` in `src/lib/tiers.ts`. Every card shows the net score as a **rating out of 100**: `50 + 50 x net / voters`, so with 50 players 50 don't-wants is 0, a split room is 50 and 50 wants is 100. It's colored in five 20-point bands (red, orange, grey, lime, green) and sits next to the want / neutral / don't-want counts. It's the same order as the net score, so it never changes the ranking, so you can see why a popular candy ranks where it does. In By Island view the ranking is within each island.
 
 Above S, the **Top 3** row repeats the 9 lines that show up most often in players' Top 3, with **Show all** to expand to every starred line, including ones in Avoid so nobody's pick is left out (ties broken like the rest of the list). They stay in their regular tier too, so nothing shifts. Every card shows its star count.
 

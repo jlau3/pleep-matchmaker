@@ -24,7 +24,7 @@ export function SubTabs({ tabs, active, query }: { tabs: { href: string; label: 
 
 export const FRIENDS_TABS = [
   { href: "/friends", label: "My Friends" },
-  { href: "/matches", label: "Find New" },
+  { href: "/matches", label: "Find New Friends" },
 ];
 
 export const PROFILE_TABS = [
