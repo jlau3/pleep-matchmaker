@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { crowdChoice, crowdVotes } from "./crowd";
-import { LINES } from "./lines";
+import { crowdChoice, crowdHint } from "./crowd";
 
 describe("crowdChoice", () => {
   it("wants a line most players want and few turn down", () => {
@@ -24,12 +23,10 @@ describe("crowdChoice", () => {
   });
 });
 
-describe("crowdVotes", () => {
-  it("covers every line and counts the buckets", () => {
-    const first = LINES[0].id;
-    const { choices, counts } = crowdVotes({ [first]: { wants: 9, dontWants: 0 } }, 10);
-    expect(Object.keys(choices)).toHaveLength(LINES.length);
-    expect(choices[first]).toBe("want");
-    expect(counts).toEqual({ want: 1, dont_want: 0, undecided: LINES.length - 1 });
+describe("crowdHint", () => {
+  it("gives the lean and rounded shares", () => {
+    expect(crowdHint({ wants: 62, dontWants: 7 }, 100)).toEqual({ lean: "want", wantPct: 62, dontPct: 7 });
+    expect(crowdHint({ wants: 2, dontWants: 1 }, 3)).toEqual({ lean: "want", wantPct: 67, dontPct: 33 });
+    expect(crowdHint(undefined, 10)).toEqual({ lean: "undecided", wantPct: 0, dontPct: 0 });
   });
 });

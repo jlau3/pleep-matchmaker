@@ -1,10 +1,9 @@
 import { PROFILE_TABS, SubTabs } from "@/components/SubTabs";
-import { CrowdVotesCard } from "@/components/CrowdVotesCard";
 import { VoteBoard } from "@/components/VoteBoard";
 import { loadCommunityStats } from "@/lib/communityStats";
 import Link from "next/link";
 import { loadOwnProfile, loadOwnVotes, seedUndecided } from "@/lib/data";
-import { CROWD_MIN_VOTERS, crowdVotes } from "@/lib/crowd";
+import { CROWD_MIN_VOTERS } from "@/lib/crowd";
 import { LINES, recentLines } from "@/lib/lines";
 import type { LineVotes } from "@/lib/tiers";
 import { requireUser } from "@/lib/supabase/server";
@@ -16,7 +15,7 @@ export default async function VotePage() {
   const needsIgn = !profile.ign && !(profile.show_discord && profile.discord_username);
   const { choices, newIds } = await seedUndecided(supabase, user.id, own);
 
-  // Everyone's totals (a shared 5-minute cache): the new candy cards and "Copy everyone's votes".
+  // Everyone's totals (a shared 5-minute cache): the new candy cards and "Show what others pick".
   const community = await loadCommunityStats(supabase);
   const recent = recentLines().map((line) => line.id);
   let newCandy: { ids: string[]; votes: Record<string, LineVotes>; voters: number } | undefined;
@@ -24,7 +23,7 @@ export default async function VotePage() {
     const votes = Object.fromEntries(recent.filter((id) => community.votes[id]).map((id) => [id, community.votes[id]]));
     newCandy = { ids: recent, votes, voters: community.voters };
   }
-  const crowd = community.voters >= CROWD_MIN_VOTERS ? crowdVotes(community.votes, community.voters).counts : null;
+  const crowd = community.voters >= CROWD_MIN_VOTERS ? { votes: community.votes, voters: community.voters } : undefined;
   return (
     <div>
       <SubTabs tabs={PROFILE_TABS} active="/vote" />
@@ -37,11 +36,9 @@ export default async function VotePage() {
           so friends can recognize and find you.
         </p>
       )}
-      {crowd && <CrowdVotesCard voters={community.voters} counts={crowd} />}
-      {/* Remounts with fresh votes when they change server-side (Copy everyone's votes). */}
       <VoteBoard
-        key={profile.prefs_updated_at ?? "never"}
-        initial={choices} initialTops={tops} firstVisit={newIds.length === LINES.length} newCandy={newCandy} />
+        initial={choices} initialTops={tops} firstVisit={newIds.length === LINES.length} newCandy={newCandy}
+        crowd={crowd} />
     </div>
   );
 }

@@ -5,9 +5,6 @@ import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { normalizeFriendCode } from "@/lib/format";
 import { META_COOKIE, META_POSTS, metaCookieValue } from "@/content/meta";
-import { loadCommunityStats } from "@/lib/communityStats";
-import { CROWD_MIN_VOTERS, crowdVotes } from "@/lib/crowd";
-import { loadOwnVotes } from "@/lib/data";
 import { HELP_COOKIE, HELP_VERSION, helpCookieValue } from "@/lib/help";
 import { NEXT_COOKIE, safeNextPath } from "@/lib/nextPath";
 import { isChoice, LINES_BY_ID, MAX_TOP } from "@/lib/lines";
@@ -113,26 +110,6 @@ export async function swapTop(outId: string, inId: string): Promise<{ error?: st
   const star = await setTop(inId, true);
   if (star.error) await setTop(outId, true);
   return star;
-}
-
-/**
- * "Copy everyone's votes": sets every line to what the active players lean
- * towards (see crowdChoice). Lines the player starred keep their vote and
- * star; those are personal picks.
- */
-export async function adoptCrowdVotes(): Promise<{ error?: string }> {
-  const { supabase, user } = await requireUser();
-  const [community, own] = await Promise.all([loadCommunityStats(supabase), loadOwnVotes(supabase, user.id)]);
-  if (community.voters < CROWD_MIN_VOTERS) return { error: "Not enough players have voted yet. Try again later." };
-  const { choices } = crowdVotes(community.votes, community.voters);
-  const starred = new Set(own.tops);
-  const rows = Object.entries(choices)
-    .filter(([lineId]) => !starred.has(lineId))
-    .map(([lineId, choice]) => ({ user_id: user.id, line_id: lineId, choice }));
-  const { error } = await supabase.from("preferences").upsert(rows, { onConflict: "user_id,line_id" });
-  if (error) return { error: "Couldn't save, try again" };
-  revalidatePath("/", "layout");
-  return {};
 }
 
 export interface ProfileFormState {

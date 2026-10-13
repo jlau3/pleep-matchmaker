@@ -1,7 +1,7 @@
-import { type Choice, LINES } from "./lines";
+import type { Choice } from "./lines";
 import type { LineVotes } from "./tiers";
 
-/** Fewer active voters than this and "Copy everyone's votes" stays off: the crowd is too small to mean much. */
+/** Fewer active voters than this and My Votes offers no crowd hints: the crowd is too small to mean much. */
 export const CROWD_MIN_VOTERS = 10;
 /** A side needs at least this share of all voters... */
 export const CROWD_MIN_SHARE = 0.4;
@@ -21,14 +21,16 @@ export function crowdChoice(votes: LineVotes | undefined, voters: number): Choic
   return "undecided";
 }
 
-/** The crowd's vote on every line, plus how many land in each bucket. */
-export function crowdVotes(votes: Record<string, LineVotes>, voters: number) {
-  const choices: Record<string, Choice> = {};
-  const counts: Record<Choice, number> = { want: 0, dont_want: 0, undecided: 0 };
-  for (const line of LINES) {
-    const choice = crowdChoice(votes[line.id], voters);
-    choices[line.id] = choice;
-    counts[choice]++;
-  }
-  return { choices, counts };
+/** What My Votes shows under a line with "Show what others pick" on. */
+export interface CrowdHint {
+  /** The side the crowd leans to (crowdChoice); Neutral means split or low interest, so no glow. */
+  lean: Choice;
+  /** Share of active voters who want it / don't want it, 0 to 100. */
+  wantPct: number;
+  dontPct: number;
+}
+
+export function crowdHint(votes: LineVotes | undefined, voters: number): CrowdHint {
+  const pct = (n: number) => (voters > 0 ? Math.round((100 * n) / voters) : 0);
+  return { lean: crowdChoice(votes, voters), wantPct: pct(votes?.wants ?? 0), dontPct: pct(votes?.dontWants ?? 0) };
 }
