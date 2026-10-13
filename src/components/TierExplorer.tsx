@@ -6,6 +6,7 @@ import { ISLANDS, LINES } from "@/lib/lines";
 import { buildTiers, type LineVotes } from "@/lib/tiers";
 import { InviteButton } from "./InviteButton";
 import { InviteReminder } from "./InviteReminder";
+import { RefreshStamp } from "./RefreshStamp";
 import { TierBoard } from "./TierBoard";
 import { TierExport } from "./TierExport";
 
@@ -34,12 +35,15 @@ export function TierExplorer({
   everyone,
   initialPool,
   initialByIsland,
+  loadedAt,
   notice,
 }: {
   friends: PoolVotes;
   everyone: PoolVotes;
   initialPool: Pool;
   initialByIsland: boolean;
+  /** When the server counted these votes (ISO), for "Updated 5m ago". */
+  loadedAt: string;
   /** Shown under the heading (e.g. "3 new candies to vote on"). */
   notice?: React.ReactNode;
 }) {
@@ -82,7 +86,10 @@ export function TierExplorer({
   return (
     <div className="space-y-5">
       <div>
-        <h1 className="text-2xl font-bold">Tier List</h1>
+        <div className="flex flex-wrap items-baseline justify-between gap-x-3">
+          <h1 className="text-2xl font-bold">Tier List</h1>
+          <RefreshStamp loadedAt={loadedAt} />
+        </div>
         <p className="text-sm text-slate-600 dark:text-slate-300">
           Which candy to prioritize, ranked by what {pool === "friends" ? "your friends" : `${data.voters} active players`}{" "}
           want and don&apos;t want.

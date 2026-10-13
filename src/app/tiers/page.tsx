@@ -40,6 +40,7 @@ export default async function TiersPage({ searchParams }: { searchParams: Promis
       everyone={everyone}
       initialPool={params.pool === "everyone" ? "everyone" : "friends"}
       initialByIsland={params.split === "islands"}
+      loadedAt={new Date().toISOString()}
       notice={
         unvoted > 0 && (
           <Link
