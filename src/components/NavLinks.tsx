@@ -38,8 +38,8 @@ export function NavLinks() {
             aria-current={active ? "page" : undefined}
             className={`shrink-0 ${
               active
-                ? "rounded-full bg-white/15 px-3 py-1 font-bold text-white"
-                : "px-3 py-1 text-white/75 hover:text-white"
+                ? "rounded-full bg-white/15 px-2 py-1 font-bold text-white sm:px-3"
+                : "px-2 py-1 text-white/75 hover:text-white sm:px-3"
             }`}
           >
             {link.label}
