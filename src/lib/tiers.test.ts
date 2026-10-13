@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { LINES_BY_ID } from "./lines";
-import { buildTiers, countVotes, TOP_ROW_SIZE } from "./tiers";
+import { buildTiers, countVotes, ratingOf, TOP_ROW_SIZE } from "./tiers";
 
 /** n lines where line i has i+1 wants from n voters, so every score is distinct. */
 function ladder(n: number) {
@@ -190,5 +190,21 @@ describe("buildTiers", () => {
     const tiers = buildTiers(votes, 16, [a, b]);
     expect(ids(tiers, "avoid")).toEqual([a.id]);
     expect(ids(tiers, "top")).toEqual([a.id, b.id]);
+  });
+});
+
+describe("ratingOf", () => {
+  it("maps the net score onto 0-100 for the pool", () => {
+    expect(ratingOf(-50, 50)).toBe(0); // 50 don't-wants
+    expect(ratingOf(0, 50)).toBe(50); // split room, or all neutral
+    expect(ratingOf(50, 50)).toBe(100); // 50 wants
+    expect(ratingOf(28, 50)).toBe(78); // 39 want + 11 don't
+    expect(ratingOf(3, 0)).toBeNull();
+  });
+
+  it("is on every ranked line", () => {
+    const [a] = [...LINES_BY_ID.values()];
+    const tiers = buildTiers(new Map([[a.id, { wants: 3, dontWants: 1 }]]), 4, [a]);
+    expect(tiers.get("S")![0].rating).toBe(75);
   });
 });

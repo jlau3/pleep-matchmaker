@@ -42,12 +42,12 @@ const STEPS: { title: string; body: React.ReactNode; href: string; cta: string }
     title: "Find new friends",
     body: (
       <>
-        Find New suggests players whose wants fit what your friends already want. Copy their friend code and add them in
+        Find New Friends suggests players whose wants fit what your friends already want. Copy their friend code and add them in
         Pokémon Sleep.
       </>
     ),
     href: "/matches",
-    cta: "Find New",
+    cta: "Find New Friends",
   },
 ];
 

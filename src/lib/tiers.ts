@@ -60,6 +60,12 @@ export interface RankedLine {
   neutral: number;
   /** Net score (see netScore); what tiers rank on. */
   score: number;
+  /**
+   * The net score shown out of 100 (see ratingOf): 0 when the whole pool
+   * doesn't want it, 50 when wants and don't-wants cancel out, 100 when
+   * everyone wants it. Null with no voters.
+   */
+  rating: number | null;
   tops: number;
   /**
    * Share of the pool who want it, 0 to 1, stars not weighted. Null with no
@@ -76,6 +82,16 @@ export interface RankedLine {
  */
 export function netScore(votes: LineVotes): number {
   return votes.wants - DONT_WANT_WEIGHT * votes.dontWants;
+}
+
+/**
+ * Net score as a 0-100 rating: 50 + 50 x net / voters. With 50 players, 50
+ * don't-wants is 0 and 50 wants is 100. Same order as the net score within a
+ * pool, so it never changes the ranking.
+ */
+export function ratingOf(score: number, voters: number): number | null {
+  if (voters <= 0) return null;
+  return Math.min(100, Math.max(0, Math.round(50 + (50 * score) / voters)));
 }
 
 const byRank = (a: RankedLine, b: RankedLine) =>
@@ -104,6 +120,7 @@ export function buildTiers(
       dontWants: v.dontWants,
       neutral: Math.max(0, voters - v.wants - v.dontWants),
       score: netScore(v),
+      rating: ratingOf(netScore(v), voters),
       tops: v.tops ?? 0,
       wantShare: voters > 0 ? v.wants / voters : null,
       dontShare: voters > 0 ? v.dontWants / voters : null,

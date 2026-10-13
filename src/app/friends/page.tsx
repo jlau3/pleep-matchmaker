@@ -12,13 +12,19 @@ import type { FriendRow } from "@/lib/types";
 
 const card = "card p-4";
 
+const fitRank = (f: FriendRow) => (!f.visible ? -2 : (f.match_pct ?? -1));
+
 export default async function FriendsPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
   const { supabase, user } = await requireUser();
   const q = await searchQuery(searchParams);
 
   const friendsResult = await supabase.rpc("get_friends");
   if (friendsResult.error) throw friendsResult.error;
-  const friends = friendsResult.data as FriendRow[];
+  // Best fit first. Friends with no fit yet (no votes) come next, private lists last;
+  // ties keep the order they were added (sort is stable).
+  const friends = (friendsResult.data as FriendRow[]).sort(
+    (a, b) => fitRank(b) - fitRank(a),
+  );
   const friendIds = new Set(friends.map((f) => f.user_id));
 
   return (
@@ -51,7 +57,7 @@ export default async function FriendsPage({ searchParams }: { searchParams: Prom
         {friends.length === 0 ? (
           <p className="text-sm text-slate-500">
             Search for your in-game friends above, or find new ones in{" "}
-            <Link href="/matches" className="underline">Find New</Link>. Then check the{" "}
+            <Link href="/matches" className="underline">Find New Friends</Link>. Then check the{" "}
             <Link href="/tiers" className="underline">Tier List</Link> to see which candy they want most.
           </p>
         ) : (

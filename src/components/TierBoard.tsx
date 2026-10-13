@@ -12,8 +12,18 @@ const TIER_STYLE: Record<string, string> = {
 
 const panel = "card p-3";
 
-/** "+28", "0", "−5" (a real minus sign, so it lines up with the plus). */
-const formatScore = (score: number) => (score > 0 ? `+${score}` : score < 0 ? `−${-score}` : "0");
+/**
+ * Rating color in five 20-point bands, red (nobody wants it) through grey
+ * (wants and don't-wants cancel out, 50) to green (everyone wants it).
+ */
+const RATING_BANDS: [number, string][] = [
+  [80, "text-emerald-600 dark:text-emerald-400"],
+  [60, "text-lime-600 dark:text-lime-400"],
+  [40, "text-slate-500 dark:text-slate-400"],
+  [20, "text-orange-500 dark:text-orange-400"],
+  [0, "text-red-600 dark:text-red-400"],
+];
+const ratingColor = (rating: number) => RATING_BANDS.find(([min]) => rating >= min)![1];
 
 function VoteCard({ ranked }: { ranked: RankedLine }) {
   return (
@@ -22,13 +32,10 @@ function VoteCard({ ranked }: { ranked: RankedLine }) {
       <div className="min-w-0 flex-1">
         <div className="flex items-baseline justify-between gap-2">
           <span className="truncate font-semibold">{ranked.line.name}</span>
-          {ranked.wantShare !== null && (
-            <span
-              className={`shrink-0 text-sm font-bold ${
-                ranked.score > 0 ? "text-want" : ranked.score < 0 ? "text-dont" : "text-slate-400"
-              }`}
-            >
-              {formatScore(ranked.score)}
+          {ranked.rating !== null && (
+            <span className="shrink-0 whitespace-nowrap">
+              <span className={`text-lg font-extrabold ${ratingColor(ranked.rating)}`}>{ranked.rating}</span>
+              <span className="text-xs text-slate-400">/100</span>
             </span>
           )}
         </div>
