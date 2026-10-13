@@ -44,8 +44,8 @@ const STEPS: { title: string; body: React.ReactNode; href: string; cta: string }
     title: "Find new friends",
     body: (
       <>
-        Find New Friends suggests players who fit both ways: you&apos;d each send candy the other wants. Copy their
-        friend code and add them in Pokémon Sleep.
+        Find New Friends suggests players who fit both ways, best fit first: you&apos;d each send candy the other
+        wants, so they&apos;re likely to add you back. Copy their friend code and add them in Pokémon Sleep.
       </>
     ),
     href: "/matches",
