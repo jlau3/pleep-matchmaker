@@ -12,16 +12,18 @@ export interface PlayerContact {
 }
 
 export interface MatchRow extends PlayerContact {
-  /**
-   * Fit %. My Friends (get_friends): how well their wants fit what your friends
-   * want. Find New Friends (browse_players): how much of what you want their
-   * friends want (see the fit_from_their_list migration). Null when unknown.
-   */
+  /** "Fits your list": how well their wants fit what your friends want (see the friends_fit migration). Null when unknown. */
   match_pct: number | null;
-  /** get_friends: their wants your friends want too. browse_players: your wants their friends want. Most-wanted first. */
+  /** Their wants that your friends want too, most-wanted first: what you'd send them that they want. */
   fit_wants: string[];
-  /** get_friends: candy your friends want that they don't. browse_players: your don't-wants their friends want. */
+  /** Their don't-wants that your friends want, most-wanted first: what they'd rather not be sent. */
   fit_dont_wants: string[];
+  /** browse_players only: "you fit theirs", your wants against their friends' wants. Null when unknown. */
+  you_fit_pct?: number | null;
+  /** browse_players only: your wants their friends want (what they'd send you that you want). */
+  you_fit_wants?: string[];
+  /** browse_players only: your don't-wants their friends want. */
+  you_fit_dont_wants?: string[];
   /** browse_players only: their starred Top 3. */
   top_wants?: string[];
   /** browse_players only: how many players the current filter lists in all. */
@@ -33,8 +35,10 @@ export interface LookupRow extends PlayerContact {
   dont_wants: string[];
   /** Starred subset of wants (Top 3). */
   top_wants: string[];
-  /** How well their wants fit your friends' wants. Null for yourself or with nothing to compare yet. */
+  /** "Fits your list": how well their wants fit your friends' wants. Null for yourself or with nothing to compare yet. */
   match_pct: number | null;
+  /** "You fit theirs": how much of what you want their friends want. Null for yourself or when unknown. */
+  you_fit_pct: number | null;
 }
 
 export interface LineStatRow {

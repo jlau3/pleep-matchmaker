@@ -6,7 +6,7 @@ import { PlayerSearch, searchQuery } from "@/components/PlayerSearch";
 import { FRIENDS_TABS, SubTabs } from "@/components/SubTabs";
 import { FriendPostCard } from "@/components/FriendPostCard";
 import { FriendshipLevel5 } from "@/components/FriendshipLevel5";
-import { MatchPct } from "@/components/MatchPct";
+import { FitPair } from "@/components/MatchPct";
 import { LOW_FIT_PCT } from "@/lib/fit";
 import { loadFriendIds, loadOwnProfile, loadOwnVotes, MAX_FRIENDS } from "@/lib/data";
 import { LINES, LINES_BY_ID, linesFromIds } from "@/lib/lines";
@@ -143,7 +143,7 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
               "No one to suggest right now. Check back as more players join."
             ) : (
               <>
-                No good fits yet (at least {LOW_FIT_PCT}% fit and 3 of your wants on their Tier List).{" "}
+                No good fits yet (at least {LOW_FIT_PCT}% both ways and 3 of your wants on their Tier List).{" "}
                 <Link href={link({ everyone: true })} className="underline">See everyone</Link> instead.
               </>
             )}
@@ -152,9 +152,9 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
           <ul className="space-y-4">
             {matches.map((match) => (
               <li key={match.user_id} className="card p-4">
-                <PlayerHeader player={match} aside={<MatchPct pct={match.match_pct} theirList />} />
+                <PlayerHeader player={match} aside={<FitPair they={match.match_pct} you={match.you_fit_pct} />} />
                 <FitLists match={match} />
-                {match.match_pct === null && match.fit_wants.length === 0 && (
+                {match.match_pct === null && match.you_fit_pct == null && (
                   <p className="mt-3 text-sm text-slate-500">Hasn&apos;t voted on any candy yet.</p>
                 )}
                 <div className="mt-4">
@@ -215,14 +215,24 @@ function Pills({ options }: { options: (readonly [string, string, boolean])[] })
 }
 
 /**
- * Same layout as My Friends: their Top 3 always shown, then a dropdown of how
- * their Tier List lines up with you: your wants their friends want (what
- * they'd send you that you want) and your don't-wants their friends want.
+ * Their Top 3 always shown, then a dropdown with both directions: what
+ * they'd send you (your wants and don't-wants their friends want) and what
+ * you'd send them (their wants and don't-wants your friends want).
  */
 function FitLists({ match }: { match: MatchRow }) {
   const tops = match.top_wants ?? [];
-  const chips = (ids: string[]) => ids.flatMap((id) => LINES_BY_ID.get(id) ?? []);
-  if (tops.length === 0 && match.fit_wants.length === 0 && match.fit_dont_wants.length === 0) return null;
+  const chips = (ids: string[] | undefined) => (ids ?? []).flatMap((id) => LINES_BY_ID.get(id) ?? []);
+  const toYou = { want: match.you_fit_wants ?? [], dont: match.you_fit_dont_wants ?? [] };
+  const toThem = { want: match.fit_wants, dont: match.fit_dont_wants };
+  const any = toYou.want.length + toYou.dont.length + toThem.want.length + toThem.dont.length > 0;
+  if (tops.length === 0 && !any) return null;
+  const group = (title: string, color: string, ids: string[]) =>
+    ids.length > 0 && (
+      <div>
+        <h5 className={`mb-2 text-sm font-semibold ${color}`}>{title}</h5>
+        <LineChips lines={chips(ids)} />
+      </div>
+    );
   return (
     <div className="mt-3 space-y-3">
       {tops.length > 0 && (
@@ -231,22 +241,28 @@ function FitLists({ match }: { match: MatchRow }) {
           <LineChips lines={linesFromIds(tops)} />
         </div>
       )}
-      {match.fit_wants.length + match.fit_dont_wants.length > 0 && (
+      {any && (
         <details>
           <summary className="cursor-pointer text-sm font-semibold">
-            They&apos;d send you: {match.fit_wants.length} you want · {match.fit_dont_wants.length} you don&apos;t
+            They&apos;d send you {toYou.want.length} you want · You&apos;d send them {toThem.want.length} they want
           </summary>
-          <div className="mt-3 space-y-4">
-            <div>
-              <h4 className="mb-2 text-sm font-semibold text-want">Your wants their friends want</h4>
-              <LineChips lines={chips(match.fit_wants)} />
+          <div className="mt-3 space-y-5">
+            <div className="space-y-3">
+              <h4 className="font-bold">They&apos;d send you</h4>
+              {group("Your wants their friends want", "text-want", toYou.want)}
+              {group("Your don't-wants their friends want", "text-dont", toYou.dont)}
+              {toYou.want.length + toYou.dont.length === 0 && (
+                <p className="text-sm text-slate-500">Nothing you've voted on is on their list yet.</p>
+              )}
             </div>
-            {match.fit_dont_wants.length > 0 && (
-              <div>
-                <h4 className="mb-2 text-sm font-semibold text-dont">Your don&apos;t-wants their friends want</h4>
-                <LineChips lines={chips(match.fit_dont_wants)} />
-              </div>
-            )}
+            <div className="space-y-3">
+              <h4 className="font-bold">You&apos;d send them</h4>
+              {group("Their wants your friends want", "text-want", toThem.want)}
+              {group("Their don't-wants your friends want", "text-dont", toThem.dont)}
+              {toThem.want.length + toThem.dont.length === 0 && (
+                <p className="text-sm text-slate-500">Nothing they've voted on is on your list yet.</p>
+              )}
+            </div>
           </div>
         </details>
       )}
