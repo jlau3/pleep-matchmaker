@@ -6,7 +6,7 @@ import { redirect } from "next/navigation";
 import { normalizeFriendCode } from "@/lib/format";
 import { META_COOKIE, META_POSTS, metaCookieValue } from "@/content/meta";
 import { HELP_COOKIE, HELP_VERSION, helpCookieValue } from "@/lib/help";
-import { NEXT_COOKIE, safeNextPath } from "@/lib/nextPath";
+import { LINKING_COOKIE, NEXT_COOKIE, safeNextPath } from "@/lib/nextPath";
 import { isChoice, LINES_BY_ID, MAX_TOP } from "@/lib/lines";
 import { createClient, requireUser } from "@/lib/supabase/server";
 
@@ -36,6 +36,42 @@ export async function signInWithOAuth(form?: FormData) {
   });
   if (error || !data.url) redirect(`/?error=${encodeURIComponent(error?.message ?? `Could not start ${label} sign-in`)}`);
   redirect(data.url);
+}
+
+type Provider = keyof typeof OAUTH_PROVIDERS;
+const isProvider = (p: string): p is Provider => p in OAUTH_PROVIDERS;
+
+/**
+ * Adds another sign-in method (Discord or Google) to the signed-in account.
+ * Needs "Manual linking" turned on in Supabase Auth. Linking Discord fills in
+ * the Discord name from Discord itself (see /auth/callback).
+ */
+export async function linkProvider(form: FormData) {
+  const provider = String(form.get("provider") ?? "");
+  if (!isProvider(provider)) redirect("/profile?error=link");
+  const { supabase } = await requireUser();
+  const { data, error } = await supabase.auth.linkIdentity({
+    provider,
+    options: { redirectTo: `${await siteOrigin()}/auth/callback` },
+  });
+  if (error || !data?.url) redirect(`/profile?error=${encodeURIComponent(error?.message ?? "link")}`);
+  (await cookies()).set(LINKING_COOKIE, provider, { maxAge: 600, httpOnly: true, sameSite: "lax", path: "/" });
+  redirect(data.url);
+}
+
+/** Removes a sign-in method; Supabase refuses to remove the last one. */
+export async function unlinkProvider(form: FormData) {
+  const provider = String(form.get("provider") ?? "");
+  if (!isProvider(provider)) redirect("/profile?error=link");
+  const { supabase } = await requireUser();
+  const { data } = await supabase.auth.getUserIdentities();
+  const identity = data?.identities.find((i) => i.provider === provider);
+  if (!identity || (data?.identities.length ?? 0) < 2) redirect("/profile?error=unlink-last");
+  const { error } = await supabase.auth.unlinkIdentity(identity);
+  if (error) redirect(`/profile?error=${encodeURIComponent(error.message)}`);
+  if (provider === "discord") await supabase.rpc("sync_discord_identity");
+  revalidatePath("/", "layout");
+  redirect("/profile?linked=removed");
 }
 
 export interface MagicLinkState {

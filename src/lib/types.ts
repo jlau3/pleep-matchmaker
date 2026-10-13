@@ -90,4 +90,7 @@ export interface FriendRow extends PlayerContact {
 /** Someone who added you and you haven't added back or dismissed (get_added_me). */
 export interface AddedMeRow extends PlayerContact {
   added_at: string;
+  /** Both fits, only when asked for (get_added_me(with_fit)); see MatchRow. */
+  match_pct: number | null;
+  you_fit_pct: number | null;
 }

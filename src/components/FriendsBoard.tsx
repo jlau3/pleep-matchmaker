@@ -1,8 +1,10 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { FRIEND_SORT_HINTS, FRIEND_SORTS, type FriendSort } from "@/lib/friendSort";
 import { ViewToggle } from "./ViewToggle";
+
+const VIEW_KEY = "pm_friends_view";
 
 export interface FriendItem {
   id: string;
@@ -21,14 +23,31 @@ export interface FriendItem {
 export function FriendsBoard({
   items,
   initialSort,
-  initialView,
 }: {
   items: FriendItem[];
   initialSort: FriendSort;
-  initialView: "list" | "grid";
 }) {
   const [sort, setSort] = useState(initialSort);
-  const [view, setView] = useState(initialView);
+  const [view, setView] = useState<"list" | "grid">("list");
+
+  // Remember the layout per browser, like the voting page.
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(VIEW_KEY);
+      if (saved === "list" || saved === "grid") setView(saved);
+    } catch {
+      /* Storage unavailable: keep the default. */
+    }
+  }, []);
+
+  function changeView(next: "list" | "grid") {
+    setView(next);
+    try {
+      localStorage.setItem(VIEW_KEY, next);
+    } catch {
+      /* Not remembered; fine. */
+    }
+  }
   // Stable sort: ties keep the order friends were added in.
   const sorted = useMemo(() => [...items].sort((a, b) => b.ranks[sort] - a.ranks[sort]), [items, sort]);
 
@@ -62,7 +81,7 @@ export function FriendsBoard({
               </button>
             ))}
             <span className="ml-auto">
-              <ViewToggle view={view} onChange={setView} />
+              <ViewToggle view={view} onChange={changeView} />
             </span>
           </div>
           <p className="text-xs text-slate-500">{FRIEND_SORT_HINTS[sort]}</p>

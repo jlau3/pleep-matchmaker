@@ -1,4 +1,3 @@
-import { cookies } from "next/headers";
 import Link from "next/link";
 import { FriendButton } from "@/components/FriendButton";
 import { PlayerHeader, playerName } from "@/components/PlayerHeader";
@@ -11,7 +10,6 @@ import { MAX_FRIENDS } from "@/lib/data";
 import { requireUser } from "@/lib/supabase/server";
 import type { AddedMeRow, FriendRow } from "@/lib/types";
 import { DismissAddedYou } from "@/components/DismissAddedYou";
-import { FRIENDS_VIEW_COOKIE } from "@/components/ViewToggle";
 import { type FriendItem, FriendsBoard } from "@/components/FriendsBoard";
 import { FRIEND_SORTS, friendRank, parseFriendSort } from "@/lib/friendSort";
 
@@ -22,9 +20,8 @@ export default async function FriendsPage({ searchParams }: { searchParams: Prom
   const params = await searchParams;
   const q = await searchQuery(Promise.resolve(params));
   const sort = parseFriendSort(params.sort);
-  const view = (await cookies()).get(FRIENDS_VIEW_COOKIE)?.value === "grid" ? "grid" : "list";
 
-  const [friendsResult, addedMeResult] = await Promise.all([supabase.rpc("get_friends"), supabase.rpc("get_added_me")]);
+  const [friendsResult, addedMeResult] = await Promise.all([supabase.rpc("get_friends"), supabase.rpc("get_added_me", { with_fit: true })]);
   if (friendsResult.error) throw friendsResult.error;
   // People who added you and are waiting on you (empty if that lookup isn't available yet).
   const addedMe = (addedMeResult.data ?? []) as AddedMeRow[];
@@ -49,7 +46,11 @@ export default async function FriendsPage({ searchParams }: { searchParams: Prom
           <ul className="space-y-3">
             {addedMe.map((player) => (
               <li key={player.user_id} className={card}>
-                <PlayerHeader player={player} isFriend={false} />
+                <PlayerHeader
+                  player={player}
+                  isFriend={false}
+                  aside={<FitPair they={player.match_pct} you={player.you_fit_pct} />}
+                />
                 <div className="mt-2 flex justify-end">
                   <DismissAddedYou userId={player.user_id} />
                 </div>
@@ -88,7 +89,6 @@ export default async function FriendsPage({ searchParams }: { searchParams: Prom
         ) : (
           <FriendsBoard
             initialSort={sort}
-            initialView={view}
             items={friends.map(
               (friend): FriendItem => ({
                 id: friend.user_id,
