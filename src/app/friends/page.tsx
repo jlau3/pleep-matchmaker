@@ -3,7 +3,7 @@ import { FriendButton } from "@/components/FriendButton";
 import { PlayerHeader, playerName } from "@/components/PlayerHeader";
 import { PlayerLists } from "@/components/PlayerLists";
 import { InviteReminder } from "@/components/InviteReminder";
-import { MatchPct } from "@/components/MatchPct";
+import { FitPair } from "@/components/FitPair";
 import { PlayerSearch, searchQuery } from "@/components/PlayerSearch";
 import { FRIENDS_TABS, SubTabs } from "@/components/SubTabs";
 import { MAX_FRIENDS } from "@/lib/data";
@@ -93,7 +93,7 @@ export default async function FriendsPage({ searchParams }: { searchParams: Prom
                     <PlayerHeader
                       player={friend}
                       isFriend
-                      aside={<MatchPct pct={friend.match_pct} />}
+                      aside={<FitPair they={friend.match_pct} you={friend.you_fit_pct} />}
                     />
                     {friend.added_me && (
                       <p className="mt-1 text-xs font-semibold text-want" title="They have you on their friend list too">

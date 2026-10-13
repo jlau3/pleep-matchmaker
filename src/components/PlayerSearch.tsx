@@ -1,7 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import Link from "next/link";
 import type { LookupRow } from "@/lib/types";
-import { FitPair, MatchPct } from "./MatchPct";
+import { FitPair } from "./FitPair";
 import { PlayerHeader } from "./PlayerHeader";
 import { PlayerLists } from "./PlayerLists";
 
@@ -56,9 +56,6 @@ export async function PlayerSearch({
                       <br />
                       to see their fit
                     </Link>
-                  ) : friendIds.has(player.user_id) ? (
-                    // Already on your list: one number, as on My Friends.
-                    <MatchPct pct={player.match_pct} />
                   ) : (
                     <FitPair they={player.match_pct} you={player.you_fit_pct} />
                   )

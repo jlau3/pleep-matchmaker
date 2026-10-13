@@ -31,8 +31,9 @@ const STEPS: { title: string; body: React.ReactNode; href: string; cta: string }
     title: "Add your in-game friends",
     body: (
       <>
-        Look them up by exact name, IGN or friend code and add up to {MAX_FRIENDS}. Each player shows a fit %: how
-        closely their wants and don&apos;t-wants line up with your current friends list.
+        Look them up by exact name, IGN or friend code and add up to {MAX_FRIENDS}. Each player shows two fits: how
+        well they fit your friends list, and how well you fit theirs. A low one means one of you would mostly get
+        candy they don&apos;t need.
       </>
     ),
     href: "/friends",
@@ -42,8 +43,8 @@ const STEPS: { title: string; body: React.ReactNode; href: string; cta: string }
     title: "Find new friends",
     body: (
       <>
-        Find New Friends suggests players with two fits: how well they fit your list, and how well you fit theirs
-        (their friends want what you want). Copy their friend code and add them in Pokémon Sleep.
+        Find New Friends suggests players who fit both ways: you&apos;d each send candy the other wants. Copy their
+        friend code and add them in Pokémon Sleep.
       </>
     ),
     href: "/matches",

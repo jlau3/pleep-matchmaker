@@ -1,31 +1,5 @@
 import { LOW_FIT_PCT } from "@/lib/fit";
 
-/**
- * How well a player fits your friends' wants, shown top right of their card on
- * My Friends. Counts their wants and their don't-wants against what your
- * friends want. Low fits get a quiet amber "low fit" instead of the green "fit".
- * Nothing when unknown.
- */
-export function MatchPct({ pct }: { pct: number | null | undefined }) {
-  if (pct === null || pct === undefined) return null;
-  const low = pct < LOW_FIT_PCT;
-  return (
-    <div
-      className="shrink-0 whitespace-nowrap text-right leading-none"
-      title={
-        low
-          ? "Their wants and don't-wants mostly don't line up with your current friends list"
-          : "How closely their wants and don't-wants line up with your current friends list"
-      }
-    >
-      <span className={`text-2xl font-bold ${low ? "text-amber-600 dark:text-amber-400" : "text-want"}`}>{pct}%</span>{" "}
-      <span className={`text-xs ${low ? "font-semibold text-amber-700 dark:text-amber-300" : "text-slate-500"}`}>
-        {low ? "low fit" : "fit"}
-      </span>
-    </div>
-  );
-}
-
 const FIT_ROWS = [
   {
     key: "they",
@@ -40,8 +14,9 @@ const FIT_ROWS = [
 ] as const;
 
 /**
- * Both fits for someone you could add (Find New Friends, search): how well
- * they fit your list, and how well you fit theirs. Low fits turn amber.
+ * Both fits, top right of a player's card (My Friends, Find New Friends,
+ * search): how well they fit your list, and how well you fit theirs. Either
+ * one turns amber below LOW_FIT_PCT, so a lopsided friendship stands out.
  */
 export function FitPair({ they, you }: { they: number | null | undefined; you: number | null | undefined }) {
   const values = { they, you };

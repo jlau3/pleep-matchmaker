@@ -12,8 +12,9 @@
 -- 'active'. "Good fits" need both at or above match_config().min_pct and
 -- their list wanting at least min_shared_wants of your wants.
 --
--- their_list_demand / you_fit_pct are the per-player versions for search.
--- My Friends (get_friends) is unchanged. Safe to re-run.
+-- their_list_demand / you_fit_pct are the per-player versions, used by search
+-- (lookup_players) and My Friends (get_friends), which show both numbers too.
+-- Hidden friends (lookup off) get neither. Safe to re-run.
 
 -- One player's Tier List demand per line (0..1), leaving `viewer` out.
 create or replace function public.their_list_demand(player uuid, viewer uuid)
@@ -340,3 +341,62 @@ $$;
 
 revoke execute on function public.lookup_players(text) from public, anon;
 grant execute on function public.lookup_players(text) to authenticated;
+
+-- My Friends shows both numbers: are you hurting them, are they hurting you.
+drop function if exists public.get_friends(boolean);
+
+create function public.get_friends(with_match boolean default true)
+returns table (
+  user_id uuid,
+  discord_username text,
+  discord_display_name text,
+  avatar_url text,
+  ign text,
+  friend_code text,
+  last_seen_at timestamptz,
+  prefs_updated_at timestamptz,
+  added_at timestamptz,
+  visible boolean,
+  wants text[],
+  dont_wants text[],
+  top_wants text[],
+  match_pct int,
+  you_fit_pct int,
+  added_me boolean
+)
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select
+    pr.id,
+    case when pr.show_discord then pr.discord_username end,
+    case when pr.show_discord then pr.discord_display_name end,
+    case when pr.show_discord then pr.avatar_url end,
+    case when pr.allow_lookup then pr.ign end,
+    case when pr.allow_lookup then pr.friend_code end,
+    pr.last_seen_at,
+    pr.prefs_updated_at,
+    f.created_at,
+    pr.allow_lookup,
+    case when pr.allow_lookup then coalesce((
+      select array_agg(p.line_id order by p.line_id) from public.preferences p
+      where p.user_id = pr.id and p.choice = 'want'), '{}') else '{}' end,
+    case when pr.allow_lookup then coalesce((
+      select array_agg(p.line_id order by p.line_id) from public.preferences p
+      where p.user_id = pr.id and p.choice = 'dont_want'), '{}') else '{}' end,
+    case when pr.allow_lookup then coalesce((
+      select array_agg(p.line_id order by p.line_id) from public.preferences p
+      where p.user_id = pr.id and p.top), '{}') else '{}' end,
+    case when with_match and pr.allow_lookup then public.fit_pct(auth.uid(), pr.id) end,
+    case when with_match and pr.allow_lookup then public.you_fit_pct(auth.uid(), pr.id) end,
+    exists (select 1 from public.friends back where back.user_id = pr.id and back.friend_id = auth.uid())
+  from public.friends f
+  join public.profiles pr on pr.id = f.friend_id
+  where f.user_id = auth.uid()
+  order by f.created_at
+$$;
+
+revoke execute on function public.get_friends(boolean) from public, anon;
+grant execute on function public.get_friends(boolean) to authenticated;

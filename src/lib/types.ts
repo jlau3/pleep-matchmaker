@@ -79,8 +79,10 @@ export interface FriendRow extends PlayerContact {
   wants: string[];
   dont_wants: string[];
   top_wants: string[];
-  /** How well their wants fit the rest of your friends' wants. Null when hidden or nothing to compare. */
+  /** "Fits your list": how well their wants fit the rest of your friends' wants. Null when hidden or nothing to compare. */
   match_pct: number | null;
+  /** "You fit theirs": how much of what you want their friends want. Null when hidden or unknown. */
+  you_fit_pct?: number | null;
   /** They have you on their friend list too. */
   added_me: boolean;
 }

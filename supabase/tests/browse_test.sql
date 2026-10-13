@@ -121,6 +121,17 @@ do $$ begin
 end $$;
 reset role;
 
+-- My Friends shows both numbers once you add them.
+insert into public.friends (user_id, friend_id) values ('00000000-0000-0000-000d-000000000001', '00000000-0000-0000-0010-000000000001');
+set role authenticated;
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-000d-000000000001', false);
+do $$ begin
+  assert (select you_fit_pct from public.get_friends() where discord_username = 'br_hub') = 100, 'my friends: you fit theirs';
+  assert (select you_fit_pct from public.get_friends(false) where discord_username = 'br_hub') is null, 'skipped without with_match';
+end $$;
+reset role;
+delete from public.friends where user_id = '00000000-0000-0000-000d-000000000001' and friend_id = '00000000-0000-0000-0010-000000000001';
+
 -- With one of the three friends gone, under 3 voters: their own wants (x1) stand in.
 delete from public.friends where user_id = '00000000-0000-0000-0010-000000000001' and friend_id = '00000000-0000-0000-0010-000000000004';
 set role authenticated;
