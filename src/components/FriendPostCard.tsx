@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useTransition } from "react";
+import { enableLookup } from "@/app/actions";
 import { formatFriendCode } from "@/lib/format";
 
 const callout =
@@ -15,22 +16,24 @@ const callout =
  */
 export function FriendPostCard({
   friendCode,
-  handle,
-  searchName,
+  ign,
+  allowLookup,
   topNames,
   wantNames,
 }: {
   friendCode: string | null;
-  /** How people find you in search: "@discordname" or an IGN. */
-  handle: string | null;
-  /** What the link pre-fills in search (Discord name or IGN); opens your search result directly. */
-  searchName: string | null;
+  /** Your in-game name, so readers recognize you in Pokémon Sleep. */
+  ign: string | null;
+  /** With lookup off, search can't find you, so the post leaves the link out. */
+  allowLookup: boolean;
   topNames: string[];
   wantNames: string[];
 }) {
   const [origin, setOrigin] = useState("https://pleep-matchmaker.vercel.app");
   const [copied, setCopied] = useState(false);
   const [canShare, setCanShare] = useState(false);
+  const [turningOn, startTurningOn] = useTransition();
+  const [lookupError, setLookupError] = useState<string | null>(null);
   useEffect(() => {
     setOrigin(window.location.origin);
     setCanShare(typeof navigator.share === "function");
@@ -48,15 +51,23 @@ export function FriendPostCard({
     );
   }
 
-  const favorites = topNames.length > 0 ? `My Top ${topNames.length} candies: ${topNames.join(", ")}` : wantNames.length > 0 ? `Candies I'm after: ${wantNames.join(", ")}` : null;
-  // The link opens Friends with your name already searched, showing how well you fit the reader's friends.
-  const link = searchName ? `${origin}/friends?q=${encodeURIComponent(searchName)}` : origin;
-  const where = handle ? `Pleep Matchmaker (I'm ${handle})` : "Pleep Matchmaker";
+  const favorites =
+    topNames.length === 1
+      ? `My top candy: ${topNames[0]}`
+      : topNames.length > 1
+        ? `My Top ${topNames.length} candies: ${topNames.join(", ")}`
+        : wantNames.length > 0
+          ? `Candies I'm after: ${wantNames.join(", ")}`
+          : null;
+  // The link opens Friends with your friend code already searched: unique, always set here, and
+  // lookup matches it exactly (IGNs can be shared; Discord names can be hidden).
+  const link = `${origin}/friends?q=${friendCode}`;
   const message = [
     "🌙 Looking for Pokémon Sleep friends!",
+    ign ? `IGN: ${ign}` : null,
     `Friend code: ${formatFriendCode(friendCode)}`,
     favorites,
-    `See how my candy wishlist fits your friends' on ${where}: ${link}`,
+    allowLookup ? `See how my candy wishlist fits your friends' on Pleep Matchmaker: ${link}` : null,
   ]
     .filter(Boolean)
     .join("\n");
@@ -86,6 +97,9 @@ export function FriendPostCard({
         <span>
           <span className="font-bold">📣 Looking for more friends?</span>{" "}
           <span className="text-slate-700 dark:text-slate-300">Share a post with your friend code.</span>
+          {!allowLookup && (
+            <span className="ml-1 font-semibold text-amber-800 dark:text-amber-200">Lookup is off, so it won&apos;t link to you.</span>
+          )}
         </span>
         <span className="shrink-0 text-xs font-semibold underline group-open:hidden">Show</span>
         <span className="hidden shrink-0 text-xs font-semibold underline group-open:inline">Hide</span>
@@ -103,6 +117,33 @@ export function FriendPostCard({
           </button>
         </div>
       </div>
+      {!allowLookup && (
+        <div className="mb-2 flex flex-wrap items-center gap-x-3 gap-y-1 rounded-xl bg-amber-100 px-3 py-2 text-xs text-amber-900 dark:bg-amber-900/30 dark:text-amber-200">
+          <span>
+            &quot;Allow lookup&quot; is off, so readers can&apos;t find you here and the post leaves out your link. Planning to
+            share it? Turn lookup back on.
+          </span>
+          <button
+            type="button"
+            disabled={turningOn}
+            onClick={() =>
+              startTurningOn(async () => {
+                setLookupError(null);
+                try {
+                  const result = await enableLookup();
+                  if (result.error) setLookupError(result.error);
+                } catch {
+                  setLookupError("Couldn't turn it on, try again");
+                }
+              })
+            }
+            className="shrink-0 rounded-full bg-amber-600 px-3 py-1 font-semibold text-white disabled:opacity-60"
+          >
+            {turningOn ? "Turning on…" : "Turn on lookup"}
+          </button>
+          {lookupError && <span className="text-dont">{lookupError}</span>}
+        </div>
+      )}
       <pre className="whitespace-pre-wrap rounded-2xl bg-white p-3 font-sans text-sm dark:bg-night-deep">{message}</pre>
     </details>
   );

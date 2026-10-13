@@ -1,19 +1,13 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-
-/** Cookie holding the My Friends layout ("grid" or absent for list). */
+/** Cookie holding the My Friends layout ("grid" or absent for list), so the server renders it first time. */
 export const FRIENDS_VIEW_COOKIE = "pm_friends_view";
 
-/**
- * List / Grid switch for My Friends on wider screens (phones always get one
- * column). Remembered in a cookie so the server renders the right layout.
- */
-export function ViewToggle({ view }: { view: "list" | "grid" }) {
-  const router = useRouter();
+/** List / Grid switch for My Friends on wider screens (phones always get one column). */
+export function ViewToggle({ view, onChange }: { view: "list" | "grid"; onChange: (view: "list" | "grid") => void }) {
   function pick(next: "list" | "grid") {
     document.cookie = `${FRIENDS_VIEW_COOKIE}=${next}; path=/; max-age=31536000; samesite=lax`;
-    router.refresh();
+    onChange(next);
   }
   return (
     <div className="hidden shrink-0 rounded-full bg-white p-1 shadow-sm md:inline-flex dark:bg-night" role="group" aria-label="Layout">

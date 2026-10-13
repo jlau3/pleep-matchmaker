@@ -41,7 +41,7 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
   const picked = Object.values(choices).filter((c) => c !== "undecided").length;
   const unsorted = LINES.length - Object.keys(choices).length;
 
-  // The Discord name only goes in the friend post if the player shows it.
+  // A shown Discord name lets friends find you even without an IGN (see the notice below).
   const shownDiscord = profile.show_discord ? profile.discord_username : null;
 
   const notices: React.ReactNode[] = [];
@@ -100,8 +100,8 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
 
       <FriendPostCard
         friendCode={profile.friend_code}
-        handle={shownDiscord ? `@${shownDiscord}` : profile.ign}
-        searchName={shownDiscord ?? profile.ign}
+        ign={profile.ign}
+        allowLookup={profile.allow_lookup}
         topNames={linesFromIds(tops).map((line) => line.name)}
         wantNames={linesFromIds(Object.keys(choices).filter((id) => choices[id] === "want"))
           .sort((a, b) => b.weight - a.weight || a.dex - b.dex)

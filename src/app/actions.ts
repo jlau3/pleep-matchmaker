@@ -117,6 +117,15 @@ export interface ProfileFormState {
   saved?: boolean;
 }
 
+/** Turns "Allow lookup" back on (the friend post's reminder), so a shared link finds you. */
+export async function enableLookup(): Promise<{ error?: string }> {
+  const { supabase, user } = await requireUser();
+  const { error } = await supabase.from("profiles").update({ allow_lookup: true }).eq("id", user.id);
+  if (error) return { error: "Couldn't turn it on, try again" };
+  revalidatePath("/", "layout");
+  return {};
+}
+
 export async function updateProfile(_prev: ProfileFormState, form: FormData): Promise<ProfileFormState> {
   const { supabase, user } = await requireUser();
   const ign = String(form.get("ign") ?? "").trim();
