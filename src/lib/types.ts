@@ -40,6 +40,8 @@ export interface BlockedRow {
   user_id: string;
   discord_username: string | null;
   discord_display_name: string | null;
+  /** So hidden-Discord and Google/email players still have a name here. */
+  ign: string | null;
   blocked_at: string;
 }
 
@@ -52,6 +54,8 @@ export interface OwnProfile {
   friend_code: string | null;
   open_to_friends: boolean;
   allow_lookup: boolean;
+  /** Whether other players see (and can search) their Discord name and avatar. */
+  show_discord: boolean;
   last_seen_at: string;
   prefs_updated_at: string | null;
 }

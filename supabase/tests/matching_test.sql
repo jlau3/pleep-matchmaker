@@ -9,6 +9,8 @@ insert into auth.users (id, raw_user_meta_data) values
   ('00000000-0000-0000-0000-00000000000c', '{"provider_id":"3","name":"cara#0"}'),
   ('00000000-0000-0000-0000-00000000000d', '{"provider_id":"4","name":"dan#0"}'),
   ('00000000-0000-0000-0000-00000000000e', '{"provider_id":"5","name":"eve#0"}');
+-- These players show their Discord name (new accounts start hidden; see show_discord_test.sql).
+update public.profiles set show_discord = true;
 
 update public.profiles set friend_code = '10000000000' || (ascii(right(id::text, 1)) % 10), ign = 'ign_' || discord_username;
 

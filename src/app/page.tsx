@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
-import { signInWithDiscord } from "@/app/actions";
 import { HowItWorks } from "@/components/HowItWorks";
+import { SignInOptions } from "@/components/SignInOptions";
 import { safeNextPath } from "@/lib/nextPath";
 import { loadOwnChoices } from "@/lib/data";
 import { LINES, lineSpriteUrl } from "@/lib/lines";
@@ -46,12 +46,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ e
           </p>
         )}
         {params.deleted && <p className="mb-4 text-sm text-slate-500">Your account has been deleted.</p>}
-        <form action={signInWithDiscord}>
-          {next && <input type="hidden" name="next" value={next} />}
-          <button type="submit" className="w-full rounded-full bg-[#5865F2] px-6 py-3 text-lg font-extrabold text-white shadow-[0_3px_0_#3c45a5] hover:brightness-105 active:translate-y-[2px] active:shadow-[0_1px_0_#3c45a5]">
-            Sign in with Discord
-          </button>
-        </form>
+        <SignInOptions next={next} />
       </div>
       <section className="card p-6">
         <h2 className="mb-4 text-xl font-extrabold">How it works</h2>

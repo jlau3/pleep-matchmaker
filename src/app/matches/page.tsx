@@ -27,7 +27,17 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
   const picked = Object.values(choices).filter((c) => c !== "undecided").length;
   const unsorted = LINES.length - Object.keys(choices).length;
 
+  // The Discord name only goes in the friend post if the player shows it.
+  const shownDiscord = profile.show_discord ? profile.discord_username : null;
+
   const notices: React.ReactNode[] = [];
+  if (!profile.ign && !shownDiscord)
+    notices.push(
+      <>
+        Add your in-game name in <Link href="/profile" className="underline">Profile</Link> so friends can recognise and find
+        you{profile.discord_username ? " (your Discord name is hidden)" : ""}.
+      </>,
+    );
   if (!profile.friend_code)
     notices.push(
       <>
@@ -77,8 +87,8 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
 
       <FriendPostCard
         friendCode={profile.friend_code}
-        handle={profile.discord_username ? `@${profile.discord_username}` : profile.ign}
-        searchName={profile.discord_username ?? profile.ign}
+        handle={shownDiscord ? `@${shownDiscord}` : profile.ign}
+        searchName={shownDiscord ?? profile.ign}
         topNames={linesFromIds(tops).map((line) => line.name)}
         wantNames={linesFromIds(Object.keys(choices).filter((id) => choices[id] === "want"))
           .sort((a, b) => b.weight - a.weight || a.dex - b.dex)

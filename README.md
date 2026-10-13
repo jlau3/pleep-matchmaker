@@ -10,7 +10,9 @@ New players go straight to My votes after signing in, and land on the Tier list 
 
 A **How it works** card explains the app on the sign-in page. Signed in, it's a popup over the current page (darkened backdrop; Esc, ×, "Got it" or a tap outside closes it), opened by the **?** next to Profile. It also opens by itself once per account on first sign-in, and once more for everyone whenever `HELP_VERSION` in `src/lib/help.ts` is bumped (tracked in `profiles.help_seen_version`, cached in a per-account cookie). `/about` now redirects home. The card ends with an **Invite friends** button (native share sheet on phones, copied message elsewhere); My Friends and the Tier List show a dismissible reminder (hidden for two weeks when closed) asking about Pokémon Sleep friends who haven't signed up yet, with the same button.
 
-Stack: Next.js 15 (App Router) + Supabase (Postgres, Discord OAuth) + Tailwind. Built to run on the Vercel and Supabase free tiers.
+Sign in with Discord, Google, or an emailed one-time link (no password). Only Discord shows a name to other players, and only while the player keeps **Show my Discord name** on (Profile → Settings; on for accounts from before the setting, off for new ones). Everyone else is known by IGN.
+
+Stack: Next.js 15 (App Router) + Supabase (Postgres, Discord/Google OAuth, email links) + Tailwind. Built to run on the Vercel and Supabase free tiers.
 
 ## How matching works
 
@@ -56,6 +58,7 @@ Inside a tier, lines sort by score, then Top 3 stars, then a rarity weight, then
 - Row level security: users read and write only their own rows.
 - Other players' data only comes out of `security definer` functions (`get_matches`, `lookup_players`, `get_friends`, `get_line_stats`, `get_voter_count`), which apply blocks, staleness, `open_to_friends` and `allow_lookup`.
 - Lookup is exact-match only, so the player list can't be scrolled or enumerated. It ignores letter case, extra spaces and Unicode width/accent encoding differences (`public.search_key`), but never matches part of a name. Players can turn lookup off in Profile, which also hides their picks from people who added them as a friend.
+- Names: other players only ever see a Discord name and avatar when the player has **Show my Discord name** on; with it off they're shown and found by IGN and friend code only. Google and email sign-ins never copy a name, photo or email into the profile (`sync_profile_from_auth` only reads Discord metadata).
 - Blocking hides both players from each other everywhere and removes any friend link.
 - Deleting an account removes the auth user, which cascades to everything else.
 
@@ -73,6 +76,28 @@ Inside a tier, lines sort by score, then Top 3 stars, then a rarity weight, then
 2. Under **OAuth2**, add the redirect `https://<your-project>.supabase.co/auth/v1/callback`.
 3. In Supabase, go to **Authentication → Sign In / Providers → Discord**, enable it, and paste in the Discord client ID and secret.
 4. In Supabase, go to **Authentication → URL Configuration**. Set the Site URL to your production URL and add these redirect URLs: `http://localhost:3000/auth/callback` and `https://<your-domain>/auth/callback`.
+
+### 2b. Google sign-in
+
+1. In [Google Cloud console](https://console.cloud.google.com/) create a project, then **APIs & Services → OAuth consent screen**: External, app name "Pleep Matchmaker", your support email, scopes `email`, `profile`, `openid` only. Publish it (no verification needed for those scopes).
+2. **Credentials → Create credentials → OAuth client ID → Web application**. Authorized redirect URI: `https://<your-project>.supabase.co/auth/v1/callback`.
+3. In Supabase, **Authentication → Sign In / Providers → Google**: enable, paste the client ID and secret.
+
+The same redirect URLs as Discord apply. A Google sign-in with the same verified email as an existing Discord account is linked to it automatically.
+
+### 2c. Email sign-in links
+
+1. **Authentication → Sign In / Providers → Email**: enable it. Password sign-up isn't offered in the app; it only sends one-time links.
+2. **Custom SMTP (required for real use).** Supabase's built-in sender only allows a few emails an hour and is meant for testing. Under **Authentication → Emails → SMTP settings**, plug in a free sender. [Brevo](https://www.brevo.com/) works without owning a domain (verify a single sender address; 300 emails/day free). [Resend](https://resend.com/) is nicer if you have a domain to verify.
+3. **Email templates.** Under **Authentication → Emails → Templates**, make the link in both **Magic Link** and **Confirm signup** point at the app, so it works even when opened in the mail app's browser:
+
+   ```html
+   <h2>Sign in to Pleep Matchmaker</h2>
+   <p><a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=email">Sign in</a></p>
+   <p>This link works once and expires in an hour. If you didn't ask for it, ignore this email.</p>
+   ```
+
+   (The default templates still work, via `/auth/callback`, but only in the same browser that asked for the link.)
 
 ### 3. Run locally
 
