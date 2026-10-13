@@ -13,7 +13,17 @@ import { DismissAddedYou } from "@/components/DismissAddedYou";
 
 const card = "card p-4";
 
-const fitRank = (f: FriendRow) => (!f.visible ? -2 : (f.match_pct ?? -1));
+/**
+ * Best fit, same as Find New Friends: the average of "fits your list" and "you
+ * fit theirs" (either one alone when the other is unknown). No fit yet ranks
+ * -1, private lists -2.
+ */
+const fitRank = (f: FriendRow) => {
+  if (!f.visible) return -2;
+  const they = f.match_pct ?? f.you_fit_pct;
+  const you = f.you_fit_pct ?? f.match_pct;
+  return they == null || you == null ? -1 : (they + you) / 2;
+};
 
 export default async function FriendsPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
   const { supabase, user } = await requireUser();
@@ -23,7 +33,7 @@ export default async function FriendsPage({ searchParams }: { searchParams: Prom
   if (friendsResult.error) throw friendsResult.error;
   // People who added you and are waiting on you (empty if that lookup isn't available yet).
   const addedMe = (addedMeResult.data ?? []) as AddedMeRow[];
-  // Best fit first. Friends with no fit yet (no votes) come next, private lists last;
+  // Best fit (both ways) first. Friends with no fit yet (no votes) come next, private lists last;
   // ties keep the order they were added (sort is stable).
   const friends = (friendsResult.data as FriendRow[]).sort(
     (a, b) => fitRank(b) - fitRank(a),
