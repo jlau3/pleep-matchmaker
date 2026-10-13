@@ -4,8 +4,9 @@ import { BlockButton } from "./BlockButton";
 import { CopyButton } from "./CopyButton";
 import { FriendButton } from "./FriendButton";
 
-export function playerName(p: Pick<PlayerContact, "discord_display_name" | "discord_username">): string {
-  return p.discord_display_name || p.discord_username || "Unknown player";
+/** Discord name when the player shows it, otherwise their IGN (Google/email players, or Discord name hidden). */
+export function playerName(p: Pick<PlayerContact, "discord_display_name" | "discord_username" | "ign">): string {
+  return p.discord_display_name || p.discord_username || p.ign || "Unknown player";
 }
 
 /** Avatar, names, IGN, friend code and activity for one player. */

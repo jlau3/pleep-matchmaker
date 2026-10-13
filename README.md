@@ -3,14 +3,16 @@
 Pokémon Sleep players vote on every candy line: **want**, **don't want** or **neutral**. Three tabs:
 
 - **Tier list** (home): which candy to prioritize, ranked S/A/B/C/Avoid by what your friends want and don't want, with toggles for All Islands / By Island and My Friends / Everyone. A banner links to voting when there are unvoted candies.
-- **Friends**: player search (exact Discord name, IGN or friend code) on both sub-tabs, carried over when you switch; *My Friends* lists your friends (up to 50), best fit with the rest of your list first; *Find New Friends* is matchmaking against players open to new friends, leaving out anyone you already added, with the date someone added today would reach friendship level 5 (`DAYS_TO_FRIENDSHIP_LEVEL_5` = 100 in `src/lib/friendship.ts`, player-reported). Search results show each player's fit with your friends, and Find New Friends has a **Share a friend post** card (Copy, plus Share on phones): a "looking for friends" message for Discord, Reddit or group chats with your friend code, Top 3 and a pointer to look you up here.
-- **Profile**: *My Votes* (every candy in dex order, List or Grid view, with a ★ on each card to pick your Top 3 wants, pinned at the top) and *Settings* (IGN, friend code, visibility toggles, blocked players, sign out, delete account).
+- **Friends**: player search (exact Discord name, IGN or friend code) on both sub-tabs, carried over when you switch; *My Friends* lists your friends (up to 50), best fit with the rest of your list first, marking those who **added you too**; friend lists are one-way (the game's friendships are mutual, so a one-sided list just means someone hasn't added the other here yet), and anyone who added you shows up in an **Added you** list with Add back / Not now, plus a banner on every other page until you answer; *Find New Friends* lists players open to new friends (`browse_players`), 20 a page, with **Good fits / Everyone** and sorting by **Best fit / Recently active / Most in common**; it leaves out anyone you already added, blocked, full, inactive or without a friend code. Each card's main button copies their friend code (befriending happens in Pokémon Sleep first), then offers **Add friend** for once they accept, with the earliest date someone added today could reach friendship level 5 (`DAYS_TO_FRIENDSHIP_LEVEL_5` = 100 in `src/lib/friendship.ts`, player-reported). Search results show each player's fit with your friends, and Find New Friends has a **Share a friend post** card (Copy, plus Share on phones): a "looking for friends" message for Discord, Reddit or group chats with your friend code, Top 3 and a pointer to look you up here.
+- **Profile**: *My Votes* (every candy in dex order, List or Grid view, with a ★ on each card to pick your Top 3 wants, pinned at the top) and *Settings* (IGN, friend code, visibility toggles, **Show my Discord name**, **Theme** (match device, light or dark; saved per device in the `pm_theme` cookie), blocked players, sign out, delete account).
 
 New players go straight to My votes after signing in, and land on the Tier list once everything is voted.
 
 A **How it works** card explains the app on the sign-in page. Signed in, it's a popup over the current page (darkened backdrop; Esc, ×, "Got it" or a tap outside closes it), opened by the **?** next to Profile. It also opens by itself once per account on first sign-in, and once more for everyone whenever `HELP_VERSION` in `src/lib/help.ts` is bumped (tracked in `profiles.help_seen_version`, cached in a per-account cookie). `/about` now redirects home. The card ends with an **Invite friends** button (native share sheet on phones, copied message elsewhere); My Friends and the Tier List show a dismissible reminder (hidden for two weeks when closed) asking about Pokémon Sleep friends who haven't signed up yet, with the same button.
 
-Stack: Next.js 15 (App Router) + Supabase (Postgres, Discord OAuth) + Tailwind. Built to run on the Vercel and Supabase free tiers.
+Sign in with Discord, Google, or an emailed one-time link (no password). Only Discord shows a name to other players, and only while the player keeps **Show my Discord name** on (Profile → Settings; on by default when you first sign up with Discord, and a later login never changes your choice). Everyone else is known by IGN.
+
+Stack: Next.js 15 (App Router) + Supabase (Postgres, Discord/Google OAuth, email links) + Tailwind. Built to run on the Vercel and Supabase free tiers.
 
 ## How matching works
 
@@ -56,6 +58,7 @@ Inside a tier, lines sort by score, then Top 3 stars, then a rarity weight, then
 - Row level security: users read and write only their own rows.
 - Other players' data only comes out of `security definer` functions (`get_matches`, `lookup_players`, `get_friends`, `get_line_stats`, `get_voter_count`), which apply blocks, staleness, `open_to_friends` and `allow_lookup`.
 - Lookup is exact-match only, so the player list can't be scrolled or enumerated. It ignores letter case, extra spaces and Unicode width/accent encoding differences (`public.search_key`), but never matches part of a name. Players can turn lookup off in Profile, which also hides their picks from people who added them as a friend.
+- Names: other players only ever see a Discord name and avatar when the player has **Show my Discord name** on; with it off they're shown and found by IGN and friend code only. Google and email sign-ins never copy a name, photo or email into the profile (`sync_profile_from_auth` only reads Discord metadata).
 - Blocking hides both players from each other everywhere and removes any friend link.
 - Deleting an account removes the auth user, which cascades to everything else.
 
@@ -73,6 +76,28 @@ Inside a tier, lines sort by score, then Top 3 stars, then a rarity weight, then
 2. Under **OAuth2**, add the redirect `https://<your-project>.supabase.co/auth/v1/callback`.
 3. In Supabase, go to **Authentication → Sign In / Providers → Discord**, enable it, and paste in the Discord client ID and secret.
 4. In Supabase, go to **Authentication → URL Configuration**. Set the Site URL to your production URL and add these redirect URLs: `http://localhost:3000/auth/callback` and `https://<your-domain>/auth/callback`.
+
+### 2b. Google sign-in
+
+1. In [Google Cloud console](https://console.cloud.google.com/) create a project, then **APIs & Services → OAuth consent screen**: External, app name "Pleep Matchmaker", your support email, scopes `email`, `profile`, `openid` only. Publish it (no verification needed for those scopes).
+2. **Credentials → Create credentials → OAuth client ID → Web application**. Authorized redirect URI: `https://<your-project>.supabase.co/auth/v1/callback`.
+3. In Supabase, **Authentication → Sign In / Providers → Google**: enable, paste the client ID and secret.
+
+The same redirect URLs as Discord apply. A Google sign-in with the same verified email as an existing Discord account is linked to it automatically.
+
+### 2c. Email sign-in links
+
+1. **Authentication → Sign In / Providers → Email**: enable it. Password sign-up isn't offered in the app; it only sends one-time links.
+2. **Custom SMTP (required for real use).** Supabase's built-in sender only allows a few emails an hour and is meant for testing. Under **Authentication → Emails → SMTP settings**, plug in a free sender. [Brevo](https://www.brevo.com/) works without owning a domain (verify a single sender address; 300 emails/day free). [Resend](https://resend.com/) is nicer if you have a domain to verify.
+3. **Email templates.** Under **Authentication → Emails → Templates**, make the link in both **Magic Link** and **Confirm signup** point at the app, so it works even when opened in the mail app's browser:
+
+   ```html
+   <h2>Sign in to Pleep Matchmaker</h2>
+   <p><a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=email">Sign in</a></p>
+   <p>This link works once and expires in an hour. If you didn't ask for it, ignore this email.</p>
+   ```
+
+   (The default templates still work, via `/auth/callback`, but only in the same browser that asked for the link.)
 
 ### 3. Run locally
 
@@ -98,7 +123,7 @@ Import the repo in Vercel and set `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPAB
 
 - Roster from [nitoyon/pokesleep-tool](https://github.com/nitoyon/pokesleep-tool) (MIT).
 - Sprites are the in-game Pokémon Sleep icons from Serebii (`scripts/build_icons.py`, run after `build_lines.py`), downscaled to 128px webp. Anything Serebii lacks keeps the PokeAPI official artwork that `build_lines.py` downloads.
-- All forms (event costumes, regional variants, sizes) share candy with their base species, so a line is one evolution family. Regional forms get their own sprite inside the line.
+- All forms (event costumes, regional variants, sizes) share candy with their base species, so a line is one evolution family. Regional forms and event costumes (Holiday Pikachu's Santa hat, Halloween Eevee's witch hat, Captain Pikachu, Holiday Spheal) get their own icon inside the line; costumes are listed last, use the Serebii icon (`025-holiday.png` → `public/sprites/25-holiday.webp`), and new ones in the roster are picked up automatically.
 
 When the game adds Pokémon, re-run it and commit the result:
 

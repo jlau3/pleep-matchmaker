@@ -1,0 +1,75 @@
+\set ON_ERROR_STOP on
+
+-- viewer (no friends, so own wants a,b,c stand in). Candidates:
+--   good: wants a,b,c          -> 100% fit, a good fit
+--   low:  wants a + 9 others   -> 10% fit, only under "everyone"
+--   fresh: no votes yet        -> no fit, only under "everyone", listed last
+--   stale / closed / blocked   -> never listed
+insert into auth.users (id, raw_user_meta_data) values
+  ('00000000-0000-0000-000d-000000000001', '{"name":"br_viewer#0"}'),
+  ('00000000-0000-0000-000d-000000000002', '{"name":"br_good#0"}'),
+  ('00000000-0000-0000-000d-000000000003', '{"name":"br_low#0"}'),
+  ('00000000-0000-0000-000d-000000000004', '{"name":"br_fresh#0"}'),
+  ('00000000-0000-0000-000d-000000000005', '{"name":"br_stale#0"}'),
+  ('00000000-0000-0000-000d-000000000006', '{"name":"br_closed#0"}'),
+  ('00000000-0000-0000-000d-000000000007', '{"name":"br_blocked#0"}');
+update public.profiles set friend_code = '7777' || right(id::text, 8) where id::text like '00000000-0000-0000-000d-%';
+update public.profiles set last_seen_at = now() - interval '5 months' where discord_username = 'br_stale';
+update public.profiles set open_to_friends = false where discord_username = 'br_closed';
+-- Recency for the 'active' sort: fresh most recent, then low, then good.
+update public.profiles set last_seen_at = now() - interval '3 days' where discord_username = 'br_good';
+update public.profiles set last_seen_at = now() - interval '2 days' where discord_username = 'br_low';
+update public.profiles set last_seen_at = now() - interval '1 day' where discord_username = 'br_fresh';
+
+insert into public.preferences (user_id, line_id, choice)
+select u::uuid, l, 'want'::public.choice
+from unnest(array['00000000-0000-0000-000d-000000000001', '00000000-0000-0000-000d-000000000002',
+                  '00000000-0000-0000-000d-000000000005', '00000000-0000-0000-000d-000000000006',
+                  '00000000-0000-0000-000d-000000000007']) u,
+     unnest(array['bra', 'brb', 'brc']) l;
+insert into public.preferences (user_id, line_id, choice)
+select '00000000-0000-0000-000d-000000000003'::uuid, l, 'want'::public.choice
+from unnest(array['bra', 'bx1', 'bx2', 'bx3', 'bx4', 'bx5', 'bx6', 'bx7', 'bx8', 'bx9']) l;
+insert into public.blocks (blocker_id, blocked_id) values ('00000000-0000-0000-000d-000000000001', '00000000-0000-0000-000d-000000000007');
+
+set role authenticated;
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-000d-000000000001', false);
+
+do $$
+declare names text[]; n bigint;
+begin
+  -- Other test files leave players around; look only at this file's.
+  select array_agg(discord_username order by ord), max(total_count) into names, n
+  from (select *, row_number() over () as ord from public.browse_players()) t where discord_username like 'br_%';
+  assert names = '{br_good}', format('good fits: %s', names);
+
+  select array_agg(discord_username order by ord) into names
+  from (select *, row_number() over () as ord from public.browse_players('fit', true, 50, 0)) t where discord_username like 'br_%';
+  assert names = '{br_good,br_low,br_fresh}', format('everyone by fit: %s', names);
+
+  select array_agg(discord_username order by ord) into names
+  from (select *, row_number() over () as ord from public.browse_players('active', true, 50, 0)) t where discord_username like 'br_%';
+  assert names = '{br_fresh,br_low,br_good}', format('everyone by activity: %s', names);
+
+  assert (select match_pct from public.browse_players('fit', true, 50, 0) where discord_username = 'br_fresh') is null, 'no votes, no fit';
+  assert (select match_pct from public.browse_players('fit', true, 50, 0) where discord_username = 'br_low') = 10, 'low fit';
+  assert not exists (
+    select 1 from public.browse_players('fit', true, 50, 0)
+    where discord_username in ('br_stale', 'br_closed', 'br_blocked', 'br_viewer')
+  ), 'never listed';
+end $$;
+
+-- Paging: pages don't overlap and total_count covers everything.
+do $$
+declare first_page uuid[]; second_page uuid[]; total bigint;
+begin
+  select array_agg(user_id), max(total_count) into first_page, total from public.browse_players('fit', true, 2, 0);
+  select array_agg(user_id) into second_page from public.browse_players('fit', true, 2, 2);
+  assert cardinality(first_page) = 2, 'page size';
+  assert not (first_page && second_page), 'pages overlap';
+  assert total >= 3, 'total count';
+  assert (select count(*) from public.browse_players('fit', true, 500, 0)) <= 50, 'page size capped at 50';
+end $$;
+reset role;
+
+\echo 'ALL BROWSE TESTS PASSED'

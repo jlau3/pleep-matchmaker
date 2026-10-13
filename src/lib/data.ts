@@ -62,7 +62,7 @@ export async function seedUndecided(
 export async function loadOwnProfile(supabase: SupabaseClient, userId: string): Promise<OwnProfile> {
   const { data, error } = await supabase
     .from("profiles")
-    .select("id, discord_username, discord_display_name, avatar_url, ign, friend_code, open_to_friends, allow_lookup, last_seen_at, prefs_updated_at")
+    .select("id, discord_username, discord_display_name, avatar_url, ign, friend_code, open_to_friends, allow_lookup, show_discord, last_seen_at, prefs_updated_at")
     .eq("id", userId)
     .single();
   if (error) throw error;

@@ -12,12 +12,14 @@ export interface PlayerContact {
 }
 
 export interface MatchRow extends PlayerContact {
-  /** How well their wants fit what your friends want (see the friends_fit migration). */
-  match_pct: number;
+  /** How well their wants fit what your friends want (see the friends_fit migration). Null before they've voted. */
+  match_pct: number | null;
   /** Their wants that your friends want too, most-wanted first. */
   fit_wants: string[];
   /** Candy your friends want that they don't, most-wanted first: what they'd rather not be sent. */
   fit_dont_wants: string[];
+  /** browse_players only: how many players the current filter lists in all. */
+  total_count?: number;
 }
 
 export interface LookupRow extends PlayerContact {
@@ -40,6 +42,8 @@ export interface BlockedRow {
   user_id: string;
   discord_username: string | null;
   discord_display_name: string | null;
+  /** So hidden-Discord and Google/email players still have a name here. */
+  ign: string | null;
   blocked_at: string;
 }
 
@@ -52,6 +56,8 @@ export interface OwnProfile {
   friend_code: string | null;
   open_to_friends: boolean;
   allow_lookup: boolean;
+  /** Whether other players see (and can search) their Discord name and avatar. */
+  show_discord: boolean;
   last_seen_at: string;
   prefs_updated_at: string | null;
 }
@@ -65,4 +71,11 @@ export interface FriendRow extends PlayerContact {
   top_wants: string[];
   /** How well their wants fit the rest of your friends' wants. Null when hidden or nothing to compare. */
   match_pct: number | null;
+  /** They have you on their friend list too. */
+  added_me: boolean;
+}
+
+/** Someone who added you and you haven't added back or dismissed (get_added_me). */
+export interface AddedMeRow extends PlayerContact {
+  added_at: string;
 }

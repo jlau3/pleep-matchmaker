@@ -1,7 +1,10 @@
 import type { Metadata, Viewport } from "next";
+import { cookies } from "next/headers";
 import { M_PLUS_Rounded_1c } from "next/font/google";
+import { AddedYouBanner } from "@/components/AddedYouBanner";
 import { Nav } from "@/components/Nav";
 import { SupportFooter } from "@/components/SupportFooter";
+import { parseTheme, THEME_COOKIE } from "@/lib/theme";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -20,11 +23,14 @@ const rounded = M_PLUS_Rounded_1c({
 
 export const viewport: Viewport = { width: "device-width", initialScale: 1 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  // A theme picked in Settings; "system" adds no class, so CSS follows the device.
+  const theme = parseTheme((await cookies()).get(THEME_COOKIE)?.value);
   return (
-    <html lang="en" className={rounded.variable}>
+    <html lang="en" className={theme === "system" ? rounded.variable : `${rounded.variable} ${theme}`}>
       <body className="min-h-dvh antialiased">
         <Nav />
+        <AddedYouBanner />
         <main className="mx-auto max-w-5xl px-4 pb-16 pt-4">{children}</main>
         <SupportFooter />
       </body>

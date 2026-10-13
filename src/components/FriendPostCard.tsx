@@ -4,6 +4,9 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { formatFriendCode } from "@/lib/format";
 
+const callout =
+  "rounded-2xl border-2 border-dashed border-sun-deep/60 bg-[#fff3c9] p-4 text-sm dark:bg-night";
+
 /**
  * A ready-to-paste "looking for friends" post for anywhere players gather
  * (Discord, Reddit, group chats): friend code, Top 3
@@ -35,9 +38,9 @@ export function FriendPostCard({
 
   if (!friendCode) {
     return (
-      <section className="card p-4 text-sm">
-        <h2 className="mb-1 font-bold">Share a friend post</h2>
-        <p className="text-slate-600 dark:text-slate-300">
+      <section className={callout}>
+        <h2 className="mb-1 font-bold">📣 Looking for more friends?</h2>
+        <p className="text-slate-700 dark:text-slate-300">
           Add your friend code in <Link href="/profile" className="underline">Profile → Settings</Link> to get a ready-made
           &quot;looking for friends&quot; post.
         </p>
@@ -77,12 +80,18 @@ export function FriendPostCard({
   }
 
   return (
-    <section className="card p-4">
-      <div className="mb-2 flex items-center justify-between gap-3">
-        <div>
-          <h2 className="font-bold">Share a friend post</h2>
-          <p className="text-xs text-slate-500">Paste it wherever you look for friends: Discord, Reddit, group chats.</p>
-        </div>
+    // A dashed gold call-out, collapsed by default, so it doesn't read as one of the player cards below.
+    <details className={`${callout} group`}>
+      <summary className="flex cursor-pointer list-none items-center justify-between gap-3">
+        <span>
+          <span className="font-bold">📣 Looking for more friends?</span>{" "}
+          <span className="text-slate-700 dark:text-slate-300">Share a post with your friend code.</span>
+        </span>
+        <span className="shrink-0 text-xs font-semibold underline group-open:hidden">Show</span>
+        <span className="hidden shrink-0 text-xs font-semibold underline group-open:inline">Hide</span>
+      </summary>
+      <div className="mb-2 mt-3 flex items-center justify-between gap-3">
+        <p className="text-xs text-slate-600 dark:text-slate-400">Paste it wherever you look for friends: Discord, Reddit, group chats.</p>
         <div className="flex shrink-0 gap-2">
           {canShare && (
             <button type="button" onClick={share} className="rounded-full border border-slate-300 px-3 py-1.5 text-sm font-semibold dark:border-slate-600">
@@ -95,6 +104,6 @@ export function FriendPostCard({
         </div>
       </div>
       <pre className="whitespace-pre-wrap rounded-2xl bg-white p-3 font-sans text-sm dark:bg-night-deep">{message}</pre>
-    </section>
+    </details>
   );
 }

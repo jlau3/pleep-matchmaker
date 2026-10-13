@@ -8,7 +8,8 @@ import { PlayerSearch, searchQuery } from "@/components/PlayerSearch";
 import { FRIENDS_TABS, SubTabs } from "@/components/SubTabs";
 import { MAX_FRIENDS } from "@/lib/data";
 import { requireUser } from "@/lib/supabase/server";
-import type { FriendRow } from "@/lib/types";
+import type { AddedMeRow, FriendRow } from "@/lib/types";
+import { DismissAddedYou } from "@/components/DismissAddedYou";
 
 const card = "card p-4";
 
@@ -18,8 +19,10 @@ export default async function FriendsPage({ searchParams }: { searchParams: Prom
   const { supabase, user } = await requireUser();
   const q = await searchQuery(searchParams);
 
-  const friendsResult = await supabase.rpc("get_friends");
+  const [friendsResult, addedMeResult] = await Promise.all([supabase.rpc("get_friends"), supabase.rpc("get_added_me")]);
   if (friendsResult.error) throw friendsResult.error;
+  // People who added you and are waiting on you (empty if that lookup isn't available yet).
+  const addedMe = (addedMeResult.data ?? []) as AddedMeRow[];
   // Best fit first. Friends with no fit yet (no votes) come next, private lists last;
   // ties keep the order they were added (sort is stable).
   const friends = (friendsResult.data as FriendRow[]).sort(
@@ -33,6 +36,27 @@ export default async function FriendsPage({ searchParams }: { searchParams: Prom
         <SubTabs tabs={FRIENDS_TABS} active="/friends" query={q ? `q=${encodeURIComponent(q)}` : undefined} />
         <PlayerSearch supabase={supabase} q={q} friendIds={friendIds} viewerId={user.id} />
       </section>
+
+      {addedMe.length > 0 && (
+        <section id="added-you" className="scroll-mt-20">
+          <h2 className="mb-1 text-lg font-semibold">
+            Added you <span className="text-sm font-normal text-slate-500">{addedMe.length}</span>
+          </h2>
+          <p className="mb-3 text-sm text-slate-500">
+            These players have you on their friend list. Add them back to see their candy on your Tier List.
+          </p>
+          <ul className="space-y-3">
+            {addedMe.map((player) => (
+              <li key={player.user_id} className={card}>
+                <PlayerHeader player={player} isFriend={false} />
+                <div className="mt-2 flex justify-end">
+                  <DismissAddedYou userId={player.user_id} />
+                </div>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       <section>
         <h2 className="mb-3 text-lg font-semibold">
@@ -71,6 +95,11 @@ export default async function FriendsPage({ searchParams }: { searchParams: Prom
                       isFriend
                       aside={<MatchPct pct={friend.match_pct} />}
                     />
+                    {friend.added_me && (
+                      <p className="mt-1 text-xs font-semibold text-want" title="They have you on their friend list too">
+                        ↔ Added you too
+                      </p>
+                    )}
                     <PlayerLists wants={friend.wants} dontWants={friend.dont_wants} topWants={friend.top_wants} />
                   </>
                 ) : (

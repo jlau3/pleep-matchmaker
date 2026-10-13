@@ -36,12 +36,26 @@ export function ProfileForm({ profile, friendListFull }: { profile: OwnProfile; 
           </span>
         </span>
       </label>
+      {profile.discord_username && (
+        <label className="flex items-start gap-3">
+          <input type="hidden" name="has_show_discord" value="1" />
+          <input type="checkbox" name="show_discord" defaultChecked={profile.show_discord} className="mt-1 h-4 w-4" />
+          <span>
+            <span className="block text-sm font-medium">Show my Discord name</span>
+            <span className="text-xs text-slate-500">
+              Off: other players see your IGN instead of @{profile.discord_username} and your Discord picture, and can only
+              find you by IGN or friend code.
+            </span>
+          </span>
+        </label>
+      )}
       <label className="flex items-start gap-3">
         <input type="checkbox" name="allow_lookup" defaultChecked={profile.allow_lookup} className="mt-1 h-4 w-4" />
         <span>
           <span className="block text-sm font-medium">Let people look me up</span>
           <span className="text-xs text-slate-500">
-            Anyone who knows your exact Discord name, IGN or friend code can see your candy list.
+            Anyone who knows your exact IGN or friend code{profile.discord_username && profile.show_discord ? " (or Discord name)" : ""}{" "}
+            can see your candy list.
           </span>
         </span>
       </label>

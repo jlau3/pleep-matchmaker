@@ -1,5 +1,20 @@
 @import "tailwindcss";
 
+/*
+ * dark: follows the device unless the player picked a theme in Settings,
+ * which puts .light or .dark on <html> (see ThemePicker).
+ */
+@custom-variant dark {
+  &:where(.dark, .dark *) {
+    @slot;
+  }
+  @media (prefers-color-scheme: dark) {
+    &:where(:root:not(.light), :root:not(.light) *) {
+      @slot;
+    }
+  }
+}
+
 /* Pokémon Sleep-inspired palette: night-sky navy, sunny yellow, cream cards. */
 @theme {
   --font-sans: var(--font-rounded), ui-rounded, system-ui, sans-serif;
@@ -18,13 +33,19 @@
 :root {
   color-scheme: light dark;
 }
+:root.light {
+  color-scheme: light;
+}
+:root.dark {
+  color-scheme: dark;
+}
 
 body {
   color: var(--color-ink);
   background: linear-gradient(#d7ecff, #f3f9ff 360px) fixed;
 }
 
-@media (prefers-color-scheme: dark) {
+@variant dark {
   body {
     color: #eef1ff;
     background: linear-gradient(var(--color-night-deep), #161c3d 360px) fixed;

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { LineChips } from "@/components/LineChips";
-import { PlayerHeader } from "@/components/PlayerHeader";
+import { ConnectSteps } from "@/components/ConnectSteps";
+import { PlayerHeader, playerName } from "@/components/PlayerHeader";
 import { PlayerSearch, searchQuery } from "@/components/PlayerSearch";
 import { FRIENDS_TABS, SubTabs } from "@/components/SubTabs";
 import { FriendPostCard } from "@/components/FriendPostCard";
@@ -9,25 +10,48 @@ import { MatchPct } from "@/components/MatchPct";
 import { LOW_FIT_PCT } from "@/lib/fit";
 import { loadFriendIds, loadOwnProfile, loadOwnVotes, MAX_FRIENDS } from "@/lib/data";
 import { LINES, LINES_BY_ID, linesFromIds } from "@/lib/lines";
+import { BROWSE_PAGE_SIZE, BROWSE_SORTS, browseQuery, parseBrowse } from "@/lib/browse";
 import { requireUser } from "@/lib/supabase/server";
 import type { MatchRow } from "@/lib/types";
 
-export default async function MatchesPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
+type Params = { q?: string; sort?: string; show?: string; page?: string };
+
+export default async function MatchesPage({ searchParams }: { searchParams: Promise<Params> }) {
   const { supabase, user } = await requireUser();
-  const q = await searchQuery(searchParams);
+  const params = await searchParams;
+  const q = await searchQuery(Promise.resolve(params));
+  const opts = parseBrowse(params);
   const [{ choices, tops }, profile, friendIds, matchesResult] = await Promise.all([
     loadOwnVotes(supabase, user.id),
     loadOwnProfile(supabase, user.id),
     loadFriendIds(supabase, user.id),
-    supabase.rpc("get_matches"),
+    supabase.rpc("browse_players", {
+      sort: opts.sort,
+      everyone: opts.everyone,
+      page_size: BROWSE_PAGE_SIZE,
+      page_offset: (opts.page - 1) * BROWSE_PAGE_SIZE,
+    }),
   ]);
   if (matchesResult.error) throw matchesResult.error;
   const matches = matchesResult.data as MatchRow[];
+  const total = Number(matches[0]?.total_count ?? 0);
+  const pages = Math.max(1, Math.ceil(total / BROWSE_PAGE_SIZE));
+  const link = (change: Partial<typeof opts>) => `/matches${browseQuery({ ...opts, page: 1, ...change }, q)}`;
 
   const picked = Object.values(choices).filter((c) => c !== "undecided").length;
   const unsorted = LINES.length - Object.keys(choices).length;
 
+  // The Discord name only goes in the friend post if the player shows it.
+  const shownDiscord = profile.show_discord ? profile.discord_username : null;
+
   const notices: React.ReactNode[] = [];
+  if (!profile.ign && !shownDiscord)
+    notices.push(
+      <>
+        Add your in-game name in <Link href="/profile" className="underline">Profile</Link> so friends can recognise and find
+        you{profile.discord_username ? " (your Discord name is hidden)" : ""}.
+      </>,
+    );
   if (!profile.friend_code)
     notices.push(
       <>
@@ -77,8 +101,8 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
 
       <FriendPostCard
         friendCode={profile.friend_code}
-        handle={profile.discord_username ? `@${profile.discord_username}` : profile.ign}
-        searchName={profile.discord_username ?? profile.ign}
+        handle={shownDiscord ? `@${shownDiscord}` : profile.ign}
+        searchName={shownDiscord ?? profile.ign}
         topNames={linesFromIds(tops).map((line) => line.name)}
         wantNames={linesFromIds(Object.keys(choices).filter((id) => choices[id] === "want"))
           .sort((a, b) => b.weight - a.weight || a.dex - b.dex)
@@ -86,42 +110,118 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
           .map((line) => line.name)}
       />
 
-      {picked === 0 && friendIds.size === 0 ? (
-        <p className="py-8 text-center text-slate-500">
-          Add your friends (or <Link href="/vote" className="underline">vote</Link> on some lines) so we know what your group
-          wants.
-        </p>
-      ) : matches.length === 0 ? (
-        <p className="py-8 text-center text-slate-500">
-          No matches yet. A match needs at least {LOW_FIT_PCT}% fit and 3 lines your friends want. Check back as more
-          players join.
-        </p>
-      ) : (
-        <ul className="space-y-4">
-          {matches.map((match) => (
-            <li key={match.user_id} className="card p-4">
-              <PlayerHeader
-                player={match}
-                isFriend={friendIds.has(match.user_id)}
-                aside={<MatchPct pct={match.match_pct} />}
-              />
-              <div className="mt-4">
-                <h3 className="mb-2 text-sm font-semibold">Wants what your friends want ({match.fit_wants.length})</h3>
-                {/* Kept in the order Find New returns: most-wanted by your friends first. */}
-                <LineChips lines={match.fit_wants.flatMap((id) => LINES_BY_ID.get(id) ?? [])} />
-              </div>
-              {match.fit_dont_wants.length > 0 && (
-                <div className="mt-3">
-                  <h3 className="mb-2 text-sm font-semibold text-dont">
-                    Doesn&apos;t want, but your friends do ({match.fit_dont_wants.length})
-                  </h3>
-                  <LineChips lines={match.fit_dont_wants.flatMap((id) => LINES_BY_ID.get(id) ?? [])} />
+      <section className="space-y-3">
+        <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2">
+          <h2 className="text-lg font-semibold">
+            Suggested players{" "}
+            {total > 0 && <span className="text-sm font-normal text-slate-500">{total}</span>}
+          </h2>
+          <div className="flex flex-wrap gap-2 text-sm">
+            <Pills
+              options={[
+                [link({ everyone: false }), "Good fits", !opts.everyone],
+                [link({ everyone: true }), "Everyone", opts.everyone],
+              ]}
+            />
+          </div>
+        </div>
+        <div className="flex flex-wrap items-center gap-2 text-sm">
+          <span className="text-slate-500">Sort</span>
+          <Pills options={BROWSE_SORTS.map(([id, label]) => [link({ sort: id }), label, opts.sort === id])} />
+        </div>
+
+        {picked === 0 && friendIds.size === 0 && !opts.everyone ? (
+          <p className="py-8 text-center text-slate-500">
+            Add your friends (or <Link href="/vote" className="underline">vote</Link> on some lines) so we know what your
+            group wants, or <Link href={link({ everyone: true })} className="underline">see everyone</Link>.
+          </p>
+        ) : matches.length === 0 ? (
+          <p className="py-8 text-center text-slate-500">
+            {opts.everyone ? (
+              "No one to suggest right now. Check back as more players join."
+            ) : (
+              <>
+                No good fits yet (at least {LOW_FIT_PCT}% fit and 3 lines your friends want).{" "}
+                <Link href={link({ everyone: true })} className="underline">See everyone</Link> instead.
+              </>
+            )}
+          </p>
+        ) : (
+          <ul className="space-y-4">
+            {matches.map((match) => (
+              <li key={match.user_id} className="card p-4">
+                <PlayerHeader player={match} aside={<MatchPct pct={match.match_pct} />} />
+                {match.fit_wants.length > 0 && (
+                  <div className="mt-4">
+                    <h3 className="mb-2 text-sm font-semibold">Wants what your friends want ({match.fit_wants.length})</h3>
+                    {/* Kept in the order browse_players returns: most-wanted by your friends first. */}
+                    <LineChips lines={match.fit_wants.flatMap((id) => LINES_BY_ID.get(id) ?? [])} />
+                  </div>
+                )}
+                {match.fit_dont_wants.length > 0 && (
+                  <div className="mt-3">
+                    <h3 className="mb-2 text-sm font-semibold text-dont">
+                      Doesn&apos;t want, but your friends do ({match.fit_dont_wants.length})
+                    </h3>
+                    <LineChips lines={match.fit_dont_wants.flatMap((id) => LINES_BY_ID.get(id) ?? [])} />
+                  </div>
+                )}
+                {match.match_pct === null && match.fit_wants.length === 0 && (
+                  <p className="mt-3 text-sm text-slate-500">Hasn&apos;t voted on any candy yet.</p>
+                )}
+                <div className="mt-4">
+                  <ConnectSteps userId={match.user_id} friendCode={match.friend_code} name={playerName(match)} />
                 </div>
-              )}
-            </li>
-          ))}
-        </ul>
-      )}
+              </li>
+            ))}
+          </ul>
+        )}
+
+        {pages > 1 && (
+          <nav aria-label="Pages" className="flex items-center justify-between pt-2 text-sm">
+            {opts.page > 1 ? (
+              <Link href={link({ ...opts, page: opts.page - 1 })} className="font-semibold underline">
+                ← Previous
+              </Link>
+            ) : (
+              <span />
+            )}
+            <span className="text-slate-500">
+              Page {opts.page} of {pages}
+            </span>
+            {opts.page < pages ? (
+              <Link href={link({ ...opts, page: opts.page + 1 })} className="font-semibold underline">
+                Next →
+              </Link>
+            ) : (
+              <span />
+            )}
+          </nav>
+        )}
+      </section>
     </div>
+  );
+}
+
+/** A row of link pills; the active one is filled. */
+function Pills({ options }: { options: (readonly [string, string, boolean])[] }) {
+  return (
+    <>
+      {options.map(([href, label, active]) => (
+        <Link
+          key={label}
+          href={href}
+          scroll={false}
+          aria-current={active ? "true" : undefined}
+          className={`rounded-full border px-3 py-1 ${
+            active
+              ? "border-transparent bg-night text-white dark:bg-sun dark:text-[#5b3e00]"
+              : "border-slate-300 hover:bg-white/60 dark:border-slate-700 dark:hover:bg-night"
+          }`}
+        >
+          {label}
+        </Link>
+      ))}
+    </>
   );
 }

@@ -37,6 +37,14 @@ FORM_ICONS = {
 }
 
 
+def icon_name(sprite: int | str) -> str:
+    """Serebii file name: 25 -> '025', event costume '25-holiday' -> '025-holiday'."""
+    if isinstance(sprite, str):
+        dex, _, form = sprite.partition("-")
+        return f"{int(dex):03d}-{form}"
+    return f"{sprite:03d}"
+
+
 def fetch(url: str) -> bytes | None:
     req = urllib.request.Request(url, headers={"User-Agent": "pleep-matchmaker data build"})
     try:
@@ -50,7 +58,7 @@ def fetch(url: str) -> bytes | None:
 
 def main() -> int:
     lines = json.loads(LINES_JSON.read_text())
-    all_sprites = sorted({m["sprite"] for line in lines for m in line["members"]})
+    all_sprites = sorted({m["sprite"] for line in lines for m in line["members"]}, key=str)
     state = json.loads(STATE_JSON.read_text()) if STATE_JSON.exists() else {"checked": [], "missing": []}
     sprites = all_sprites
     if "--missing-only" in sys.argv:
@@ -58,7 +66,7 @@ def main() -> int:
         sprites = [s for s in all_sprites if s not in checked or s in still]
     missing = []
     for sprite in sprites:
-        name = FORM_ICONS.get(sprite, f"{sprite:03d}")
+        name = FORM_ICONS.get(sprite) or icon_name(sprite)
         data = fetch(BASE.format(name))
         if data is None:
             missing.append(sprite)
@@ -70,8 +78,8 @@ def main() -> int:
     print(f"{len(sprites) - len(missing)} icons from Serebii, {len(missing)} kept as PokeAPI art: {missing}")
     fetched_now = set(sprites)
     state = {
-        "checked": sorted(set(state["checked"]) | fetched_now),
-        "missing": sorted((set(state["missing"]) - fetched_now) | set(missing)),
+        "checked": sorted(set(state["checked"]) | fetched_now, key=str),
+        "missing": sorted((set(state["missing"]) - fetched_now) | set(missing), key=str),
     }
     STATE_JSON.write_text(json.dumps(state) + "\n")
     return 0

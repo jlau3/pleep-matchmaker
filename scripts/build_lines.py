@@ -7,7 +7,7 @@ Sprites:       PokeAPI official artwork, downscaled to webp
 
 Every form (event costumes, regional variants, Pumpkaboo sizes, Toxtricity
 forms) shares candy with its base species, so a candy line is one evolution
-family. Re-run this whenever the game adds Pokémon:
+family. Regional forms and event costumes get their own icon in the line. Re-run this whenever the game adds Pokémon:
 
     pip install pillow
     python3 scripts/build_lines.py
@@ -30,8 +30,19 @@ OUT_JSON = ROOT / "src" / "data" / "candy-lines.json"
 OUT_SPRITES = ROOT / "public" / "sprites"
 
 # Forms that look different enough to get their own member entry and sprite.
-# Everything else (event costumes, sizes) collapses into the base species.
+# Everything else (sizes, Toxtricity's forms) collapses into the base species.
 REGIONAL_FORMS = {"Alola", "Paldea"}
+
+# Event costumes (Holiday = Santa hat, Halloween = witch hat, ...) also get
+# their own entry, listed after the regular members as "Holiday Pikachu".
+# They have no PokeAPI artwork: the sprite id is a string like "25-holiday",
+# and build_icons.py fetches the in-game icon from Serebii (025-holiday.png).
+# A new costume in the roster is picked up automatically.
+NON_COSTUME_FORMS = REGIONAL_FORMS | {"Small", "Medium", "Large", "Jumbo", "Amped", "Low Key"}
+
+
+def is_costume(p: dict) -> bool:
+    return bool(p.get("form")) and p["form"] not in NON_COSTUME_FORMS
 
 # (dex id, form) -> PokeAPI sprite id for forms that have their own artwork.
 FORM_SPRITES = {
@@ -85,8 +96,18 @@ def main() -> int:
         first = min(members, key=lambda p: (p["evolutionCount"], bool(p.get("form")), p["id"]))
         seen = set()
         line_members = []
-        ordered = sorted(members, key=lambda p: (-p["evolutionLeft"], p["evolutionCount"], bool(p.get("form")), p["id"]))
+        ordered = sorted(
+            members,
+            key=lambda p: (is_costume(p), -p["evolutionLeft"], p["evolutionCount"], bool(p.get("form")), p["id"]),
+        )
         for p in ordered:
+            if is_costume(p):
+                sprite = f"{p['id']}-{slugify(p['form'])}"
+                if sprite in seen:
+                    continue
+                seen.add(sprite)
+                line_members.append({"name": f"{p['form']} {base_name(p['name'])}", "dex": p["id"], "sprite": sprite})
+                continue
             form = p.get("form") if p.get("form") in REGIONAL_FORMS else None
             key = (p["id"], form)
             if key in seen:

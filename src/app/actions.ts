@@ -9,18 +9,63 @@ import { NEXT_COOKIE, safeNextPath } from "@/lib/nextPath";
 import { isChoice, LINES_BY_ID, MAX_TOP } from "@/lib/lines";
 import { createClient, requireUser } from "@/lib/supabase/server";
 
-export async function signInWithDiscord(form?: FormData) {
+const OAUTH_PROVIDERS = { discord: "Discord", google: "Google" } as const;
+
+/** Remembers where the player was headed (a shared /friends?q= link, say) for after sign-in. */
+async function rememberNext(form?: FormData) {
   const next = safeNextPath(form?.get("next"));
   if (next) (await cookies()).set(NEXT_COOKIE, next, { maxAge: 600, httpOnly: true, sameSite: "lax", path: "/" });
-  const supabase = await createClient();
+}
+
+async function siteOrigin() {
   const h = await headers();
-  const origin = h.get("origin") ?? `https://${h.get("host")}`;
+  return h.get("origin") ?? `https://${h.get("host")}`;
+}
+
+/** Discord or Google sign-in; the form's `provider` field picks which. */
+export async function signInWithOAuth(form?: FormData) {
+  const provider = String(form?.get("provider") ?? "discord");
+  if (!(provider in OAUTH_PROVIDERS)) redirect("/?error=Unknown+sign-in+option");
+  const label = OAUTH_PROVIDERS[provider as keyof typeof OAUTH_PROVIDERS];
+  await rememberNext(form);
+  const supabase = await createClient();
   const { data, error } = await supabase.auth.signInWithOAuth({
-    provider: "discord",
-    options: { redirectTo: `${origin}/auth/callback` },
+    provider: provider as keyof typeof OAUTH_PROVIDERS,
+    options: { redirectTo: `${await siteOrigin()}/auth/callback` },
   });
-  if (error || !data.url) redirect(`/?error=${encodeURIComponent(error?.message ?? "Could not start Discord sign-in")}`);
+  if (error || !data.url) redirect(`/?error=${encodeURIComponent(error?.message ?? `Could not start ${label} sign-in`)}`);
   redirect(data.url);
+}
+
+export interface MagicLinkState {
+  sentTo?: string;
+  error?: string;
+}
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+/**
+ * Emails a one-time sign-in link (no password). The link opens /auth/confirm,
+ * which works even when it's opened in a different browser than this one
+ * (e.g. the mail app's), see the README for the email template it needs.
+ */
+export async function sendMagicLink(_prev: MagicLinkState, form: FormData): Promise<MagicLinkState> {
+  const email = String(form.get("email") ?? "").trim().toLowerCase();
+  if (!EMAIL_RE.test(email) || email.length > 254) return { error: "That doesn't look like an email address." };
+  await rememberNext(form);
+  const supabase = await createClient();
+  const { error } = await supabase.auth.signInWithOtp({
+    email,
+    options: { shouldCreateUser: true, emailRedirectTo: `${await siteOrigin()}/auth/callback` },
+  });
+  if (error) {
+    return {
+      error: /rate|limit|seconds/i.test(error.message)
+        ? "Too many sign-in emails just now. Wait a minute and try again."
+        : "Couldn't send the email. Try again in a bit.",
+    };
+  }
+  return { sentTo: email };
 }
 
 export async function signOut() {
@@ -80,15 +125,15 @@ export async function updateProfile(_prev: ProfileFormState, form: FormData): Pr
   if (ign.length > 40) return { error: "IGN is too long (40 characters max)" };
   if (rawCode && !friendCode) return { error: "Friend code should be 12 digits" };
 
-  const { error } = await supabase
-    .from("profiles")
-    .update({
-      ign: ign || null,
-      friend_code: friendCode,
-      open_to_friends: form.get("open_to_friends") === "on",
-      allow_lookup: form.get("allow_lookup") === "on",
-    })
-    .eq("id", user.id);
+  const update: Record<string, unknown> = {
+    ign: ign || null,
+    friend_code: friendCode,
+    open_to_friends: form.get("open_to_friends") === "on",
+    allow_lookup: form.get("allow_lookup") === "on",
+  };
+  // Only Discord accounts get the checkbox (an unchecked box isn't submitted, hence the marker).
+  if (form.has("has_show_discord")) update.show_discord = form.get("show_discord") === "on";
+  const { error } = await supabase.from("profiles").update(update).eq("id", user.id);
   if (error) return { error: "Couldn't save your profile, try again" };
   revalidatePath("/", "layout");
   return { saved: true };
@@ -114,8 +159,17 @@ export async function addFriend(friendId: string): Promise<{ error?: string }> {
   const { supabase, user } = await requireUser();
   const { error } = await supabase.from("friends").insert({ user_id: user.id, friend_id: friendId });
   if (error && error.code !== "23505") return { error: FRIEND_ERRORS[error.message] ?? "Couldn't add friend, try again" };
-  revalidatePath("/friends");
-  revalidatePath("/tiers");
+  // Whole layout: the "added you" banner may need to go.
+  revalidatePath("/", "layout");
+  return {};
+}
+
+/** "Not now" on someone who added you: stops prompting about them (they stay addable by search). */
+export async function dismissAddedYou(adderId: string): Promise<{ error?: string }> {
+  const { supabase, user } = await requireUser();
+  const { error } = await supabase.from("friend_prompt_dismissals").insert({ user_id: user.id, adder_id: adderId });
+  if (error && error.code !== "23505") return { error: "Couldn't update, try again" };
+  revalidatePath("/", "layout");
   return {};
 }
 
