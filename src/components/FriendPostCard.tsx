@@ -15,16 +15,13 @@ const callout =
  */
 export function FriendPostCard({
   friendCode,
-  handle,
-  searchName,
+  ign,
   topNames,
   wantNames,
 }: {
   friendCode: string | null;
-  /** How people find you in search: "@discordname" or an IGN. */
-  handle: string | null;
-  /** What the link pre-fills in search (Discord name or IGN); opens your search result directly. */
-  searchName: string | null;
+  /** Your in-game name, so readers recognize you in Pokémon Sleep. */
+  ign: string | null;
   topNames: string[];
   wantNames: string[];
 }) {
@@ -49,14 +46,15 @@ export function FriendPostCard({
   }
 
   const favorites = topNames.length > 0 ? `My Top ${topNames.length} candies: ${topNames.join(", ")}` : wantNames.length > 0 ? `Candies I'm after: ${wantNames.join(", ")}` : null;
-  // The link opens Friends with your name already searched, showing how well you fit the reader's friends.
-  const link = searchName ? `${origin}/friends?q=${encodeURIComponent(searchName)}` : origin;
-  const where = handle ? `Pleep Matchmaker (I'm ${handle})` : "Pleep Matchmaker";
+  // The link opens Friends with your friend code already searched: unique, always set here, and
+  // lookup matches it exactly (IGNs can be shared; Discord names can be hidden).
+  const link = `${origin}/friends?q=${friendCode}`;
   const message = [
     "🌙 Looking for Pokémon Sleep friends!",
+    ign ? `IGN: ${ign}` : null,
     `Friend code: ${formatFriendCode(friendCode)}`,
     favorites,
-    `See how my candy wishlist fits your friends' on ${where}: ${link}`,
+    `See how my candy wishlist fits your friends' on Pleep Matchmaker: ${link}`,
   ]
     .filter(Boolean)
     .join("\n");

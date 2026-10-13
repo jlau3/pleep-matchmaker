@@ -1,22 +1,21 @@
+import { BROWSE_SORT_HINTS } from "./browse";
 import type { FriendRow } from "./types";
 
-/** My Friends orders, read from ?sort= (best fit when missing or unknown). */
+/** My Friends orders, read from ?sort= (best fit when missing or unknown). Same names as Find New Friends. */
 export const FRIEND_SORTS = [
   ["fit", "Best fit"],
-  ["for_you", "Best for you"],
-  ["for_them", "Best for them"],
+  ["you_fit", "Best for you"],
   ["active", "Recently active"],
 ] as const;
 export type FriendSort = (typeof FRIEND_SORTS)[number][0];
 
 export const FRIEND_SORT_HINTS: Record<FriendSort, string> = {
-  fit: "Average of both fits, best first.",
-  for_you: "Whose friends want what you want, best first. Low ones mostly send you candy you don't need.",
-  for_them: "Whose wants match your friends', best first. Low ones mostly get candy they don't need from you.",
+  fit: BROWSE_SORT_HINTS.fit,
+  you_fit: BROWSE_SORT_HINTS.you_fit,
   active: "Most recently online first.",
 };
 
-export function parseFriendSort(value: string | undefined): FriendSort {
+export function parseFriendSort(value: string | null | undefined): FriendSort {
   return FRIEND_SORTS.some(([id]) => id === value) ? (value as FriendSort) : "fit";
 }
 
@@ -29,8 +28,7 @@ export function friendRank(f: FriendRow, sort: FriendSort): number {
   if (sort === "active") return new Date(f.last_seen_at).getTime();
   const forThem = f.match_pct ?? null;
   const forYou = f.you_fit_pct ?? null;
-  if (sort === "for_you") return forYou ?? -1;
-  if (sort === "for_them") return forThem ?? -1;
+  if (sort === "you_fit") return forYou ?? -1;
   // Best fit: the average, or either one alone when the other is unknown.
   if (forThem == null && forYou == null) return -1;
   return ((forThem ?? forYou)! + (forYou ?? forThem)!) / 2;

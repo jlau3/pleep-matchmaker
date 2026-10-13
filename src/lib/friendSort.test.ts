@@ -32,9 +32,8 @@ describe("friend sorts", () => {
     expect(sortFriends([c, d, a, b], "fit").map((f) => f.user_id)).toEqual(["b", "a", "c", "d"]);
   });
 
-  it("sorts by either side", () => {
-    expect(sortFriends([a, b], "for_you").map((f) => f.user_id)).toEqual(["b", "a"]);
-    expect(sortFriends([b, a], "for_them").map((f) => f.user_id)).toEqual(["a", "b"]);
+  it("sorts by best for you", () => {
+    expect(sortFriends([a, b], "you_fit").map((f) => f.user_id)).toEqual(["b", "a"]);
   });
 
   it("uses the known number alone for best fit", () => {
@@ -43,6 +42,7 @@ describe("friend sorts", () => {
 
   it("falls back to best fit for unknown sorts", () => {
     expect(parseFriendSort("nope")).toBe("fit");
-    expect(parseFriendSort("for_you")).toBe("for_you");
+    expect(parseFriendSort("you_fit")).toBe("you_fit");
+    expect(parseFriendSort("for_them")).toBe("fit");
   });
 });
