@@ -3,7 +3,7 @@ import { InviteButton } from "@/components/InviteButton";
 import { InviteReminder } from "@/components/InviteReminder";
 import { TierBoard } from "@/components/TierBoard";
 import { ISLANDS, LINES } from "@/lib/lines";
-import { loadOwnChoices } from "@/lib/data";
+import { countOwnVotes } from "@/lib/data";
 import { requireUser } from "@/lib/supabase/server";
 import { loadCommunityStats } from "@/lib/communityStats";
 import { buildTiers, countVotes, type LineVotes } from "@/lib/tiers";
@@ -13,28 +13,30 @@ type Pool = "friends" | "everyone";
 
 export default async function TiersPage({ searchParams }: { searchParams: Promise<{ pool?: string; split?: string }> }) {
   const { supabase, user } = await requireUser();
-  const unvoted = LINES.length - Object.keys(await loadOwnChoices(supabase, user.id)).length;
   const params = await searchParams;
   const pool: Pool = params.pool === "everyone" ? "everyone" : "friends";
   const mappedIslands = ISLANDS.filter((island) => island.lines.length > 0);
   const byIsland = params.split === "islands" && mappedIslands.length > 0;
 
-  let votes: Map<string, LineVotes>;
-  let voters: number;
-  let friendCount = 0;
-  if (pool === "friends") {
-    // Votes only: skip the per-friend fit %, which only My Friends shows.
-    const { data, error } = await supabase.rpc("get_friends", { with_match: false });
-    if (error) throw error;
-    friendCount = (data as FriendRow[]).length;
-    const players = (data as FriendRow[]).filter((f) => f.visible && f.wants.length + f.dont_wants.length > 0);
-    votes = countVotes(players);
-    voters = players.length;
-  } else {
-    const community = await loadCommunityStats(supabase);
-    votes = new Map(Object.entries(community.votes));
-    voters = community.voters;
-  }
+  // Both lookups at once: each is a round trip to Supabase, and the page waits on the slower one only.
+  const [votedCount, pooled] = await Promise.all([
+    countOwnVotes(supabase, user.id),
+    pool === "friends"
+      ? // Votes only: skip the per-friend fit %, which only My Friends shows.
+        supabase.rpc("get_friends", { with_match: false }).then(({ data, error }) => {
+          if (error) throw error;
+          const rows = data as FriendRow[];
+          const players = rows.filter((f) => f.visible && f.wants.length + f.dont_wants.length > 0);
+          return { votes: countVotes(players), voters: players.length, friendCount: rows.length };
+        })
+      : loadCommunityStats(supabase).then((community) => ({
+          votes: new Map(Object.entries(community.votes)) as Map<string, LineVotes>,
+          voters: community.voters,
+          friendCount: 0,
+        })),
+  ]);
+  const unvoted = Math.max(0, LINES.length - votedCount);
+  const { votes, voters, friendCount } = pooled;
 
   const href = (next: { pool?: Pool; byIsland?: boolean }) => {
     const p = new URLSearchParams();

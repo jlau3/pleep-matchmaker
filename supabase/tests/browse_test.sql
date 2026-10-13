@@ -31,6 +31,7 @@ insert into public.preferences (user_id, line_id, choice)
 select '00000000-0000-0000-000d-000000000003'::uuid, l, 'want'::public.choice
 from unnest(array['bra', 'bx1', 'bx2', 'bx3', 'bx4', 'bx5', 'bx6', 'bx7', 'bx8', 'bx9']) l;
 insert into public.blocks (blocker_id, blocked_id) values ('00000000-0000-0000-000d-000000000001', '00000000-0000-0000-000d-000000000007');
+update public.preferences set top = true where user_id = '00000000-0000-0000-000d-000000000002' and line_id = 'bra';
 
 set role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-000d-000000000001', false);
@@ -57,6 +58,8 @@ begin
     select 1 from public.browse_players('fit', true, 50, 0)
     where discord_username in ('br_stale', 'br_closed', 'br_blocked', 'br_viewer')
   ), 'never listed';
+  assert (select top_wants from public.browse_players('fit', true, 50, 0) where discord_username = 'br_good') = '{bra}',
+    'top 3 returned';
 end $$;
 
 -- Paging: pages don't overlap and total_count covers everything.

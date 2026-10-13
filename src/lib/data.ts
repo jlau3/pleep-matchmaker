@@ -6,6 +6,20 @@ import type { OwnProfile } from "./types";
 export { MAX_FRIENDS } from "./friendship";
 
 /** The caller's picks, keyed by line id. Ids no longer in the data are dropped. */
+/**
+ * How many current candy lines the player has a vote row for (any choice).
+ * A count, not the rows: the Tier List only needs "N new candies to vote on".
+ */
+export async function countOwnVotes(supabase: SupabaseClient, userId: string): Promise<number> {
+  const { count, error } = await supabase
+    .from("preferences")
+    .select("line_id", { count: "exact", head: true })
+    .eq("user_id", userId)
+    .in("line_id", LINES.map((line) => line.id));
+  if (error) throw error;
+  return count ?? 0;
+}
+
 export async function loadOwnChoices(supabase: SupabaseClient, userId: string): Promise<Record<string, Choice>> {
   const { data, error } = await supabase.from("preferences").select("line_id, choice").eq("user_id", userId);
   if (error) throw error;
