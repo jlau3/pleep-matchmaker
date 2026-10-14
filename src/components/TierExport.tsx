@@ -1,8 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { lineSpriteUrl } from "@/lib/lines";
-import { type RankedLine, type TierId, TIERS } from "@/lib/tiers";
+import { type RankedLine, rankedSpriteUrl, type TierId, TIERS } from "@/lib/tiers";
 
 export interface ExportSection {
   /** Island name when exporting By Island; none for a single list. */
@@ -77,7 +76,7 @@ async function renderPng(title: string, voters: number, sections: ExportSection[
   height += FOOTER;
 
   const sprites = new Map<string, HTMLImageElement | null>();
-  const urls = new Set(rows.flat().flatMap((row) => row.lines.map((r) => lineSpriteUrl(r.line))));
+  const urls = new Set(rows.flat().flatMap((row) => row.lines.map((r) => rankedSpriteUrl(r))));
   await Promise.all([...urls].map(async (url) => sprites.set(url, await loadImage(url))));
 
   const canvas = document.createElement("canvas");
@@ -130,7 +129,7 @@ async function renderPng(title: string, voters: number, sections: ExportSection[
         ctx.fillStyle = "#ffffff";
         roundRect(ctx, x, top, ICON, ICON, 10);
         ctx.fill();
-        const img = sprites.get(lineSpriteUrl(ranked.line));
+        const img = sprites.get(rankedSpriteUrl(ranked));
         if (img) ctx.drawImage(img, x + 2, top + 2, ICON - 4, ICON - 4);
         if (ranked.tops > 0) drawStarCount(ctx, font, ranked.tops, x + ICON, top);
       });

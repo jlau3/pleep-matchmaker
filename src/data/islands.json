@@ -95,7 +95,368 @@
       "pawmi",
       "tinkatink",
       "cetoddle"
-    ]
+    ],
+    "spawns": {
+      "bulbasaur": [
+        "Bulbasaur",
+        "Ivysaur",
+        "Venusaur"
+      ],
+      "charmander": [
+        "Charmander",
+        "Charmeleon",
+        "Charizard"
+      ],
+      "squirtle": [
+        "Squirtle",
+        "Wartortle",
+        "Blastoise"
+      ],
+      "caterpie": [
+        "Caterpie",
+        "Metapod",
+        "Butterfree"
+      ],
+      "rattata": [
+        "Rattata",
+        "Raticate"
+      ],
+      "ekans": [
+        "Ekans",
+        "Arbok"
+      ],
+      "pikachu": [
+        "Pichu",
+        "Pikachu",
+        "Raichu"
+      ],
+      "sandshrew": [
+        "Sandshrew",
+        "Sandslash"
+      ],
+      "clefairy": [
+        "Cleffa",
+        "Clefairy",
+        "Clefable"
+      ],
+      "vulpix": [
+        "Vulpix",
+        "Ninetales"
+      ],
+      "jigglypuff": [
+        "Igglybuff",
+        "Jigglypuff",
+        "Wigglytuff"
+      ],
+      "diglett": [
+        "Diglett",
+        "Dugtrio"
+      ],
+      "meowth": [
+        "Meowth",
+        "Persian"
+      ],
+      "psyduck": [
+        "Psyduck"
+      ],
+      "mankey": [
+        "Mankey",
+        "Primeape"
+      ],
+      "growlithe": [
+        "Growlithe"
+      ],
+      "bellsprout": [
+        "Bellsprout",
+        "Weepinbell",
+        "Victreebel"
+      ],
+      "geodude": [
+        "Geodude",
+        "Graveler"
+      ],
+      "slowpoke": [
+        "Slowpoke",
+        "Slowbro"
+      ],
+      "magnemite": [
+        "Magnemite",
+        "Magneton",
+        "Magnezone"
+      ],
+      "farfetchd": [
+        "Farfetch'd"
+      ],
+      "doduo": [
+        "Doduo",
+        "Dodrio"
+      ],
+      "gastly": [
+        "Gastly",
+        "Haunter"
+      ],
+      "cubone": [
+        "Cubone",
+        "Marowak"
+      ],
+      "chansey": [
+        "Happiny",
+        "Chansey",
+        "Blissey"
+      ],
+      "kangaskhan": [
+        "Kangaskhan"
+      ],
+      "pinsir": [
+        "Pinsir"
+      ],
+      "ditto": [
+        "Ditto"
+      ],
+      "eevee": [
+        "Eevee",
+        "Vaporeon",
+        "Jolteon",
+        "Flareon",
+        "Espeon",
+        "Umbreon",
+        "Leafeon",
+        "Glaceon",
+        "Sylveon"
+      ],
+      "mewtwo": [
+        "Mewtwo"
+      ],
+      "mew": [
+        "Mew"
+      ],
+      "chikorita": [
+        "Chikorita",
+        "Bayleef",
+        "Meganium"
+      ],
+      "cyndaquil": [
+        "Cyndaquil",
+        "Quilava",
+        "Typhlosion"
+      ],
+      "totodile": [
+        "Totodile",
+        "Croconaw",
+        "Feraligatr"
+      ],
+      "togepi": [
+        "Togepi",
+        "Togetic",
+        "Togekiss"
+      ],
+      "natu": [
+        "Natu",
+        "Xatu"
+      ],
+      "mareep": [
+        "Mareep",
+        "Flaaffy"
+      ],
+      "sudowoodo": [
+        "Bonsly",
+        "Sudowoodo"
+      ],
+      "wooper": [
+        "Wooper",
+        "Wooper (Paldea)",
+        "Quagsire",
+        "Clodsire"
+      ],
+      "murkrow": [
+        "Murkrow",
+        "Honchkrow"
+      ],
+      "wobbuffet": [
+        "Wynaut",
+        "Wobbuffet"
+      ],
+      "shuckle": [
+        "Shuckle"
+      ],
+      "heracross": [
+        "Heracross"
+      ],
+      "sneasel": [
+        "Sneasel",
+        "Weavile"
+      ],
+      "delibird": [
+        "Delibird"
+      ],
+      "houndour": [
+        "Houndour"
+      ],
+      "raikou": [
+        "Raikou"
+      ],
+      "entei": [
+        "Entei"
+      ],
+      "suicune": [
+        "Suicune"
+      ],
+      "larvitar": [
+        "Larvitar"
+      ],
+      "treecko": [
+        "Treecko",
+        "Grovyle",
+        "Sceptile"
+      ],
+      "torchic": [
+        "Torchic",
+        "Combusken",
+        "Blaziken"
+      ],
+      "mudkip": [
+        "Mudkip",
+        "Marshtomp",
+        "Swampert"
+      ],
+      "slakoth": [
+        "Slakoth",
+        "Vigoroth",
+        "Slaking"
+      ],
+      "mawile": [
+        "Mawile"
+      ],
+      "plusle": [
+        "Plusle"
+      ],
+      "minun": [
+        "Minun"
+      ],
+      "gulpin": [
+        "Gulpin",
+        "Swalot"
+      ],
+      "swablu": [
+        "Swablu"
+      ],
+      "shuppet": [
+        "Shuppet",
+        "Banette"
+      ],
+      "absol": [
+        "Absol"
+      ],
+      "spheal": [
+        "Spheal"
+      ],
+      "latias": [
+        "Latias"
+      ],
+      "latios": [
+        "Latios"
+      ],
+      "turtwig": [
+        "Turtwig",
+        "Grotle",
+        "Torterra"
+      ],
+      "chimchar": [
+        "Chimchar",
+        "Monferno",
+        "Infernape"
+      ],
+      "drifloon": [
+        "Drifloon"
+      ],
+      "spiritomb": [
+        "Spiritomb"
+      ],
+      "riolu": [
+        "Riolu"
+      ],
+      "croagunk": [
+        "Croagunk",
+        "Toxicroak"
+      ],
+      "cresselia": [
+        "Cresselia"
+      ],
+      "darkrai": [
+        "Darkrai"
+      ],
+      "munna": [
+        "Munna",
+        "Musharna"
+      ],
+      "foongus": [
+        "Foongus",
+        "Amoonguss"
+      ],
+      "rufflet": [
+        "Rufflet",
+        "Braviary"
+      ],
+      "tyrunt": [
+        "Tyrunt",
+        "Tyrantrum"
+      ],
+      "dedenne": [
+        "Dedenne"
+      ],
+      "pumpkaboo": [
+        "Pumpkaboo",
+        "Gourgeist"
+      ],
+      "noibat": [
+        "Noibat",
+        "Noivern"
+      ],
+      "cutiefly": [
+        "Cutiefly",
+        "Ribombee"
+      ],
+      "comfey": [
+        "Comfey"
+      ],
+      "togedemaru": [
+        "Togedemaru"
+      ],
+      "mimikyu": [
+        "Mimikyu"
+      ],
+      "drampa": [
+        "Drampa"
+      ],
+      "cramorant": [
+        "Cramorant"
+      ],
+      "toxel": [
+        "Toxel"
+      ],
+      "sprigatito": [
+        "Sprigatito",
+        "Floragato",
+        "Meowscarada"
+      ],
+      "fuecoco": [
+        "Fuecoco"
+      ],
+      "quaxly": [
+        "Quaxly"
+      ],
+      "pawmi": [
+        "Pawmi"
+      ],
+      "tinkatink": [
+        "Tinkatink",
+        "Tinkatuff",
+        "Tinkaton"
+      ],
+      "cetoddle": [
+        "Cetoddle"
+      ]
+    }
   },
   {
     "id": "greengrass-isle-expert",
@@ -183,7 +544,345 @@
       "pawmi",
       "tinkatink",
       "cetoddle"
-    ]
+    ],
+    "spawns": {
+      "bulbasaur": [
+        "Bulbasaur",
+        "Ivysaur",
+        "Venusaur"
+      ],
+      "charmander": [
+        "Charmander",
+        "Charmeleon",
+        "Charizard"
+      ],
+      "squirtle": [
+        "Squirtle",
+        "Wartortle",
+        "Blastoise"
+      ],
+      "caterpie": [
+        "Caterpie",
+        "Metapod",
+        "Butterfree"
+      ],
+      "pikachu": [
+        "Pichu",
+        "Pikachu",
+        "Raichu"
+      ],
+      "sandshrew": [
+        "Sandshrew",
+        "Sandslash"
+      ],
+      "clefairy": [
+        "Cleffa",
+        "Clefairy",
+        "Clefable"
+      ],
+      "vulpix": [
+        "Vulpix",
+        "Vulpix (Alola)",
+        "Ninetales",
+        "Ninetales (Alola)"
+      ],
+      "meowth": [
+        "Meowth",
+        "Persian"
+      ],
+      "growlithe": [
+        "Growlithe",
+        "Arcanine"
+      ],
+      "magnemite": [
+        "Magnemite",
+        "Magneton",
+        "Magnezone"
+      ],
+      "farfetchd": [
+        "Farfetch'd"
+      ],
+      "doduo": [
+        "Doduo",
+        "Dodrio"
+      ],
+      "onix": [
+        "Onix",
+        "Steelix"
+      ],
+      "cubone": [
+        "Cubone",
+        "Marowak"
+      ],
+      "chansey": [
+        "Happiny",
+        "Chansey",
+        "Blissey"
+      ],
+      "kangaskhan": [
+        "Kangaskhan"
+      ],
+      "pinsir": [
+        "Pinsir"
+      ],
+      "ditto": [
+        "Ditto"
+      ],
+      "eevee": [
+        "Eevee",
+        "Vaporeon",
+        "Jolteon",
+        "Flareon",
+        "Espeon",
+        "Umbreon",
+        "Leafeon",
+        "Glaceon",
+        "Sylveon"
+      ],
+      "mewtwo": [
+        "Mewtwo"
+      ],
+      "mew": [
+        "Mew"
+      ],
+      "chikorita": [
+        "Chikorita",
+        "Bayleef",
+        "Meganium"
+      ],
+      "cyndaquil": [
+        "Cyndaquil",
+        "Quilava",
+        "Typhlosion"
+      ],
+      "totodile": [
+        "Totodile",
+        "Croconaw",
+        "Feraligatr"
+      ],
+      "natu": [
+        "Natu",
+        "Xatu"
+      ],
+      "mareep": [
+        "Mareep",
+        "Flaaffy",
+        "Ampharos"
+      ],
+      "sudowoodo": [
+        "Bonsly",
+        "Sudowoodo"
+      ],
+      "wooper": [
+        "Wooper (Paldea)",
+        "Clodsire"
+      ],
+      "murkrow": [
+        "Murkrow",
+        "Honchkrow"
+      ],
+      "shuckle": [
+        "Shuckle"
+      ],
+      "heracross": [
+        "Heracross"
+      ],
+      "sneasel": [
+        "Sneasel",
+        "Weavile"
+      ],
+      "delibird": [
+        "Delibird"
+      ],
+      "houndour": [
+        "Houndour",
+        "Houndoom"
+      ],
+      "raikou": [
+        "Raikou"
+      ],
+      "entei": [
+        "Entei"
+      ],
+      "suicune": [
+        "Suicune"
+      ],
+      "larvitar": [
+        "Larvitar",
+        "Pupitar",
+        "Tyranitar"
+      ],
+      "treecko": [
+        "Treecko",
+        "Grovyle",
+        "Sceptile"
+      ],
+      "torchic": [
+        "Torchic",
+        "Combusken",
+        "Blaziken"
+      ],
+      "mudkip": [
+        "Mudkip",
+        "Marshtomp",
+        "Swampert"
+      ],
+      "ralts": [
+        "Ralts",
+        "Kirlia",
+        "Gardevoir",
+        "Gallade"
+      ],
+      "slakoth": [
+        "Slakoth",
+        "Vigoroth",
+        "Slaking"
+      ],
+      "sableye": [
+        "Sableye"
+      ],
+      "mawile": [
+        "Mawile"
+      ],
+      "aron": [
+        "Aron",
+        "Lairon",
+        "Aggron"
+      ],
+      "plusle": [
+        "Plusle"
+      ],
+      "minun": [
+        "Minun"
+      ],
+      "swablu": [
+        "Swablu",
+        "Altaria"
+      ],
+      "shuppet": [
+        "Shuppet",
+        "Banette"
+      ],
+      "absol": [
+        "Absol"
+      ],
+      "spheal": [
+        "Spheal",
+        "Sealeo",
+        "Walrein"
+      ],
+      "latias": [
+        "Latias"
+      ],
+      "latios": [
+        "Latios"
+      ],
+      "turtwig": [
+        "Turtwig",
+        "Grotle",
+        "Torterra"
+      ],
+      "chimchar": [
+        "Chimchar",
+        "Monferno",
+        "Infernape"
+      ],
+      "drifloon": [
+        "Drifloon",
+        "Drifblim"
+      ],
+      "spiritomb": [
+        "Spiritomb"
+      ],
+      "snover": [
+        "Snover",
+        "Abomasnow"
+      ],
+      "cresselia": [
+        "Cresselia"
+      ],
+      "darkrai": [
+        "Darkrai"
+      ],
+      "munna": [
+        "Munna",
+        "Musharna"
+      ],
+      "foongus": [
+        "Foongus",
+        "Amoonguss"
+      ],
+      "rufflet": [
+        "Rufflet",
+        "Braviary"
+      ],
+      "tyrunt": [
+        "Tyrunt",
+        "Tyrantrum"
+      ],
+      "dedenne": [
+        "Dedenne"
+      ],
+      "pumpkaboo": [
+        "Pumpkaboo",
+        "Gourgeist"
+      ],
+      "noibat": [
+        "Noibat",
+        "Noivern"
+      ],
+      "cutiefly": [
+        "Cutiefly",
+        "Ribombee"
+      ],
+      "comfey": [
+        "Comfey"
+      ],
+      "togedemaru": [
+        "Togedemaru"
+      ],
+      "mimikyu": [
+        "Mimikyu"
+      ],
+      "drampa": [
+        "Drampa"
+      ],
+      "cramorant": [
+        "Cramorant"
+      ],
+      "toxel": [
+        "Toxel"
+      ],
+      "sprigatito": [
+        "Sprigatito",
+        "Floragato",
+        "Meowscarada"
+      ],
+      "fuecoco": [
+        "Fuecoco",
+        "Crocalor",
+        "Skeledirge"
+      ],
+      "quaxly": [
+        "Quaxly",
+        "Quaxwell",
+        "Quaquaval"
+      ],
+      "pawmi": [
+        "Pawmi",
+        "Pawmo",
+        "Pawmot"
+      ],
+      "tinkatink": [
+        "Tinkatink",
+        "Tinkatuff",
+        "Tinkaton"
+      ],
+      "cetoddle": [
+        "Cetoddle",
+        "Cetitan"
+      ]
+    }
   },
   {
     "id": "cyan-beach",
@@ -220,7 +919,125 @@
       "cramorant",
       "fuecoco",
       "tinkatink"
-    ]
+    ],
+    "spawns": {
+      "squirtle": [
+        "Squirtle",
+        "Wartortle",
+        "Blastoise"
+      ],
+      "caterpie": [
+        "Caterpie"
+      ],
+      "pikachu": [
+        "Pikachu"
+      ],
+      "clefairy": [
+        "Cleffa",
+        "Clefairy",
+        "Clefable"
+      ],
+      "jigglypuff": [
+        "Igglybuff",
+        "Jigglypuff",
+        "Wigglytuff"
+      ],
+      "psyduck": [
+        "Psyduck",
+        "Golduck"
+      ],
+      "bellsprout": [
+        "Bellsprout"
+      ],
+      "slowpoke": [
+        "Slowpoke",
+        "Slowbro",
+        "Slowking"
+      ],
+      "farfetchd": [
+        "Farfetch'd"
+      ],
+      "kangaskhan": [
+        "Kangaskhan"
+      ],
+      "mr-mime": [
+        "Mime Jr.",
+        "Mr. Mime"
+      ],
+      "pinsir": [
+        "Pinsir"
+      ],
+      "ditto": [
+        "Ditto"
+      ],
+      "eevee": [
+        "Eevee",
+        "Vaporeon"
+      ],
+      "mew": [
+        "Mew"
+      ],
+      "totodile": [
+        "Totodile",
+        "Croconaw",
+        "Feraligatr"
+      ],
+      "sudowoodo": [
+        "Bonsly",
+        "Sudowoodo"
+      ],
+      "wooper": [
+        "Wooper",
+        "Quagsire"
+      ],
+      "shuckle": [
+        "Shuckle"
+      ],
+      "heracross": [
+        "Heracross"
+      ],
+      "suicune": [
+        "Suicune"
+      ],
+      "treecko": [
+        "Treecko",
+        "Grovyle",
+        "Sceptile"
+      ],
+      "gulpin": [
+        "Gulpin"
+      ],
+      "croagunk": [
+        "Croagunk",
+        "Toxicroak"
+      ],
+      "darkrai": [
+        "Darkrai"
+      ],
+      "rufflet": [
+        "Rufflet"
+      ],
+      "cutiefly": [
+        "Cutiefly",
+        "Ribombee"
+      ],
+      "comfey": [
+        "Comfey"
+      ],
+      "cramorant": [
+        "Cramorant"
+      ],
+      "fuecoco": [
+        "Fuecoco",
+        "Crocalor",
+        "Skeledirge"
+      ],
+      "tinkatink": [
+        "Tinkatink",
+        "Tinkatuff",
+        "Tinkaton"
+      ]
+    }
   },
   {
     "id": "cyan-beach-expert",
@@ -257,7 +1074,130 @@
       "drampa",
       "cramorant",
       "tinkatink"
-    ]
+    ],
+    "spawns": {
+      "squirtle": [
+        "Squirtle",
+        "Wartortle",
+        "Blastoise"
+      ],
+      "clefairy": [
+        "Cleffa",
+        "Clefairy",
+        "Clefable"
+      ],
+      "jigglypuff": [
+        "Igglybuff",
+        "Jigglypuff",
+        "Wigglytuff"
+      ],
+      "psyduck": [
+        "Psyduck",
+        "Golduck"
+      ],
+      "farfetchd": [
+        "Farfetch'd"
+      ],
+      "chansey": [
+        "Happiny",
+        "Chansey",
+        "Blissey"
+      ],
+      "pinsir": [
+        "Pinsir"
+      ],
+      "ditto": [
+        "Ditto"
+      ],
+      "eevee": [
+        "Eevee",
+        "Sylveon"
+      ],
+      "dratini": [
+        "Dratini",
+        "Dragonair",
+        "Dragonite"
+      ],
+      "mewtwo": [
+        "Mewtwo"
+      ],
+      "mew": [
+        "Mew"
+      ],
+      "totodile": [
+        "Totodile",
+        "Croconaw",
+        "Feraligatr"
+      ],
+      "togepi": [
+        "Togekiss"
+      ],
+      "shuckle": [
+        "Shuckle"
+      ],
+      "heracross": [
+        "Heracross"
+      ],
+      "suicune": [
+        "Suicune"
+      ],
+      "treecko": [
+        "Treecko",
+        "Grovyle",
+        "Sceptile"
+      ],
+      "mudkip": [
+        "Mudkip",
+        "Marshtomp",
+        "Swampert"
+      ],
+      "piplup": [
+        "Piplup",
+        "Prinplup",
+        "Empoleon"
+      ],
+      "croagunk": [
+        "Croagunk",
+        "Toxicroak"
+      ],
+      "darkrai": [
+        "Darkrai"
+      ],
+      "foongus": [
+        "Foongus",
+        "Amoonguss"
+      ],
+      "rufflet": [
+        "Rufflet",
+        "Braviary"
+      ],
+      "hawlucha": [
+        "Hawlucha"
+      ],
+      "grubbin": [
+        "Grubbin",
+        "Charjabug",
+        "Vikavolt"
+      ],
+      "cutiefly": [
+        "Cutiefly",
+        "Ribombee"
+      ],
+      "comfey": [
+        "Comfey"
+      ],
+      "drampa": [
+        "Drampa"
+      ],
+      "cramorant": [
+        "Cramorant"
+      ],
+      "tinkatink": [
+        "Tinkatink",
+        "Tinkatuff",
+        "Tinkaton"
+      ]
+    }
   },
   {
     "id": "taupe-hollow",
@@ -292,7 +1232,129 @@
       "tyrunt",
       "noibat",
       "fuecoco"
-    ]
+    ],
+    "spawns": {
+      "charmander": [
+        "Charmander",
+        "Charmeleon",
+        "Charizard"
+      ],
+      "sandshrew": [
+        "Sandshrew",
+        "Sandslash"
+      ],
+      "clefairy": [
+        "Cleffa",
+        "Clefairy",
+        "Clefable"
+      ],
+      "vulpix": [
+        "Vulpix",
+        "Ninetales"
+      ],
+      "diglett": [
+        "Diglett",
+        "Dugtrio"
+      ],
+      "growlithe": [
+        "Growlithe",
+        "Arcanine"
+      ],
+      "geodude": [
+        "Geodude",
+        "Graveler",
+        "Golem"
+      ],
+      "gastly": [
+        "Gastly",
+        "Haunter",
+        "Gengar"
+      ],
+      "onix": [
+        "Onix",
+        "Steelix"
+      ],
+      "cubone": [
+        "Cubone",
+        "Marowak"
+      ],
+      "ditto": [
+        "Ditto"
+      ],
+      "eevee": [
+        "Flareon",
+        "Umbreon"
+      ],
+      "mew": [
+        "Mew"
+      ],
+      "cyndaquil": [
+        "Cyndaquil",
+        "Quilava",
+        "Typhlosion"
+      ],
+      "wooper": [
+        "Wooper (Paldea)",
+        "Clodsire"
+      ],
+      "shuckle": [
+        "Shuckle"
+      ],
+      "houndour": [
+        "Houndour",
+        "Houndoom"
+      ],
+      "entei": [
+        "Entei"
+      ],
+      "larvitar": [
+        "Larvitar",
+        "Pupitar",
+        "Tyranitar"
+      ],
+      "mudkip": [
+        "Mudkip",
+        "Marshtomp",
+        "Swampert"
+      ],
+      "sableye": [
+        "Sableye"
+      ],
+      "trapinch": [
+        "Trapinch",
+        "Vibrava",
+        "Flygon"
+      ],
+      "turtwig": [
+        "Turtwig",
+        "Grotle",
+        "Torterra"
+      ],
+      "chimchar": [
+        "Chimchar",
+        "Monferno",
+        "Infernape"
+      ],
+      "riolu": [
+        "Riolu"
+      ],
+      "darkrai": [
+        "Darkrai"
+      ],
+      "tyrunt": [
+        "Tyrunt",
+        "Tyrantrum"
+      ],
+      "noibat": [
+        "Noibat",
+        "Noivern"
+      ],
+      "fuecoco": [
+        "Fuecoco",
+        "Crocalor",
+        "Skeledirge"
+      ]
+    }
   },
   {
     "id": "snowdrop-tundra",
@@ -314,7 +1376,6 @@
       "gulpin",
       "swablu",
       "absol",
-      "piplup",
       "spheal",
       "spiritomb",
       "riolu",
@@ -324,7 +1385,106 @@
       "cramorant",
       "pawmi",
       "cetoddle"
-    ]
+    ],
+    "spawns": {
+      "rattata": [
+        "Rattata",
+        "Raticate"
+      ],
+      "clefairy": [
+        "Cleffa",
+        "Clefairy",
+        "Clefable"
+      ],
+      "vulpix": [
+        "Vulpix (Alola)",
+        "Ninetales (Alola)"
+      ],
+      "mankey": [
+        "Mankey",
+        "Primeape"
+      ],
+      "chansey": [
+        "Happiny",
+        "Chansey",
+        "Blissey"
+      ],
+      "ditto": [
+        "Ditto"
+      ],
+      "eevee": [
+        "Glaceon"
+      ],
+      "mew": [
+        "Mew"
+      ],
+      "mareep": [
+        "Mareep",
+        "Flaaffy",
+        "Ampharos"
+      ],
+      "murkrow": [
+        "Murkrow",
+        "Honchkrow"
+      ],
+      "sneasel": [
+        "Sneasel",
+        "Weavile"
+      ],
+      "delibird": [
+        "Delibird"
+      ],
+      "slakoth": [
+        "Slakoth",
+        "Vigoroth",
+        "Slaking"
+      ],
+      "gulpin": [
+        "Gulpin",
+        "Swalot"
+      ],
+      "swablu": [
+        "Swablu",
+        "Altaria"
+      ],
+      "absol": [
+        "Absol"
+      ],
+      "spheal": [
+        "Spheal",
+        "Sealeo",
+        "Walrein"
+      ],
+      "spiritomb": [
+        "Spiritomb"
+      ],
+      "riolu": [
+        "Riolu",
+        "Lucario"
+      ],
+      "snover": [
+        "Snover",
+        "Abomasnow"
+      ],
+      "cresselia": [
+        "Cresselia"
+      ],
+      "darkrai": [
+        "Darkrai"
+      ],
+      "cramorant": [
+        "Cramorant"
+      ],
+      "pawmi": [
+        "Pawmi",
+        "Pawmo",
+        "Pawmot"
+      ],
+      "cetoddle": [
+        "Cetoddle",
+        "Cetitan"
+      ]
+    }
   },
   {
     "id": "lapis-lakeside",
@@ -359,7 +1519,127 @@
       "drampa",
       "sprigatito",
       "quaxly"
-    ]
+    ],
+    "spawns": {
+      "bulbasaur": [
+        "Bulbasaur",
+        "Ivysaur",
+        "Venusaur"
+      ],
+      "clefairy": [
+        "Cleffa",
+        "Clefairy",
+        "Clefable"
+      ],
+      "meowth": [
+        "Meowth",
+        "Persian"
+      ],
+      "bellsprout": [
+        "Bellsprout",
+        "Weepinbell",
+        "Victreebel"
+      ],
+      "doduo": [
+        "Doduo",
+        "Dodrio"
+      ],
+      "ditto": [
+        "Ditto"
+      ],
+      "eevee": [
+        "Espeon",
+        "Leafeon"
+      ],
+      "dratini": [
+        "Dratini",
+        "Dragonair",
+        "Dragonite"
+      ],
+      "mew": [
+        "Mew"
+      ],
+      "chikorita": [
+        "Chikorita",
+        "Bayleef",
+        "Meganium"
+      ],
+      "togepi": [
+        "Togepi",
+        "Togetic"
+      ],
+      "natu": [
+        "Natu"
+      ],
+      "wobbuffet": [
+        "Wynaut",
+        "Wobbuffet"
+      ],
+      "suicune": [
+        "Suicune"
+      ],
+      "treecko": [
+        "Treecko",
+        "Grovyle",
+        "Sceptile"
+      ],
+      "torchic": [
+        "Torchic",
+        "Combusken",
+        "Blaziken"
+      ],
+      "ralts": [
+        "Ralts",
+        "Kirlia",
+        "Gardevoir",
+        "Gallade"
+      ],
+      "latias": [
+        "Latias"
+      ],
+      "latios": [
+        "Latios"
+      ],
+      "turtwig": [
+        "Turtwig",
+        "Grotle",
+        "Torterra"
+      ],
+      "cresselia": [
+        "Cresselia"
+      ],
+      "darkrai": [
+        "Darkrai"
+      ],
+      "munna": [
+        "Munna",
+        "Musharna"
+      ],
+      "foongus": [
+        "Foongus",
+        "Amoonguss"
+      ],
+      "dedenne": [
+        "Dedenne"
+      ],
+      "stufful": [
+        "Stufful",
+        "Bewear"
+      ],
+      "drampa": [
+        "Drampa"
+      ],
+      "sprigatito": [
+        "Sprigatito",
+        "Floragato",
+        "Meowscarada"
+      ],
+      "quaxly": [
+        "Quaxly",
+        "Quaxwell",
+        "Quaquaval"
+      ]
+    }
   },
   {
     "id": "old-gold-power-plant",
@@ -393,7 +1673,117 @@
       "toxel",
       "pawmi",
       "tinkatink"
-    ]
+    ],
+    "spawns": {
+      "caterpie": [
+        "Caterpie",
+        "Metapod",
+        "Butterfree"
+      ],
+      "pikachu": [
+        "Pichu",
+        "Pikachu",
+        "Raichu"
+      ],
+      "clefairy": [
+        "Cleffa",
+        "Clefairy",
+        "Clefable"
+      ],
+      "magnemite": [
+        "Magnemite",
+        "Magneton",
+        "Magnezone"
+      ],
+      "farfetchd": [
+        "Farfetch'd"
+      ],
+      "gastly": [
+        "Gastly",
+        "Haunter",
+        "Gengar"
+      ],
+      "onix": [
+        "Steelix"
+      ],
+      "ditto": [
+        "Ditto"
+      ],
+      "eevee": [
+        "Jolteon"
+      ],
+      "mew": [
+        "Mew"
+      ],
+      "murkrow": [
+        "Murkrow",
+        "Honchkrow"
+      ],
+      "raikou": [
+        "Raikou"
+      ],
+      "mawile": [
+        "Mawile"
+      ],
+      "aron": [
+        "Aron",
+        "Lairon",
+        "Aggron"
+      ],
+      "plusle": [
+        "Plusle"
+      ],
+      "minun": [
+        "Minun"
+      ],
+      "shuppet": [
+        "Shuppet",
+        "Banette"
+      ],
+      "shinx": [
+        "Shinx",
+        "Luxio",
+        "Luxray"
+      ],
+      "drifloon": [
+        "Drifloon",
+        "Drifblim"
+      ],
+      "darkrai": [
+        "Darkrai"
+      ],
+      "dedenne": [
+        "Dedenne"
+      ],
+      "pumpkaboo": [
+        "Pumpkaboo",
+        "Gourgeist"
+      ],
+      "grubbin": [
+        "Grubbin",
+        "Charjabug",
+        "Vikavolt"
+      ],
+      "togedemaru": [
+        "Togedemaru"
+      ],
+      "mimikyu": [
+        "Mimikyu"
+      ],
+      "toxel": [
+        "Toxel"
+      ],
+      "pawmi": [
+        "Pawmi",
+        "Pawmo",
+        "Pawmot"
+      ],
+      "tinkatink": [
+        "Tinkatink",
+        "Tinkatuff",
+        "Tinkaton"
+      ]
+    }
   },
   {
     "id": "amber-canyon",
@@ -430,6 +1820,120 @@
       "togedemaru",
       "drampa",
       "toxel"
-    ]
+    ],
+    "spawns": {
+      "ekans": [
+        "Ekans",
+        "Arbok"
+      ],
+      "sandshrew": [
+        "Sandshrew",
+        "Sandslash"
+      ],
+      "clefairy": [
+        "Cleffa",
+        "Clefairy",
+        "Clefable"
+      ],
+      "vulpix": [
+        "Vulpix",
+        "Ninetales"
+      ],
+      "chansey": [
+        "Happiny",
+        "Chansey",
+        "Blissey"
+      ],
+      "pinsir": [
+        "Pinsir"
+      ],
+      "ditto": [
+        "Ditto"
+      ],
+      "eevee": [
+        "Eevee"
+      ],
+      "mew": [
+        "Mew"
+      ],
+      "natu": [
+        "Natu",
+        "Xatu"
+      ],
+      "heracross": [
+        "Heracross"
+      ],
+      "entei": [
+        "Entei"
+      ],
+      "larvitar": [
+        "Larvitar"
+      ],
+      "mawile": [
+        "Mawile"
+      ],
+      "plusle": [
+        "Plusle"
+      ],
+      "minun": [
+        "Minun"
+      ],
+      "trapinch": [
+        "Trapinch",
+        "Vibrava",
+        "Flygon"
+      ],
+      "bagon": [
+        "Bagon",
+        "Shelgon",
+        "Salamence"
+      ],
+      "latias": [
+        "Latias"
+      ],
+      "latios": [
+        "Latios"
+      ],
+      "chimchar": [
+        "Chimchar",
+        "Monferno",
+        "Infernape"
+      ],
+      "spiritomb": [
+        "Spiritomb"
+      ],
+      "darkrai": [
+        "Darkrai"
+      ],
+      "dwebble": [
+        "Dwebble",
+        "Crustle"
+      ],
+      "foongus": [
+        "Foongus",
+        "Amoonguss"
+      ],
+      "rufflet": [
+        "Rufflet",
+        "Braviary"
+      ],
+      "tyrunt": [
+        "Tyrunt",
+        "Tyrantrum"
+      ],
+      "noibat": [
+        "Noibat",
+        "Noivern"
+      ],
+      "togedemaru": [
+        "Togedemaru"
+      ],
+      "drampa": [
+        "Drampa"
+      ],
+      "toxel": [
+        "Toxel"
+      ]
+    }
   }
 ]
