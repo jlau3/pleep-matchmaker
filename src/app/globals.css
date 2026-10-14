@@ -73,20 +73,8 @@ body {
 @layer components {
   /* Starry night bar, like the game's top HUD. */
   .header-night {
+    /* The sparkles live in the nav's empty stretch (NavStars), clear of text and pills. */
     background-color: var(--color-night);
-    /* Four-point sparkles, not dots (dots read as dead pixels). The third is placed from the
-       center, not by %, so it never lands on the ? button (center - 80px) at any width; none sit at the
-       far right, where the feedback and support icons are. */
-    background-image:
-      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath fill='%23fff' fill-opacity='.85' d='M5 0C5.4 3.6 6.4 4.6 10 5C6.4 5.4 5.4 6.4 5 10C4.6 6.4 3.6 5.4 0 5C3.6 4.6 4.6 3.6 5 0Z'/%3E%3C/svg%3E"),
-      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath fill='%23fff' fill-opacity='.7' d='M5 0C5.4 3.6 6.4 4.6 10 5C6.4 5.4 5.4 6.4 5 10C4.6 6.4 3.6 5.4 0 5C3.6 4.6 4.6 3.6 5 0Z'/%3E%3C/svg%3E"),
-      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath fill='%23fff' fill-opacity='.9' d='M5 0C5.4 3.6 6.4 4.6 10 5C6.4 5.4 5.4 6.4 5 10C4.6 6.4 3.6 5.4 0 5C3.6 4.6 4.6 3.6 5 0Z'/%3E%3C/svg%3E"),
-      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath fill='%23fff' fill-opacity='.65' d='M5 0C5.4 3.6 6.4 4.6 10 5C6.4 5.4 5.4 6.4 5 10C4.6 6.4 3.6 5.4 0 5C3.6 4.6 4.6 3.6 5 0Z'/%3E%3C/svg%3E"),
-      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath fill='%23fff' fill-opacity='.85' d='M5 0C5.4 3.6 6.4 4.6 10 5C6.4 5.4 5.4 6.4 5 10C4.6 6.4 3.6 5.4 0 5C3.6 4.6 4.6 3.6 5 0Z'/%3E%3C/svg%3E"),
-      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath fill='%23fff' fill-opacity='.7' d='M5 0C5.4 3.6 6.4 4.6 10 5C6.4 5.4 5.4 6.4 5 10C4.6 6.4 3.6 5.4 0 5C3.6 4.6 4.6 3.6 5 0Z'/%3E%3C/svg%3E");
-    background-position: 20% 30%, 34% 70%, calc(50% + 60px) 22%, 58% 64%, 68% 35%, 77% 72%;
-    background-size: 9px 9px, 6px 6px, 8px 8px, 6px 6px, 10px 10px, 6px 6px;
-    background-repeat: no-repeat;
   }
 
   .card {
