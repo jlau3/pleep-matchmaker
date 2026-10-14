@@ -133,9 +133,10 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
         <div className="space-y-1">
           <div className="flex flex-wrap items-center gap-2 text-sm">
             <span className="text-slate-500">Sort</span>
-            <Pills options={BROWSE_SORTS.map(([id, label]) => [link({ sort: id }), label, opts.sort === id])} />
+            <Pills
+              options={BROWSE_SORTS.map(([id, label]) => [link({ sort: id }), label, opts.sort === id, BROWSE_SORT_HINTS[id]])}
+            />
           </div>
-          <p className="text-xs text-slate-500">{BROWSE_SORT_HINTS[opts.sort]}</p>
           <FitLegend friendsVoted={friendsVoted} youVoted={picked > 0} />
         </div>
 
@@ -222,14 +223,15 @@ function NewPlayerNote({ match, name }: { match: MatchRow; name: string }) {
   );
 }
 
-/** A row of link pills; the active one is filled. */
-function Pills({ options }: { options: (readonly [string, string, boolean])[] }) {
+/** A row of link pills; the active one is filled. An optional hint shows on hover. */
+function Pills({ options }: { options: (readonly [string, string, boolean, string?])[] }) {
   return (
     <>
-      {options.map(([href, label, active]) => (
+      {options.map(([href, label, active, hint]) => (
         <Link
           key={label}
           href={href}
+          title={hint}
           scroll={false}
           aria-current={active ? "true" : undefined}
           className={`rounded-full border px-3 py-1 ${

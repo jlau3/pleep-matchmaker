@@ -8,7 +8,9 @@ export function FitLegend({ friendsVoted = true, youVoted = true }: { friendsVot
     <div className="space-y-1">
       <p className="text-xs text-slate-500">
         <b className="text-slate-700 dark:text-slate-200">For you</b>: How much of what you want aligns with what their
-        friends want, so the candy they send suits you. <b className="text-slate-700 dark:text-slate-200">For them</b>:
+        friends want, so the candy they send suits you.
+        <br />
+        <b className="text-slate-700 dark:text-slate-200">For them</b>:
         How much of what they want aligns with what your friends want too, so the candy you send suits them. A
         &ndash; means there isn&apos;t enough to go on yet.
       </p>
