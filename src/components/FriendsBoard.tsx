@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { FRIEND_SORT_HINTS, FRIEND_SORTS, type FriendSort } from "@/lib/friendSort";
+import { FitLegend } from "./FitLegend";
 import { ViewToggle } from "./ViewToggle";
 
 const VIEW_KEY = "pm_friends_view";
@@ -87,6 +88,9 @@ export function FriendsBoard({
           <p className="text-xs text-slate-500">{FRIEND_SORT_HINTS[sort]}</p>
         </div>
       )}
+      <div className="mb-3">
+        <FitLegend />
+      </div>
       <ul className={view === "grid" ? "grid gap-3 md:grid-cols-2" : "space-y-3"}>
         {sorted.map((item) => (
           <li key={item.id} className="card p-4">

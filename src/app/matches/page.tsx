@@ -6,6 +6,7 @@ import { PlayerSearch, searchQuery } from "@/components/PlayerSearch";
 import { FRIENDS_TABS, SubTabs } from "@/components/SubTabs";
 import { FriendPostCard } from "@/components/FriendPostCard";
 import { FriendshipLevel5 } from "@/components/FriendshipLevel5";
+import { FitLegend } from "@/components/FitLegend";
 import { FitPair } from "@/components/FitPair";
 import { LOW_FIT_PCT } from "@/lib/fit";
 import { loadFriendIds, loadOwnProfile, loadOwnVotes, MAX_FRIENDS } from "@/lib/data";
@@ -130,6 +131,7 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
             <Pills options={BROWSE_SORTS.map(([id, label]) => [link({ sort: id }), label, opts.sort === id])} />
           </div>
           <p className="text-xs text-slate-500">{BROWSE_SORT_HINTS[opts.sort]}</p>
+          <FitLegend />
         </div>
 
         {picked === 0 && friendIds.size === 0 && !opts.everyone ? (

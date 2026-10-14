@@ -31,6 +31,9 @@ export async function PlayerSearch({
     if (error) throw error;
     results = data as LookupRow[];
   }
+  // You can't add or block yourself: say it's you instead of showing your own card.
+  const foundSelf = results.some((player) => player.user_id === viewerId);
+  results = results.filter((player) => player.user_id !== viewerId);
   return (
     <div className="space-y-3">
       <form className="flex gap-2">
@@ -39,7 +42,12 @@ export async function PlayerSearch({
           Search
         </button>
       </form>
-      {q && results.length === 0 && (
+      {foundSelf && (
+        <p className="rounded-2xl bg-sky/60 p-3 text-center text-sm dark:bg-night-deep">
+          That&apos;s you! Other players can find you with this search.
+        </p>
+      )}
+      {q && !foundSelf && results.length === 0 && (
         <p className="py-4 text-center text-sm text-slate-500">
           No one found. Names have to match exactly (case doesn&apos;t matter), and some players turn lookup off.
         </p>
@@ -50,7 +58,7 @@ export async function PlayerSearch({
             <li key={player.user_id} className="card p-4">
               <PlayerHeader player={player} isFriend={friendIds.has(player.user_id)} aside={
                   // No fit while there's nothing to compare against: no friends' votes and none of your own.
-                  player.match_pct === null && player.you_fit_pct === null && player.user_id !== viewerId && player.wants.length > 0 ? (
+                  player.match_pct === null && player.you_fit_pct === null && player.wants.length > 0 ? (
                     <Link href="/vote" className="shrink-0 text-right text-xs font-semibold text-want underline">
                       Add friends or vote
                       <br />

@@ -61,8 +61,11 @@ begin
   assert r.match_pct = 50, format('c1 fit %s', r.match_pct);
   assert r.fit_wants = '{fa,fb,fc}', format('fit wants ordered by demand %s', r.fit_wants);
   assert not exists (select 1 from public.get_matches() where discord_username = 'ctwo'), 'c2 below min_pct';
-  assert (select match_pct from public.lookup_players('ctwo')) = 22, 'search shows low fit';
-  assert (select match_pct from public.lookup_players('cthree')) = 25, 'don''t-want on a top line costs a want';
+  -- Easygoing cap: the group's list sends fa 1 + fb 0.5 + fc 0.5 = 2 lines' worth,
+  -- so c2's 9 wants count as 2. c2 wants everything the list sends: 2 / 2.
+  assert (select match_pct from public.lookup_players('ctwo')) = 100, 'easygoing player not marked down';
+  -- c3: (0.5 + 0.5) / (least(3, 2) + 1) = 33%.
+  assert (select match_pct from public.lookup_players('cthree')) = 33, 'don''t-want on a top line costs a want';
   -- Each friend is compared with the rest of the list:
   -- f1 (fa, fb) vs f2 (fa, fc): 1 / 2 = 50%, f1's star on fa adds nothing;
   -- f2 (fa, fc) vs f1 (fa, fb): 1 / 2 = 50%.

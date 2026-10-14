@@ -50,10 +50,8 @@ export default async function FriendsPage({ searchParams }: { searchParams: Prom
                   player={player}
                   isFriend={false}
                   aside={<FitPair they={player.match_pct} you={player.you_fit_pct} />}
+                  actions={<DismissAddedYou userId={player.user_id} />}
                 />
-                <div className="mt-2 flex justify-end">
-                  <DismissAddedYou userId={player.user_id} />
-                </div>
               </li>
             ))}
           </ul>

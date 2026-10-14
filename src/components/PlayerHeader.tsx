@@ -14,11 +14,14 @@ export function PlayerHeader({
   player,
   aside,
   isFriend,
+  actions,
 }: {
   player: PlayerContact;
   aside?: React.ReactNode;
   /** Shows the add/remove friend button when set. */
   isFriend?: boolean;
+  /** Extra buttons on the same line as the friend button (e.g. "Not now"). */
+  actions?: React.ReactNode;
 }) {
   const name = playerName(player);
   return (
@@ -54,7 +57,12 @@ export function PlayerHeader({
         <span>Prefs updated {relativeTime(player.prefs_updated_at)}</span>
         <BlockButton userId={player.user_id} name={name} />
       </div>
-      {isFriend !== undefined && <FriendButton userId={player.user_id} isFriend={isFriend} name={name} />}
+      {(isFriend !== undefined || actions) && (
+        <div className="flex flex-wrap items-center gap-2">
+          {isFriend !== undefined && <FriendButton userId={player.user_id} isFriend={isFriend} name={name} />}
+          {actions}
+        </div>
+      )}
     </div>
   );
 }

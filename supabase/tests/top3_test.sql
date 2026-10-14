@@ -87,15 +87,16 @@ end $$;
 
 -- tara is tom's only friend, so for her own fit the group falls back to tom's
 -- wants (ta, tb, tc, share 1 each). tara wants ta, tb, te (all starred) and td,
--- and doesn't want tc: (1 + 1) / (4 + 1) = 40%. No thresholds on My Friends.
+-- and doesn't want tc. tom's list sends 3 lines, so her 4 wants count as 3:
+-- (1 + 1) / (3 + 1) = 50%. No thresholds on My Friends.
 do $$ begin
-  assert (select match_pct from public.get_friends() where discord_username = 'tara') = 40,
+  assert (select match_pct from public.get_friends() where discord_username = 'tara') = 50,
     format('friend pct %s', (select match_pct from public.get_friends() where discord_username = 'tara'));
 end $$;
 
 -- Player search shows the same % (tom looking up tara), and none for yourself.
 do $$ begin
-  assert (select match_pct from public.lookup_players('tara')) = 40, 'lookup pct';
+  assert (select match_pct from public.lookup_players('tara')) = 50, 'lookup pct';
   assert (select match_pct from public.lookup_players('tom')) is null, 'no pct for yourself';
 end $$;
 

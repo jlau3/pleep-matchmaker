@@ -57,7 +57,8 @@ begin
   assert (select you_fit_pct from public.browse_players('fit', true, 50, 0) where discord_username = 'br_fresh') is null, 'no votes, no fit';
   assert (select you_fit_pct from public.browse_players('fit', true, 50, 0) where discord_username = 'br_low') = 33, 'low fit: you fit theirs';
   -- Fits your list: the viewer has no friends, so own wants a,b,c stand in; low wants a + 9 others.
-  assert (select match_pct from public.browse_players('fit', true, 50, 0) where discord_username = 'br_low') = 10, 'low fit: fits your list';
+  -- That list can only send 3 lines, so low's 10 wants count as 3: 1 of 3 (easygoing cap).
+  assert (select match_pct from public.browse_players('fit', true, 50, 0) where discord_username = 'br_low') = 33, 'low fit: fits your list';
   assert not exists (
     select 1 from public.browse_players('fit', true, 50, 0)
     where discord_username in ('br_stale', 'br_closed', 'br_blocked', 'br_viewer')

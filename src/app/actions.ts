@@ -38,6 +38,19 @@ export async function signInWithOAuth(form?: FormData) {
   redirect(data.url);
 }
 
+/**
+ * Google sign-in from Google's own button (GoogleSignIn), so Google's popup
+ * names this site instead of the Supabase project URL. `nonce` is the raw
+ * value whose SHA-256 the button gave Google; Supabase checks it against the
+ * token so a token can't be replayed.
+ */
+export async function signInWithGoogleToken(credential: string, nonce: string, next: string | null): Promise<{ error?: string }> {
+  const supabase = await createClient();
+  const { error } = await supabase.auth.signInWithIdToken({ provider: "google", token: credential, nonce });
+  if (error) return { error: error.message };
+  redirect(safeNextPath(next) ?? "/");
+}
+
 type Provider = keyof typeof OAUTH_PROVIDERS;
 const isProvider = (p: string): p is Provider => p in OAUTH_PROVIDERS;
 
