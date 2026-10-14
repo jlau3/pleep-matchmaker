@@ -69,7 +69,9 @@ export function GoogleSignIn({ clientId, next }: { clientId: string; next: strin
   return (
     <div>
       <Script src="https://accounts.google.com/gsi/client" strategy="afterInteractive" onReady={() => void render()} />
-      <div ref={box} className="flex min-h-11 w-full justify-center" />
+      {/* Google's button is an iframe with a light color scheme; in dark mode the page's dark scheme
+          makes the browser paint a white box behind it. Matching the scheme keeps it transparent. */}
+      <div ref={box} className="flex min-h-11 w-full justify-center [color-scheme:light]" />
       {error && (
         <p role="alert" className="mt-1 text-sm text-dont">
           {error}
