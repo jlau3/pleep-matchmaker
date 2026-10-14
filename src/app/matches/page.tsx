@@ -23,11 +23,13 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
   const params = await searchParams;
   const q = await searchQuery(Promise.resolve(params));
   const opts = parseBrowse(params);
-  const [{ choices, tops }, profile, friendIds, votedResult, matchesResult] = await Promise.all([
+  const [{ choices, tops }, profile, friendIds, votedResult, , matchesResult] = await Promise.all([
     loadOwnVotes(supabase, user.id),
     loadOwnProfile(supabase, user.id),
     loadFriendIds(supabase, user.id),
     supabase.rpc("my_friends_voted"),
+    // Keeps the community averages (blended into every list) fresh; a no-op if refreshed within the hour.
+    supabase.rpc("refresh_community_rates"),
     supabase.rpc("browse_players", {
       sort: opts.sort,
       everyone: opts.everyone,
@@ -256,6 +258,11 @@ function FitLists({ match }: { match: MatchRow }) {
           <div className="mt-3 space-y-5">
             <div className="space-y-3">
               <h4 className="font-bold">They&apos;d send you</h4>
+              {(match.list_voters ?? 0) < 3 && (
+                <p className="text-sm text-slate-500">
+                  They don&apos;t have 3 friends voting here yet, so this uses what players generally want.
+                </p>
+              )}
               {group("Your wants their friends want", "text-want", toYou.want)}
               {group("Your don't-wants their friends want", "text-dont", toYou.dont)}
               {toYou.want.length + toYou.dont.length === 0 && (

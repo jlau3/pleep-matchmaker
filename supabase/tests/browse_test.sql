@@ -35,6 +35,20 @@ from unnest(array['bra', 'bx1', 'bx2', 'bx3', 'bx4', 'bx5', 'bx6', 'bx7', 'bx8',
 insert into public.blocks (blocker_id, blocked_id) values ('00000000-0000-0000-000d-000000000001', '00000000-0000-0000-000d-000000000007');
 update public.preferences set top = true where user_id = '00000000-0000-0000-000d-000000000002' and line_id = 'bra';
 
+-- The community (normally the cached share of active players wanting each line):
+-- a, b, c popular, the nine others less so. Under 3 voting friends a player's
+-- list is the community alone, whatever they want themselves.
+delete from public.community_rates;
+-- Every player now gets a community-based fit, so hide the other test files'
+-- players from Find New while this file runs (restored at the end).
+create temp table br_hidden as
+select id from public.profiles where open_to_friends and discord_username not like 'br\_%';
+update public.profiles set open_to_friends = false where id in (select id from br_hidden);
+insert into public.community_rates (line_id, rate)
+select l, 0.6 from unnest(array['bra', 'brb', 'brc']) l
+union all
+select 'bx' || g, 0.2 from generate_series(1, 9) g;
+
 set role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-000d-000000000001', false);
 
@@ -44,18 +58,23 @@ begin
   -- Other test files leave players around; look only at this file's.
   select array_agg(discord_username order by ord), max(total_count) into names, n
   from (select *, row_number() over () as ord from public.browse_players()) t where discord_username like 'br_%';
-  assert names = '{br_good}', format('good fits: %s', names);
+  -- good, low and fresh have no voting friends, so all three are scored on the
+  -- community (which wants the viewer's a, b, c): equal fits, newest first.
+  assert names = '{br_fresh,br_low,br_good}', format('good fits: %s', names);
 
   select array_agg(discord_username order by ord) into names
   from (select *, row_number() over () as ord from public.browse_players('fit', true, 50, 0)) t where discord_username like 'br_%';
-  assert names = '{br_good,br_low,br_fresh}', format('everyone by fit: %s', names);
+  assert names = '{br_fresh,br_low,br_good}', format('everyone by fit: %s', names);
 
   select array_agg(discord_username order by ord) into names
   from (select *, row_number() over () as ord from public.browse_players('active', true, 50, 0)) t where discord_username like 'br_%';
   assert names = '{br_fresh,br_low,br_good}', format('everyone by activity: %s', names);
 
-  assert (select you_fit_pct from public.browse_players('fit', true, 50, 0) where discord_username = 'br_fresh') is null, 'no votes, no fit';
-  assert (select you_fit_pct from public.browse_players('fit', true, 50, 0) where discord_username = 'br_low') = 33, 'low fit: you fit theirs';
+  -- A brand-new player isn't hidden: their list is the community's.
+  assert (select you_fit_pct from public.browse_players('fit', true, 50, 0) where discord_username = 'br_fresh') = 100, 'new player: community list';
+  assert (select list_voters from public.browse_players('fit', true, 50, 0) where discord_username = 'br_fresh') = 0, 'no voting friends';
+  -- Their own wants (a + 9 others) don't change "for you" any more.
+  assert (select you_fit_pct from public.browse_players('fit', true, 50, 0) where discord_username = 'br_low') = 100, 'own wants ignored';
   -- "For them" needs your friends' votes: the viewer has none yet, so it's unknown,
   -- and good fits go by "for you" alone (br_good is still listed above).
   assert (select match_pct from public.browse_players('fit', true, 50, 0) where discord_username = 'br_low') is null, 'no friends, no "for them"';
@@ -132,15 +151,17 @@ end $$;
 reset role;
 delete from public.friends where user_id = '00000000-0000-0000-000d-000000000001' and friend_id = '00000000-0000-0000-0010-000000000001';
 
--- With one of the three friends gone, under 3 voters: their own wants (x1) stand in.
+-- With one of the three friends gone, under 3 voters: the community alone (their own x1 doesn't count).
 delete from public.friends where user_id = '00000000-0000-0000-0010-000000000001' and friend_id = '00000000-0000-0000-0010-000000000004';
 set role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-000d-000000000001', false);
 do $$ begin
-  assert (select you_fit_pct from public.browse_players('fit', true, 50, 0) where discord_username = 'br_hub') = 0,
-    'under 3 friends with votes: their own wants';
-  assert (select you_fit_pct from public.lookup_players('br_hub')) = 0, 'search agrees';
+  assert (select you_fit_pct from public.browse_players('fit', true, 50, 0) where discord_username = 'br_hub') = 100,
+    'under 3 friends with votes: the community';
+  assert (select you_fit_pct from public.lookup_players('br_hub')) = 100, 'search agrees';
 end $$;
 reset role;
+delete from public.community_rates;
+update public.profiles set open_to_friends = true where id in (select id from br_hidden);
 
 \echo 'ALL BROWSE TESTS PASSED'
