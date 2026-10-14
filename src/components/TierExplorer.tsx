@@ -24,6 +24,21 @@ export interface PoolVotes {
 const POOL_LABEL: Record<Pool, string> = { friends: "My Friends", everyone: "Everyone" };
 const MAPPED_ISLANDS = ISLANDS.filter((island) => island.lines.length > 0);
 
+/** Island art from Neroli's Lab (public/islands, Apache-2.0; see NOTICE there). Expert areas reuse the base art. */
+const ISLAND_ART: Record<string, string> = {
+  "greengrass-isle": "greengrass",
+  "cyan-beach": "cyan",
+  "taupe-hollow": "taupe",
+  "snowdrop-tundra": "snowdrop",
+  "lapis-lakeside": "lapis",
+  "old-gold-power-plant": "powerplant",
+  "amber-canyon": "amber",
+};
+const islandArt = (id: string) => ISLAND_ART[id.replace(/-expert$/, "")];
+/** Short label under the icon: "Greengrass", "Cyan EX", "Power Plant". */
+const shortName = (name: string) =>
+  name.replace(/^Old Gold /, "").replace(/ (Isle|Beach|Hollow|Tundra|Lakeside|Canyon)/, "").replace(" (Expert)", " EX");
+
 /**
  * The Tier List with every view ready up front: both pools (My Friends,
  * Everyone) by all islands and by island are built once from the vote totals
@@ -34,21 +49,24 @@ export function TierExplorer({
   friends,
   everyone,
   initialPool,
-  initialByIsland,
+  initialIsland,
   loadedAt,
   notice,
 }: {
   friends: PoolVotes;
   everyone: PoolVotes;
   initialPool: Pool;
-  initialByIsland: boolean;
+  /** Island id to open on (?island=), or null for all islands. */
+  initialIsland: string | null;
   /** When the server counted these votes (ISO), for "Updated 5m ago". */
   loadedAt: string;
   /** Shown under the heading (e.g. "3 new candies to vote on"). */
   notice?: React.ReactNode;
 }) {
   const [pool, setPool] = useState<Pool>(initialPool);
-  const [byIsland, setByIsland] = useState(initialByIsland && MAPPED_ISLANDS.length > 0);
+  const [islandId, setIslandId] = useState(
+    MAPPED_ISLANDS.some((island) => island.id === initialIsland) ? initialIsland : null,
+  );
 
   // Every view, built once per page load: [pool] -> { all, islands }.
   const views = useMemo(() => {
@@ -65,14 +83,14 @@ export function TierExplorer({
     return { friends: build(friends), everyone: build(everyone) };
   }, [friends, everyone]);
 
-  function show(next: { pool?: Pool; byIsland?: boolean }) {
+  function show(next: { pool?: Pool; island?: string | null }) {
     const p = next.pool ?? pool;
-    const split = next.byIsland ?? byIsland;
+    const id = next.island !== undefined ? next.island : islandId;
     setPool(p);
-    setByIsland(split);
+    setIslandId(id);
     const qs = new URLSearchParams();
     if (p === "everyone") qs.set("pool", "everyone");
-    if (split) qs.set("split", "islands");
+    if (id) qs.set("island", id);
     const query = qs.toString();
     window.history.replaceState(window.history.state, "", `${window.location.pathname}${query ? `?${query}` : ""}`);
   }
@@ -80,6 +98,8 @@ export function TierExplorer({
   const data = pool === "friends" ? friends : everyone;
   const view = views[pool];
   const poolLabel = POOL_LABEL[pool];
+  const selected = view.islands.find(({ island }) => island.id === islandId) ?? null;
+  const tiers = selected ? selected.tiers : view.all;
   const pill = (active: boolean) =>
     `rounded-full border px-3 py-1 text-sm ${active ? "pill-active border-transparent" : "border-slate-300 dark:border-slate-700"}`;
 
@@ -109,25 +129,51 @@ export function TierExplorer({
         {data.voters > 0 && (
           <div className="ml-auto">
             <TierExport
-              title={`${poolLabel} · ${byIsland ? "By Island" : "All Islands"}`}
+              title={`${poolLabel} · ${selected ? selected.island.name : "All Islands"}`}
               voters={data.voters}
-              sections={
-                byIsland
-                  ? view.islands.map(({ island, tiers }) => ({ heading: island.name, tiers }))
-                  : [{ tiers: view.all }]
-              }
+              sections={[{ tiers }]}
             />
           </div>
         )}
       </div>
+
+      {/* One tap picks an island; tapping it again (or another) goes back / switches. None picked: all islands. */}
       {MAPPED_ISLANDS.length > 0 && (
-        <div className="flex flex-wrap gap-2">
-          <button type="button" onClick={() => show({ byIsland: false })} aria-pressed={!byIsland} className={pill(!byIsland)}>
-            All Islands
-          </button>
-          <button type="button" onClick={() => show({ byIsland: true })} aria-pressed={byIsland} className={pill(byIsland)}>
-            By Island
-          </button>
+        <div role="group" aria-label="Island" className="grid grid-cols-5 gap-1 sm:grid-cols-9">
+          {MAPPED_ISLANDS.map((island) => {
+            const active = island.id === islandId;
+            const art = islandArt(island.id);
+            return (
+              <button
+                key={island.id}
+                type="button"
+                onClick={() => show({ island: active ? null : island.id })}
+                aria-pressed={active}
+                title={active ? `${island.name} (tap again for all islands)` : island.name}
+                className={`flex min-w-0 flex-col items-center gap-1 rounded-2xl p-1 text-[11px] font-semibold leading-tight transition ${
+                  active
+                    ? "bg-sun/70 ring-2 ring-sun-deep dark:bg-sun/30"
+                    : islandId
+                      ? "opacity-50 hover:opacity-100"
+                      : "hover:bg-white/60 dark:hover:bg-night"
+                }`}
+              >
+                <span className="relative">
+                  {art ? (
+                    <img src={`/islands/${art}.webp`} alt="" className="h-11 w-11" />
+                  ) : (
+                    <span className="block h-11 w-11 rounded-full bg-sky dark:bg-night-deep" />
+                  )}
+                  {island.id.endsWith("-expert") && (
+                    <span className="absolute -right-1 -top-1 rounded-full bg-night px-1 text-[9px] font-black text-white dark:bg-sun dark:text-[#5b3e00]">
+                      EX
+                    </span>
+                  )}
+                </span>
+                <span className="text-center">{shortName(island.name)}</span>
+              </button>
+            );
+          })}
         </div>
       )}
 
@@ -145,27 +191,18 @@ export function TierExplorer({
             "No votes yet."
           )}
         </p>
-      ) : byIsland ? (
-        <div className="space-y-3">
-          {view.islands.map(({ island, tiers }) => (
-            <details key={island.id} className="card p-3">
-              <summary className="font-semibold">{island.name}</summary>
-              <div className="mt-3 space-y-3">
-                <div className="flex justify-end">
-                  <TierExport
-                    title={`${poolLabel} · ${island.name}`}
-                    voters={data.voters}
-                    sections={[{ tiers }]}
-                    label="Export this island"
-                  />
-                </div>
-                <TierBoard tiers={tiers} pool={pool} />
-              </div>
-            </details>
-          ))}
-        </div>
       ) : (
-        <TierBoard tiers={view.all} pool={pool} />
+        <>
+          {selected && (
+            <h2 className="-mb-2 text-lg font-bold">
+              {selected.island.name}{" "}
+              <button type="button" onClick={() => show({ island: null })} className="text-sm font-semibold text-slate-500 underline">
+                All islands
+              </button>
+            </h2>
+          )}
+          <TierBoard tiers={tiers} pool={pool} />
+        </>
       )}
     </div>
   );
