@@ -14,11 +14,17 @@ select '00000000-0000-0000-0003-000000000002'::uuid, l, 'want'::public.choice fr
 union all
 select '00000000-0000-0000-0003-000000000002'::uuid, 'td', 'dont_want'::public.choice;
 
+-- tara's one friend tia wants the same five lines, so they're tara's group.
+insert into auth.users (id, raw_user_meta_data) values ('00000000-0000-0000-0003-000000000003', '{"name":"tia#0"}');
+insert into public.preferences (user_id, line_id, choice)
+select '00000000-0000-0000-0003-000000000003'::uuid, l, 'want'::public.choice from unnest(array['ta', 'tb', 'tc', 'td', 'te']) l;
+insert into public.friends (user_id, friend_id) values
+  ('00000000-0000-0000-0003-000000000001', '00000000-0000-0000-0003-000000000003');
+
 set role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0003-000000000001', false);
 
--- tara has no friends, so her own wants are the group. Before any stars all
--- shares are 1. tom's three wants are all in it, but he doesn't want td, which
+-- Before any stars all shares are 1. tom's three wants are all in it, but he doesn't want td, which
 -- tara wants: 3 / (3 + 1) = 75%.
 do $$ begin
   assert (select match_pct from public.get_matches() where discord_username = 'tom') = 75, 'pct without stars';
@@ -85,17 +91,16 @@ do $$ begin
   assert (select tops from public.get_line_stats() where line_id = 'ta') = 1, 'line stats tops';
 end $$;
 
--- tara is tom's only friend, so for her own fit the group falls back to tom's
--- wants (ta, tb, tc, share 1 each). tara wants ta, tb, te (all starred) and td,
--- and doesn't want tc: (1 + 1) / (4 + 1) = 40%. No thresholds on My Friends.
+-- tara is tom's only friend, and her "for them" is scored against tom's OTHER
+-- friends' votes. There are none, so there's no number (tom's own wants don't stand in).
 do $$ begin
-  assert (select match_pct from public.get_friends() where discord_username = 'tara') = 40,
+  assert (select match_pct from public.get_friends() where discord_username = 'tara') is null,
     format('friend pct %s', (select match_pct from public.get_friends() where discord_username = 'tara'));
 end $$;
 
--- Player search shows the same % (tom looking up tara), and none for yourself.
+-- Player search agrees (tom looking up tara), and none for yourself.
 do $$ begin
-  assert (select match_pct from public.lookup_players('tara')) = 40, 'lookup pct';
+  assert (select match_pct from public.lookup_players('tara')) is null, 'lookup pct';
   assert (select match_pct from public.lookup_players('tom')) is null, 'no pct for yourself';
 end $$;
 

@@ -159,13 +159,13 @@ export function TierExplorer({
                     label="Export this island"
                   />
                 </div>
-                <TierBoard tiers={tiers} />
+                <TierBoard tiers={tiers} pool={pool} />
               </div>
             </details>
           ))}
         </div>
       ) : (
-        <TierBoard tiers={view.all} />
+        <TierBoard tiers={view.all} pool={pool} />
       )}
     </div>
   );

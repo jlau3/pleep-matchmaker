@@ -52,7 +52,11 @@ function VoteCard({ ranked }: { ranked: RankedLine }) {
   );
 }
 
-export function TierBoard({ tiers }: { tiers: Map<TierId, RankedLine[]> }) {
+/**
+ * `pool` words the Top 3 blurb: "your friends" on My Friends, "players" on
+ * Everyone. The Top 3 row starts folded so the ranking leads.
+ */
+export function TierBoard({ tiers, pool = "friends" }: { tiers: Map<TierId, RankedLine[]>; pool?: "friends" | "everyone" }) {
   return (
     <div className="space-y-3">
       {TIERS.map((tier) => {
@@ -95,8 +99,30 @@ export function TierBoard({ tiers }: { tiers: Map<TierId, RankedLine[]> }) {
             )}
           </>
         );
+        if (tier.id === "top") {
+          const who = pool === "friends" ? "your friends" : "players";
+          return (
+            <details key={tier.id} className={`${topPanel} group/top`}>
+              {/* The blurb sits in the summary so it shows while folded. */}
+              <summary className="cursor-pointer list-none">
+                <span className="flex items-center gap-3">
+                  {header}
+                  <span className="ml-auto shrink-0 text-sm font-semibold text-slate-500 underline">
+                    <span className="group-open/top:hidden">Show</span>
+                    <span className="hidden group-open/top:inline">Hide</span>
+                  </span>
+                </span>
+                <span className="mt-2 block text-sm text-slate-600 dark:text-slate-300">
+                  The candy {who} want most, from each one&apos;s personal Top 3. Some rank low on the tier list below,
+                  but whoever starred them really wants them.
+                </span>
+              </summary>
+              {cards}
+            </details>
+          );
+        }
         return (
-          <section key={tier.id} className={tier.id === "top" ? topPanel : panel}>
+          <section key={tier.id} className={panel}>
             <div className="flex items-center gap-3">{header}</div>
             {cards}
           </section>

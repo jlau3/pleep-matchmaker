@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import { type MagicLinkState, sendMagicLink, signInWithOAuth } from "@/app/actions";
+import { GoogleSignIn } from "./GoogleSignIn";
 
 /**
  * Email sign-in links, off for now: Discord and Google cover most players and
@@ -10,6 +11,15 @@ import { type MagicLinkState, sendMagicLink, signInWithOAuth } from "@/app/actio
  * the action and /auth/confirm route are still in place.
  */
 const EMAIL_SIGN_IN = false;
+
+/**
+ * Google's own button when a Google client ID is set (its popup names this
+ * site); otherwise the redirect through Supabase, which shows the Supabase
+ * project URL on Google's screen. Set NEXT_PUBLIC_GOOGLE_CLIENT_ID only where
+ * that origin is listed in the Google client (production), so previews keep
+ * the redirect.
+ */
+const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
 
 const oauthButton = "w-full rounded-full px-6 py-3 text-lg font-extrabold active:translate-y-[2px]";
 
@@ -34,16 +44,20 @@ export function SignInOptions({ next }: { next: string | null }) {
           Sign in with Discord
         </button>
       </form>
-      <form action={signInWithOAuth}>
-        {nextField}
-        <input type="hidden" name="provider" value="google" />
-        <button
-          type="submit"
-          className={`${oauthButton} border border-slate-300 bg-white text-slate-800 shadow-[0_3px_0_#cbd5e1] hover:bg-slate-50 active:shadow-[0_1px_0_#cbd5e1]`}
-        >
-          Sign in with Google
-        </button>
-      </form>
+      {GOOGLE_CLIENT_ID ? (
+        <GoogleSignIn clientId={GOOGLE_CLIENT_ID} next={next} />
+      ) : (
+        <form action={signInWithOAuth}>
+          {nextField}
+          <input type="hidden" name="provider" value="google" />
+          <button
+            type="submit"
+            className={`${oauthButton} border border-slate-300 bg-white text-slate-800 shadow-[0_3px_0_#cbd5e1] hover:bg-slate-50 active:shadow-[0_1px_0_#cbd5e1]`}
+          >
+            Sign in with Google
+          </button>
+        </form>
+      )}
 
       {EMAIL_SIGN_IN && (
         <>

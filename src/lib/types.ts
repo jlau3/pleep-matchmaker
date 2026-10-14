@@ -28,6 +28,10 @@ export interface MatchRow extends PlayerContact {
   top_wants?: string[];
   /** browse_players only: how many players the current filter lists in all. */
   total_count?: number;
+  /** browse_players only: their friends who've voted, 0 under 3 ("for you" is a dash then). */
+  list_voters?: number;
+  /** browse_players only: whether they've voted on anything ("for them" is a dash until they do). */
+  voted?: boolean;
 }
 
 export interface LookupRow extends PlayerContact {
@@ -85,6 +89,11 @@ export interface FriendRow extends PlayerContact {
   you_fit_pct?: number | null;
   /** They have you on their friend list too. */
   added_me: boolean;
+}
+
+/** A player you asked in Pokémon Sleep and haven't added here yet (get_pending_friends). */
+export interface PendingRow extends PlayerContact {
+  pending_since: string;
 }
 
 /** Someone who added you and you haven't added back or dismissed (get_added_me). */

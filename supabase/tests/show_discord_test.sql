@@ -23,7 +23,7 @@ begin
   assert not exists (select 1 from public.lookup_players('Shy')), 'not found by hidden display name';
   select * into r from public.lookup_players('ShySleeper');
   assert found and r.discord_username is null and r.discord_display_name is null and r.avatar_url is null, 'lookup masked';
-  select * into r from public.get_matches() where user_id = '00000000-0000-0000-000b-000000000001';
+  select * into r from public.browse_players('fit', true, 50, 0) where user_id = '00000000-0000-0000-000b-000000000001';
   assert found and r.discord_username is null and r.avatar_url is null, 'match masked';
 end $$;
 

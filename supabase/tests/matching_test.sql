@@ -17,14 +17,22 @@ do $$ begin
   assert (select discord_display_name from public.profiles where id = '00000000-0000-0000-0000-00000000000a') = 'Alice', 'display name sync';
 end $$;
 
--- a has no friends yet, so a's own wants (w1..w10) stand in for the group.
--- b wants 10 lines, 6 of them a's: fit 6 / 10 = 60%.
+-- a's one friend f wants w1..w10, so that's the group ("for them" needs a
+-- friend's votes; a's own wants don't stand in).
+-- b wants 10 lines, 6 of them the group's: fit 6 / 10 = 60%.
 insert into public.preferences (user_id, line_id, choice)
 select '00000000-0000-0000-0000-00000000000a'::uuid, 'w' || g, 'want'::public.choice from generate_series(1, 10) g
 union all
 select '00000000-0000-0000-0000-00000000000a'::uuid, 'd' || g, 'dont_want'::public.choice from generate_series(1, 3) g
 union all
 select '00000000-0000-0000-0000-00000000000a'::uuid, 'u1', 'undecided'::public.choice;
+
+insert into auth.users (id, raw_user_meta_data) values
+  ('00000000-0000-0000-0000-00000000000f', '{"provider_id":"6","name":"fay#0"}');
+insert into public.preferences (user_id, line_id, choice)
+select '00000000-0000-0000-0000-00000000000f'::uuid, 'w' || g, 'want'::public.choice from generate_series(1, 10) g;
+insert into public.friends (user_id, friend_id) values
+  ('00000000-0000-0000-0000-00000000000a', '00000000-0000-0000-0000-00000000000f');
 
 insert into public.preferences (user_id, line_id, choice)
 select '00000000-0000-0000-0000-00000000000b'::uuid, 'w' || g, 'want'::public.choice from generate_series(1, 6) g
@@ -124,7 +132,7 @@ end $$;
 
 -- Stats: counts active users only (eve is stale).
 do $$ begin
-  assert (select wants from public.get_line_stats() where line_id = 'w1') = 4, 'w1 wants a,b,c,d';
+  assert (select wants from public.get_line_stats() where line_id = 'w1') = 5, 'w1 wants a,b,c,d,f';
   assert (select dont_wants from public.get_line_stats() where line_id = 'd1') = 3, 'd1 dont a,b,c';
 end $$;
 

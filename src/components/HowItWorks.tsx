@@ -31,7 +31,9 @@ const STEPS: { title: string; body: React.ReactNode; href: string; cta: string }
     title: "Add your in-game friends",
     body: (
       <>
-        Look them up by exact Discord name, IGN or friend code and add up to {MAX_FRIENDS}. Each player shows two fit %s:
+        Add them in Pokémon Sleep first, then here: this list should match your in-game one, since it decides whose
+        wants your Tier List follows. Look them up by exact Discord name, IGN or friend code and add up to{" "}
+        {MAX_FRIENDS}. Each player shows two fit %s:
         <b>for you</b> (your wants match what their friends want, so the candy they send suits you) and{" "}
         <b>for them</b> (their wants match what your friends want, so the candy you send suits them). A low one
         means one of you mostly gets candy they don&apos;t need.
@@ -45,7 +47,8 @@ const STEPS: { title: string; body: React.ReactNode; href: string; cta: string }
     body: (
       <>
         Find New Friends suggests players who fit both ways, best fit first: you&apos;d each send candy the other
-        wants, so they&apos;re likely to add you back. Copy their friend code and add them in Pokémon Sleep.
+        wants, so they&apos;re likely to add you back. Tap Add friend and send them a request in Pokémon Sleep with
+        their friend code; they wait under Pending until they accept, then tap again to add them.
       </>
     ),
     href: "/matches",

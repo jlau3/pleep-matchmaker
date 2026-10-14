@@ -14,11 +14,14 @@ export function PlayerHeader({
   player,
   aside,
   isFriend,
+  actions,
 }: {
   player: PlayerContact;
   aside?: React.ReactNode;
   /** Shows the add/remove friend button when set. */
   isFriend?: boolean;
+  /** Extra buttons on the same line as the friend button (e.g. "Not now"). */
+  actions?: React.ReactNode;
 }) {
   const name = playerName(player);
   return (
@@ -31,8 +34,13 @@ export function PlayerHeader({
           <div className="h-12 w-12 shrink-0 rounded-full bg-slate-200 dark:bg-slate-700" />
         )}
         <div className="min-w-0 flex-1 self-center">
-          <span className="font-semibold">{name}</span>
-          {player.discord_username && <span className="ml-2 text-sm text-slate-500">@{player.discord_username}</span>}
+          {/* Name, then @username on its own line; long names wrap and long @names trim, so neither runs into the fits. */}
+          <span className="block break-words font-semibold">{name}</span>
+          {player.discord_username && (
+            <span className="block truncate text-sm text-slate-500" title={`@${player.discord_username}`}>
+              @{player.discord_username}
+            </span>
+          )}
         </div>
         {aside}
       </div>
@@ -54,7 +62,12 @@ export function PlayerHeader({
         <span>Prefs updated {relativeTime(player.prefs_updated_at)}</span>
         <BlockButton userId={player.user_id} name={name} />
       </div>
-      {isFriend !== undefined && <FriendButton userId={player.user_id} isFriend={isFriend} name={name} />}
+      {(isFriend !== undefined || actions) && (
+        <div className="flex flex-wrap items-center gap-2">
+          {isFriend !== undefined && <FriendButton userId={player.user_id} isFriend={isFriend} name={name} />}
+          {actions}
+        </div>
+      )}
     </div>
   );
 }

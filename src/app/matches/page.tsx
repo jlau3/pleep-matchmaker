@@ -6,9 +6,11 @@ import { PlayerSearch, searchQuery } from "@/components/PlayerSearch";
 import { FRIENDS_TABS, SubTabs } from "@/components/SubTabs";
 import { FriendPostCard } from "@/components/FriendPostCard";
 import { FriendshipLevel5 } from "@/components/FriendshipLevel5";
+import { FitLegend } from "@/components/FitLegend";
+import { InGameFirst } from "@/components/InGameFirst";
 import { FitPair } from "@/components/FitPair";
 import { LOW_FIT_PCT } from "@/lib/fit";
-import { loadFriendIds, loadOwnProfile, loadOwnVotes, MAX_FRIENDS } from "@/lib/data";
+import { loadFriendIds, loadOwnProfile, loadOwnVotes, loadPendingIds, MAX_FRIENDS } from "@/lib/data";
 import { LINES, LINES_BY_ID, linesFromIds } from "@/lib/lines";
 import { BROWSE_PAGE_SIZE, BROWSE_SORT_HINTS, BROWSE_SORTS, browseQuery, parseBrowse } from "@/lib/browse";
 import { requireUser } from "@/lib/supabase/server";
@@ -21,10 +23,12 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
   const params = await searchParams;
   const q = await searchQuery(Promise.resolve(params));
   const opts = parseBrowse(params);
-  const [{ choices, tops }, profile, friendIds, matchesResult] = await Promise.all([
+  const [{ choices, tops }, profile, friendIds, pendingIds, votedResult, matchesResult] = await Promise.all([
     loadOwnVotes(supabase, user.id),
     loadOwnProfile(supabase, user.id),
     loadFriendIds(supabase, user.id),
+    loadPendingIds(supabase, user.id),
+    supabase.rpc("my_friends_voted"),
     supabase.rpc("browse_players", {
       sort: opts.sort,
       everyone: opts.everyone,
@@ -34,6 +38,8 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
   ]);
   if (matchesResult.error) throw matchesResult.error;
   const matches = matchesResult.data as MatchRow[];
+  // "For them" is a dash until a friend has voted (assume they have if the check isn't deployed yet).
+  const friendsVoted = votedResult.error ? true : Boolean(votedResult.data);
   const total = Number(matches[0]?.total_count ?? 0);
   const pages = Math.max(1, Math.ceil(total / BROWSE_PAGE_SIZE));
   const link = (change: Partial<typeof opts>) => `/matches${browseQuery({ ...opts, page: 1, ...change }, q)}`;
@@ -88,6 +94,7 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
         <p className="mt-4 text-sm text-slate-600 dark:text-slate-300">
           Players open to new friends who are sending candies you want.
         </p>
+        <InGameFirst className="mt-2" />
         <div className="mt-2">
           <FriendshipLevel5 />
         </div>
@@ -130,6 +137,7 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
             <Pills options={BROWSE_SORTS.map(([id, label]) => [link({ sort: id }), label, opts.sort === id])} />
           </div>
           <p className="text-xs text-slate-500">{BROWSE_SORT_HINTS[opts.sort]}</p>
+          <FitLegend friendsVoted={friendsVoted} youVoted={picked > 0} />
         </div>
 
         {picked === 0 && friendIds.size === 0 && !opts.everyone ? (
@@ -154,11 +162,13 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
               <li key={match.user_id} className="card p-4">
                 <PlayerHeader player={match} aside={<FitPair they={match.match_pct} you={match.you_fit_pct} />} />
                 <FitLists match={match} />
-                {match.match_pct === null && match.you_fit_pct == null && (
-                  <p className="mt-3 text-sm text-slate-500">Hasn&apos;t voted on any candy yet.</p>
-                )}
+                <NewPlayerNote match={match} name={playerName(match)} />
                 <div className="mt-4">
-                  <ConnectSteps userId={match.user_id} friendCode={match.friend_code} name={playerName(match)} />
+                  <ConnectSteps
+                    userId={match.user_id}
+                    name={playerName(match)}
+                    initialPending={pendingIds.has(match.user_id)}
+                  />
                 </div>
               </li>
             ))}
@@ -188,6 +198,28 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
         )}
       </section>
     </div>
+  );
+}
+
+/**
+ * Why a player's numbers are dashes when it's on their side: they haven't
+ * voted ("for them"), or fewer than 3 of their friends have ("for you").
+ * Nothing is estimated in the meantime; the note says what's missing.
+ */
+function NewPlayerNote({ match, name }: { match: MatchRow; name: string }) {
+  const noVotes = match.voted === false;
+  const noList = (match.list_voters ?? 0) < 3;
+  if (!noVotes && !noList) return null;
+  const text =
+    noVotes && noList
+      ? `${name} hasn't voted yet and has fewer than 3 friends voting here, so their numbers aren't ready.`
+      : noVotes
+        ? `${name} hasn't voted yet, so "for them" isn't ready.`
+        : `${name} has fewer than 3 friends voting here, so "for you" isn't ready.`;
+  return (
+    <p className="mt-3 rounded-xl bg-sky/60 px-3 py-2 text-xs dark:bg-night-deep">
+      <b>New here:</b> {text} It fills in as they play along.
+    </p>
   );
 }
 

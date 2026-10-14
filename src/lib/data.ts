@@ -88,3 +88,13 @@ export async function loadFriendIds(supabase: SupabaseClient, userId: string): P
   if (error) throw error;
   return new Set(data.map((row) => row.friend_id as string));
 }
+
+/**
+ * Players you marked pending (asked in Pokémon Sleep, not added here yet).
+ * Empty if the pending_friends table isn't there yet (migration not run).
+ */
+export async function loadPendingIds(supabase: SupabaseClient, userId: string): Promise<Set<string>> {
+  const { data, error } = await supabase.from("pending_friends").select("target_id").eq("user_id", userId);
+  if (error) return new Set();
+  return new Set(data.map((row) => row.target_id as string));
+}
