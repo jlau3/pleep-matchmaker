@@ -1,0 +1,28 @@
+\set ON_ERROR_STOP on
+
+-- 20261018000000_tighter_fuzzy_search.sql: substring matches, typos only from 5 characters.
+insert into auth.users (id, raw_user_meta_data) values
+  ('00000000-0000-0000-0017-000000000001', '{"name":"ts_me#0"}'),
+  ('00000000-0000-0000-0017-000000000002', '{"name":"ts_two#0"}'),
+  ('00000000-0000-0000-0017-000000000003', '{"name":"ts_three#0"}');
+update public.profiles set ign = 'Mr Time' where id = '00000000-0000-0000-0017-000000000002';
+update public.profiles set ign = 'Snorlax_Lover' where id = '00000000-0000-0000-0017-000000000003';
+
+set role authenticated;
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-0017-000000000001', false);
+do $$
+declare
+  t constant uuid := '00000000-0000-0000-0017-000000000002';
+  s constant uuid := '00000000-0000-0000-0017-000000000003';
+begin
+  assert not exists (select 1 from public.lookup_players('mrl') where user_id = t), 'mrl is not Mr Time';
+  assert exists (select 1 from public.lookup_players('tim') where user_id = t), 'word start';
+  assert exists (select 1 from public.lookup_players('mrtime') where user_id = t), 'spaces ignored';
+  assert exists (select 1 from public.lookup_players('r ti') where user_id = t), 'substring';
+  assert exists (select 1 from public.lookup_players('lax lov') where user_id = s), 'substring across _';
+  assert exists (select 1 from public.lookup_players('snorlx') where user_id = s), 'typo from 5 characters';
+  assert not exists (select 1 from public.lookup_players('snrl') where user_id = s), 'no typos under 5 characters';
+end $$;
+reset role;
+
+\echo 'ALL TIGHTER SEARCH TESTS PASSED'
