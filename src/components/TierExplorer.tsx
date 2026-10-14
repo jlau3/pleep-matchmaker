@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
-import { ISLANDS, LINES, SLEEP_TYPE_LABEL, SLEEP_TYPES, lineSpriteUrl, sleepTypeMember, spriteUrl, type SleepType } from "@/lib/lines";
+import { useEffect, useMemo, useState } from "react";
+import { isSleepType, ISLANDS, LINES, SLEEP_TYPE_LABEL, SLEEP_TYPES, lineSpriteUrl, sleepTypeMember, spriteUrl, type SleepType } from "@/lib/lines";
 import { buildTiers, type LineVotes } from "@/lib/tiers";
 import { InviteButton } from "./InviteButton";
 import { InviteReminder } from "./InviteReminder";
@@ -20,6 +20,9 @@ export interface PoolVotes {
   /** Everyone on your list, voted or not (friends pool only). */
   friendCount: number;
 }
+
+/** Last view (pool, island, sleep type), so leaving the Tier List and coming back keeps it. */
+const VIEW_KEY = "pm_tiers_view";
 
 const POOL_LABEL: Record<Pool, string> = { friends: "My Friends", everyone: "Everyone" };
 const MAPPED_ISLANDS = ISLANDS.filter((island) => island.lines.length > 0);
@@ -49,7 +52,8 @@ const shortName = (name: string) =>
  * The Tier List with every view ready up front: both pools (My Friends,
  * Everyone) by island and sleep type come straight from the vote totals the
  * page loaded, so the pickers switch instantly with no server round trip.
- * The view goes in the URL (replaceState) so a reload or shared link opens it.
+ * The view goes in the URL (replaceState) so a reload or shared link opens it,
+ * and in localStorage so coming back from another tab (no query) reopens it.
  */
 export function TierExplorer({
   friends,
@@ -79,6 +83,23 @@ export function TierExplorer({
 
   const [sleepType, setSleepType] = useState<SleepType | null>(initialSleep);
 
+  // Plain /tiers (from the nav): reopen the last view. A link with its own query wins.
+  useEffect(() => {
+    if (window.location.search) return;
+    try {
+      const saved = JSON.parse(localStorage.getItem(VIEW_KEY) ?? "null");
+      if (!saved || typeof saved !== "object") return;
+      show({
+        pool: saved.pool === "everyone" ? "everyone" : "friends",
+        island: MAPPED_ISLANDS.some((island) => island.id === saved.island) ? saved.island : null,
+        sleep: isSleepType(saved.sleep) ? saved.sleep : null,
+      });
+    } catch {
+      /* Storage unavailable or bad JSON: keep the default view. */
+    }
+    // Once, on arrival.
+  }, []);
+
   function show(next: { pool?: Pool; island?: string | null; sleep?: SleepType | null }) {
     const p = next.pool ?? pool;
     const id = next.island !== undefined ? next.island : islandId;
@@ -92,6 +113,11 @@ export function TierExplorer({
     if (sleep) qs.set("sleep", sleep);
     const query = qs.toString();
     window.history.replaceState(window.history.state, "", `${window.location.pathname}${query ? `?${query}` : ""}`);
+    try {
+      localStorage.setItem(VIEW_KEY, JSON.stringify({ pool: p, island: id, sleep }));
+    } catch {
+      /* Not remembered; fine. */
+    }
   }
 
   const data = pool === "friends" ? friends : everyone;
