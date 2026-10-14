@@ -67,7 +67,7 @@ export function FriendPostCard({
     ign ? `IGN: ${ign}` : null,
     `Friend code: ${formatFriendCode(friendCode)}`,
     favorites,
-    allowLookup ? `See how my candy wishlist fits your friends' on Pleep Matchmaker: ${link}` : null,
+    allowLookup ? `See how my candy wishlist matches your friends' on Pleep Matchmaker: ${link}` : null,
   ]
     .filter(Boolean)
     .join("\n");

@@ -62,7 +62,7 @@ export async function PlayerSearch({
                     <Link href="/vote" className="shrink-0 text-right text-xs font-semibold text-want underline">
                       Add friends or vote
                       <br />
-                      to see their fit
+                      to see how you match
                     </Link>
                   ) : (
                     <FitPair they={player.match_pct} you={player.you_fit_pct} />

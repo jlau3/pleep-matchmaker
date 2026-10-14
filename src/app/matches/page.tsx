@@ -124,7 +124,7 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
           <div className="flex flex-wrap gap-2 text-sm">
             <Pills
               options={[
-                [link({ everyone: false }), "Good fits", !opts.everyone],
+                [link({ everyone: false }), "Good matches", !opts.everyone],
                 [link({ everyone: true }), "Everyone", opts.everyone],
               ]}
             />
@@ -151,7 +151,7 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
               "No one to suggest right now. Check back as more players join."
             ) : (
               <>
-                No good fits yet (at least {LOW_FIT_PCT}% both ways and 3 of your wants on their Tier List).{" "}
+                No good matches yet (at least {LOW_FIT_PCT}% both ways and 3 of your wants on their Tier List).{" "}
                 <Link href={link({ everyone: true })} className="underline">See everyone</Link> instead.
               </>
             )}

@@ -7,7 +7,7 @@ export const BROWSE_SORTS = [
 
 /** One line under the sort pills saying what the chosen order means. */
 export const BROWSE_SORT_HINTS: Record<(typeof BROWSE_SORTS)[number][0], string> = {
-  fit: "Highest average of both fits first: you'd each send candy the other wants, so they're likely to add you back.",
+  fit: "Highest average of both match %s first: you'd each send candy the other wants, so they're likely to add you back.",
   you_fit: "Highest \"for you\" first: most of what you want is what their friends want.",
   active: "Most recently online first, so they're likely to accept your friend request soon.",
 };
@@ -17,7 +17,7 @@ export const BROWSE_PAGE_SIZE = 20;
 
 export interface BrowseOptions {
   sort: BrowseSort;
-  /** false: good fits only; true: everyone you could add. */
+  /** false: good matches only; true: everyone you could add. */
   everyone: boolean;
   /** 1-based. */
   page: number;
