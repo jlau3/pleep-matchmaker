@@ -63,7 +63,7 @@ export function FriendPostCard({
   // lookup matches it exactly (IGNs can be shared; Discord names can be hidden).
   const link = `${origin}/friends?q=${friendCode}`;
   const message = [
-    "🌙 Looking for Pokémon Sleep friends!",
+    "🍬 Looking for Pokémon Sleep friends! 🍬",
     ign ? `IGN: ${ign}` : null,
     `Friend code: ${formatFriendCode(friendCode)}`,
     favorites,
