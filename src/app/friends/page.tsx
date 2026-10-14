@@ -2,12 +2,13 @@ import Link from "next/link";
 import { FriendButton } from "@/components/FriendButton";
 import { PlayerHeader, playerName } from "@/components/PlayerHeader";
 import { PlayerLists } from "@/components/PlayerLists";
-import { InGameFirst } from "@/components/InGameFirst";
+import { FriendPostCard } from "@/components/FriendPostCard";
+import { friendPostProps } from "@/lib/friendPost";
 import { InviteReminder } from "@/components/InviteReminder";
 import { FitPair } from "@/components/FitPair";
 import { PlayerSearch, searchQuery } from "@/components/PlayerSearch";
 import { FRIENDS_TABS, SubTabs } from "@/components/SubTabs";
-import { MAX_FRIENDS } from "@/lib/data";
+import { loadOwnProfile, loadOwnVotes, MAX_FRIENDS } from "@/lib/data";
 import { requireUser } from "@/lib/supabase/server";
 import type { AddedMeRow, FriendRow, PendingRow } from "@/lib/types";
 import { ConnectSteps } from "@/components/ConnectSteps";
@@ -23,10 +24,12 @@ export default async function FriendsPage({ searchParams }: { searchParams: Prom
   const q = await searchQuery(Promise.resolve(params));
   const sort = parseFriendSort(params.sort);
 
-  const [friendsResult, addedMeResult, pendingResult] = await Promise.all([
+  const [friendsResult, addedMeResult, pendingResult, profile, { choices, tops }] = await Promise.all([
     supabase.rpc("get_friends"),
     supabase.rpc("get_added_me", { with_fit: true }),
     supabase.rpc("get_pending_friends"),
+    loadOwnProfile(supabase, user.id),
+    loadOwnVotes(supabase, user.id),
   ]);
   if (friendsResult.error) throw friendsResult.error;
   // People who added you and are waiting on you (empty if that lookup isn't available yet).
@@ -95,19 +98,13 @@ export default async function FriendsPage({ searchParams }: { searchParams: Prom
             {friends.length} / {MAX_FRIENDS}
           </span>
         </h2>
-        <InGameFirst className="mb-3" />
+        <div className="mb-3">
+          <FriendPostCard {...friendPostProps(profile, choices, tops)} />
+        </div>
         {friends.length < MAX_FRIENDS && (
           <div className="mb-3">
             <InviteReminder friendCount={friends.length} />
           </div>
-        )}
-        {friends.length > 0 && friends.length < MAX_FRIENDS && (
-          <p className="mb-3 text-sm text-slate-500">
-            Room for {MAX_FRIENDS - friends.length} more.{" "}
-            <Link href="/matches" className="font-semibold underline">
-              Find new friends →
-            </Link>
-          </p>
         )}
         {friends.length === 0 ? (
           <p className="text-sm text-slate-500">

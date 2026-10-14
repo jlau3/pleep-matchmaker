@@ -5,6 +5,7 @@ import { PlayerHeader, playerName } from "@/components/PlayerHeader";
 import { PlayerSearch, searchQuery } from "@/components/PlayerSearch";
 import { FRIENDS_TABS, SubTabs } from "@/components/SubTabs";
 import { FriendPostCard } from "@/components/FriendPostCard";
+import { friendPostProps } from "@/lib/friendPost";
 import { FriendshipLevel5 } from "@/components/FriendshipLevel5";
 import { FitLegend } from "@/components/FitLegend";
 import { FitPair } from "@/components/FitPair";
@@ -100,16 +101,7 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
         </p>
       ))}
 
-      <FriendPostCard
-        friendCode={profile.friend_code}
-        ign={profile.ign}
-        allowLookup={profile.allow_lookup}
-        topNames={linesFromIds(tops).map((line) => line.name)}
-        wantNames={linesFromIds(Object.keys(choices).filter((id) => choices[id] === "want"))
-          .sort((a, b) => b.weight - a.weight || a.dex - b.dex)
-          .slice(0, 3)
-          .map((line) => line.name)}
-      />
+      <FriendPostCard {...friendPostProps(profile, choices, tops)} />
 
       <section className="space-y-3">
         <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2">
