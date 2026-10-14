@@ -114,7 +114,7 @@ export function TierBoard({ tiers, pool = "friends" }: { tiers: Map<TierId, Rank
                   </span>
                 </span>
                 <span className="mt-2 block text-sm text-slate-600 dark:text-slate-300">
-                  The candy {who} want most, from each one&apos;s personal Top 3. Some rank low on the tier list below,
+                  Candy {who} want most, from their personal Top 3. Some rank low on the tier list below,
                   but whoever starred them really wants them.
                 </span>
               </summary>
