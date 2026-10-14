@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useRef } from "react";
 import { type ProfileFormState, updateProfile } from "@/app/actions";
 import { formatFriendCode } from "@/lib/format";
 import type { OwnProfile } from "@/lib/types";
@@ -10,18 +10,24 @@ import { DiscordIcon, RedditIcon } from "./BrandIcons";
 export function ProfileForm({ profile, friendListFull }: { profile: OwnProfile; friendListFull: boolean }) {
   const [state, action, pending] = useActionState<ProfileFormState, FormData>(updateProfile, {});
   const input = "w-full field";
+  // No Save button: checkboxes save on click, text fields when you leave them (or press Enter), the icon from its popup.
+  const form = useRef<HTMLFormElement>(null);
+  const save = () => form.current?.requestSubmit();
+  const saveIfChanged = (e: React.FocusEvent<HTMLInputElement>) => {
+    if (e.currentTarget.value !== e.currentTarget.defaultValue) save();
+  };
   return (
-    <form action={action} className="space-y-4">
+    <form ref={form} action={action} className="space-y-4">
       <input type="hidden" name="has_extras" value="1" />
       <AvatarPicker initial={profile.game_avatar ?? null} discordAvatar={profile.avatar_url} />
       <label className="block space-y-1">
         <span className="text-sm font-medium">In-game name</span>
-        <input name="ign" defaultValue={profile.ign ?? ""} maxLength={40} className={input} />
+        <input name="ign" onBlur={saveIfChanged} defaultValue={profile.ign ?? ""} maxLength={40} className={input} />
       </label>
       <label className="block space-y-1">
         <span className="text-sm font-medium">Friend code</span>
         <input
-          name="friend_code"
+          name="friend_code" onBlur={saveIfChanged}
           defaultValue={profile.friend_code ? formatFriendCode(profile.friend_code) : ""}
           inputMode="numeric"
           placeholder="1234 5678 9012"
@@ -35,12 +41,12 @@ export function ProfileForm({ profile, friendListFull }: { profile: OwnProfile; 
         </span>
         <div className="flex items-center gap-1">
           <span className="text-sm text-slate-500">u/</span>
-          <input name="reddit_username" defaultValue={profile.reddit_username ?? ""} maxLength={22} placeholder="your_reddit_name" className={input} />
+          <input name="reddit_username" onBlur={saveIfChanged} defaultValue={profile.reddit_username ?? ""} maxLength={22} placeholder="your_reddit_name" className={input} />
         </div>
         <span className="text-xs text-slate-500">Shown under your name so Reddit friends recognize you. Not verified.</span>
       </label>
       <label className="flex items-start gap-3">
-        <input type="checkbox" name="open_to_friends" defaultChecked={profile.open_to_friends} className="mt-1 h-4 w-4" />
+        <input type="checkbox" onChange={save} name="open_to_friends" defaultChecked={profile.open_to_friends} className="mt-1 h-4 w-4" />
         <span>
           <span className="block text-sm font-medium">Open to new friends</span>
           <span className="text-xs text-slate-500">
@@ -55,7 +61,7 @@ export function ProfileForm({ profile, friendListFull }: { profile: OwnProfile; 
       {profile.discord_username && (
         <label className="flex items-start gap-3">
           <input type="hidden" name="has_show_discord" value="1" />
-          <input type="checkbox" name="show_discord" defaultChecked={profile.show_discord} className="mt-1 h-4 w-4" />
+          <input type="checkbox" onChange={save} name="show_discord" defaultChecked={profile.show_discord} className="mt-1 h-4 w-4" />
           <span>
             <span className="flex items-center gap-1 text-sm font-medium"><DiscordIcon /> Show my Discord name</span>
             <span className="text-xs text-slate-500">
@@ -66,7 +72,7 @@ export function ProfileForm({ profile, friendListFull }: { profile: OwnProfile; 
         </label>
       )}
       <label className="flex items-start gap-3">
-        <input type="checkbox" name="votes_private" defaultChecked={profile.votes_private ?? false} className="mt-1 h-4 w-4" />
+        <input type="checkbox" onChange={save} name="votes_private" defaultChecked={profile.votes_private ?? false} className="mt-1 h-4 w-4" />
         <span>
           <span className="block text-sm font-medium">Friends-only votes</span>
           <span className="text-xs text-slate-500">
@@ -75,7 +81,7 @@ export function ProfileForm({ profile, friendListFull }: { profile: OwnProfile; 
         </span>
       </label>
       <label className="flex items-start gap-3">
-        <input type="checkbox" name="allow_lookup" defaultChecked={profile.allow_lookup} className="mt-1 h-4 w-4" />
+        <input type="checkbox" onChange={save} name="allow_lookup" defaultChecked={profile.allow_lookup} className="mt-1 h-4 w-4" />
         <span>
           <span className="block text-sm font-medium">Let people look me up</span>
           <span className="text-xs text-slate-500">
@@ -84,21 +90,17 @@ export function ProfileForm({ profile, friendListFull }: { profile: OwnProfile; 
           </span>
         </span>
       </label>
-      <div className="flex items-center gap-3">
-        <button
-          type="submit"
-          disabled={pending}
-          className="btn-primary px-5 py-2"
-        >
-          {pending ? "Saving…" : "Save"}
-        </button>
-        {state.saved && !pending && <span className="text-sm text-want">Saved</span>}
-        {state.error && (
-          <span role="alert" className="text-sm text-dont">
-            {state.error}
-          </span>
+      <p className="min-h-5 text-sm" aria-live="polite">
+        {pending ? (
+          <span className="text-slate-500">Saving…</span>
+        ) : state.error ? (
+          <span role="alert" className="text-dont">{state.error}</span>
+        ) : state.saved ? (
+          <span className="text-want">Saved</span>
+        ) : (
+          <span className="text-slate-500">Changes save automatically.</span>
         )}
-      </div>
+      </p>
     </form>
   );
 }
