@@ -11,8 +11,7 @@ export function FitLegend({ friendsVoted = true, youVoted = true }: { friendsVot
         friends want, so the candy they send suits you.
         <br />
         <b className="text-slate-700 dark:text-slate-200">For them</b>:
-        How much of what they want aligns with what your friends want too, so the candy you send suits them. A
-        &ndash; means there isn&apos;t enough to go on yet.
+        How much of what they want aligns with what your friends want, so the candy you send suits them.
       </p>
       {!youVoted && (
         <p className="text-xs font-semibold text-amber-700 dark:text-amber-300">
