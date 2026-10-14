@@ -6,8 +6,8 @@
 export function InGameFirst({ className = "" }: { className?: string }) {
   return (
     <p className={`rounded-2xl bg-sky/60 px-3 py-2 text-sm dark:bg-night-deep ${className}`}>
-      <b>Friends here should match your Pokémon Sleep friends.</b> Add someone in the game first, then add them here,
-      so your Tier List follows the people you actually send candy to.
+      <b>📣 Your friends here should match your Pokémon Sleep friends!</b> Add them in-game first, then here, so your
+      Tier List reflects the people you actually send candy to.
     </p>
   );
 }

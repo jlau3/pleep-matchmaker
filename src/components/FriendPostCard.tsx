@@ -42,10 +42,10 @@ export function FriendPostCard({
   if (!friendCode) {
     return (
       <section className={callout}>
-        <h2 className="mb-1 font-bold">📣 Looking for more friends?</h2>
         <p className="text-slate-700 dark:text-slate-300">
-          Add your friend code in <Link href="/profile" className="underline">Profile → Settings</Link> to get a ready-made
-          &quot;looking for friends&quot; post.
+          <b>📣 Your friends here should match your Pokémon Sleep friends!</b> Add them in-game first, then here, so your
+          Tier List reflects the people you actually send candy to. Looking for more friends? Add your friend code in{" "}
+          <Link href="/profile" className="underline">Profile → Settings</Link> to get a ready-made post.
         </p>
       </section>
     );
@@ -95,8 +95,11 @@ export function FriendPostCard({
     <details className={`${callout} group`}>
       <summary className="flex cursor-pointer list-none items-center justify-between gap-3">
         <span>
-          <span className="font-bold">📣 Looking for more friends?</span>{" "}
-          <span className="text-slate-700 dark:text-slate-300">Share a post with your friend code.</span>
+          <b>📣 Your friends here should match your Pokémon Sleep friends!</b>{" "}
+          <span className="text-slate-700 dark:text-slate-300">
+            Add them in-game first, then here, so your Tier List reflects the people you actually send candy to. Looking
+            for more friends? Share a post with your friend code below!
+          </span>
           {!allowLookup && (
             <span className="ml-1 font-semibold text-amber-800 dark:text-amber-200">Lookup is off, so it won&apos;t link to you.</span>
           )}
