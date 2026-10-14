@@ -56,9 +56,10 @@ begin
 
   assert (select you_fit_pct from public.browse_players('fit', true, 50, 0) where discord_username = 'br_fresh') is null, 'no votes, no fit';
   assert (select you_fit_pct from public.browse_players('fit', true, 50, 0) where discord_username = 'br_low') = 33, 'low fit: you fit theirs';
-  -- Fits your list: the viewer has no friends, so own wants a,b,c stand in; low wants a + 9 others.
-  -- That list can only send 3 lines, so low's 10 wants count as 3: 1 of 3 (easygoing cap).
-  assert (select match_pct from public.browse_players('fit', true, 50, 0) where discord_username = 'br_low') = 33, 'low fit: fits your list';
+  -- "For them" needs your friends' votes: the viewer has none yet, so it's unknown,
+  -- and good fits go by "for you" alone (br_good is still listed above).
+  assert (select match_pct from public.browse_players('fit', true, 50, 0) where discord_username = 'br_low') is null, 'no friends, no "for them"';
+  assert not public.my_friends_voted(), 'no friends voted';
   assert not exists (
     select 1 from public.browse_players('fit', true, 50, 0)
     where discord_username in ('br_stale', 'br_closed', 'br_blocked', 'br_viewer')
@@ -111,14 +112,12 @@ do $$ begin
     'scored on their friends'' wants, not their own';
   assert (select you_fit_wants from public.browse_players('fit', true, 50, 0) where discord_username = 'br_hub') = '{bra,brb,brc}',
     'your wants their list covers';
-  assert (select match_pct from public.browse_players('fit', true, 50, 0) where discord_username = 'br_hub') = 0,
-    'their own wants (x1) don''t fit your list';
+  assert (select match_pct from public.browse_players('fit', true, 50, 0) where discord_username = 'br_hub') is null,
+    'no friends of yours voted, so no "for them"';
   -- Search shows the same two numbers.
   assert (select you_fit_pct from public.lookup_players('br_hub')) = 100, 'search: you fit theirs';
-  assert (select match_pct from public.lookup_players('br_hub')) = 0, 'search: fits your list';
-  -- Sorts: by your list, good (100) comes before hub (0); by theirs, hub (100) ties good (100).
-  assert (select array_position(array_agg(discord_username order by ord), 'br_good') < array_position(array_agg(discord_username order by ord), 'br_hub')
-          from (select *, row_number() over () as ord from public.browse_players('they_fit', true, 50, 0)) t), 'they_fit sort';
+  assert (select match_pct from public.lookup_players('br_hub')) is null, 'search: no "for them" without friends';
+  -- (The they_fit sort can't be told apart here: with no friends' votes, "for them" is null for everyone.)
 end $$;
 reset role;
 

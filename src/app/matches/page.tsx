@@ -7,6 +7,7 @@ import { FRIENDS_TABS, SubTabs } from "@/components/SubTabs";
 import { FriendPostCard } from "@/components/FriendPostCard";
 import { FriendshipLevel5 } from "@/components/FriendshipLevel5";
 import { FitLegend } from "@/components/FitLegend";
+import { InGameFirst } from "@/components/InGameFirst";
 import { FitPair } from "@/components/FitPair";
 import { LOW_FIT_PCT } from "@/lib/fit";
 import { loadFriendIds, loadOwnProfile, loadOwnVotes, MAX_FRIENDS } from "@/lib/data";
@@ -22,10 +23,11 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
   const params = await searchParams;
   const q = await searchQuery(Promise.resolve(params));
   const opts = parseBrowse(params);
-  const [{ choices, tops }, profile, friendIds, matchesResult] = await Promise.all([
+  const [{ choices, tops }, profile, friendIds, votedResult, matchesResult] = await Promise.all([
     loadOwnVotes(supabase, user.id),
     loadOwnProfile(supabase, user.id),
     loadFriendIds(supabase, user.id),
+    supabase.rpc("my_friends_voted"),
     supabase.rpc("browse_players", {
       sort: opts.sort,
       everyone: opts.everyone,
@@ -35,6 +37,8 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
   ]);
   if (matchesResult.error) throw matchesResult.error;
   const matches = matchesResult.data as MatchRow[];
+  // "For them" is a dash until a friend has voted (assume they have if the check isn't deployed yet).
+  const friendsVoted = votedResult.error ? true : Boolean(votedResult.data);
   const total = Number(matches[0]?.total_count ?? 0);
   const pages = Math.max(1, Math.ceil(total / BROWSE_PAGE_SIZE));
   const link = (change: Partial<typeof opts>) => `/matches${browseQuery({ ...opts, page: 1, ...change }, q)}`;
@@ -89,6 +93,7 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
         <p className="mt-4 text-sm text-slate-600 dark:text-slate-300">
           Players open to new friends who are sending candies you want.
         </p>
+        <InGameFirst className="mt-2" />
         <div className="mt-2">
           <FriendshipLevel5 />
         </div>
@@ -131,7 +136,7 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
             <Pills options={BROWSE_SORTS.map(([id, label]) => [link({ sort: id }), label, opts.sort === id])} />
           </div>
           <p className="text-xs text-slate-500">{BROWSE_SORT_HINTS[opts.sort]}</p>
-          <FitLegend />
+          <FitLegend friendsVoted={friendsVoted} />
         </div>
 
         {picked === 0 && friendIds.size === 0 && !opts.everyone ? (

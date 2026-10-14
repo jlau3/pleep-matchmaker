@@ -24,9 +24,12 @@ export interface FriendItem {
 export function FriendsBoard({
   items,
   initialSort,
+  friendsVoted,
 }: {
   items: FriendItem[];
   initialSort: FriendSort;
+  /** Whether any friend has voted; "for them" is a dash until one has. */
+  friendsVoted: boolean;
 }) {
   const [sort, setSort] = useState(initialSort);
   const [view, setView] = useState<"list" | "grid">("list");
@@ -89,7 +92,7 @@ export function FriendsBoard({
         </div>
       )}
       <div className="mb-3">
-        <FitLegend />
+        <FitLegend friendsVoted={friendsVoted} />
       </div>
       <ul className={view === "grid" ? "grid gap-3 md:grid-cols-2" : "space-y-3"}>
         {sorted.map((item) => (

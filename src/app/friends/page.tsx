@@ -2,6 +2,7 @@ import Link from "next/link";
 import { FriendButton } from "@/components/FriendButton";
 import { PlayerHeader, playerName } from "@/components/PlayerHeader";
 import { PlayerLists } from "@/components/PlayerLists";
+import { InGameFirst } from "@/components/InGameFirst";
 import { InviteReminder } from "@/components/InviteReminder";
 import { FitPair } from "@/components/FitPair";
 import { PlayerSearch, searchQuery } from "@/components/PlayerSearch";
@@ -41,7 +42,8 @@ export default async function FriendsPage({ searchParams }: { searchParams: Prom
             Added you <span className="text-sm font-normal text-slate-500">{addedMe.length}</span>
           </h2>
           <p className="mb-3 text-sm text-slate-500">
-            These players have you on their friend list. Add them back to see their candy on your Tier List.
+            These players have you on their friend list here. Once you&apos;re friends in Pokémon Sleep too, add them
+            back so their candy shows on your Tier List.
           </p>
           <ul className="space-y-3">
             {addedMe.map((player) => (
@@ -65,6 +67,7 @@ export default async function FriendsPage({ searchParams }: { searchParams: Prom
             {friends.length} / {MAX_FRIENDS}
           </span>
         </h2>
+        <InGameFirst className="mb-3" />
         {friends.length < MAX_FRIENDS && (
           <div className="mb-3">
             <InviteReminder friendCount={friends.length} />
@@ -80,13 +83,15 @@ export default async function FriendsPage({ searchParams }: { searchParams: Prom
         )}
         {friends.length === 0 ? (
           <p className="text-sm text-slate-500">
-            Search for your in-game friends above, or find new ones in{" "}
+            Search for your Pokémon Sleep friends above and add them, or find new ones in{" "}
             <Link href="/matches" className="underline">Find New Friends</Link>. Then check the{" "}
             <Link href="/tiers" className="underline">Tier List</Link> to see which candy they want most.
           </p>
         ) : (
           <FriendsBoard
             initialSort={sort}
+            // "For them" scores against your friends' votes (group_demand: visible friends' wants).
+            friendsVoted={friends.some((f) => f.visible && f.wants.length > 0)}
             items={friends.map(
               (friend): FriendItem => ({
                 id: friend.user_id,
