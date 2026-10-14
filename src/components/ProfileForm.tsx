@@ -4,12 +4,16 @@ import { useActionState } from "react";
 import { type ProfileFormState, updateProfile } from "@/app/actions";
 import { formatFriendCode } from "@/lib/format";
 import type { OwnProfile } from "@/lib/types";
+import { AvatarPicker } from "./AvatarPicker";
+import { DiscordIcon, RedditIcon } from "./BrandIcons";
 
 export function ProfileForm({ profile, friendListFull }: { profile: OwnProfile; friendListFull: boolean }) {
   const [state, action, pending] = useActionState<ProfileFormState, FormData>(updateProfile, {});
   const input = "w-full field";
   return (
     <form action={action} className="space-y-4">
+      <input type="hidden" name="has_extras" value="1" />
+      <AvatarPicker initial={profile.game_avatar ?? null} discordAvatar={profile.avatar_url} />
       <label className="block space-y-1">
         <span className="text-sm font-medium">In-game name</span>
         <input name="ign" defaultValue={profile.ign ?? ""} maxLength={40} className={input} />
@@ -24,6 +28,16 @@ export function ProfileForm({ profile, friendListFull }: { profile: OwnProfile; 
           className={`${input} font-mono`}
         />
         <span className="text-xs text-slate-500">You won't show up in other people's matches until this is set.</span>
+      </label>
+      <label className="block space-y-1">
+        <span className="flex items-center gap-1 text-sm font-medium">
+          <RedditIcon /> Reddit name <span className="font-normal text-slate-500">(optional)</span>
+        </span>
+        <div className="flex items-center gap-1">
+          <span className="text-sm text-slate-500">u/</span>
+          <input name="reddit_username" defaultValue={profile.reddit_username ?? ""} maxLength={22} placeholder="your_reddit_name" className={input} />
+        </div>
+        <span className="text-xs text-slate-500">Shown under your name so Reddit friends recognize you. Not verified.</span>
       </label>
       <label className="flex items-start gap-3">
         <input type="checkbox" name="open_to_friends" defaultChecked={profile.open_to_friends} className="mt-1 h-4 w-4" />
@@ -43,7 +57,7 @@ export function ProfileForm({ profile, friendListFull }: { profile: OwnProfile; 
           <input type="hidden" name="has_show_discord" value="1" />
           <input type="checkbox" name="show_discord" defaultChecked={profile.show_discord} className="mt-1 h-4 w-4" />
           <span>
-            <span className="block text-sm font-medium">Show my Discord name</span>
+            <span className="flex items-center gap-1 text-sm font-medium"><DiscordIcon /> Show my Discord name</span>
             <span className="text-xs text-slate-500">
               Off: other players see your IGN instead of @{profile.discord_username} and your Discord picture, and can only
               find you by IGN or friend code.
@@ -51,6 +65,15 @@ export function ProfileForm({ profile, friendListFull }: { profile: OwnProfile; 
           </span>
         </label>
       )}
+      <label className="flex items-start gap-3">
+        <input type="checkbox" name="votes_private" defaultChecked={profile.votes_private ?? false} className="mt-1 h-4 w-4" />
+        <span>
+          <span className="block text-sm font-medium">Friends-only votes</span>
+          <span className="text-xs text-slate-500">
+            Only players on your friend list see your wants, don&apos;t-wants and Top 3. Others still see your match %s.
+          </span>
+        </span>
+      </label>
       <label className="flex items-start gap-3">
         <input type="checkbox" name="allow_lookup" defaultChecked={profile.allow_lookup} className="mt-1 h-4 w-4" />
         <span>

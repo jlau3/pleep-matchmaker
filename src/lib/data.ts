@@ -74,11 +74,11 @@ export async function seedUndecided(
 }
 
 export async function loadOwnProfile(supabase: SupabaseClient, userId: string): Promise<OwnProfile> {
-  const { data, error } = await supabase
-    .from("profiles")
-    .select("id, discord_username, discord_display_name, avatar_url, ign, friend_code, open_to_friends, allow_lookup, show_discord, last_seen_at, prefs_updated_at")
-    .eq("id", userId)
-    .single();
+  const base = "id, discord_username, discord_display_name, avatar_url, ign, friend_code, open_to_friends, allow_lookup, show_discord, last_seen_at, prefs_updated_at";
+  const full = await supabase.from("profiles").select(`${base}, votes_private, game_avatar, reddit_username`).eq("id", userId).single();
+  if (!full.error) return full.data as OwnProfile;
+  // Before the profile_extras migration runs those columns don't exist yet.
+  const { data, error } = await supabase.from("profiles").select(base).eq("id", userId).single();
   if (error) throw error;
   return data as OwnProfile;
 }

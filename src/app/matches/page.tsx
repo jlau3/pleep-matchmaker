@@ -15,6 +15,7 @@ import { LINES, LINES_BY_ID, linesFromIds } from "@/lib/lines";
 import { BROWSE_PAGE_SIZE, BROWSE_SORT_HINTS, BROWSE_SORTS, browseQuery, parseBrowse } from "@/lib/browse";
 import { requireUser } from "@/lib/supabase/server";
 import type { MatchRow } from "@/lib/types";
+import { withExtras } from "@/lib/extras";
 
 type Params = { q?: string; sort?: string; show?: string; page?: string };
 
@@ -37,7 +38,7 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
     }),
   ]);
   if (matchesResult.error) throw matchesResult.error;
-  const matches = matchesResult.data as MatchRow[];
+  const matches = await withExtras(supabase, matchesResult.data as MatchRow[]);
   // "For them" is a dash until a friend has voted (assume they have if the check isn't deployed yet).
   const friendsVoted = votedResult.error ? true : Boolean(votedResult.data);
   const total = Number(matches[0]?.total_count ?? 0);
@@ -92,7 +93,7 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
         <SubTabs tabs={FRIENDS_TABS} active="/matches" />
         <PlayerSearch supabase={supabase} q={q} friendIds={friendIds} viewerId={user.id} />
         <div className="mt-4">
-          <FriendshipLevel5 />
+          <FriendPostCard {...friendPostProps(profile, choices, tops)} />
         </div>
       </div>
       {notices.map((notice, i) => (
@@ -101,7 +102,7 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
         </p>
       ))}
 
-      <FriendPostCard {...friendPostProps(profile, choices, tops)} />
+      <FriendshipLevel5 />
 
       <section className="space-y-3">
         <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2">

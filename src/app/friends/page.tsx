@@ -12,10 +12,12 @@ import { loadOwnProfile, loadOwnVotes, MAX_FRIENDS } from "@/lib/data";
 import { requireUser } from "@/lib/supabase/server";
 import type { AddedMeRow, FriendRow, PendingRow, PlaceholderRow } from "@/lib/types";
 import { FriendPlaceholders } from "@/components/FriendPlaceholders";
+import { ConfirmPlaceholder } from "@/components/ConfirmPlaceholder";
 import { ConnectSteps } from "@/components/ConnectSteps";
 import { DismissAddedYou } from "@/components/DismissAddedYou";
 import { type FriendItem, FriendsBoard } from "@/components/FriendsBoard";
 import { FRIEND_SORTS, friendRank, parseFriendSort } from "@/lib/friendSort";
+import { withExtras } from "@/lib/extras";
 
 const card = "card p-4";
 
@@ -35,13 +37,18 @@ export default async function FriendsPage({ searchParams }: { searchParams: Prom
   ]);
   if (friendsResult.error) throw friendsResult.error;
   // People who added you and are waiting on you (empty if that lookup isn't available yet).
-  const addedMe = (addedMeResult.data ?? []) as AddedMeRow[];
+  const addedMe = await withExtras(supabase, (addedMeResult.data ?? []) as AddedMeRow[]);
   // Asked in Pokémon Sleep, not added here yet (empty until that migration runs).
-  const pending = (pendingResult.data ?? []) as PendingRow[];
+  const pending = await withExtras(supabase, (pendingResult.data ?? []) as PendingRow[]);
   // In-game friends not here yet (null until that migration runs, which hides the section).
   const placeholders = placeholdersResult.error ? null : ((placeholdersResult.data ?? []) as PlaceholderRow[]);
-  const friends = friendsResult.data as FriendRow[];
+  const friends = await withExtras(supabase, friendsResult.data as FriendRow[]);
   const friendIds = new Set(friends.map((f) => f.user_id));
+  // Someone who added you and has the IGN of a Not here yet name is probably that friend: those go first, in gold.
+  const nameKey = (name: string | null | undefined) => (name ?? "").normalize("NFKC").trim().replace(/\s+/g, " ").toLowerCase();
+  const placeholderFor = (ign: string | null) =>
+    ign ? (placeholders ?? []).find((p) => nameKey(p.name) === nameKey(ign))?.name ?? null : null;
+  const addedMeSorted = [...addedMe].sort((a, b) => Number(Boolean(placeholderFor(b.ign))) - Number(Boolean(placeholderFor(a.ign))));
 
   return (
     <div className="space-y-8">
@@ -50,11 +57,7 @@ export default async function FriendsPage({ searchParams }: { searchParams: Prom
         <PlayerSearch supabase={supabase} q={q} friendIds={friendIds} viewerId={user.id} />
       </section>
 
-      {placeholders && (
-        <section id="not-here-yet" className="scroll-mt-20">
-          <FriendPlaceholders rows={placeholders} friendIds={[...friendIds]} viewerId={user.id} />
-        </section>
-      )}
+      <FriendPostCard {...friendPostProps(profile, choices, tops)} />
 
       {addedMe.length > 0 && (
         <section id="added-you" className="scroll-mt-20">
@@ -66,16 +69,30 @@ export default async function FriendsPage({ searchParams }: { searchParams: Prom
             back so their candy shows on your Tier List.
           </p>
           <ul className="space-y-3">
-            {addedMe.map((player) => (
-              <li key={player.user_id} className={card}>
-                <PlayerHeader
-                  player={player}
-                  isFriend={false}
-                  aside={<FitPair they={player.match_pct} you={player.you_fit_pct} />}
-                  actions={<DismissAddedYou userId={player.user_id} />}
-                />
-              </li>
-            ))}
+            {addedMeSorted.map((player) => {
+              const maybe = placeholderFor(player.ign);
+              return (
+                <li key={player.user_id} className={maybe ? `${card} ring-2 ring-sun-deep` : card}>
+                  {maybe && (
+                    <p className="-mx-4 -mt-4 mb-3 rounded-t-3xl bg-sun/40 px-4 py-2 text-sm dark:bg-sun/20">
+                      <b>★ This may be {maybe} from your Not here yet list!</b> If it&apos;s them, add them back and
+                      they come off that list.
+                    </p>
+                  )}
+                  <PlayerHeader
+                    player={player}
+                    isFriend={maybe ? undefined : false}
+                    aside={<FitPair they={player.match_pct} you={player.you_fit_pct} />}
+                    actions={
+                      <>
+                        {maybe && <ConfirmPlaceholder userId={player.user_id} placeholder={maybe} />}
+                        <DismissAddedYou userId={player.user_id} />
+                      </>
+                    }
+                  />
+                </li>
+              );
+            })}
           </ul>
         </section>
       )}
@@ -108,9 +125,11 @@ export default async function FriendsPage({ searchParams }: { searchParams: Prom
             {friends.length} / {MAX_FRIENDS}
           </span>
         </h2>
-        <div className="mb-3">
-          <FriendPostCard {...friendPostProps(profile, choices, tops)} />
-        </div>
+        {placeholders && (
+          <div id="not-here-yet" className="mb-3 scroll-mt-20">
+            <FriendPlaceholders rows={placeholders} friendIds={[...friendIds]} viewerId={user.id} />
+          </div>
+        )}
         {friends.length < MAX_FRIENDS && (
           <div className="mb-3">
             <InviteReminder friendCount={friends.length} />

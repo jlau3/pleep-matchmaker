@@ -5,12 +5,14 @@ import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { normalizeFriendCode } from "@/lib/format";
 import { MAX_FRIENDS } from "@/lib/friendship";
+import { parseAvatar } from "@/lib/avatars";
 import type { LookupRow } from "@/lib/types";
 import { META_COOKIE, META_POSTS, metaCookieValue } from "@/content/meta";
 import { HELP_COOKIE, HELP_VERSION, helpCookieValue } from "@/lib/help";
 import { LINKING_COOKIE, NEXT_COOKIE, safeNextPath } from "@/lib/nextPath";
 import { isChoice, LINES_BY_ID, MAX_TOP } from "@/lib/lines";
 import { createClient, requireUser } from "@/lib/supabase/server";
+import { withExtras } from "@/lib/extras";
 
 const OAUTH_PROVIDERS = { discord: "Discord", google: "Google" } as const;
 
@@ -194,7 +196,21 @@ export async function updateProfile(_prev: ProfileFormState, form: FormData): Pr
   };
   // Only Discord accounts get the checkbox (an unchecked box isn't submitted, hence the marker).
   if (form.has("has_show_discord")) update.show_discord = form.get("show_discord") === "on";
-  const { error } = await supabase.from("profiles").update(update).eq("id", user.id);
+
+  // Icon, Reddit name and friends-only votes (profile_extras migration).
+  const extras: Record<string, unknown> = {};
+  if (form.has("has_extras")) {
+    const reddit = String(form.get("reddit_username") ?? "").trim().replace(/^\/?u\//i, "");
+    if (reddit && !/^[A-Za-z0-9_-]{3,20}$/.test(reddit)) return { error: "Reddit names are 3 to 20 letters, numbers, - or _" };
+    const avatar = String(form.get("game_avatar") ?? "");
+    if (avatar && !parseAvatar(avatar)) return { error: "Pick an icon from the list" };
+    extras.reddit_username = reddit || null;
+    extras.game_avatar = avatar || null;
+    extras.votes_private = form.get("votes_private") === "on";
+  }
+  let { error } = await supabase.from("profiles").update({ ...update, ...extras }).eq("id", user.id);
+  // Before that migration runs, save the rest.
+  if (error && Object.keys(extras).length > 0) ({ error } = await supabase.from("profiles").update(update).eq("id", user.id));
   if (error) return { error: "Couldn't save your profile, try again" };
   revalidatePath("/", "layout");
   return { saved: true };
@@ -284,7 +300,29 @@ export async function lookupPlayers(q: string): Promise<{ rows?: LookupRow[]; er
   if (!query) return { rows: [] };
   const { data, error } = await supabase.rpc("lookup_players", { q: query });
   if (error) return { error: "Search failed, try again" };
-  return { rows: data as LookupRow[] };
+  return { rows: await withExtras(supabase, data as LookupRow[]) };
+}
+
+/**
+ * Not here yet's single search: looks up every saved name at once and returns the
+ * names that turned someone up, in A-Z order. Names with no one found are left out.
+ */
+export async function searchPlaceholders(): Promise<{ hits?: { name: string; rows: LookupRow[] }[]; searched?: number; error?: string }> {
+  const { supabase, user } = await requireUser();
+  const { data, error } = await supabase.from("friend_placeholders").select("name").eq("user_id", user.id);
+  if (error) return { error: "Search failed, try again" };
+  const names = (data ?? []).map((r) => r.name as string);
+  const results = await Promise.all(
+    names.map(async (name) => {
+      const found = await supabase.rpc("lookup_players", { q: name });
+      const rows = await withExtras(supabase, ((found.data ?? []) as LookupRow[]).filter((row) => row.user_id !== user.id));
+      return { name, rows };
+    }),
+  );
+  const hits = results
+    .filter((r) => r.rows.length > 0)
+    .sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: "base", numeric: true }));
+  return { hits, searched: names.length };
 }
 
 /**

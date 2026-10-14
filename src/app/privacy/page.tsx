@@ -37,8 +37,8 @@ export default function PrivacyPage() {
             name or photo.
           </li>
           <li>
-            <b>What you enter.</b> Your in-game name (IGN), friend code, candy votes and Top 3, friends list, blocked players,
-            and settings.
+            <b>What you enter.</b> Your in-game name (IGN), friend code, profile icon, Reddit name if you add one, candy votes
+            and Top 3, friends list, blocked players, and settings.
           </li>
           <li>
             <b>Activity.</b> When you were last active and when your votes last changed, so inactive players drop out of
@@ -58,8 +58,9 @@ export default function PrivacyPage() {
       <Section title="Who can see what">
         <ul className="list-disc space-y-1 pl-5">
           <li>
-            <b>Other players</b> can see your IGN, friend code, candy votes and Top 3, when you were last active, and your
-            Discord name and avatar if <b>Show my Discord name</b> is on. They see this when they search for your name (or
+            <b>Other players</b> can see your IGN, friend code, profile icon, Reddit name, candy votes and Top 3 (only your
+            friends, if <b>Friends-only votes</b> is on), when you were last active, and your Discord name and avatar if{" "}
+            <b>Show my Discord name</b> is on. They see this when they search for your name (or
             something close to it) or friend code, when you appear in their matches, or when they&apos;ve added you as a friend.
           </li>
           <li>
@@ -67,8 +68,8 @@ export default function PrivacyPage() {
           </li>
           <li>
             <b>You control it</b> in Profile → Settings: turn off &quot;Let people look me up&quot; to hide your list from
-            searches and friends, turn off &quot;Open to new friends&quot; to leave matching, hide your Discord name, or block
-            anyone.
+            searches and friends, turn on &quot;Friends-only votes&quot;, turn off &quot;Open to new friends&quot; to leave
+            matching, hide your Discord name, or block anyone.
           </li>
           <li>
             <b>The developer</b> can see the database, including sign-in emails, to run and fix the app.

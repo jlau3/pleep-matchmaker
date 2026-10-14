@@ -1,6 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { LookupRow } from "@/lib/types";
 import { PlayerSearchBox } from "./PlayerSearchBox";
+import { withExtras } from "@/lib/extras";
 
 /** Reads and trims the ?q= search on the Friends tabs. */
 export async function searchQuery(searchParams: Promise<{ q?: string }>): Promise<string> {
@@ -27,7 +28,7 @@ export async function PlayerSearch({
   if (q) {
     const { data, error } = await supabase.rpc("lookup_players", { q });
     if (error) throw error;
-    rows = data as LookupRow[];
+    rows = await withExtras(supabase, data as LookupRow[]);
   }
   return <PlayerSearchBox initialQ={q} initialRows={rows} friendIds={[...friendIds]} viewerId={viewerId} />;
 }
