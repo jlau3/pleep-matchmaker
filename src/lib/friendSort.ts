@@ -29,9 +29,9 @@ export function friendRank(f: FriendRow, sort: FriendSort): number {
   const forThem = f.match_pct ?? null;
   const forYou = f.you_fit_pct ?? null;
   if (sort === "you_fit") return forYou ?? -1;
-  // Best match: the average, or either one alone when the other is unknown.
+  // Best match: the two added up (a missing one counts as 0, like Find New Friends).
   if (forThem == null && forYou == null) return -1;
-  return ((forThem ?? forYou)! + (forYou ?? forThem)!) / 2;
+  return (forThem ?? 0) + (forYou ?? 0);
 }
 
 /** Sorted copy; ties keep the order friends were added in. */

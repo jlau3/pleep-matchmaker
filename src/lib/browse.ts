@@ -7,7 +7,7 @@ export const BROWSE_SORTS = [
 
 /** One line under the sort pills saying what the chosen order means. */
 export const BROWSE_SORT_HINTS: Record<(typeof BROWSE_SORTS)[number][0], string> = {
-  fit: "Highest average of both match %s first: you'd each send candy the other wants, so they're likely to add you back.",
+  fit: "Highest total of both match %s first (a – counts as 0): you'd each send candy the other wants, so they're likely to add you back.",
   you_fit: "Highest \"for you\" first: most of what you want is what their friends want.",
   active: "Most recently online first, so they're likely to accept your friend request soon.",
 };
