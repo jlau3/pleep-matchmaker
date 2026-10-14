@@ -5,9 +5,9 @@ import { PlayerHeader, playerName } from "@/components/PlayerHeader";
 import { PlayerSearch, searchQuery } from "@/components/PlayerSearch";
 import { FRIENDS_TABS, SubTabs } from "@/components/SubTabs";
 import { FriendPostCard } from "@/components/FriendPostCard";
+import { friendPostProps } from "@/lib/friendPost";
 import { FriendshipLevel5 } from "@/components/FriendshipLevel5";
 import { FitLegend } from "@/components/FitLegend";
-import { InGameFirst } from "@/components/InGameFirst";
 import { FitPair } from "@/components/FitPair";
 import { LOW_FIT_PCT } from "@/lib/fit";
 import { loadFriendIds, loadOwnProfile, loadOwnVotes, loadPendingIds, MAX_FRIENDS } from "@/lib/data";
@@ -91,10 +91,7 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
       <div>
         <SubTabs tabs={FRIENDS_TABS} active="/matches" query={q ? `q=${encodeURIComponent(q)}` : undefined} />
         <PlayerSearch supabase={supabase} q={q} friendIds={friendIds} viewerId={user.id} />
-        <p className="mt-4 text-sm text-slate-600 dark:text-slate-300">
-        </p>
-        <InGameFirst className="mt-2" />
-        <div className="mt-2">
+        <div className="mt-4">
           <FriendshipLevel5 />
         </div>
       </div>
@@ -104,16 +101,7 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
         </p>
       ))}
 
-      <FriendPostCard
-        friendCode={profile.friend_code}
-        ign={profile.ign}
-        allowLookup={profile.allow_lookup}
-        topNames={linesFromIds(tops).map((line) => line.name)}
-        wantNames={linesFromIds(Object.keys(choices).filter((id) => choices[id] === "want"))
-          .sort((a, b) => b.weight - a.weight || a.dex - b.dex)
-          .slice(0, 3)
-          .map((line) => line.name)}
-      />
+      <FriendPostCard {...friendPostProps(profile, choices, tops)} />
 
       <section className="space-y-3">
         <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2">
