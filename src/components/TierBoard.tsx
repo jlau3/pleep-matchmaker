@@ -16,7 +16,7 @@ const topPanel = "card mb-6 border-2 border-dashed border-sun-deep/60 bg-[#fff3c
 
 /**
  * Rating color in five 20-point bands, red (nobody wants it) through yellow
- * (wants and don't-wants cancel out, 50) to green (everyone wants it).
+ * (around 50, the Avoid line) to green (everyone wants it; all Neutral is 67).
  */
 const RATING_BANDS: [number, string][] = [
   [80, "text-emerald-600 dark:text-emerald-400"],
