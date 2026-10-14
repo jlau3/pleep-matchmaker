@@ -50,6 +50,12 @@ export default async function FriendsPage({ searchParams }: { searchParams: Prom
         <PlayerSearch supabase={supabase} q={q} friendIds={friendIds} viewerId={user.id} />
       </section>
 
+      {placeholders && (
+        <section id="not-here-yet" className="scroll-mt-20">
+          <FriendPlaceholders rows={placeholders} friendIds={[...friendIds]} viewerId={user.id} />
+        </section>
+      )}
+
       {addedMe.length > 0 && (
         <section id="added-you" className="scroll-mt-20">
           <h2 className="mb-1 text-lg font-semibold">
@@ -153,20 +159,6 @@ export default async function FriendsPage({ searchParams }: { searchParams: Prom
           />
         )}
       </section>
-
-      {placeholders && (
-        <section id="not-here-yet" className="scroll-mt-20">
-          <h2 className="mb-1 text-lg font-semibold">
-            Not here yet{" "}
-            {placeholders.length > 0 && <span className="text-sm font-normal text-slate-500">{placeholders.length}</span>}
-          </h2>
-          <p className="mb-3 text-sm text-slate-500">
-            In-game friends who haven&apos;t signed up. Add their IGN as a reminder, then tap Search now and then; once they
-            join, add them and they drop off this list.
-          </p>
-          <FriendPlaceholders rows={placeholders} />
-        </section>
-      )}
     </div>
   );
 }
