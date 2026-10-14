@@ -34,8 +34,13 @@ export function PlayerHeader({
           <div className="h-12 w-12 shrink-0 rounded-full bg-slate-200 dark:bg-slate-700" />
         )}
         <div className="min-w-0 flex-1 self-center">
-          <span className="font-semibold">{name}</span>
-          {player.discord_username && <span className="ml-2 text-sm text-slate-500">@{player.discord_username}</span>}
+          {/* Name, then @username on its own line; long names wrap and long @names trim, so neither runs into the fits. */}
+          <span className="block break-words font-semibold">{name}</span>
+          {player.discord_username && (
+            <span className="block truncate text-sm text-slate-500" title={`@${player.discord_username}`}>
+              @{player.discord_username}
+            </span>
+          )}
         </div>
         {aside}
       </div>
