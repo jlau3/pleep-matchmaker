@@ -136,12 +136,11 @@ New lines are saved as Neutral for every player the next time they open **My Vot
 
 ### Automatic updates
 
-Two scheduled GitHub Actions keep this current:
+A scheduled GitHub Action keeps this current:
 
-- **Data refresh** (`.github/workflows/data-refresh.yml`, daily): reruns `build_lines.py`, `build_icons.py --missing-only` (only new sprites and ones still without a Serebii icon, tracked in `scripts/icons-state.json`) and `build_islands.py`. If anything changed, `scripts/check_data.py` blocks the update when a line id would disappear (votes would orphan), a sprite is missing or an island names an unknown line. Then typecheck and tests run, and a `data/refresh` PR is opened or updated with a summary of new lines, members and spawns. Nothing ships until you merge it.
-- **News watch** (`.github/workflows/news-watch.yml`, every 6 hours): reads the [official news list](https://www.pokemonsleep.net/en/news/) (it has no RSS feed) and posts new headlines, so you know a release is coming.
+- **Data refresh** (`.github/workflows/data-refresh.yml`, every 6 hours): reruns `build_lines.py`, `build_icons.py --missing-only` (only new sprites and ones still without a Serebii icon, tracked in `scripts/icons-state.json`) and `build_islands.py`. If anything changed, `scripts/check_data.py` blocks the update when a line id would disappear (votes would orphan), a sprite is missing or an island names an unknown line. Then typecheck and tests run, and a `data/refresh` PR is opened or updated with a summary of new lines, members and spawns. Nothing ships until you merge it.
 
-Both ping Discord when the `DISCORD_WEBHOOK_URL` repository secret is set (Server Settings → Integrations → Webhooks in Discord; GitHub repo → Settings → Secrets and variables → Actions). The data job also needs **Settings → Actions → General → Allow GitHub Actions to create and approve pull requests**. Either can be run by hand from the Actions tab.
+It pings Discord when the `DISCORD_WEBHOOK_URL` repository secret is set, headlined "New Pokémon" when nitoyon's roster adds lines or members (Server Settings → Integrations → Webhooks in Discord; GitHub repo → Settings → Secrets and variables → Actions). It also needs **Settings → Actions → General → Allow GitHub Actions to create and approve pull requests**. It can be run by hand from the Actions tab.
 
 Lines released in the last 14 days get a **new candy card** at the top of My Votes, with spawn islands and what players have voted so far.
 

@@ -1,7 +1,8 @@
-# Daily: rebuild the candy lines, sprites and island spawns from upstream
-# (nitoyon/pokesleep-tool roster, Serebii icons and location pages). If
-# anything changed and the safety checks pass, open or update a PR and ping
-# Discord. Nothing reaches players until the PR is merged.
+# Every 6 hours: rebuild the candy lines, sprites and island spawns from
+# upstream (nitoyon/pokesleep-tool roster, Serebii icons and location pages).
+# If anything changed and the safety checks pass, open or update a PR and ping
+# Discord, headlined with the new Pokémon when nitoyon added any. Nothing
+# reaches players until the PR is merged.
 #
 # Needs: Settings -> Actions -> General -> "Allow GitHub Actions to create and
 # approve pull requests". Optional secret DISCORD_WEBHOOK_URL for the ping.
@@ -9,7 +10,7 @@ name: Data refresh
 
 on:
   schedule:
-    - cron: "17 13 * * *"
+    - cron: "17 */6 * * *"
   workflow_dispatch:
 
 permissions:
@@ -88,8 +89,10 @@ jobs:
         if: steps.pr.outputs.pull-request-operation == 'created' || steps.pr.outputs.pull-request-operation == 'updated'
         run: |
           [ -n "$DISCORD_WEBHOOK_URL" ] || { echo "No DISCORD_WEBHOOK_URL secret; skipping ping."; exit 0; }
-          jq -n --arg op "${{ steps.pr.outputs.pull-request-operation }}" --arg url "${{ steps.pr.outputs.pull-request-url }}" --rawfile summary summary.md \
-            '{content: ("**Pleep Matchmaker data refresh** (PR " + $op + ")\n" + $summary + "\nReview and merge: " + $url)[0:1900]}' \
+          # New lines or members (from nitoyon's roster) get their own headline; sprite or spawn-only refreshes stay low-key.
+          if grep -q '^\*\*New \(candy lines\|members\)' summary.md; then head="**New Pokémon in Pokémon Sleep data!**"; else head="**Pleep Matchmaker data refresh**"; fi
+          jq -n --arg head "$head" --arg op "${{ steps.pr.outputs.pull-request-operation }}" --arg url "${{ steps.pr.outputs.pull-request-url }}" --rawfile summary summary.md \
+            '{content: ($head + " (PR " + $op + ")\n" + $summary + "\nReview and merge: " + $url)[0:1900]}' \
             | curl -sSf -H "Content-Type: application/json" -d @- "$DISCORD_WEBHOOK_URL"
 
       - name: Ping Discord on failure
