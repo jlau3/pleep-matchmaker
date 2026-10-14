@@ -1,6 +1,6 @@
 /** Find New Friends list options, read from the URL (?sort=&show=&page=). */
 export const BROWSE_SORTS = [
-  ["fit", "Best fit"],
+  ["fit", "Best match"],
   ["you_fit", "Best for you"],
   ["active", "Recently active"],
 ] as const;

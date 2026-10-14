@@ -28,7 +28,7 @@ describe("friend sorts", () => {
   const c = friend("c", null, null);
   const d = friend("d", 99, 99, { visible: false });
 
-  it("best fit averages both, unknowns then private last", () => {
+  it("best match averages both, unknowns then private last", () => {
     expect(sortFriends([c, d, a, b], "fit").map((f) => f.user_id)).toEqual(["b", "a", "c", "d"]);
   });
 
@@ -36,11 +36,11 @@ describe("friend sorts", () => {
     expect(sortFriends([a, b], "you_fit").map((f) => f.user_id)).toEqual(["b", "a"]);
   });
 
-  it("uses the known number alone for best fit", () => {
+  it("uses the known number alone for best match", () => {
     expect(friendRank(friend("x", null, 60), "fit")).toBe(60);
   });
 
-  it("falls back to best fit for unknown sorts", () => {
+  it("falls back to best match for unknown sorts", () => {
     expect(parseFriendSort("nope")).toBe("fit");
     expect(parseFriendSort("you_fit")).toBe("you_fit");
     expect(parseFriendSort("for_them")).toBe("fit");
