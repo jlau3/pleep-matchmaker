@@ -89,6 +89,11 @@ export interface FriendRow extends PlayerContact {
   added_me: boolean;
 }
 
+/** A player you asked in Pokémon Sleep and haven't added here yet (get_pending_friends). */
+export interface PendingRow extends PlayerContact {
+  pending_since: string;
+}
+
 /** Someone who added you and you haven't added back or dismissed (get_added_me). */
 export interface AddedMeRow extends PlayerContact {
   added_at: string;

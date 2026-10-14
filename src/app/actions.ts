@@ -237,6 +237,28 @@ export async function dismissAddedYou(adderId: string): Promise<{ error?: string
  * them out of your Find New and, once enough people say so, everyone's (until
  * they come back). A failed report doesn't undo the removal.
  */
+/**
+ * Find New's Add friend: marks them pending while the request goes through in
+ * Pokémon Sleep. They're added here for real (addFriend) once you're friends there.
+ */
+export async function markPending(targetId: string): Promise<{ error?: string }> {
+  const { supabase, user } = await requireUser();
+  if (targetId === user.id) return { error: "That's you." };
+  const { error } = await supabase.from("pending_friends").insert({ user_id: user.id, target_id: targetId });
+  if (error && error.code !== "23505") return { error: "Couldn't save, try again" };
+  revalidatePath("/friends");
+  return {};
+}
+
+/** Drops a pending request that fell through. */
+export async function cancelPending(targetId: string): Promise<{ error?: string }> {
+  const { supabase, user } = await requireUser();
+  const { error } = await supabase.from("pending_friends").delete().eq("user_id", user.id).eq("target_id", targetId);
+  if (error) return { error: "Couldn't update, try again" };
+  revalidatePath("/friends");
+  return {};
+}
+
 export async function removeFriend(friendId: string, inactive = false): Promise<{ error?: string }> {
   const { supabase, user } = await requireUser();
   const { error } = await supabase.from("friends").delete().eq("user_id", user.id).eq("friend_id", friendId);

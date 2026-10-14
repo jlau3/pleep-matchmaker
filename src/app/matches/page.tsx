@@ -10,7 +10,7 @@ import { FitLegend } from "@/components/FitLegend";
 import { InGameFirst } from "@/components/InGameFirst";
 import { FitPair } from "@/components/FitPair";
 import { LOW_FIT_PCT } from "@/lib/fit";
-import { loadFriendIds, loadOwnProfile, loadOwnVotes, MAX_FRIENDS } from "@/lib/data";
+import { loadFriendIds, loadOwnProfile, loadOwnVotes, loadPendingIds, MAX_FRIENDS } from "@/lib/data";
 import { LINES, LINES_BY_ID, linesFromIds } from "@/lib/lines";
 import { BROWSE_PAGE_SIZE, BROWSE_SORT_HINTS, BROWSE_SORTS, browseQuery, parseBrowse } from "@/lib/browse";
 import { requireUser } from "@/lib/supabase/server";
@@ -23,10 +23,11 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
   const params = await searchParams;
   const q = await searchQuery(Promise.resolve(params));
   const opts = parseBrowse(params);
-  const [{ choices, tops }, profile, friendIds, votedResult, , matchesResult] = await Promise.all([
+  const [{ choices, tops }, profile, friendIds, pendingIds, votedResult, , matchesResult] = await Promise.all([
     loadOwnVotes(supabase, user.id),
     loadOwnProfile(supabase, user.id),
     loadFriendIds(supabase, user.id),
+    loadPendingIds(supabase, user.id),
     supabase.rpc("my_friends_voted"),
     // Keeps the community averages (blended into every list) fresh; a no-op if refreshed within the hour.
     supabase.rpc("refresh_community_rates"),
@@ -167,7 +168,11 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
                   <p className="mt-3 text-sm text-slate-500">Hasn&apos;t voted on any candy yet.</p>
                 )}
                 <div className="mt-4">
-                  <ConnectSteps userId={match.user_id} friendCode={match.friend_code} name={playerName(match)} />
+                  <ConnectSteps
+                    userId={match.user_id}
+                    name={playerName(match)}
+                    initialPending={pendingIds.has(match.user_id)}
+                  />
                 </div>
               </li>
             ))}
