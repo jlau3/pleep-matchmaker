@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import Link from "next/link";
 import { HelpModal } from "./HelpModal";
 import { MetaNoteModal } from "./MetaNoteModal";
+import { NavExtras } from "./NavExtras";
 import { NavLinks } from "./NavLinks";
 import { activeMetaPost, META_COOKIE, metaCookieValue } from "@/content/meta";
 import { HELP_COOKIE, HELP_VERSION, helpCookieValue } from "@/lib/help";
@@ -58,6 +59,7 @@ export async function Nav() {
         </Link>
         {user && <NavLinks />}
         <HelpModal signedIn={user} autoOpen={popups.help.autoOpen} rememberSeen={popups.help.rememberSeen} />
+        <NavExtras donateUrl={process.env.NEXT_PUBLIC_DONATION_URL} />
       </nav>
       {note && (popups.meta.autoOpen || popups.meta.rememberSeen) && (
         <MetaNoteModal

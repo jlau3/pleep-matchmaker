@@ -4,7 +4,7 @@ import { ThemePicker } from "@/components/ThemePicker";
 import { parseTheme, THEME_COOKIE } from "@/lib/theme";
 import { BlockButton } from "@/components/BlockButton";
 import { DeleteAccountButton } from "@/components/DeleteAccountButton";
-import { playerName } from "@/components/PlayerHeader";
+import { playerAvatar, playerName } from "@/components/PlayerHeader";
 import { ProfileForm } from "@/components/ProfileForm";
 import { linkErrorText, SignInMethods } from "@/components/SignInMethods";
 import { PROFILE_TABS, SubTabs } from "@/components/SubTabs";
@@ -42,7 +42,7 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
       <SubTabs tabs={PROFILE_TABS} active="/profile" />
       <div className="mx-auto max-w-md space-y-8">
         <section className="flex items-center gap-3">
-          {profile.avatar_url && <img src={profile.avatar_url} alt="" className="h-14 w-14 rounded-full" />}
+          {playerAvatar(profile) && <img src={playerAvatar(profile)!} alt="" className="h-14 w-14 rounded-full bg-sky object-contain dark:bg-night-deep" />}
           <div>
             <h1 className="text-xl font-bold">{playerName(profile)}</h1>
             {profile.discord_username && <p className="text-sm text-slate-500">@{profile.discord_username}</p>}

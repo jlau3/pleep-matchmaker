@@ -1,6 +1,8 @@
+import { gameAvatarUrl } from "@/lib/avatars";
 import { formatFriendCode, relativeTime } from "@/lib/format";
 import type { PlayerContact } from "@/lib/types";
 import { BlockButton } from "./BlockButton";
+import { DiscordIcon, RedditIcon } from "./BrandIcons";
 import { CopyButton } from "./CopyButton";
 import { FriendButton } from "./FriendButton";
 
@@ -18,7 +20,12 @@ function discordLine(p: PlayerContact, name: string): string | null {
   return parts.length > 0 ? parts.join(" · ") : null;
 }
 
-/** Avatar, IGN and Discord names, friend code and activity for one player. */
+/** Their in-game icon if they picked one, else their shown Discord picture. */
+export function playerAvatar(p: Pick<PlayerContact, "game_avatar" | "avatar_url">): string | null {
+  return gameAvatarUrl(p.game_avatar) ?? p.avatar_url;
+}
+
+/** Avatar, IGN, Discord and Reddit names, friend code and activity for one player. */
 export function PlayerHeader({
   player,
   aside,
@@ -37,21 +44,35 @@ export function PlayerHeader({
 }) {
   const name = playerName(player);
   const discord = discordLine(player, name);
+  const avatar = playerAvatar(player);
+  const game = Boolean(gameAvatarUrl(player.game_avatar));
   return (
     <div className="space-y-2">
       {/* Avatar, name and the aside (fits) on top; everything else full width below, flush left. */}
       <div className="flex items-start gap-3">
-        {player.avatar_url ? (
-          <img src={player.avatar_url} alt="" className="h-12 w-12 shrink-0 rounded-full" />
+        {avatar ? (
+          <img
+            src={avatar}
+            alt=""
+            title={game ? "Their Pokémon Sleep icon" : undefined}
+            className={`h-12 w-12 shrink-0 rounded-full ${game ? "bg-sky object-contain dark:bg-night-deep" : ""}`}
+          />
         ) : (
           <div className="h-12 w-12 shrink-0 rounded-full bg-slate-200 dark:bg-slate-700" />
         )}
         <div className="min-w-0 flex-1 self-center">
-          {/* IGN, then their Discord names on their own line; long names wrap and the Discord line trims, so neither runs into the fits. */}
+          {/* IGN, then Discord and Reddit names on their own lines; long names wrap and the others trim, so none run into the fits. */}
           <span className="block break-words font-semibold">{name}</span>
           {discord && (
-            <span className="block truncate text-sm text-slate-500" title={discord}>
-              {discord}
+            <span className="flex min-w-0 items-center gap-1 text-sm text-slate-500" title={`Discord: ${discord}`}>
+              <DiscordIcon />
+              <span className="truncate">{discord}</span>
+            </span>
+          )}
+          {player.reddit_username && (
+            <span className="flex min-w-0 items-center gap-1 text-sm text-slate-500" title="Reddit name (added by the player, not verified)">
+              <RedditIcon />
+              <span className="truncate">u/{player.reddit_username}</span>
             </span>
           )}
         </div>

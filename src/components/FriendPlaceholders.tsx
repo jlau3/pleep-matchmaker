@@ -1,16 +1,19 @@
 "use client";
 
 import { useEffect, useRef, useState, useTransition } from "react";
-import { addPlaceholder, lookupPlayers, removePlaceholder } from "@/app/actions";
+import { addPlaceholder, removePlaceholder, searchPlaceholders } from "@/app/actions";
 import { rethrowIfNavigation, SAVE_FAILED } from "@/lib/saveError";
 import type { LookupRow, PlaceholderRow } from "@/lib/types";
 import { PlayerResults } from "./PlayerResults";
 
+type Hits = { name: string; rows: LookupRow[] }[];
+
 /**
  * Not here yet: in-game friends who haven't signed up, by IGN, so you
- * remember to check on them. Folded by default. Search looks a name up right
- * in its row. IGNs aren't unique, so a matching player is only a maybe: the
- * row asks you to check it's them before adding, which clears it.
+ * remember to check on them. Folded by default. One Search looks up every
+ * name at once and lists only the ones that turned someone up. IGNs aren't
+ * unique, so a match is only a maybe: you check it's them before adding,
+ * which clears the name.
  */
 export function FriendPlaceholders({
   rows,
@@ -24,6 +27,8 @@ export function FriendPlaceholders({
   const [name, setName] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+  const [hits, setHits] = useState<{ hits: Hits; searched: number } | null>(null);
+  const [searching, startSearch] = useTransition();
   const maybes = rows.filter((row) => row.signed_up).length;
   // A–Z, ignoring case and accents, so a name is easy to find in a long list.
   const sorted = [...rows].sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: "base", numeric: true }));
@@ -48,17 +53,29 @@ export function FriendPlaceholders({
     });
   }
 
+  function searchAll() {
+    setError(null);
+    startSearch(async () => {
+      try {
+        const result = await searchPlaceholders();
+        if (result.error) setError(result.error);
+        else setHits({ hits: result.hits ?? [], searched: result.searched ?? 0 });
+      } catch (e) {
+        rethrowIfNavigation(e);
+        setError("Search failed, try again");
+      }
+    });
+  }
+
+  // Names cleared since the search (added as a friend, or removed) drop out of the results.
+  const shownHits = hits?.hits.filter((hit) => rows.some((row) => row.name === hit.name)) ?? [];
+
   return (
     <details ref={details} className="card group p-4">
       <summary className="flex cursor-pointer list-none items-center justify-between gap-3">
         <span>
-          <span className="font-semibold">Not here yet</span>{" "}
-          <span className="text-sm text-slate-500">{rows.length}</span>
-          {maybes > 0 && (
-            <span className="ml-2 text-xs font-semibold text-want">
-              {maybes} may have joined
-            </span>
-          )}
+          <span className="font-semibold">Not here yet</span> <span className="text-sm text-slate-500">{rows.length}</span>
+          {maybes > 0 && <span className="ml-2 text-xs font-semibold text-want">{maybes} may have joined</span>}
           <span className="block text-sm text-slate-500">In-game friends who haven&apos;t signed up yet.</span>
         </span>
         <span className="shrink-0 text-xs font-semibold underline group-open:hidden">Show</span>
@@ -66,7 +83,7 @@ export function FriendPlaceholders({
       </summary>
       <div className="mt-3 space-y-3">
         <p className="text-sm text-slate-500">
-          Add their IGN as a reminder and tap Search now and then. Once they join, add them and they drop off this list.
+          Add their IGN as a reminder and search now and then. Once they join, add them and they drop off this list.
         </p>
         <form
           className="flex flex-wrap items-center gap-2"
@@ -93,100 +110,62 @@ export function FriendPlaceholders({
           </p>
         )}
         {rows.length > 0 && (
-          <ul className="divide-y divide-slate-200 rounded-2xl border border-slate-200 dark:divide-slate-700 dark:border-slate-700">
-            {sorted.map((row) => (
-              <PlaceholderItem
-                key={row.name}
-                row={row}
-                friendIds={friendIds}
-                viewerId={viewerId}
-                busy={pending}
-                onRemove={() => run(() => removePlaceholder(row.name))}
-              />
-            ))}
-          </ul>
+          <>
+            <ul className="divide-y divide-slate-200 rounded-2xl border border-slate-200 dark:divide-slate-700 dark:border-slate-700">
+              {sorted.map((row) => (
+                <li key={row.name} className="flex items-center gap-2 px-3 py-2 text-sm">
+                  <span className="min-w-0 flex-1">
+                    <span className="block truncate font-semibold" title={row.name}>
+                      {row.name}
+                    </span>
+                    {row.signed_up && (
+                      <span className="block text-xs text-want">Someone with this IGN joined. Search to check it&apos;s them.</span>
+                    )}
+                  </span>
+                  <button
+                    type="button"
+                    disabled={pending}
+                    onClick={() => run(() => removePlaceholder(row.name))}
+                    aria-label={`Remove ${row.name}`}
+                    title="Remove"
+                    className="shrink-0 rounded-lg px-2 py-1 text-slate-400 hover:text-slate-700 disabled:opacity-50 dark:hover:text-white"
+                  >
+                    ✕
+                  </button>
+                </li>
+              ))}
+            </ul>
+            <button
+              type="button"
+              disabled={searching}
+              onClick={searchAll}
+              className={`w-full rounded-full py-2 text-sm font-bold disabled:opacity-60 ${
+                maybes > 0 ? "bg-want text-white" : "border border-slate-300 dark:border-slate-600"
+              }`}
+            >
+              {searching ? "Searching…" : `Search for all ${rows.length}`}
+            </button>
+          </>
+        )}
+        {hits && (
+          <div className="space-y-4">
+            {shownHits.length === 0 ? (
+              <p className="text-center text-sm text-slate-500">
+                No one found yet for {hits.searched === 1 ? "your name" : `any of your ${hits.searched} names`}. Check back later.
+              </p>
+            ) : (
+              shownHits.map((hit) => (
+                <div key={hit.name} className="space-y-2">
+                  <h4 className="text-sm font-semibold">
+                    Possible match{hit.rows.length === 1 ? "" : "es"} for <span className="text-want">{hit.name}</span>
+                  </h4>
+                  <PlayerResults q={hit.name} rows={hit.rows} friendIds={friendIds} viewerId={viewerId} suggestPlaceholder={false} placeholder={hit.name} />
+                </div>
+              ))
+            )}
+          </div>
         )}
       </div>
     </details>
-  );
-}
-
-/** One name, with its search results opening right under it. */
-function PlaceholderItem({
-  row,
-  friendIds,
-  viewerId,
-  busy,
-  onRemove,
-}: {
-  row: PlaceholderRow;
-  friendIds: string[];
-  viewerId: string;
-  busy: boolean;
-  onRemove: () => void;
-}) {
-  const [results, setResults] = useState<LookupRow[] | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [searching, startSearch] = useTransition();
-
-  function toggleSearch() {
-    if (results) return setResults(null);
-    setError(null);
-    startSearch(async () => {
-      try {
-        const found = await lookupPlayers(row.name);
-        if (found.error) setError(found.error);
-        else setResults(found.rows ?? []);
-      } catch (e) {
-        rethrowIfNavigation(e);
-        setError("Search failed, try again");
-      }
-    });
-  }
-
-  return (
-    <li className="px-3 py-2 text-sm">
-      <div className="flex items-center gap-2">
-        <span className="min-w-0 flex-1">
-          <span className="block truncate font-semibold" title={row.name}>
-            {row.name}
-          </span>
-          {row.signed_up && (
-            <span className="block text-xs text-want">Someone with this IGN joined. Search to check it&apos;s them.</span>
-          )}
-        </span>
-        <button
-          type="button"
-          disabled={searching}
-          onClick={toggleSearch}
-          aria-expanded={results !== null}
-          className={`shrink-0 rounded-lg px-3 py-1 text-xs font-semibold disabled:opacity-60 ${
-            results ? "border border-slate-300 dark:border-slate-600" : row.signed_up ? "bg-want text-white" : "border border-slate-300 dark:border-slate-600"
-          }`}
-        >
-          {searching ? "Searching…" : results ? "Close" : "Search"}
-        </button>
-        <button
-          type="button"
-          disabled={busy}
-          onClick={onRemove}
-          aria-label={`Remove ${row.name}`}
-          title="Remove"
-          className="shrink-0 rounded-lg px-2 py-1 text-slate-400 hover:text-slate-700 disabled:opacity-50 dark:hover:text-white"
-        >
-          ✕
-        </button>
-      </div>
-      {error && (
-        <p role="alert" className="mt-1 text-xs text-dont">
-          {error}
-        </p>
-      )}
-      {results && (
-        <div className="mt-3 space-y-3">
-          <PlayerResults q={row.name} rows={results} friendIds={friendIds} viewerId={viewerId} suggestPlaceholder={false} placeholder={row.name} />
-        </div>
-      )}
-    </li>
   );
 }

@@ -9,6 +9,10 @@ export interface PlayerContact {
   friend_code: string | null;
   last_seen_at: string;
   prefs_updated_at: string | null;
+  /** In-game icon ("pikachu:happy"), added by withExtras. */
+  game_avatar?: string | null;
+  /** Reddit handle (unverified), added by withExtras. */
+  reddit_username?: string | null;
 }
 
 export interface MatchRow extends PlayerContact {
@@ -72,6 +76,10 @@ export interface OwnProfile {
   allow_lookup: boolean;
   /** Whether other players see (and can search) their Discord name and avatar. */
   show_discord: boolean;
+  /** Wants, don't-wants and Top 3 show only to people on your friend list. */
+  votes_private?: boolean;
+  game_avatar?: string | null;
+  reddit_username?: string | null;
   last_seen_at: string;
   prefs_updated_at: string | null;
 }
