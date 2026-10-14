@@ -20,8 +20,41 @@ begin
   ] loop
     assert (select count(*) from public.lookup_players(q)) = 1, format('no hit for %L', q);
   end loop;
-  assert not exists (select 1 from public.lookup_players('snorlax')), 'still no partial matches';
-  assert not exists (select 1 from public.lookup_players('jacky unicode')), 'accents are not stripped';
+end $$;
+
+-- Close names (20261017000200_fuzzy_search.sql): partial names and typos, from 3
+-- characters, at most 10 results, best first; hidden Discord names stay hidden.
+reset role;
+insert into auth.users (id, raw_user_meta_data)
+select ('00000000-0000-0000-0009-' || lpad(to_hex(10 + g), 12, '0'))::uuid, format('{"name":"fz_sleeper_%s#0"}', g)::jsonb
+from generate_series(1, 12) g;
+insert into auth.users (id, raw_user_meta_data) values
+  ('00000000-0000-0000-0009-000000000003', '{"name":"hidden_dragonite#0"}');
+update public.profiles set show_discord = false, ign = 'Quiet One' where discord_username = 'hidden_dragonite';
+set role authenticated;
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-0009-000000000002', false);
+do $$
+declare first_id uuid;
+begin
+  assert exists (select 1 from public.lookup_players('snorlax') where user_id = '00000000-0000-0000-0009-000000000001'),
+    'partial IGN';
+  assert exists (select 1 from public.lookup_players('snorlx fan') where user_id = '00000000-0000-0000-0009-000000000001'),
+    'typo in IGN';
+  assert exists (select 1 from public.lookup_players('mixedcase') where user_id = '00000000-0000-0000-0009-000000000001'),
+    'partial Discord name';
+  assert not exists (select 1 from public.lookup_players('sn') where user_id = '00000000-0000-0000-0009-000000000001'),
+    'two letters: exact only';
+  assert not exists (select 1 from public.lookup_players('qqqqzz')), 'nothing close';
+  assert (select count(*) from public.lookup_players('fz_sleeper')) = 10, 'at most 10';
+  -- The exact name comes first.
+  select user_id into first_id from public.lookup_players('fz_sleeper_7') limit 1;
+  assert first_id = '00000000-0000-0000-0009-000000000011', format('exact first, got %s', first_id);
+  -- A hidden Discord name can't be found, not even roughly; their IGN still can.
+  assert not exists (select 1 from public.lookup_players('hidden_dragonite')), 'hidden name, exact';
+  assert not exists (select 1 from public.lookup_players('dragonite')), 'hidden name, partial';
+  assert exists (select 1 from public.lookup_players('quiet one')), 'IGN still works';
+  -- You only find yourself by exact name.
+  assert not exists (select 1 from public.lookup_players('searche') where user_id = auth.uid()), 'self not fuzzy';
 end $$;
 
 \echo 'ALL SEARCH TESTS PASSED'

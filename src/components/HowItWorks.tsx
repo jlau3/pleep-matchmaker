@@ -32,7 +32,7 @@ const STEPS: { title: string; body: React.ReactNode; href: string; cta: string }
     body: (
       <>
         Add them in Pokémon Sleep first, then here: this list should match your in-game one, since it decides whose
-        wants your Tier List follows. Look them up by exact Discord name, IGN or friend code and add up to{" "}
+        wants your Tier List follows. Look them up by Discord name, IGN or friend code and add up to{" "}
         {MAX_FRIENDS}. Each player shows two match %s:
         <b>for you</b> (your wants match what their friends want, so the candy they send suits you) and{" "}
         <b>for them</b> (their wants match what your friends want, so the candy you send suits them). A low one
@@ -91,7 +91,7 @@ export function HowItWorks({ links = true }: { links?: boolean }) {
         <InviteButton />
       </div>
       <p className="mt-5 text-xs text-slate-500">
-        Your friend code and IGN are only shown to matches and to people who look you up by exact name. You can turn off
+        Your friend code and IGN are only shown to matches and to people who look you up by name or friend code. You can turn off
         matching or lookup in Profile → Settings, and stay hidden from matches automatically once your friend list is full.
         Players inactive for 2 months drop out of matching.
       </p>

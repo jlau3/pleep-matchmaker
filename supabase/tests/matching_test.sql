@@ -94,7 +94,7 @@ end $$;
 insert into public.blocks (blocker_id, blocked_id) values (auth.uid(), '00000000-0000-0000-0000-00000000000b');
 do $$ begin
   assert not exists (select 1 from public.get_matches() where discord_username = 'bob'), 'blocked hidden';
-  assert not exists (select 1 from public.lookup_players('bob')), 'blocked hidden from lookup';
+  assert not exists (select 1 from public.lookup_players('bob') where user_id = '00000000-0000-0000-0000-00000000000b'), 'blocked hidden from lookup';
   assert (select count(*) from public.get_blocked()) = 1, 'get_blocked';
 end $$;
 delete from public.blocks where blocker_id = auth.uid();
@@ -105,14 +105,14 @@ update public.profiles set open_to_friends = false where discord_username = 'bob
 set role authenticated;
 do $$ begin
   assert not exists (select 1 from public.get_matches() where discord_username = 'bob'), 'closed hidden from matches';
-  assert exists (select 1 from public.lookup_players('BOB')), 'closed still found by lookup';
+  assert exists (select 1 from public.lookup_players('BOB') where user_id = '00000000-0000-0000-0000-00000000000b'), 'closed still found by lookup';
 end $$;
 
--- Lookup: exact only, by username/IGN/friend code; allow_lookup=false hides.
+-- Lookup by username/IGN/friend code (close names too, see search_test); allow_lookup=false hides.
 do $$
 declare r record;
 begin
-  assert not exists (select 1 from public.lookup_players('bo')), 'no partial match';
+  assert not exists (select 1 from public.lookup_players('bo') where user_id <> auth.uid()), 'two letters: exact only';
   assert exists (select 1 from public.lookup_players('@Bob')), 'leading @ and case ignored';
   assert exists (select 1 from public.lookup_players('ign_cara')), 'by ign';
   assert exists (select 1 from public.lookup_players('IGN_CARA')), 'ign any case';
@@ -127,7 +127,7 @@ update public.profiles set allow_lookup = false where discord_username = 'cara';
 set role authenticated;
 do $$ begin
   assert exists (select 1 from public.lookup_players('1234-1234-1234')), 'by friend code with separators';
-  assert not exists (select 1 from public.lookup_players('cara')), 'allow_lookup off';
+  assert not exists (select 1 from public.lookup_players('cara') where user_id = '00000000-0000-0000-0000-00000000000c'), 'allow_lookup off';
 end $$;
 
 -- Stats: counts active users only (eve is stale).

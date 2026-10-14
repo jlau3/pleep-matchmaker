@@ -54,7 +54,7 @@ export function ProfileForm({ profile, friendListFull }: { profile: OwnProfile; 
         <span>
           <span className="block text-sm font-medium">Let people look me up</span>
           <span className="text-xs text-slate-500">
-            Anyone who knows your exact IGN or friend code{profile.discord_username && profile.show_discord ? " (or Discord name)" : ""}{" "}
+            Anyone who searches your IGN or friend code{profile.discord_username && profile.show_discord ? " (or Discord name)" : ""}{" "}
             can see your candy list.
           </span>
         </span>
