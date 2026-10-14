@@ -92,7 +92,6 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
         <SubTabs tabs={FRIENDS_TABS} active="/matches" query={q ? `q=${encodeURIComponent(q)}` : undefined} />
         <PlayerSearch supabase={supabase} q={q} friendIds={friendIds} viewerId={user.id} />
         <p className="mt-4 text-sm text-slate-600 dark:text-slate-300">
-          Players open to new friends who are sending candies you want.
         </p>
         <InGameFirst className="mt-2" />
         <div className="mt-2">
@@ -212,13 +211,13 @@ function NewPlayerNote({ match, name }: { match: MatchRow; name: string }) {
   if (!noVotes && !noList) return null;
   const text =
     noVotes && noList
-      ? `${name} hasn't voted yet and has fewer than 3 friends voting here, so their numbers aren't ready.`
+      ? `${name} hasn't voted yet and has fewer than 3 friends voting here, so their numbers aren't ready yet.`
       : noVotes
-        ? `${name} hasn't voted yet, so "for them" isn't ready.`
-        : `${name} has fewer than 3 friends voting here, so "for you" isn't ready.`;
+        ? `${name} hasn't voted yet, so "for them" isn't ready yet.`
+        : `This user has fewer than 3 friends voting here, so "for you" isn't ready yet.`;
   return (
     <p className="mt-3 rounded-xl bg-sky/60 px-3 py-2 text-xs dark:bg-night-deep">
-      <b>New here:</b> {text} It fills in as they play along.
+      <b>New here:</b> {text}
     </p>
   );
 }
@@ -281,16 +280,16 @@ function FitLists({ match }: { match: MatchRow }) {
           <div className="mt-3 space-y-5">
             <div className="space-y-3">
               <h4 className="font-bold">They&apos;d send you</h4>
-              {group("Your wants their friends want", "text-want", toYou.want)}
-              {group("Your don't-wants their friends want", "text-dont", toYou.dont)}
+              {group("Your wants matching their friends' wants", "text-want", toYou.want)}
+              {group("Your don't-wants matching their friends' wants", "text-dont", toYou.dont)}
               {toYou.want.length + toYou.dont.length === 0 && (
                 <p className="text-sm text-slate-500">Nothing you've voted on is on their list yet.</p>
               )}
             </div>
             <div className="space-y-3">
               <h4 className="font-bold">You&apos;d send them</h4>
-              {group("Their wants your friends want", "text-want", toThem.want)}
-              {group("Their don't-wants your friends want", "text-dont", toThem.dont)}
+              {group("Their wants matching your friends' wants", "text-want", toThem.want)}
+              {group("Their don't-wants matching your friends' wants", "text-dont", toThem.dont)}
               {toThem.want.length + toThem.dont.length === 0 && (
                 <p className="text-sm text-slate-500">Nothing they've voted on is on your list yet.</p>
               )}
