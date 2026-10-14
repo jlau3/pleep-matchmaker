@@ -16,7 +16,8 @@ insert into auth.users (id, raw_user_meta_data) values
   ('00000000-0000-0000-000d-000000000006', '{"name":"br_closed#0"}'),
   ('00000000-0000-0000-000d-000000000007', '{"name":"br_blocked#0"}');
 update public.profiles set friend_code = '7777' || right(id::text, 8) where id::text like '00000000-0000-0000-000d-%';
-update public.profiles set last_seen_at = now() - interval '5 months' where discord_username = 'br_stale';
+-- Stale means unseen for 2 months (match_config): 10 weeks is out.
+update public.profiles set last_seen_at = now() - interval '10 weeks' where discord_username = 'br_stale';
 update public.profiles set open_to_friends = false where discord_username = 'br_closed';
 -- Recency for the 'active' sort: fresh most recent, then low, then good.
 update public.profiles set last_seen_at = now() - interval '3 days' where discord_username = 'br_good';

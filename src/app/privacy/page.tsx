@@ -42,7 +42,7 @@ export default function PrivacyPage() {
           </li>
           <li>
             <b>Activity.</b> When you were last active and when your votes last changed, so inactive players drop out of
-            matching after 4 months. If you remove a friend and say they stopped playing, we note that too.
+            matching after 2 months. If you remove a friend and say they stopped playing, we note that too.
           </li>
           <li>
             <b>Feedback you send.</b> The message, the page you sent it from, and your Discord name or IGN, delivered to the
