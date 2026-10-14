@@ -25,6 +25,8 @@ export function FriendPlaceholders({
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
   const maybes = rows.filter((row) => row.signed_up).length;
+  // A–Z, ignoring case and accents, so a name is easy to find in a long list.
+  const sorted = [...rows].sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: "base", numeric: true }));
   const details = useRef<HTMLDetailsElement>(null);
 
   // Opened when linked to (#not-here-yet, e.g. from a search that found no one).
@@ -92,7 +94,7 @@ export function FriendPlaceholders({
         )}
         {rows.length > 0 && (
           <ul className="divide-y divide-slate-200 rounded-2xl border border-slate-200 dark:divide-slate-700 dark:border-slate-700">
-            {rows.map((row) => (
+            {sorted.map((row) => (
               <PlaceholderItem
                 key={row.name}
                 row={row}
