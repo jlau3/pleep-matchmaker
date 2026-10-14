@@ -103,3 +103,11 @@ export interface AddedMeRow extends PlayerContact {
   match_pct: number | null;
   you_fit_pct: number | null;
 }
+
+/** An in-game friend who isn't here yet, kept by IGN (get_friend_placeholders). */
+export interface PlaceholderRow {
+  name: string;
+  created_at: string;
+  /** A player with exactly this IGN can be found here now. */
+  signed_up: boolean;
+}

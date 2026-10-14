@@ -4,12 +4,21 @@ import { BlockButton } from "./BlockButton";
 import { CopyButton } from "./CopyButton";
 import { FriendButton } from "./FriendButton";
 
-/** Discord name when the player shows it, otherwise their IGN (Google/email players, or Discord name hidden). */
+/** In-game name first (what friends know them by in Pokémon Sleep), else their shown Discord name. */
 export function playerName(p: Pick<PlayerContact, "discord_display_name" | "discord_username" | "ign">): string {
-  return p.discord_display_name || p.discord_username || p.ign || "Unknown player";
+  return p.ign || p.discord_display_name || p.discord_username || "Unknown player";
 }
 
-/** Avatar, names, IGN, friend code and activity for one player. */
+/** The Discord line under the name: "Display · @username", minus whatever the top line already shows. */
+function discordLine(p: PlayerContact, name: string): string | null {
+  const parts = [
+    p.discord_display_name && p.discord_display_name !== name ? p.discord_display_name : null,
+    p.discord_username ? `@${p.discord_username}` : null,
+  ].filter(Boolean);
+  return parts.length > 0 ? parts.join(" · ") : null;
+}
+
+/** Avatar, IGN and Discord names, friend code and activity for one player. */
 export function PlayerHeader({
   player,
   aside,
@@ -24,6 +33,7 @@ export function PlayerHeader({
   actions?: React.ReactNode;
 }) {
   const name = playerName(player);
+  const discord = discordLine(player, name);
   return (
     <div className="space-y-2">
       {/* Avatar, name and the aside (fits) on top; everything else full width below, flush left. */}
@@ -34,22 +44,17 @@ export function PlayerHeader({
           <div className="h-12 w-12 shrink-0 rounded-full bg-slate-200 dark:bg-slate-700" />
         )}
         <div className="min-w-0 flex-1 self-center">
-          {/* Name, then @username on its own line; long names wrap and long @names trim, so neither runs into the fits. */}
+          {/* IGN, then their Discord names on their own line; long names wrap and the Discord line trims, so neither runs into the fits. */}
           <span className="block break-words font-semibold">{name}</span>
-          {player.discord_username && (
-            <span className="block truncate text-sm text-slate-500" title={`@${player.discord_username}`}>
-              @{player.discord_username}
+          {discord && (
+            <span className="block truncate text-sm text-slate-500" title={discord}>
+              {discord}
             </span>
           )}
         </div>
         {aside}
       </div>
       <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
-        {player.ign && (
-          <span>
-            IGN <strong>{player.ign}</strong>
-          </span>
-        )}
         {player.friend_code && (
           <span className="flex items-center gap-2 whitespace-nowrap">
             FC <strong className="font-mono">{formatFriendCode(player.friend_code)}</strong>

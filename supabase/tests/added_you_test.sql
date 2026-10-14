@@ -37,12 +37,12 @@ do $$ begin
   assert exists (select 1 from public.get_added_me() where discord_username = 'ay_bob'), 'undismissed';
 end $$;
 
--- A one-way friend isn't marked mutual.
+-- Ann removing me takes her off my list too (friends_upkeep: unfriending is two-sided).
 reset role;
 delete from public.friends where user_id = '00000000-0000-0000-000c-000000000002';
 set role authenticated;
 do $$ begin
-  assert not (select added_me from public.get_friends() where discord_username = 'ay_ann'), 'not mutual once removed';
+  assert not exists (select 1 from public.get_friends() where discord_username = 'ay_ann'), 'removed both ways';
 end $$;
 
 -- Can't write someone else's dismissals.

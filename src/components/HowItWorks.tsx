@@ -92,7 +92,8 @@ export function HowItWorks({ links = true }: { links?: boolean }) {
       </div>
       <p className="mt-5 text-xs text-slate-500">
         Your friend code and IGN are only shown to matches and to people who look you up by name or friend code. You can turn off
-        matching or lookup in Profile → Settings, and stay hidden from matches automatically once your friend list is full.
+        matching (which also hides your friend code from name searches) or lookup in Profile → Settings, and stay hidden
+        from matches automatically once your friend list is full.
         Players inactive for 2 months drop out of matching.
       </p>
     </div>

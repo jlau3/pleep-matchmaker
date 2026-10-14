@@ -10,17 +10,20 @@
       {
         "name": "Bulbasaur",
         "dex": 1,
-        "sprite": 1
+        "sprite": 1,
+        "sleepType": "dozing"
       },
       {
         "name": "Ivysaur",
         "dex": 2,
-        "sprite": 2
+        "sprite": 2,
+        "sleepType": "dozing"
       },
       {
         "name": "Venusaur",
         "dex": 3,
-        "sprite": 3
+        "sprite": 3,
+        "sleepType": "dozing"
       }
     ]
   },
@@ -35,17 +38,20 @@
       {
         "name": "Charmander",
         "dex": 4,
-        "sprite": 4
+        "sprite": 4,
+        "sleepType": "snoozing"
       },
       {
         "name": "Charmeleon",
         "dex": 5,
-        "sprite": 5
+        "sprite": 5,
+        "sleepType": "snoozing"
       },
       {
         "name": "Charizard",
         "dex": 6,
-        "sprite": 6
+        "sprite": 6,
+        "sleepType": "snoozing"
       }
     ]
   },
@@ -60,17 +66,20 @@
       {
         "name": "Squirtle",
         "dex": 7,
-        "sprite": 7
+        "sprite": 7,
+        "sleepType": "slumbering"
       },
       {
         "name": "Wartortle",
         "dex": 8,
-        "sprite": 8
+        "sprite": 8,
+        "sleepType": "slumbering"
       },
       {
         "name": "Blastoise",
         "dex": 9,
-        "sprite": 9
+        "sprite": 9,
+        "sleepType": "slumbering"
       }
     ]
   },
@@ -85,17 +94,20 @@
       {
         "name": "Caterpie",
         "dex": 10,
-        "sprite": 10
+        "sprite": 10,
+        "sleepType": "dozing"
       },
       {
         "name": "Metapod",
         "dex": 11,
-        "sprite": 11
+        "sprite": 11,
+        "sleepType": "dozing"
       },
       {
         "name": "Butterfree",
         "dex": 12,
-        "sprite": 12
+        "sprite": 12,
+        "sleepType": "dozing"
       }
     ]
   },
@@ -110,12 +122,14 @@
       {
         "name": "Rattata",
         "dex": 19,
-        "sprite": 19
+        "sprite": 19,
+        "sleepType": "snoozing"
       },
       {
         "name": "Raticate",
         "dex": 20,
-        "sprite": 20
+        "sprite": 20,
+        "sleepType": "snoozing"
       }
     ]
   },
@@ -130,12 +144,14 @@
       {
         "name": "Ekans",
         "dex": 23,
-        "sprite": 23
+        "sprite": 23,
+        "sleepType": "dozing"
       },
       {
         "name": "Arbok",
         "dex": 24,
-        "sprite": 24
+        "sprite": 24,
+        "sleepType": "dozing"
       }
     ]
   },
@@ -150,32 +166,38 @@
       {
         "name": "Pichu",
         "dex": 172,
-        "sprite": 172
+        "sprite": 172,
+        "sleepType": "slumbering"
       },
       {
         "name": "Pikachu",
         "dex": 25,
-        "sprite": 25
+        "sprite": 25,
+        "sleepType": "snoozing"
       },
       {
         "name": "Raichu",
         "dex": 26,
-        "sprite": 26
+        "sprite": 26,
+        "sleepType": "snoozing"
       },
       {
         "name": "Holiday Pikachu",
         "dex": 25,
-        "sprite": "25-holiday"
+        "sprite": "25-holiday",
+        "sleepType": "snoozing"
       },
       {
         "name": "Halloween Pikachu",
         "dex": 25,
-        "sprite": "25-halloween"
+        "sprite": "25-halloween",
+        "sleepType": "snoozing"
       },
       {
         "name": "Captain Pikachu",
         "dex": 25,
-        "sprite": "25-captain"
+        "sprite": "25-captain",
+        "sleepType": "snoozing"
       }
     ]
   },
@@ -190,12 +212,14 @@
       {
         "name": "Sandshrew",
         "dex": 27,
-        "sprite": 27
+        "sprite": 27,
+        "sleepType": "slumbering"
       },
       {
         "name": "Sandslash",
         "dex": 28,
-        "sprite": 28
+        "sprite": 28,
+        "sleepType": "slumbering"
       }
     ]
   },
@@ -210,17 +234,20 @@
       {
         "name": "Cleffa",
         "dex": 173,
-        "sprite": 173
+        "sprite": 173,
+        "sleepType": "slumbering"
       },
       {
         "name": "Clefairy",
         "dex": 35,
-        "sprite": 35
+        "sprite": 35,
+        "sleepType": "snoozing"
       },
       {
         "name": "Clefable",
         "dex": 36,
-        "sprite": 36
+        "sprite": 36,
+        "sleepType": "snoozing"
       }
     ]
   },
@@ -235,22 +262,26 @@
       {
         "name": "Vulpix",
         "dex": 37,
-        "sprite": 37
+        "sprite": 37,
+        "sleepType": "snoozing"
       },
       {
         "name": "Vulpix (Alola)",
         "dex": 37,
-        "sprite": 10103
+        "sprite": 10103,
+        "sleepType": "slumbering"
       },
       {
         "name": "Ninetales",
         "dex": 38,
-        "sprite": 38
+        "sprite": 38,
+        "sleepType": "snoozing"
       },
       {
         "name": "Ninetales (Alola)",
         "dex": 38,
-        "sprite": 10104
+        "sprite": 10104,
+        "sleepType": "slumbering"
       }
     ]
   },
@@ -265,17 +296,20 @@
       {
         "name": "Igglybuff",
         "dex": 174,
-        "sprite": 174
+        "sprite": 174,
+        "sleepType": "slumbering"
       },
       {
         "name": "Jigglypuff",
         "dex": 39,
-        "sprite": 39
+        "sprite": 39,
+        "sleepType": "snoozing"
       },
       {
         "name": "Wigglytuff",
         "dex": 40,
-        "sprite": 40
+        "sprite": 40,
+        "sleepType": "snoozing"
       }
     ]
   },
@@ -290,12 +324,14 @@
       {
         "name": "Diglett",
         "dex": 50,
-        "sprite": 50
+        "sprite": 50,
+        "sleepType": "snoozing"
       },
       {
         "name": "Dugtrio",
         "dex": 51,
-        "sprite": 51
+        "sprite": 51,
+        "sleepType": "snoozing"
       }
     ]
   },
@@ -310,12 +346,14 @@
       {
         "name": "Meowth",
         "dex": 52,
-        "sprite": 52
+        "sprite": 52,
+        "sleepType": "snoozing"
       },
       {
         "name": "Persian",
         "dex": 53,
-        "sprite": 53
+        "sprite": 53,
+        "sleepType": "snoozing"
       }
     ]
   },
@@ -330,12 +368,14 @@
       {
         "name": "Psyduck",
         "dex": 54,
-        "sprite": 54
+        "sprite": 54,
+        "sleepType": "dozing"
       },
       {
         "name": "Golduck",
         "dex": 55,
-        "sprite": 55
+        "sprite": 55,
+        "sleepType": "slumbering"
       }
     ]
   },
@@ -350,12 +390,14 @@
       {
         "name": "Mankey",
         "dex": 56,
-        "sprite": 56
+        "sprite": 56,
+        "sleepType": "dozing"
       },
       {
         "name": "Primeape",
         "dex": 57,
-        "sprite": 57
+        "sprite": 57,
+        "sleepType": "dozing"
       }
     ]
   },
@@ -370,12 +412,14 @@
       {
         "name": "Growlithe",
         "dex": 58,
-        "sprite": 58
+        "sprite": 58,
+        "sleepType": "snoozing"
       },
       {
         "name": "Arcanine",
         "dex": 59,
-        "sprite": 59
+        "sprite": 59,
+        "sleepType": "snoozing"
       }
     ]
   },
@@ -390,17 +434,20 @@
       {
         "name": "Bellsprout",
         "dex": 69,
-        "sprite": 69
+        "sprite": 69,
+        "sleepType": "dozing"
       },
       {
         "name": "Weepinbell",
         "dex": 70,
-        "sprite": 70
+        "sprite": 70,
+        "sleepType": "dozing"
       },
       {
         "name": "Victreebel",
         "dex": 71,
-        "sprite": 71
+        "sprite": 71,
+        "sleepType": "dozing"
       }
     ]
   },
@@ -415,17 +462,20 @@
       {
         "name": "Geodude",
         "dex": 74,
-        "sprite": 74
+        "sprite": 74,
+        "sleepType": "slumbering"
       },
       {
         "name": "Graveler",
         "dex": 75,
-        "sprite": 75
+        "sprite": 75,
+        "sleepType": "slumbering"
       },
       {
         "name": "Golem",
         "dex": 76,
-        "sprite": 76
+        "sprite": 76,
+        "sleepType": "slumbering"
       }
     ]
   },
@@ -440,17 +490,20 @@
       {
         "name": "Slowpoke",
         "dex": 79,
-        "sprite": 79
+        "sprite": 79,
+        "sleepType": "snoozing"
       },
       {
         "name": "Slowbro",
         "dex": 80,
-        "sprite": 80
+        "sprite": 80,
+        "sleepType": "snoozing"
       },
       {
         "name": "Slowking",
         "dex": 199,
-        "sprite": 199
+        "sprite": 199,
+        "sleepType": "snoozing"
       }
     ]
   },
@@ -465,17 +518,20 @@
       {
         "name": "Magnemite",
         "dex": 81,
-        "sprite": 81
+        "sprite": 81,
+        "sleepType": "slumbering"
       },
       {
         "name": "Magneton",
         "dex": 82,
-        "sprite": 82
+        "sprite": 82,
+        "sleepType": "slumbering"
       },
       {
         "name": "Magnezone",
         "dex": 462,
-        "sprite": 462
+        "sprite": 462,
+        "sleepType": "slumbering"
       }
     ]
   },
@@ -490,7 +546,8 @@
       {
         "name": "Farfetch'd",
         "dex": 83,
-        "sprite": 83
+        "sprite": 83,
+        "sleepType": "slumbering"
       }
     ]
   },
@@ -505,12 +562,14 @@
       {
         "name": "Doduo",
         "dex": 84,
-        "sprite": 84
+        "sprite": 84,
+        "sleepType": "slumbering"
       },
       {
         "name": "Dodrio",
         "dex": 85,
-        "sprite": 85
+        "sprite": 85,
+        "sleepType": "slumbering"
       }
     ]
   },
@@ -525,17 +584,20 @@
       {
         "name": "Gastly",
         "dex": 92,
-        "sprite": 92
+        "sprite": 92,
+        "sleepType": "dozing"
       },
       {
         "name": "Haunter",
         "dex": 93,
-        "sprite": 93
+        "sprite": 93,
+        "sleepType": "dozing"
       },
       {
         "name": "Gengar",
         "dex": 94,
-        "sprite": 94
+        "sprite": 94,
+        "sleepType": "dozing"
       }
     ]
   },
@@ -550,12 +612,14 @@
       {
         "name": "Onix",
         "dex": 95,
-        "sprite": 95
+        "sprite": 95,
+        "sleepType": "slumbering"
       },
       {
         "name": "Steelix",
         "dex": 208,
-        "sprite": 208
+        "sprite": 208,
+        "sleepType": "slumbering"
       }
     ]
   },
@@ -570,12 +634,14 @@
       {
         "name": "Cubone",
         "dex": 104,
-        "sprite": 104
+        "sprite": 104,
+        "sleepType": "slumbering"
       },
       {
         "name": "Marowak",
         "dex": 105,
-        "sprite": 105
+        "sprite": 105,
+        "sleepType": "slumbering"
       }
     ]
   },
@@ -590,17 +656,20 @@
       {
         "name": "Happiny",
         "dex": 440,
-        "sprite": 440
+        "sprite": 440,
+        "sleepType": "slumbering"
       },
       {
         "name": "Chansey",
         "dex": 113,
-        "sprite": 113
+        "sprite": 113,
+        "sleepType": "snoozing"
       },
       {
         "name": "Blissey",
         "dex": 242,
-        "sprite": 242
+        "sprite": 242,
+        "sleepType": "snoozing"
       }
     ]
   },
@@ -615,7 +684,8 @@
       {
         "name": "Kangaskhan",
         "dex": 115,
-        "sprite": 115
+        "sprite": 115,
+        "sleepType": "snoozing"
       }
     ]
   },
@@ -630,12 +700,14 @@
       {
         "name": "Mime Jr.",
         "dex": 439,
-        "sprite": 439
+        "sprite": 439,
+        "sleepType": "slumbering"
       },
       {
         "name": "Mr. Mime",
         "dex": 122,
-        "sprite": 122
+        "sprite": 122,
+        "sleepType": "snoozing"
       }
     ]
   },
@@ -650,7 +722,8 @@
       {
         "name": "Pinsir",
         "dex": 127,
-        "sprite": 127
+        "sprite": 127,
+        "sleepType": "dozing"
       }
     ]
   },
@@ -665,7 +738,8 @@
       {
         "name": "Ditto",
         "dex": 132,
-        "sprite": 132
+        "sprite": 132,
+        "sleepType": "snoozing"
       }
     ]
   },
@@ -680,57 +754,68 @@
       {
         "name": "Eevee",
         "dex": 133,
-        "sprite": 133
+        "sprite": 133,
+        "sleepType": "snoozing"
       },
       {
         "name": "Vaporeon",
         "dex": 134,
-        "sprite": 134
+        "sprite": 134,
+        "sleepType": "slumbering"
       },
       {
         "name": "Jolteon",
         "dex": 135,
-        "sprite": 135
+        "sprite": 135,
+        "sleepType": "snoozing"
       },
       {
         "name": "Flareon",
         "dex": 136,
-        "sprite": 136
+        "sprite": 136,
+        "sleepType": "snoozing"
       },
       {
         "name": "Espeon",
         "dex": 196,
-        "sprite": 196
+        "sprite": 196,
+        "sleepType": "snoozing"
       },
       {
         "name": "Umbreon",
         "dex": 197,
-        "sprite": 197
+        "sprite": 197,
+        "sleepType": "dozing"
       },
       {
         "name": "Leafeon",
         "dex": 470,
-        "sprite": 470
+        "sprite": 470,
+        "sleepType": "dozing"
       },
       {
         "name": "Glaceon",
         "dex": 471,
-        "sprite": 471
+        "sprite": 471,
+        "sleepType": "slumbering"
       },
       {
         "name": "Sylveon",
         "dex": 700,
-        "sprite": 700
+        "sprite": 700,
+        "sleepType": "snoozing"
       },
       {
         "name": "Halloween Eevee",
         "dex": 133,
-        "sprite": "133-halloween"
+        "sprite": "133-halloween",
+        "sleepType": "snoozing"
       },
       {
         "name": "Holiday Eevee",
         "dex": 133,
-        "sprite": "133-holiday"
+        "sprite": "133-holiday",
+        "sleepType": "snoozing"
       }
     ]
   },
@@ -745,17 +830,20 @@
       {
         "name": "Dratini",
         "dex": 147,
-        "sprite": 147
+        "sprite": 147,
+        "sleepType": "dozing"
       },
       {
         "name": "Dragonair",
         "dex": 148,
-        "sprite": 148
+        "sprite": 148,
+        "sleepType": "dozing"
       },
       {
         "name": "Dragonite",
         "dex": 149,
-        "sprite": 149
+        "sprite": 149,
+        "sleepType": "dozing"
       }
     ]
   },
@@ -770,7 +858,8 @@
       {
         "name": "Mewtwo",
         "dex": 150,
-        "sprite": 150
+        "sprite": 150,
+        "sleepType": "snoozing"
       }
     ]
   },
@@ -785,7 +874,8 @@
       {
         "name": "Mew",
         "dex": 151,
-        "sprite": 151
+        "sprite": 151,
+        "sleepType": "snoozing"
       }
     ]
   },
@@ -800,17 +890,20 @@
       {
         "name": "Chikorita",
         "dex": 152,
-        "sprite": 152
+        "sprite": 152,
+        "sleepType": "dozing"
       },
       {
         "name": "Bayleef",
         "dex": 153,
-        "sprite": 153
+        "sprite": 153,
+        "sleepType": "dozing"
       },
       {
         "name": "Meganium",
         "dex": 154,
-        "sprite": 154
+        "sprite": 154,
+        "sleepType": "dozing"
       }
     ]
   },
@@ -825,17 +918,20 @@
       {
         "name": "Cyndaquil",
         "dex": 155,
-        "sprite": 155
+        "sprite": 155,
+        "sleepType": "snoozing"
       },
       {
         "name": "Quilava",
         "dex": 156,
-        "sprite": 156
+        "sprite": 156,
+        "sleepType": "snoozing"
       },
       {
         "name": "Typhlosion",
         "dex": 157,
-        "sprite": 157
+        "sprite": 157,
+        "sleepType": "snoozing"
       }
     ]
   },
@@ -850,17 +946,20 @@
       {
         "name": "Totodile",
         "dex": 158,
-        "sprite": 158
+        "sprite": 158,
+        "sleepType": "slumbering"
       },
       {
         "name": "Croconaw",
         "dex": 159,
-        "sprite": 159
+        "sprite": 159,
+        "sleepType": "slumbering"
       },
       {
         "name": "Feraligatr",
         "dex": 160,
-        "sprite": 160
+        "sprite": 160,
+        "sleepType": "slumbering"
       }
     ]
   },
@@ -875,17 +974,20 @@
       {
         "name": "Togepi",
         "dex": 175,
-        "sprite": 175
+        "sprite": 175,
+        "sleepType": "slumbering"
       },
       {
         "name": "Togetic",
         "dex": 176,
-        "sprite": 176
+        "sprite": 176,
+        "sleepType": "snoozing"
       },
       {
         "name": "Togekiss",
         "dex": 468,
-        "sprite": 468
+        "sprite": 468,
+        "sleepType": "snoozing"
       }
     ]
   },
@@ -900,12 +1002,14 @@
       {
         "name": "Natu",
         "dex": 177,
-        "sprite": 177
+        "sprite": 177,
+        "sleepType": "snoozing"
       },
       {
         "name": "Xatu",
         "dex": 178,
-        "sprite": 178
+        "sprite": 178,
+        "sleepType": "snoozing"
       }
     ]
   },
@@ -920,17 +1024,20 @@
       {
         "name": "Mareep",
         "dex": 179,
-        "sprite": 179
+        "sprite": 179,
+        "sleepType": "snoozing"
       },
       {
         "name": "Flaaffy",
         "dex": 180,
-        "sprite": 180
+        "sprite": 180,
+        "sleepType": "snoozing"
       },
       {
         "name": "Ampharos",
         "dex": 181,
-        "sprite": 181
+        "sprite": 181,
+        "sleepType": "snoozing"
       }
     ]
   },
@@ -945,12 +1052,14 @@
       {
         "name": "Bonsly",
         "dex": 438,
-        "sprite": 438
+        "sprite": 438,
+        "sleepType": "slumbering"
       },
       {
         "name": "Sudowoodo",
         "dex": 185,
-        "sprite": 185
+        "sprite": 185,
+        "sleepType": "slumbering"
       }
     ]
   },
@@ -965,22 +1074,26 @@
       {
         "name": "Wooper",
         "dex": 194,
-        "sprite": 194
+        "sprite": 194,
+        "sleepType": "slumbering"
       },
       {
         "name": "Wooper (Paldea)",
         "dex": 194,
-        "sprite": 10253
+        "sprite": 10253,
+        "sleepType": "dozing"
       },
       {
         "name": "Quagsire",
         "dex": 195,
-        "sprite": 195
+        "sprite": 195,
+        "sleepType": "slumbering"
       },
       {
         "name": "Clodsire",
         "dex": 980,
-        "sprite": 980
+        "sprite": 980,
+        "sleepType": "dozing"
       }
     ]
   },
@@ -995,12 +1108,14 @@
       {
         "name": "Murkrow",
         "dex": 198,
-        "sprite": 198
+        "sprite": 198,
+        "sleepType": "dozing"
       },
       {
         "name": "Honchkrow",
         "dex": 430,
-        "sprite": 430
+        "sprite": 430,
+        "sleepType": "dozing"
       }
     ]
   },
@@ -1015,12 +1130,14 @@
       {
         "name": "Wynaut",
         "dex": 360,
-        "sprite": 360
+        "sprite": 360,
+        "sleepType": "slumbering"
       },
       {
         "name": "Wobbuffet",
         "dex": 202,
-        "sprite": 202
+        "sprite": 202,
+        "sleepType": "snoozing"
       }
     ]
   },
@@ -1035,7 +1152,8 @@
       {
         "name": "Shuckle",
         "dex": 213,
-        "sprite": 213
+        "sprite": 213,
+        "sleepType": "dozing"
       }
     ]
   },
@@ -1050,7 +1168,8 @@
       {
         "name": "Heracross",
         "dex": 214,
-        "sprite": 214
+        "sprite": 214,
+        "sleepType": "dozing"
       }
     ]
   },
@@ -1065,12 +1184,14 @@
       {
         "name": "Sneasel",
         "dex": 215,
-        "sprite": 215
+        "sprite": 215,
+        "sleepType": "dozing"
       },
       {
         "name": "Weavile",
         "dex": 461,
-        "sprite": 461
+        "sprite": 461,
+        "sleepType": "dozing"
       }
     ]
   },
@@ -1085,7 +1206,8 @@
       {
         "name": "Delibird",
         "dex": 225,
-        "sprite": 225
+        "sprite": 225,
+        "sleepType": "dozing"
       }
     ]
   },
@@ -1100,12 +1222,14 @@
       {
         "name": "Houndour",
         "dex": 228,
-        "sprite": 228
+        "sprite": 228,
+        "sleepType": "dozing"
       },
       {
         "name": "Houndoom",
         "dex": 229,
-        "sprite": 229
+        "sprite": 229,
+        "sleepType": "dozing"
       }
     ]
   },
@@ -1120,7 +1244,8 @@
       {
         "name": "Raikou",
         "dex": 243,
-        "sprite": 243
+        "sprite": 243,
+        "sleepType": "snoozing"
       }
     ]
   },
@@ -1135,7 +1260,8 @@
       {
         "name": "Entei",
         "dex": 244,
-        "sprite": 244
+        "sprite": 244,
+        "sleepType": "snoozing"
       }
     ]
   },
@@ -1150,7 +1276,8 @@
       {
         "name": "Suicune",
         "dex": 245,
-        "sprite": 245
+        "sprite": 245,
+        "sleepType": "slumbering"
       }
     ]
   },
@@ -1165,17 +1292,20 @@
       {
         "name": "Larvitar",
         "dex": 246,
-        "sprite": 246
+        "sprite": 246,
+        "sleepType": "slumbering"
       },
       {
         "name": "Pupitar",
         "dex": 247,
-        "sprite": 247
+        "sprite": 247,
+        "sleepType": "slumbering"
       },
       {
         "name": "Tyranitar",
         "dex": 248,
-        "sprite": 248
+        "sprite": 248,
+        "sleepType": "dozing"
       }
     ]
   },
@@ -1190,17 +1320,20 @@
       {
         "name": "Treecko",
         "dex": 252,
-        "sprite": 252
+        "sprite": 252,
+        "sleepType": "dozing"
       },
       {
         "name": "Grovyle",
         "dex": 253,
-        "sprite": 253
+        "sprite": 253,
+        "sleepType": "dozing"
       },
       {
         "name": "Sceptile",
         "dex": 254,
-        "sprite": 254
+        "sprite": 254,
+        "sleepType": "dozing"
       }
     ]
   },
@@ -1215,17 +1348,20 @@
       {
         "name": "Torchic",
         "dex": 255,
-        "sprite": 255
+        "sprite": 255,
+        "sleepType": "snoozing"
       },
       {
         "name": "Combusken",
         "dex": 256,
-        "sprite": 256
+        "sprite": 256,
+        "sleepType": "slumbering"
       },
       {
         "name": "Blaziken",
         "dex": 257,
-        "sprite": 257
+        "sprite": 257,
+        "sleepType": "slumbering"
       }
     ]
   },
@@ -1240,17 +1376,20 @@
       {
         "name": "Mudkip",
         "dex": 258,
-        "sprite": 258
+        "sprite": 258,
+        "sleepType": "slumbering"
       },
       {
         "name": "Marshtomp",
         "dex": 259,
-        "sprite": 259
+        "sprite": 259,
+        "sleepType": "slumbering"
       },
       {
         "name": "Swampert",
         "dex": 260,
-        "sprite": 260
+        "sprite": 260,
+        "sleepType": "slumbering"
       }
     ]
   },
@@ -1265,22 +1404,26 @@
       {
         "name": "Ralts",
         "dex": 280,
-        "sprite": 280
+        "sprite": 280,
+        "sleepType": "snoozing"
       },
       {
         "name": "Kirlia",
         "dex": 281,
-        "sprite": 281
+        "sprite": 281,
+        "sleepType": "snoozing"
       },
       {
         "name": "Gardevoir",
         "dex": 282,
-        "sprite": 282
+        "sprite": 282,
+        "sleepType": "snoozing"
       },
       {
         "name": "Gallade",
         "dex": 475,
-        "sprite": 475
+        "sprite": 475,
+        "sleepType": "slumbering"
       }
     ]
   },
@@ -1295,17 +1438,20 @@
       {
         "name": "Slakoth",
         "dex": 287,
-        "sprite": 287
+        "sprite": 287,
+        "sleepType": "snoozing"
       },
       {
         "name": "Vigoroth",
         "dex": 288,
-        "sprite": 288
+        "sprite": 288,
+        "sleepType": "dozing"
       },
       {
         "name": "Slaking",
         "dex": 289,
-        "sprite": 289
+        "sprite": 289,
+        "sleepType": "snoozing"
       }
     ]
   },
@@ -1320,7 +1466,8 @@
       {
         "name": "Sableye",
         "dex": 302,
-        "sprite": 302
+        "sprite": 302,
+        "sleepType": "dozing"
       }
     ]
   },
@@ -1335,7 +1482,8 @@
       {
         "name": "Mawile",
         "dex": 303,
-        "sprite": 303
+        "sprite": 303,
+        "sleepType": "slumbering"
       }
     ]
   },
@@ -1350,17 +1498,20 @@
       {
         "name": "Aron",
         "dex": 304,
-        "sprite": 304
+        "sprite": 304,
+        "sleepType": "slumbering"
       },
       {
         "name": "Lairon",
         "dex": 305,
-        "sprite": 305
+        "sprite": 305,
+        "sleepType": "slumbering"
       },
       {
         "name": "Aggron",
         "dex": 306,
-        "sprite": 306
+        "sprite": 306,
+        "sleepType": "slumbering"
       }
     ]
   },
@@ -1375,7 +1526,8 @@
       {
         "name": "Plusle",
         "dex": 311,
-        "sprite": 311
+        "sprite": 311,
+        "sleepType": "snoozing"
       }
     ]
   },
@@ -1390,7 +1542,8 @@
       {
         "name": "Minun",
         "dex": 312,
-        "sprite": 312
+        "sprite": 312,
+        "sleepType": "snoozing"
       }
     ]
   },
@@ -1405,12 +1558,14 @@
       {
         "name": "Gulpin",
         "dex": 316,
-        "sprite": 316
+        "sprite": 316,
+        "sleepType": "dozing"
       },
       {
         "name": "Swalot",
         "dex": 317,
-        "sprite": 317
+        "sprite": 317,
+        "sleepType": "dozing"
       }
     ]
   },
@@ -1425,17 +1580,20 @@
       {
         "name": "Trapinch",
         "dex": 328,
-        "sprite": 328
+        "sprite": 328,
+        "sleepType": "slumbering"
       },
       {
         "name": "Vibrava",
         "dex": 329,
-        "sprite": 329
+        "sprite": 329,
+        "sleepType": "slumbering"
       },
       {
         "name": "Flygon",
         "dex": 330,
-        "sprite": 330
+        "sprite": 330,
+        "sleepType": "slumbering"
       }
     ]
   },
@@ -1450,12 +1608,14 @@
       {
         "name": "Swablu",
         "dex": 333,
-        "sprite": 333
+        "sprite": 333,
+        "sleepType": "slumbering"
       },
       {
         "name": "Altaria",
         "dex": 334,
-        "sprite": 334
+        "sprite": 334,
+        "sleepType": "dozing"
       }
     ]
   },
@@ -1470,12 +1630,14 @@
       {
         "name": "Shuppet",
         "dex": 353,
-        "sprite": 353
+        "sprite": 353,
+        "sleepType": "dozing"
       },
       {
         "name": "Banette",
         "dex": 354,
-        "sprite": 354
+        "sprite": 354,
+        "sleepType": "dozing"
       }
     ]
   },
@@ -1490,7 +1652,8 @@
       {
         "name": "Absol",
         "dex": 359,
-        "sprite": 359
+        "sprite": 359,
+        "sleepType": "dozing"
       }
     ]
   },
@@ -1505,22 +1668,26 @@
       {
         "name": "Spheal",
         "dex": 363,
-        "sprite": 363
+        "sprite": 363,
+        "sleepType": "slumbering"
       },
       {
         "name": "Sealeo",
         "dex": 364,
-        "sprite": 364
+        "sprite": 364,
+        "sleepType": "slumbering"
       },
       {
         "name": "Walrein",
         "dex": 365,
-        "sprite": 365
+        "sprite": 365,
+        "sleepType": "slumbering"
       },
       {
         "name": "Holiday Spheal",
         "dex": 363,
-        "sprite": "363-holiday"
+        "sprite": "363-holiday",
+        "sleepType": "slumbering"
       }
     ]
   },
@@ -1535,17 +1702,20 @@
       {
         "name": "Bagon",
         "dex": 371,
-        "sprite": 371
+        "sprite": 371,
+        "sleepType": "dozing"
       },
       {
         "name": "Shelgon",
         "dex": 372,
-        "sprite": 372
+        "sprite": 372,
+        "sleepType": "dozing"
       },
       {
         "name": "Salamence",
         "dex": 373,
-        "sprite": 373
+        "sprite": 373,
+        "sleepType": "dozing"
       }
     ]
   },
@@ -1560,7 +1730,8 @@
       {
         "name": "Latias",
         "dex": 380,
-        "sprite": 380
+        "sprite": 380,
+        "sleepType": "dozing"
       }
     ]
   },
@@ -1575,7 +1746,8 @@
       {
         "name": "Latios",
         "dex": 381,
-        "sprite": 381
+        "sprite": 381,
+        "sleepType": "dozing"
       }
     ]
   },
@@ -1590,17 +1762,20 @@
       {
         "name": "Turtwig",
         "dex": 387,
-        "sprite": 387
+        "sprite": 387,
+        "sleepType": "dozing"
       },
       {
         "name": "Grotle",
         "dex": 388,
-        "sprite": 388
+        "sprite": 388,
+        "sleepType": "dozing"
       },
       {
         "name": "Torterra",
         "dex": 389,
-        "sprite": 389
+        "sprite": 389,
+        "sleepType": "slumbering"
       }
     ]
   },
@@ -1615,17 +1790,20 @@
       {
         "name": "Chimchar",
         "dex": 390,
-        "sprite": 390
+        "sprite": 390,
+        "sleepType": "snoozing"
       },
       {
         "name": "Monferno",
         "dex": 391,
-        "sprite": 391
+        "sprite": 391,
+        "sleepType": "slumbering"
       },
       {
         "name": "Infernape",
         "dex": 392,
-        "sprite": 392
+        "sprite": 392,
+        "sleepType": "slumbering"
       }
     ]
   },
@@ -1640,17 +1818,20 @@
       {
         "name": "Piplup",
         "dex": 393,
-        "sprite": 393
+        "sprite": 393,
+        "sleepType": "slumbering"
       },
       {
         "name": "Prinplup",
         "dex": 394,
-        "sprite": 394
+        "sprite": 394,
+        "sleepType": "slumbering"
       },
       {
         "name": "Empoleon",
         "dex": 395,
-        "sprite": 395
+        "sprite": 395,
+        "sleepType": "slumbering"
       }
     ]
   },
@@ -1665,17 +1846,20 @@
       {
         "name": "Shinx",
         "dex": 403,
-        "sprite": 403
+        "sprite": 403,
+        "sleepType": "snoozing"
       },
       {
         "name": "Luxio",
         "dex": 404,
-        "sprite": 404
+        "sprite": 404,
+        "sleepType": "snoozing"
       },
       {
         "name": "Luxray",
         "dex": 405,
-        "sprite": 405
+        "sprite": 405,
+        "sleepType": "snoozing"
       }
     ]
   },
@@ -1690,12 +1874,14 @@
       {
         "name": "Drifloon",
         "dex": 425,
-        "sprite": 425
+        "sprite": 425,
+        "sleepType": "dozing"
       },
       {
         "name": "Drifblim",
         "dex": 426,
-        "sprite": 426
+        "sprite": 426,
+        "sleepType": "dozing"
       }
     ]
   },
@@ -1710,7 +1896,8 @@
       {
         "name": "Spiritomb",
         "dex": 442,
-        "sprite": 442
+        "sprite": 442,
+        "sleepType": "dozing"
       }
     ]
   },
@@ -1725,12 +1912,14 @@
       {
         "name": "Riolu",
         "dex": 447,
-        "sprite": 447
+        "sprite": 447,
+        "sleepType": "slumbering"
       },
       {
         "name": "Lucario",
         "dex": 448,
-        "sprite": 448
+        "sprite": 448,
+        "sleepType": "slumbering"
       }
     ]
   },
@@ -1745,12 +1934,14 @@
       {
         "name": "Croagunk",
         "dex": 453,
-        "sprite": 453
+        "sprite": 453,
+        "sleepType": "dozing"
       },
       {
         "name": "Toxicroak",
         "dex": 454,
-        "sprite": 454
+        "sprite": 454,
+        "sleepType": "dozing"
       }
     ]
   },
@@ -1765,12 +1956,14 @@
       {
         "name": "Snover",
         "dex": 459,
-        "sprite": 459
+        "sprite": 459,
+        "sleepType": "slumbering"
       },
       {
         "name": "Abomasnow",
         "dex": 460,
-        "sprite": 460
+        "sprite": 460,
+        "sleepType": "slumbering"
       }
     ]
   },
@@ -1785,7 +1978,8 @@
       {
         "name": "Cresselia",
         "dex": 488,
-        "sprite": 488
+        "sprite": 488,
+        "sleepType": "snoozing"
       }
     ]
   },
@@ -1800,7 +1994,8 @@
       {
         "name": "Darkrai",
         "dex": 491,
-        "sprite": 491
+        "sprite": 491,
+        "sleepType": "dozing"
       }
     ]
   },
@@ -1815,12 +2010,14 @@
       {
         "name": "Munna",
         "dex": 517,
-        "sprite": 517
+        "sprite": 517,
+        "sleepType": "snoozing"
       },
       {
         "name": "Musharna",
         "dex": 518,
-        "sprite": 518
+        "sprite": 518,
+        "sleepType": "snoozing"
       }
     ]
   },
@@ -1835,12 +2032,14 @@
       {
         "name": "Dwebble",
         "dex": 557,
-        "sprite": 557
+        "sprite": 557,
+        "sleepType": "dozing"
       },
       {
         "name": "Crustle",
         "dex": 558,
-        "sprite": 558
+        "sprite": 558,
+        "sleepType": "dozing"
       }
     ]
   },
@@ -1855,12 +2054,14 @@
       {
         "name": "Foongus",
         "dex": 590,
-        "sprite": 590
+        "sprite": 590,
+        "sleepType": "dozing"
       },
       {
         "name": "Amoonguss",
         "dex": 591,
-        "sprite": 591
+        "sprite": 591,
+        "sleepType": "dozing"
       }
     ]
   },
@@ -1875,12 +2076,14 @@
       {
         "name": "Rufflet",
         "dex": 627,
-        "sprite": 627
+        "sprite": 627,
+        "sleepType": "slumbering"
       },
       {
         "name": "Braviary",
         "dex": 628,
-        "sprite": 628
+        "sprite": 628,
+        "sleepType": "slumbering"
       }
     ]
   },
@@ -1895,12 +2098,14 @@
       {
         "name": "Tyrunt",
         "dex": 696,
-        "sprite": 696
+        "sprite": 696,
+        "sleepType": "slumbering"
       },
       {
         "name": "Tyrantrum",
         "dex": 697,
-        "sprite": 697
+        "sprite": 697,
+        "sleepType": "slumbering"
       }
     ]
   },
@@ -1915,7 +2120,8 @@
       {
         "name": "Hawlucha",
         "dex": 701,
-        "sprite": 701
+        "sprite": 701,
+        "sleepType": "slumbering"
       }
     ]
   },
@@ -1930,7 +2136,8 @@
       {
         "name": "Dedenne",
         "dex": 702,
-        "sprite": 702
+        "sprite": 702,
+        "sleepType": "snoozing"
       }
     ]
   },
@@ -1945,12 +2152,14 @@
       {
         "name": "Pumpkaboo",
         "dex": 710,
-        "sprite": 710
+        "sprite": 710,
+        "sleepType": "dozing"
       },
       {
         "name": "Gourgeist",
         "dex": 711,
-        "sprite": 711
+        "sprite": 711,
+        "sleepType": "dozing"
       }
     ]
   },
@@ -1965,12 +2174,14 @@
       {
         "name": "Noibat",
         "dex": 714,
-        "sprite": 714
+        "sprite": 714,
+        "sleepType": "dozing"
       },
       {
         "name": "Noivern",
         "dex": 715,
-        "sprite": 715
+        "sprite": 715,
+        "sleepType": "dozing"
       }
     ]
   },
@@ -1985,17 +2196,20 @@
       {
         "name": "Grubbin",
         "dex": 736,
-        "sprite": 736
+        "sprite": 736,
+        "sleepType": "dozing"
       },
       {
         "name": "Charjabug",
         "dex": 737,
-        "sprite": 737
+        "sprite": 737,
+        "sleepType": "dozing"
       },
       {
         "name": "Vikavolt",
         "dex": 738,
-        "sprite": 738
+        "sprite": 738,
+        "sleepType": "dozing"
       }
     ]
   },
@@ -2010,12 +2224,14 @@
       {
         "name": "Cutiefly",
         "dex": 742,
-        "sprite": 742
+        "sprite": 742,
+        "sleepType": "snoozing"
       },
       {
         "name": "Ribombee",
         "dex": 743,
-        "sprite": 743
+        "sprite": 743,
+        "sleepType": "snoozing"
       }
     ]
   },
@@ -2030,12 +2246,14 @@
       {
         "name": "Stufful",
         "dex": 759,
-        "sprite": 759
+        "sprite": 759,
+        "sleepType": "slumbering"
       },
       {
         "name": "Bewear",
         "dex": 760,
-        "sprite": 760
+        "sprite": 760,
+        "sleepType": "slumbering"
       }
     ]
   },
@@ -2050,7 +2268,8 @@
       {
         "name": "Comfey",
         "dex": 764,
-        "sprite": 764
+        "sprite": 764,
+        "sleepType": "snoozing"
       }
     ]
   },
@@ -2065,7 +2284,8 @@
       {
         "name": "Togedemaru",
         "dex": 777,
-        "sprite": 777
+        "sprite": 777,
+        "sleepType": "slumbering"
       }
     ]
   },
@@ -2080,7 +2300,8 @@
       {
         "name": "Mimikyu",
         "dex": 778,
-        "sprite": 778
+        "sprite": 778,
+        "sleepType": "dozing"
       }
     ]
   },
@@ -2095,7 +2316,8 @@
       {
         "name": "Drampa",
         "dex": 780,
-        "sprite": 780
+        "sprite": 780,
+        "sleepType": "dozing"
       }
     ]
   },
@@ -2110,7 +2332,8 @@
       {
         "name": "Cramorant",
         "dex": 845,
-        "sprite": 845
+        "sprite": 845,
+        "sleepType": "slumbering"
       }
     ]
   },
@@ -2125,12 +2348,14 @@
       {
         "name": "Toxel",
         "dex": 848,
-        "sprite": 848
+        "sprite": 848,
+        "sleepType": "slumbering"
       },
       {
         "name": "Toxtricity",
         "dex": 849,
-        "sprite": 849
+        "sprite": 849,
+        "sleepType": "dozing"
       }
     ]
   },
@@ -2145,17 +2370,20 @@
       {
         "name": "Sprigatito",
         "dex": 906,
-        "sprite": 906
+        "sprite": 906,
+        "sleepType": "dozing"
       },
       {
         "name": "Floragato",
         "dex": 907,
-        "sprite": 907
+        "sprite": 907,
+        "sleepType": "dozing"
       },
       {
         "name": "Meowscarada",
         "dex": 908,
-        "sprite": 908
+        "sprite": 908,
+        "sleepType": "dozing"
       }
     ]
   },
@@ -2170,17 +2398,20 @@
       {
         "name": "Fuecoco",
         "dex": 909,
-        "sprite": 909
+        "sprite": 909,
+        "sleepType": "snoozing"
       },
       {
         "name": "Crocalor",
         "dex": 910,
-        "sprite": 910
+        "sprite": 910,
+        "sleepType": "snoozing"
       },
       {
         "name": "Skeledirge",
         "dex": 911,
-        "sprite": 911
+        "sprite": 911,
+        "sleepType": "dozing"
       }
     ]
   },
@@ -2195,17 +2426,20 @@
       {
         "name": "Quaxly",
         "dex": 912,
-        "sprite": 912
+        "sprite": 912,
+        "sleepType": "slumbering"
       },
       {
         "name": "Quaxwell",
         "dex": 913,
-        "sprite": 913
+        "sprite": 913,
+        "sleepType": "slumbering"
       },
       {
         "name": "Quaquaval",
         "dex": 914,
-        "sprite": 914
+        "sprite": 914,
+        "sleepType": "slumbering"
       }
     ]
   },
@@ -2220,17 +2454,20 @@
       {
         "name": "Pawmi",
         "dex": 921,
-        "sprite": 921
+        "sprite": 921,
+        "sleepType": "snoozing"
       },
       {
         "name": "Pawmo",
         "dex": 922,
-        "sprite": 922
+        "sprite": 922,
+        "sleepType": "snoozing"
       },
       {
         "name": "Pawmot",
         "dex": 923,
-        "sprite": 923
+        "sprite": 923,
+        "sleepType": "snoozing"
       }
     ]
   },
@@ -2245,17 +2482,20 @@
       {
         "name": "Tinkatink",
         "dex": 957,
-        "sprite": 957
+        "sprite": 957,
+        "sleepType": "snoozing"
       },
       {
         "name": "Tinkatuff",
         "dex": 958,
-        "sprite": 958
+        "sprite": 958,
+        "sleepType": "snoozing"
       },
       {
         "name": "Tinkaton",
         "dex": 959,
-        "sprite": 959
+        "sprite": 959,
+        "sleepType": "snoozing"
       }
     ]
   },
@@ -2270,12 +2510,14 @@
       {
         "name": "Cetoddle",
         "dex": 974,
-        "sprite": 974
+        "sprite": 974,
+        "sleepType": "slumbering"
       },
       {
         "name": "Cetitan",
         "dex": 975,
-        "sprite": 975
+        "sprite": 975,
+        "sleepType": "slumbering"
       }
     ]
   }

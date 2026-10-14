@@ -15,11 +15,22 @@ export const CHOICE_LABEL: Record<Choice, string> = {
   dont_want: "Don't Want",
 };
 
+export type SleepType = "dozing" | "snoozing" | "slumbering";
+
+export const SLEEP_TYPES: SleepType[] = ["dozing", "snoozing", "slumbering"];
+
+export const SLEEP_TYPE_LABEL: Record<SleepType, string> = {
+  dozing: "Dozing",
+  snoozing: "Snoozing",
+  slumbering: "Slumbering",
+};
+
 export interface LineMember {
   name: string;
   dex: number;
   /** PokeAPI id (a number), or an event costume like "25-holiday" (Holiday Pikachu). */
   sprite: number | string;
+  sleepType: SleepType;
 }
 
 /** One candy line: an evolution family whose forms all share one candy. */
@@ -41,7 +52,7 @@ export interface Island {
   lines: string[];
 }
 
-export const LINES: CandyLine[] = linesData;
+export const LINES: CandyLine[] = linesData as CandyLine[];
 export const LINES_BY_ID = new Map(LINES.map((line) => [line.id, line]));
 export const ISLANDS: Island[] = islandsData;
 
@@ -75,4 +86,13 @@ export function linesFromIds(ids: Iterable<string>): CandyLine[] {
     if (line) out.push(line);
   }
   return out.sort((a, b) => a.dex - b.dex);
+}
+
+/** Whether any form in the line sleeps this way (Pichu slumbers while Pikachu snoozes, so a line can match several). */
+export function lineHasSleepType(line: CandyLine, sleepType: SleepType): boolean {
+  return line.members.some((member) => member.sleepType === sleepType);
+}
+
+export function isSleepType(value: unknown): value is SleepType {
+  return typeof value === "string" && (SLEEP_TYPES as string[]).includes(value);
 }

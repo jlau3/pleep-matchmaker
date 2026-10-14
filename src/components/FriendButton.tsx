@@ -5,9 +5,10 @@ import { addFriend, removeFriend } from "@/app/actions";
 import { rethrowIfNavigation, SAVE_FAILED } from "@/lib/saveError";
 
 /**
- * Add / remove friend. Removing asks inline first (native confirm() is
- * suppressed in some in-app browsers, e.g. Discord's), and asks whether they
- * stopped playing: that answer feeds the inactive reports Find New uses.
+ * Add / remove friend. Removing takes you off their list too (the database
+ * does both sides). It asks inline first (native confirm() is suppressed in
+ * some in-app browsers, e.g. Discord's), and asks whether they stopped
+ * playing: that answer feeds the inactive reports Find New uses.
  */
 export function FriendButton({ userId, isFriend, name }: { userId: string; isFriend: boolean; name?: string }) {
   const [friend, setFriend] = useState(isFriend);
@@ -33,7 +34,10 @@ export function FriendButton({ userId, isFriend, name }: { userId: string; isFri
   if (confirming) {
     return (
       <span role="alertdialog" aria-label="Remove friend?" className="inline-flex flex-wrap items-center gap-2 text-sm">
-        <span className="font-semibold">Remove {name ?? "this friend"}? Have they stopped playing?</span>
+        <span className="font-semibold">
+          Remove {name ?? "this friend"}? You&apos;ll come off their list too, like in Pokémon Sleep. Have they stopped
+          playing?
+        </span>
         <button
           type="button"
           disabled={pending}

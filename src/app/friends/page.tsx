@@ -10,7 +10,8 @@ import { PlayerSearch, searchQuery } from "@/components/PlayerSearch";
 import { FRIENDS_TABS, SubTabs } from "@/components/SubTabs";
 import { loadOwnProfile, loadOwnVotes, MAX_FRIENDS } from "@/lib/data";
 import { requireUser } from "@/lib/supabase/server";
-import type { AddedMeRow, FriendRow, PendingRow } from "@/lib/types";
+import type { AddedMeRow, FriendRow, PendingRow, PlaceholderRow } from "@/lib/types";
+import { FriendPlaceholders } from "@/components/FriendPlaceholders";
 import { ConnectSteps } from "@/components/ConnectSteps";
 import { DismissAddedYou } from "@/components/DismissAddedYou";
 import { type FriendItem, FriendsBoard } from "@/components/FriendsBoard";
@@ -24,10 +25,11 @@ export default async function FriendsPage({ searchParams }: { searchParams: Prom
   const q = await searchQuery(Promise.resolve(params));
   const sort = parseFriendSort(params.sort);
 
-  const [friendsResult, addedMeResult, pendingResult, profile, { choices, tops }] = await Promise.all([
+  const [friendsResult, addedMeResult, pendingResult, placeholdersResult, profile, { choices, tops }] = await Promise.all([
     supabase.rpc("get_friends"),
     supabase.rpc("get_added_me", { with_fit: true }),
     supabase.rpc("get_pending_friends"),
+    supabase.rpc("get_friend_placeholders"),
     loadOwnProfile(supabase, user.id),
     loadOwnVotes(supabase, user.id),
   ]);
@@ -36,6 +38,8 @@ export default async function FriendsPage({ searchParams }: { searchParams: Prom
   const addedMe = (addedMeResult.data ?? []) as AddedMeRow[];
   // Asked in Pokémon Sleep, not added here yet (empty until that migration runs).
   const pending = (pendingResult.data ?? []) as PendingRow[];
+  // In-game friends not here yet (null until that migration runs, which hides the section).
+  const placeholders = placeholdersResult.error ? null : ((placeholdersResult.data ?? []) as PlaceholderRow[]);
   const friends = friendsResult.data as FriendRow[];
   const friendIds = new Set(friends.map((f) => f.user_id));
 
@@ -149,6 +153,20 @@ export default async function FriendsPage({ searchParams }: { searchParams: Prom
           />
         )}
       </section>
+
+      {placeholders && (
+        <section id="not-here-yet" className="scroll-mt-20">
+          <h2 className="mb-1 text-lg font-semibold">
+            Not here yet{" "}
+            {placeholders.length > 0 && <span className="text-sm font-normal text-slate-500">{placeholders.length}</span>}
+          </h2>
+          <p className="mb-3 text-sm text-slate-500">
+            In-game friends who haven&apos;t signed up. Add their IGN as a reminder, then tap Search now and then; once they
+            join, add them and they drop off this list.
+          </p>
+          <FriendPlaceholders rows={placeholders} />
+        </section>
+      )}
     </div>
   );
 }

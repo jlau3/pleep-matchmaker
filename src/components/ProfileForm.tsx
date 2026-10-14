@@ -32,7 +32,9 @@ export function ProfileForm({ profile, friendListFull }: { profile: OwnProfile; 
           <span className="text-xs text-slate-500">
             {friendListFull
               ? "Your friend list is full, so you're hidden from matches until you remove someone."
-              : "Turn off to hide from matches. You're hidden automatically while your friend list is full."}
+              : "Turn off to hide from matches. You're hidden automatically while your friend list is full."}{" "}
+            Off also hides your friend code from people who find you by name; your friends, and anyone who types your code
+            in, still see it.
           </span>
         </span>
       </label>
