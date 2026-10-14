@@ -108,6 +108,6 @@ export interface AddedMeRow extends PlayerContact {
 export interface PlaceholderRow {
   name: string;
   created_at: string;
-  /** A player with exactly this IGN can be found here now. */
+  /** A player with exactly this IGN can be found here now (maybe not them: IGNs aren't unique). */
   signed_up: boolean;
 }

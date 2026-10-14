@@ -8,8 +8,9 @@ import type { PlaceholderRow } from "@/lib/types";
 
 /**
  * In-game friends who haven't signed up yet, by IGN, so you remember to check
- * on them. Search looks them up; one marked "Signed up" can be found and
- * added now, which clears it.
+ * on them. Search looks them up. IGNs aren't unique, so a matching player
+ * here is only a maybe: the row asks you to check it's them before adding,
+ * which clears it.
  */
 export function FriendPlaceholders({ rows }: { rows: PlaceholderRow[] }) {
   const [name, setName] = useState("");
@@ -60,12 +61,14 @@ export function FriendPlaceholders({ rows }: { rows: PlaceholderRow[] }) {
         <ul className="divide-y divide-slate-200 rounded-2xl border border-slate-200 dark:divide-slate-700 dark:border-slate-700">
           {rows.map((row) => (
             <li key={row.name} className="flex items-center gap-2 px-3 py-2 text-sm">
-              <span className="min-w-0 flex-1 truncate font-semibold" title={row.name}>
-                {row.name}
+              <span className="min-w-0 flex-1">
+                <span className="block truncate font-semibold" title={row.name}>
+                  {row.name}
+                </span>
+                {row.signed_up && (
+                  <span className="block text-xs text-want">Someone with this IGN joined. Search to check it&apos;s them.</span>
+                )}
               </span>
-              {row.signed_up && (
-                <span className="shrink-0 rounded-full bg-want/15 px-2 py-0.5 text-xs font-semibold text-want">Signed up!</span>
-              )}
               <Link
                 href={`/friends?q=${encodeURIComponent(row.name)}`}
                 className={`shrink-0 rounded-lg px-3 py-1 text-xs font-semibold ${
