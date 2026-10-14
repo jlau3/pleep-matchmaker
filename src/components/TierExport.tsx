@@ -1,8 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { lineSpriteUrl } from "@/lib/lines";
-import { type RankedLine, type TierId, TIERS } from "@/lib/tiers";
+import { type RankedLine, rankedSpriteUrl, type TierId, TIERS } from "@/lib/tiers";
 
 export interface ExportSection {
   /** Island name when exporting By Island; none for a single list. */
@@ -44,25 +43,14 @@ function roundRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: numbe
   ctx.roundRect(x, y, w, h, r);
 }
 
-/** Gold for Top 3 picks, as on the board's Top 3 row. */
+/** Gold for the Top 3 star counts, as on the board's Top 3 row. */
 const STAR_GOLD = "#f2a900";
-
-/**
- * Top 3 ring width for a line, by how its stars compare with the most-starred
- * line in the image: thin for a lone fan, thick for the crowd favorites. Relative,
- * so a 5-friend list and a 300-player one both use the full range.
- */
-function ringWidth(tops: number, maxTops: number): number {
-  if (tops <= 0 || maxTops <= 0) return 0;
-  const share = tops / maxTops;
-  return share > 2 / 3 ? 4 : share > 1 / 3 ? 2.75 : 1.5;
-}
 
 /**
  * Draws the compact tier list: a header, then per section (one list, or one
  * per island) a row per tier of sprites only, best first. No ratings or vote
  * counts, so it stays small enough to share. Lines someone starred as a Top 3
- * get a gold ring (thicker with more stars) and, from 2 stars, a ★ count.
+ * get a gold ★ on the corner, with the count from 2 stars.
  */
 async function renderPng(title: string, voters: number, sections: ExportSection[]): Promise<Blob> {
   await document.fonts.ready;
@@ -75,7 +63,6 @@ async function renderPng(title: string, voters: number, sections: ExportSection[
       return lines.length ? [{ tier, lines }] : [];
     }),
   );
-  const maxTops = Math.max(0, ...rows.flat().flatMap((row) => row.lines.map((r) => r.tops)));
   const rowHeight = (n: number) => Math.ceil(n / COLS) * (ICON + GAP) - GAP + ROW_PAD * 2;
   const HEADER = 58;
   const SECTION_HEAD = 30;
@@ -89,7 +76,7 @@ async function renderPng(title: string, voters: number, sections: ExportSection[
   height += FOOTER;
 
   const sprites = new Map<string, HTMLImageElement | null>();
-  const urls = new Set(rows.flat().flatMap((row) => row.lines.map((r) => lineSpriteUrl(r.line))));
+  const urls = new Set(rows.flat().flatMap((row) => row.lines.map((r) => rankedSpriteUrl(r))));
   await Promise.all([...urls].map(async (url) => sprites.set(url, await loadImage(url))));
 
   const canvas = document.createElement("canvas");
@@ -142,16 +129,9 @@ async function renderPng(title: string, voters: number, sections: ExportSection[
         ctx.fillStyle = "#ffffff";
         roundRect(ctx, x, top, ICON, ICON, 10);
         ctx.fill();
-        const img = sprites.get(lineSpriteUrl(ranked.line));
+        const img = sprites.get(rankedSpriteUrl(ranked));
         if (img) ctx.drawImage(img, x + 2, top + 2, ICON - 4, ICON - 4);
-        const ring = ringWidth(ranked.tops, maxTops);
-        if (ring > 0) {
-          ctx.strokeStyle = STAR_GOLD;
-          ctx.lineWidth = ring;
-          roundRect(ctx, x + ring / 2, top + ring / 2, ICON - ring, ICON - ring, 10 - ring / 2);
-          ctx.stroke();
-        }
-        if (ranked.tops >= 2) drawStarCount(ctx, font, ranked.tops, x + ICON, top);
+        if (ranked.tops > 0) drawStarCount(ctx, font, ranked.tops, x + ICON, top);
       });
       y += h + 4;
     }
@@ -160,14 +140,6 @@ async function renderPng(title: string, voters: number, sections: ExportSection[
 
   ctx.fillStyle = "#8a97ab";
   ctx.font = `400 11px ${font}`;
-  if (maxTops > 0) {
-    // Legend for the rings, bottom left.
-    ctx.strokeStyle = STAR_GOLD;
-    ctx.lineWidth = 2;
-    roundRect(ctx, PAD, height - 21, 14, 14, 4);
-    ctx.stroke();
-    ctx.fillText("Top 3 picks (thicker ring, ★ = more players)", PAD + 20, height - 10);
-  }
   ctx.textAlign = "right";
   ctx.fillText(`Made with Pleep Matchmaker · ${window.location.host}`, WIDTH - PAD, height - 10);
 
@@ -176,9 +148,10 @@ async function renderPng(title: string, voters: number, sections: ExportSection[
   );
 }
 
-/** "★5" pill on a sprite's top-right corner. */
+/** "★" (one star) or "★5" pill on a sprite's top-right corner. */
 function drawStarCount(ctx: CanvasRenderingContext2D, font: string, tops: number, right: number, top: number) {
-  const text = `★${tops > 99 ? "99+" : tops}`;
+  // A lone star needs no count; from 2 the number says how many players.
+  const text = tops === 1 ? "★" : `★${tops > 99 ? "99+" : tops}`;
   ctx.font = `800 9px ${font}`;
   const w = ctx.measureText(text).width + 6;
   const x = right - w + 2;

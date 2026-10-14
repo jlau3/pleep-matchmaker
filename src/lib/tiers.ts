@@ -1,4 +1,4 @@
-import { type CandyLine, LINES } from "./lines";
+import { type CandyLine, LINES, lineSpriteUrl } from "./lines";
 
 export type TierId = "top" | "S" | "A" | "B" | "C" | "avoid";
 
@@ -55,6 +55,8 @@ export interface LineVotes {
 
 export interface RankedLine {
   line: CandyLine;
+  /** Sprite to show instead of the namesake's, e.g. Cleffa when filtering to Slumbering. */
+  sprite?: string;
   wants: number;
   dontWants: number;
   /** Voters in the pool who neither want nor don't want it (Neutral, or not voted yet). */
@@ -165,6 +167,9 @@ export function buildTiers(
   }
   return out;
 }
+
+/** The sprite a tier list shows for a line: the filtered form when there is one, else the namesake. */
+export const rankedSpriteUrl = (ranked: RankedLine) => ranked.sprite ?? lineSpriteUrl(ranked.line);
 
 /** Vote counts per line from a set of players' want / don't-want / starred lists. */
 export function countVotes(players: { wants: string[]; dont_wants: string[]; top_wants?: string[] }[]): Map<string, LineVotes> {

@@ -1,5 +1,4 @@
-import { lineSpriteUrl } from "@/lib/lines";
-import { type RankedLine, type TierId, TIERS, TOP_ROW_SIZE } from "@/lib/tiers";
+import { type RankedLine, rankedSpriteUrl, type TierId, TIERS, TOP_ROW_SIZE } from "@/lib/tiers";
 
 const TIER_STYLE: Record<string, string> = {
   top: "bg-gradient-to-br from-sun to-[#ff8fab] text-[#5b3e00] shadow-[0_3px_0_var(--color-sun-deep)]",
@@ -30,7 +29,7 @@ const ratingColor = (rating: number) => RATING_BANDS.find(([min]) => rating >= m
 function VoteCard({ ranked }: { ranked: RankedLine }) {
   return (
     <li className="flex items-center gap-3 rounded-2xl bg-white p-2 dark:bg-night-deep">
-      <img src={lineSpriteUrl(ranked.line)} alt="" loading="lazy" className="h-14 w-14 shrink-0 rounded-full bg-sky object-contain dark:bg-night" />
+      <img src={rankedSpriteUrl(ranked)} alt="" loading="lazy" className="h-14 w-14 shrink-0 rounded-full bg-sky object-contain dark:bg-night" />
       <div className="min-w-0 flex-1">
         <div className="flex items-baseline justify-between gap-2">
           <span className="truncate font-semibold">{ranked.line.name}</span>

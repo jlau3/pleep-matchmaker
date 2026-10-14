@@ -1,7 +1,7 @@
 import { existsSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import { ISLANDS, LINES, LINES_BY_ID, SLEEP_TYPES, lineHasSleepType, lineSpriteUrl, linesFromIds, recentLines } from "./lines";
+import { ISLANDS, LINES, LINES_BY_ID, SLEEP_TYPES, lineHasSleepType, lineSpriteUrl, linesFromIds, recentLines, sleepTypeMember } from "./lines";
 
 describe("candy line data", () => {
   it("has unique ids and at least one member per line", () => {
@@ -33,6 +33,17 @@ describe("sleep types", () => {
     expect(lineHasSleepType(pikachu, "snoozing")).toBe(true);
     expect(lineHasSleepType(pikachu, "dozing")).toBe(false);
   });
+
+  it("only counts forms that spawn on the island", () => {
+    const eevee = LINES_BY_ID.get("eevee")!;
+    const island = (id: string) => ISLANDS.find((i) => i.id === id)!;
+    // Taupe Hollow has Flareon and Umbreon, so no Slumbering (Vaporeon, Glaceon) there.
+    expect(lineHasSleepType(eevee, "slumbering", island("taupe-hollow"))).toBe(false);
+    expect(sleepTypeMember(eevee, "dozing", island("taupe-hollow"))?.name).toBe("Umbreon");
+    expect(sleepTypeMember(eevee, "slumbering", island("snowdrop-tundra"))?.name).toBe("Glaceon");
+    // A line that isn't on the island matches nothing there.
+    expect(lineHasSleepType(eevee, "snoozing", island("snowdrop-tundra"))).toBe(false);
+  });
 });
 
 describe("linesFromIds", () => {
@@ -45,6 +56,16 @@ describe("island data", () => {
   it("only references known candy lines", () => {
     for (const island of ISLANDS) {
       for (const id of island.lines) expect(LINES_BY_ID.has(id), `${island.id}: ${id}`).toBe(true);
+    }
+  });
+  it("lists spawning forms for exactly its lines, by member name", () => {
+    for (const island of ISLANDS) {
+      expect(Object.keys(island.spawns).sort(), island.id).toEqual([...island.lines].sort());
+      for (const [lineId, names] of Object.entries(island.spawns)) {
+        const members = LINES_BY_ID.get(lineId)!.members.map((m) => m.name);
+        expect(names.length, `${island.id}: ${lineId}`).toBeGreaterThan(0);
+        for (const name of names) expect(members, `${island.id}: ${lineId}`).toContain(name);
+      }
     }
   });
   it("has every island populated", () => {

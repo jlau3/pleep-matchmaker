@@ -50,11 +50,13 @@ export interface Island {
   name: string;
   /** Candy line ids that spawn on this island. */
   lines: string[];
+  /** Per line, the forms (member names) that spawn here: Taupe Hollow's Eevee line is Flareon and Umbreon. */
+  spawns: Record<string, string[]>;
 }
 
 export const LINES: CandyLine[] = linesData as CandyLine[];
 export const LINES_BY_ID = new Map(LINES.map((line) => [line.id, line]));
-export const ISLANDS: Island[] = islandsData;
+export const ISLANDS = islandsData as unknown as Island[];
 
 /** Lines released in the last `days` days get the new candy card on My Votes. */
 export const NEW_LINE_DAYS = 14;
@@ -88,9 +90,28 @@ export function linesFromIds(ids: Iterable<string>): CandyLine[] {
   return out.sort((a, b) => a.dex - b.dex);
 }
 
-/** Whether any form in the line sleeps this way (Pichu slumbers while Pikachu snoozes, so a line can match several). */
-export function lineHasSleepType(line: CandyLine, sleepType: SleepType): boolean {
-  return line.members.some((member) => member.sleepType === sleepType);
+/** Forms of each line that spawn on at least one island. */
+const SPAWNS_ANYWHERE = new Map<string, Set<string>>();
+for (const island of ISLANDS)
+  for (const [lineId, names] of Object.entries(island.spawns)) {
+    const set = SPAWNS_ANYWHERE.get(lineId) ?? new Set<string>();
+    names.forEach((name) => set.add(name));
+    SPAWNS_ANYWHERE.set(lineId, set);
+  }
+
+/**
+ * The first form of the line you can meet sleeping this way: on the island
+ * when one is given, else on any island. Forms that don't spawn there don't
+ * count (Taupe Hollow's Eevee line is Flareon and Umbreon, so no Slumbering
+ * Vaporeon). A line can match several types (Pichu slumbers, Pikachu snoozes).
+ */
+export function sleepTypeMember(line: CandyLine, sleepType: SleepType, island?: Island | null): LineMember | undefined {
+  const spawning = island ? new Set(island.spawns[line.id] ?? []) : SPAWNS_ANYWHERE.get(line.id);
+  return line.members.find((member) => member.sleepType === sleepType && (!spawning || spawning.has(member.name)));
+}
+
+export function lineHasSleepType(line: CandyLine, sleepType: SleepType, island?: Island | null): boolean {
+  return sleepTypeMember(line, sleepType, island) !== undefined;
 }
 
 export function isSleepType(value: unknown): value is SleepType {

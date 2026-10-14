@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { ISLANDS, LINES, SLEEP_TYPE_LABEL, SLEEP_TYPES, lineHasSleepType, type SleepType } from "@/lib/lines";
+import { ISLANDS, LINES, SLEEP_TYPE_LABEL, SLEEP_TYPES, lineSpriteUrl, sleepTypeMember, spriteUrl, type SleepType } from "@/lib/lines";
 import { buildTiers, type LineVotes } from "@/lib/tiers";
 import { InviteButton } from "./InviteButton";
 import { InviteReminder } from "./InviteReminder";
@@ -98,11 +98,27 @@ export function TierExplorer({
   const poolLabel = POOL_LABEL[pool];
   const selected = MAPPED_ISLANDS.find((island) => island.id === islandId) ?? null;
   // A hundred-odd lines: cheap enough to rank per pick, no need to prebuild every combination.
+  // With a sleep type picked, a line shows if a form that spawns here sleeps that way, drawn as that form.
   const tiers = useMemo(() => {
-    const lines = LINES.filter(
-      (line) => (!selected || selected.lines.includes(line.id)) && (!sleepType || lineHasSleepType(line, sleepType)),
+    const shown = new Map<string, string | undefined>();
+    for (const line of LINES) {
+      if (selected && !selected.lines.includes(line.id)) continue;
+      if (!sleepType) shown.set(line.id, undefined);
+      else {
+        const member = sleepTypeMember(line, sleepType, selected);
+        if (member) {
+          const sprite = spriteUrl(member.sprite);
+          shown.set(line.id, sprite === lineSpriteUrl(line) ? undefined : sprite);
+        }
+      }
+    }
+    const built = buildTiers(
+      new Map(Object.entries(data.votes)),
+      data.voters,
+      LINES.filter((line) => shown.has(line.id)),
     );
-    return buildTiers(new Map(Object.entries(data.votes)), data.voters, lines);
+    for (const rows of built.values()) for (const r of rows) r.sprite = shown.get(r.line.id);
+    return built;
   }, [data, selected, sleepType]);
   const pill = (active: boolean) =>
     `rounded-full border px-3 py-1 text-sm ${active ? "pill-active border-transparent" : "border-slate-300 dark:border-slate-700"}`;
