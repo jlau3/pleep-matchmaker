@@ -10,10 +10,10 @@ import type { FriendRow } from "@/lib/types";
 /**
  * Loads both pools (your friends' votes and everyone's) in one go and hands
  * them to TierExplorer, which builds every view (friends / everyone, all
- * islands / by island) in the browser. Switching views never goes back to the
+ * islands or one island) in the browser. Switching views never goes back to the
  * server; the query string only picks the view shown first.
  */
-export default async function TiersPage({ searchParams }: { searchParams: Promise<{ pool?: string; split?: string }> }) {
+export default async function TiersPage({ searchParams }: { searchParams: Promise<{ pool?: string; island?: string }> }) {
   const { supabase, user } = await requireUser();
   const params = await searchParams;
 
@@ -39,7 +39,7 @@ export default async function TiersPage({ searchParams }: { searchParams: Promis
       friends={friends}
       everyone={everyone}
       initialPool={params.pool === "everyone" ? "everyone" : "friends"}
-      initialByIsland={params.split === "islands"}
+      initialIsland={params.island ?? null}
       loadedAt={new Date().toISOString()}
       notice={
         unvoted > 0 && (
