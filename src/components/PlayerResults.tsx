@@ -19,6 +19,7 @@ export function PlayerResults({
   friendIds,
   viewerId,
   suggestPlaceholder = true,
+  placeholder,
 }: {
   q: string;
   rows: LookupRow[];
@@ -26,6 +27,8 @@ export function PlayerResults({
   viewerId: string;
   /** Off inside Not here yet, where the name is already a placeholder. */
   suggestPlaceholder?: boolean;
+  /** Searching from this Not here yet name: adding a result clears it. */
+  placeholder?: string;
 }) {
   // You can't add or block yourself: say it's you instead of showing your own card.
   const foundSelf = rows.some((player) => player.user_id === viewerId);
@@ -41,7 +44,8 @@ export function PlayerResults({
         <div className="space-y-2 py-4 text-center text-sm text-slate-500">
           <p>No one found. Try their exact name or friend code; some players turn lookup off.</p>
           {/* A friend code isn't a name to keep; anything else might be an IGN. */}
-          {suggestPlaceholder && !normalizeFriendCode(q) && <SuggestPlaceholder name={q} />}
+          {/* Keyed by name: a new search gets a fresh button instead of the last one's "Added". */}
+          {suggestPlaceholder && !normalizeFriendCode(q) && <SuggestPlaceholder key={q} name={q} />}
         </div>
       )}
       {players.length > 0 && (
@@ -51,6 +55,7 @@ export function PlayerResults({
               <PlayerHeader
                 player={player}
                 isFriend={friendIds.includes(player.user_id)}
+                placeholder={placeholder}
                 aside={
                   // No fit while there's nothing to compare against: no friends' votes and none of your own.
                   player.match_pct === null && player.you_fit_pct === null && player.wants.length > 0 ? (

@@ -89,7 +89,7 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
   return (
     <div className="space-y-4">
       <div>
-        <SubTabs tabs={FRIENDS_TABS} active="/matches" query={q ? `q=${encodeURIComponent(q)}` : undefined} />
+        <SubTabs tabs={FRIENDS_TABS} active="/matches" />
         <PlayerSearch supabase={supabase} q={q} friendIds={friendIds} viewerId={user.id} />
         <div className="mt-4">
           <FriendshipLevel5 />

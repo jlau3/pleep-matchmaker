@@ -10,7 +10,18 @@ import { rethrowIfNavigation, SAVE_FAILED } from "@/lib/saveError";
  * some in-app browsers, e.g. Discord's), and asks whether they stopped
  * playing: that answer feeds the inactive reports Find New uses.
  */
-export function FriendButton({ userId, isFriend, name }: { userId: string; isFriend: boolean; name?: string }) {
+export function FriendButton({
+  userId,
+  isFriend,
+  name,
+  placeholder,
+}: {
+  userId: string;
+  isFriend: boolean;
+  name?: string;
+  /** Not here yet name this player was searched from; adding them clears it. */
+  placeholder?: string;
+}) {
   const [friend, setFriend] = useState(isFriend);
   const [confirming, setConfirming] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -20,7 +31,7 @@ export function FriendButton({ userId, isFriend, name }: { userId: string; isFri
     setError(null);
     startTransition(async () => {
       try {
-        const result = friend ? await removeFriend(userId, inactive) : await addFriend(userId);
+        const result = friend ? await removeFriend(userId, inactive) : await addFriend(userId, placeholder);
         if (result.error) setError(result.error);
         else setFriend(!friend);
         setConfirming(false);
