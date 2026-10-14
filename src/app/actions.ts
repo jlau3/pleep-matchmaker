@@ -5,6 +5,7 @@ import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { normalizeFriendCode } from "@/lib/format";
 import { MAX_FRIENDS } from "@/lib/friendship";
+import type { LookupRow } from "@/lib/types";
 import { META_COOKIE, META_POSTS, metaCookieValue } from "@/content/meta";
 import { HELP_COOKIE, HELP_VERSION, helpCookieValue } from "@/lib/help";
 import { LINKING_COOKIE, NEXT_COOKIE, safeNextPath } from "@/lib/nextPath";
@@ -268,6 +269,16 @@ export async function removeFriend(friendId: string, inactive = false): Promise<
   revalidatePath("/friends");
   revalidatePath("/tiers");
   return {};
+}
+
+/** Player search as an action, so the search box and Not here yet can look people up without reloading the page. */
+export async function lookupPlayers(q: string): Promise<{ rows?: LookupRow[]; error?: string }> {
+  const { supabase } = await requireUser();
+  const query = q.trim().slice(0, 64);
+  if (!query) return { rows: [] };
+  const { data, error } = await supabase.rpc("lookup_players", { q: query });
+  if (error) return { error: "Search failed, try again" };
+  return { rows: data as LookupRow[] };
 }
 
 /**
