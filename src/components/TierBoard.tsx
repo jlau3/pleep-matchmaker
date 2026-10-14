@@ -72,7 +72,8 @@ export function TierBoard({ tiers, pool = "friends" }: { tiers: Map<TierId, Rank
               {tier.label}
             </span>
             <span className="text-sm text-slate-500">
-              {tier.id === "top" && ranked.length > TOP_ROW_SIZE ? `${TOP_ROW_SIZE} of ${ranked.length}` : ranked.length} · {tier.hint}
+              {/* The Top 3 row is folded, so no count there: just what it is. */}
+              {tier.id === "top" ? tier.hint : `${ranked.length} · ${tier.hint}`}
             </span>
           </>
         );
