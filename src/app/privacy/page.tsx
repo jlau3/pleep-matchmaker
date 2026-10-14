@@ -59,8 +59,8 @@ export default function PrivacyPage() {
         <ul className="list-disc space-y-1 pl-5">
           <li>
             <b>Other players</b> can see your IGN, friend code, candy votes and Top 3, when you were last active, and your
-            Discord name and avatar if <b>Show my Discord name</b> is on. They see this when they search for your exact name
-            or friend code, when you appear in their matches, or when they&apos;ve added you as a friend.
+            Discord name and avatar if <b>Show my Discord name</b> is on. They see this when they search for your name (or
+            something close to it) or friend code, when you appear in their matches, or when they&apos;ve added you as a friend.
           </li>
           <li>
             <b>Nobody else ever sees your email.</b> It&apos;s only used to sign you in.

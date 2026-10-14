@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { lineSpriteUrl } from "@/lib/lines";
-import { type RankedLine, type TierId, TIERS, TOP_ROW_SIZE } from "@/lib/tiers";
+import { type RankedLine, type TierId, TIERS } from "@/lib/tiers";
 
 export interface ExportSection {
   /** Island name when exporting By Island; none for a single list. */
@@ -44,8 +44,6 @@ function roundRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: numbe
   ctx.roundRect(x, y, w, h, r);
 }
 
-/** Rows a tier takes: the Top 3 row is cut at TOP_ROW_SIZE like on the board. */
-const tierLines = (id: TierId, ranked: RankedLine[]) => (id === "top" ? ranked.slice(0, TOP_ROW_SIZE) : ranked);
 
 /**
  * Draws the compact tier list: a header, then per section (one list, or one
@@ -57,8 +55,9 @@ async function renderPng(title: string, voters: number, sections: ExportSection[
   const font = getComputedStyle(document.body).fontFamily;
 
   const rows = sections.map((section) =>
-    TIERS.flatMap((tier) => {
-      const lines = tierLines(tier.id, section.tiers.get(tier.id) ?? []);
+    // The ranked tiers only: the Top 3 row (players' favorites, not a tier) stays on the site.
+    TIERS.filter((tier) => tier.id !== "top").flatMap((tier) => {
+      const lines = section.tiers.get(tier.id) ?? [];
       return lines.length ? [{ tier, lines }] : [];
     }),
   );
@@ -106,17 +105,9 @@ async function renderPng(title: string, voters: number, sections: ExportSection[
     }
     for (const { tier, lines } of rows[i]) {
       const h = rowHeight(lines.length);
-      // Row panel; the Top 3 row gets a dashed gold frame since it isn't a tier.
-      ctx.fillStyle = tier.id === "top" ? "#fff3c9" : "#fffaf0";
+      ctx.fillStyle = "#fffaf0";
       roundRect(ctx, PAD, y, WIDTH - PAD * 2, h, 10);
       ctx.fill();
-      if (tier.id === "top") {
-        ctx.setLineDash([4, 3]);
-        ctx.strokeStyle = "#e3a614";
-        ctx.lineWidth = 1.5;
-        ctx.stroke();
-        ctx.setLineDash([]);
-      }
       // Tier badge.
       const color = TIER_COLOR[tier.id];
       ctx.fillStyle = color.bg;

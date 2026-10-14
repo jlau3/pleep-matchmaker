@@ -192,17 +192,7 @@ export function TierExplorer({
           )}
         </p>
       ) : (
-        <>
-          {selected && (
-            <h2 className="-mb-2 text-lg font-bold">
-              {selected.island.name}{" "}
-              <button type="button" onClick={() => show({ island: null })} className="text-sm font-semibold text-slate-500 underline">
-                All islands
-              </button>
-            </h2>
-          )}
-          <TierBoard tiers={tiers} pool={pool} />
-        </>
+        <TierBoard tiers={tiers} pool={pool} />
       )}
     </div>
   );

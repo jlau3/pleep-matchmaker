@@ -11,7 +11,7 @@ export async function searchQuery(searchParams: Promise<{ q?: string }>): Promis
 }
 
 /**
- * Exact-name player search with results, shared by My Friends and Find New.
+ * Player search (exact or close names, friend codes) with results, shared by My Friends and Find New.
  * The form submits to the current page, and SubTabs carries ?q= across tabs.
  */
 export async function PlayerSearch({
@@ -37,7 +37,7 @@ export async function PlayerSearch({
   return (
     <div className="space-y-3">
       <form className="flex gap-2">
-        <input name="q" defaultValue={q} placeholder="Exact Discord name, IGN or friend code" className="min-w-0 flex-1 field" />
+        <input name="q" defaultValue={q} placeholder="Discord name, IGN or friend code" className="min-w-0 flex-1 field" />
         <button type="submit" className="btn-primary px-5 py-2">
           Search
         </button>
@@ -49,7 +49,7 @@ export async function PlayerSearch({
       )}
       {q && !foundSelf && results.length === 0 && (
         <p className="py-4 text-center text-sm text-slate-500">
-          No one found. Names have to match exactly (case doesn&apos;t matter), and some players turn lookup off.
+          No one found. Try their exact name or friend code; some players turn lookup off.
         </p>
       )}
       {results.length > 0 && (
