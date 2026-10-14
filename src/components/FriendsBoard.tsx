@@ -75,6 +75,7 @@ export function FriendsBoard({
                 type="button"
                 onClick={() => pick(id)}
                 aria-pressed={sort === id}
+                title={FRIEND_SORT_HINTS[id]}
                 className={`rounded-full border px-3 py-1 ${
                   sort === id
                     ? "border-transparent bg-night text-white dark:bg-sun dark:text-[#5b3e00]"
@@ -88,7 +89,6 @@ export function FriendsBoard({
               <ViewToggle view={view} onChange={changeView} />
             </span>
           </div>
-          <p className="text-xs text-slate-500">{FRIEND_SORT_HINTS[sort]}</p>
         </div>
       )}
       <div className="mb-3">

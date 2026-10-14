@@ -72,7 +72,8 @@ export function TierBoard({ tiers, pool = "friends" }: { tiers: Map<TierId, Rank
               {tier.label}
             </span>
             <span className="text-sm text-slate-500">
-              {tier.id === "top" && ranked.length > TOP_ROW_SIZE ? `${TOP_ROW_SIZE} of ${ranked.length}` : ranked.length} · {tier.hint}
+              {/* The Top 3 row is folded, so no count there: just what it is. */}
+              {tier.id === "top" ? tier.hint : `${ranked.length} · ${tier.hint}`}
             </span>
           </>
         );
@@ -113,7 +114,7 @@ export function TierBoard({ tiers, pool = "friends" }: { tiers: Map<TierId, Rank
                   </span>
                 </span>
                 <span className="mt-2 block text-sm text-slate-600 dark:text-slate-300">
-                  The candy {who} want most, from each one&apos;s personal Top 3. Some rank low on the tier list below,
+                  Candy {who} want most, from their personal Top 3. Some rank low on the tier list below,
                   but whoever starred them really wants them.
                 </span>
               </summary>

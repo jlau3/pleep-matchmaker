@@ -1,9 +1,9 @@
 import { BROWSE_SORT_HINTS } from "./browse";
 import type { FriendRow } from "./types";
 
-/** My Friends orders, read from ?sort= (best fit when missing or unknown). Same names as Find New Friends. */
+/** My Friends orders, read from ?sort= (best match when missing or unknown). Same names as Find New Friends. */
 export const FRIEND_SORTS = [
-  ["fit", "Best fit"],
+  ["fit", "Best match"],
   ["you_fit", "Best for you"],
   ["active", "Recently active"],
 ] as const;
@@ -29,9 +29,9 @@ export function friendRank(f: FriendRow, sort: FriendSort): number {
   const forThem = f.match_pct ?? null;
   const forYou = f.you_fit_pct ?? null;
   if (sort === "you_fit") return forYou ?? -1;
-  // Best fit: the average, or either one alone when the other is unknown.
+  // Best match: the two added up (a missing one counts as 0, like Find New Friends).
   if (forThem == null && forYou == null) return -1;
-  return ((forThem ?? forYou)! + (forYou ?? forThem)!) / 2;
+  return (forThem ?? 0) + (forYou ?? 0);
 }
 
 /** Sorted copy; ties keep the order friends were added in. */
