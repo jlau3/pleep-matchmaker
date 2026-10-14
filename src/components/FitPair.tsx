@@ -9,9 +9,9 @@ const color = (pct: number | null | undefined) =>
  * want, so the candy they send suits you. "For them" (smaller, below): how
  * well their wants match your friends', so the candy you send suits them.
  * Either turns amber below LOW_FIT_PCT, so a lopsided friendship stands out.
+ * A missing one shows a dash (not enough votes yet; see FitLegend).
  */
 export function FitPair({ they, you }: { they: number | null | undefined; you: number | null | undefined }) {
-  if (they == null && you == null) return null;
   const low = (pct: number | null | undefined) => pct != null && pct < LOW_FIT_PCT;
   return (
     <div className="shrink-0 whitespace-nowrap text-right leading-none">

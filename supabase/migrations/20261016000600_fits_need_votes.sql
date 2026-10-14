@@ -1,108 +1,17 @@
--- Blend every friends list with the community, so tiny like-minded lists stop
--- topping Find New Friends and brand-new players still get a fair number.
+-- A fit shows only when there's something real behind it; otherwise it's a
+-- dash and the page says why. No stand-ins, no blending.
 --
--- A list's demand for a line is now its friends' votes plus blend_weight()
--- "average players":
+--   "For you" (your wants vs their friends' wants) needs 3+ of their friends
+--   to have voted (fewer stays hidden so one friend's votes can't be worked
+--   out). Their own wants no longer stand in.
+--   "For them" (their wants vs your friends' wants) needs them to have voted
+--   and one of your friends to have voted (since 20261016000300).
 --
---   raw   = (friends wanting the line + K x community rate) / (voting friends + K)
---   share = raw / max(raw)              (scaled like before; K = blend_weight() = 5)
---
--- community rate = share of active players (with any want) who want the line,
--- cached in community_rates and refreshed at most hourly (refresh_community_rates,
--- called by the daily cron and by Find New Friends).
---
---   "For you" (their list): under 3 voting friends their friends' votes are left
---   out entirely (as before, so one friend's votes can't be worked out) and it's
---   the community alone. Their own wants no longer stand in: they say what the
---   player wants, not what they send.
---   "For them" (your list): still none until one of your friends has voted.
---
--- The "they'd send you / you'd send them" lists keep only lines at or above
--- list_share_cutoff() (0.5), since every line now has some share.
--- browse_players gains list_voters (their voting friends, 0 under 3) so the
--- page can say a list is the community average. Safe to re-run.
+-- browse_players gains list_voters (their voting friends, 0 under 3) and
+-- voted (whether they've voted at all) so Find New can explain a dash.
+-- Also drops the community-blend objects in case that version was run.
+-- Safe to re-run.
 
-create table if not exists public.community_rates (
-  line_id text primary key,
-  rate numeric not null
-);
--- No policies: only the security definer functions below read it.
-alter table public.community_rates enable row level security;
-
-create table if not exists public.community_rates_meta (
-  id boolean primary key default true check (id),
-  refreshed_at timestamptz not null
-);
-alter table public.community_rates_meta enable row level security;
-
-create or replace function public.blend_weight()
-returns numeric
-language sql
-immutable
-as $$ select 5.0 $$;
-
-create or replace function public.list_share_cutoff()
-returns numeric
-language sql
-immutable
-as $$ select 0.5 $$;
-
--- Recomputes community_rates now. Not callable by players; see refresh_community_rates.
-create or replace function public.refresh_community_rates_now()
-returns void
-language plpgsql
-security definer
-set search_path = ''
-as $$
-declare voters numeric;
-begin
-  lock table public.community_rates in exclusive mode;
-  create temp table if not exists pm_active (id uuid) on commit drop;
-  truncate pm_active;
-  insert into pm_active
-  select pr.id
-  from public.profiles pr
-  cross join public.match_config() cfg
-  where pr.last_seen_at > now() - cfg.stale_after
-    and exists (select 1 from public.preferences p where p.user_id = pr.id and p.choice = 'want');
-  select count(*) into voters from pm_active;
-  delete from public.community_rates;
-  if voters > 0 then
-    insert into public.community_rates (line_id, rate)
-    select p.line_id, count(*) / voters
-    from public.preferences p
-    join pm_active a on a.id = p.user_id
-    where p.choice = 'want'
-    group by p.line_id;
-  end if;
-  insert into public.community_rates_meta (id, refreshed_at) values (true, now())
-  on conflict (id) do update set refreshed_at = excluded.refreshed_at;
-end
-$$;
-
-revoke execute on function public.refresh_community_rates_now() from public, anon, authenticated;
-
--- Refreshes community_rates unless that happened in the last hour. Cheap no-op
--- otherwise, so the cron and page loads can call it freely.
-create or replace function public.refresh_community_rates()
-returns boolean
-language plpgsql
-security definer
-set search_path = ''
-as $$
-begin
-  if exists (select 1 from public.community_rates_meta where refreshed_at > now() - interval '1 hour') then
-    return false;
-  end if;
-  perform public.refresh_community_rates_now();
-  return true;
-end
-$$;
-
-revoke execute on function public.refresh_community_rates() from public;
-grant execute on function public.refresh_community_rates() to anon, authenticated;
-
--- "For you": one player's list, blended. Leaves `viewer` out.
 create or replace function public.their_list_demand(player uuid, viewer uuid)
 returns table (line_id text, share numeric)
 language sql
@@ -118,27 +27,19 @@ as $$
     where f.user_id = player and f.friend_id <> viewer
       and exists (select 1 from public.preferences p where p.user_id = f.friend_id and p.choice = 'want')
   ),
-  -- Under 3 voting friends, theirs count as none (privacy) and it's the community alone.
-  cnt as (select case when count(*) >= 3 then count(*) else 0 end::numeric as n from voters),
-  votes as (
-    select p.line_id, count(*)::numeric as v
-    from voters vo
-    join public.preferences p on p.user_id = vo.friend_id and p.choice = 'want'
-    where (select n from cnt) > 0
+  counted as (
+    select p.line_id, count(*)::numeric as demand
+    from voters v
+    join public.preferences p on p.user_id = v.friend_id and p.choice = 'want'
+    where (select count(*) from voters) >= 3
     group by p.line_id
-  ),
-  raw as (
-    select line_id,
-           (coalesce(vt.v, 0) + public.blend_weight() * coalesce(cr.rate, 0)) / ((select n from cnt) + public.blend_weight()) as raw
-    from public.community_rates cr
-    full join votes vt using (line_id)
   )
-  select r.line_id, r.raw / max(r.raw) over () from raw r where r.raw > 0
+  select c.line_id, c.demand / max(c.demand) over () from counted c
 $$;
 
 revoke execute on function public.their_list_demand(uuid, uuid) from public, anon, authenticated;
 
--- "For them": your friends' list (leaving `skip` out), blended. Nothing until a friend has voted.
+-- Your friends' list (leaving `skip` out); nothing until one has voted.
 create or replace function public.group_demand(viewer uuid, skip uuid default null)
 returns table (line_id text, share numeric)
 language sql
@@ -146,33 +47,18 @@ stable
 security definer
 set search_path = ''
 as $$
-  with
-  voters as (
-    select distinct f.friend_id
+  with friend_wants as (
+    select p.line_id, count(*)::numeric as demand
     from public.friends f
     join public.profiles pr on pr.id = f.friend_id and pr.allow_lookup
+    join public.preferences p on p.user_id = f.friend_id and p.choice = 'want'
     where f.user_id = viewer and f.friend_id is distinct from skip
-      and exists (select 1 from public.preferences p where p.user_id = f.friend_id and p.choice = 'want')
-  ),
-  cnt as (select count(*)::numeric as n from voters),
-  votes as (
-    select p.line_id, count(*)::numeric as v
-    from voters vo
-    join public.preferences p on p.user_id = vo.friend_id and p.choice = 'want'
     group by p.line_id
-  ),
-  raw as (
-    select line_id,
-           (coalesce(vt.v, 0) + public.blend_weight() * coalesce(cr.rate, 0)) / ((select n from cnt) + public.blend_weight()) as raw
-    from public.community_rates cr
-    full join votes vt using (line_id)
   )
-  select r.line_id, r.raw / max(r.raw) over () from raw r where r.raw > 0 and (select n from cnt) > 0
+  select fw.line_id, fw.demand / max(fw.demand) over () from friend_wants fw
 $$;
 
 revoke execute on function public.group_demand(uuid, uuid) from public, anon, authenticated;
-
-select public.refresh_community_rates_now();
 
 drop function if exists public.browse_players(text, boolean, int, int);
 
@@ -199,6 +85,7 @@ returns table (
   you_fit_dont_wants text[],
   top_wants text[],
   list_voters int,
+  voted boolean,
   total_count bigint
 )
 language sql
@@ -264,25 +151,11 @@ as $$
     from friend_votes fv
     group by fv.cand, fv.line_id
   ),
-  -- Their list blended with the community (see the header): friends' votes plus
-  -- blend_weight() average players. Under 3 voting friends it's the community alone.
-  lines as (select line_id from public.community_rates union select line_id from friend_wants),
-  blended as materialized (
-    select
-      c.id as cand,
-      l.line_id,
-      (coalesce(fw.demand, 0) + public.blend_weight() * coalesce(cr.rate, 0))
-        / (coalesce(case when fv.voters >= 3 then fv.voters end, 0) + public.blend_weight()) as raw
-    from candidates c
-    cross join lines l
-    left join friend_wants fw on fw.cand = c.id and fw.line_id = l.line_id
-    left join public.community_rates cr on cr.line_id = l.line_id
-    left join friend_voters fv on fv.cand = c.id
-  ),
+  -- Their list needs 3+ friends who've voted (friend_votes only reads those);
+  -- below that "for you" stays a dash. Their own wants don't stand in.
   demand as materialized (
-    select b.cand, b.line_id, b.raw / max(b.raw) over (partition by b.cand) as share
-    from blended b
-    where b.raw > 0
+    select fw.cand, fw.line_id, fw.demand / max(fw.demand) over (partition by fw.cand) as share
+    from friend_wants fw
   ),
   demand_cands as materialized (select cand, sum(share) as cap from demand group by cand),
   you_agg as (
@@ -292,9 +165,9 @@ as $$
       least(count(*) filter (where m.choice = 'want'), coalesce(max(dc.cap), 0))
         + public.dont_want_weight() * coalesce(sum(d.share) filter (where m.choice = 'dont_want'), 0) as total,
       coalesce(array_agg(m.line_id order by d.share desc, m.line_id)
-        filter (where m.choice = 'want' and d.share >= public.list_share_cutoff()), '{}') as fit_wants,
+        filter (where m.choice = 'want' and d.share is not null), '{}') as fit_wants,
       coalesce(array_agg(m.line_id order by d.share desc, m.line_id)
-        filter (where m.choice = 'dont_want' and d.share >= public.list_share_cutoff()), '{}') as fit_dont_wants
+        filter (where m.choice = 'dont_want' and d.share is not null), '{}') as fit_dont_wants
     from candidates c
     cross join mine m
     left join demand d on d.cand = c.id and d.line_id = m.line_id
@@ -309,9 +182,9 @@ as $$
       least(count(*) filter (where p.choice = 'want'), (select coalesce(sum(share), 0) from g))
         + public.dont_want_weight() * coalesce(sum(g.share) filter (where p.choice = 'dont_want'), 0) as total,
       coalesce(array_agg(p.line_id order by g.share desc, p.line_id)
-        filter (where p.choice = 'want' and g.share >= public.list_share_cutoff()), '{}') as fit_wants,
+        filter (where p.choice = 'want' and g.share is not null), '{}') as fit_wants,
       coalesce(array_agg(p.line_id order by g.share desc, p.line_id)
-        filter (where p.choice = 'dont_want' and g.share >= public.list_share_cutoff()), '{}') as fit_dont_wants
+        filter (where p.choice = 'dont_want' and g.share is not null), '{}') as fit_dont_wants
     from public.preferences p
     join candidates c on c.id = p.user_id
     left join g on g.line_id = p.line_id
@@ -327,7 +200,8 @@ as $$
       case when y.total > 0 and dc.cand is not null then round(100.0 * y.hit / y.total)::int end as you_pct,
       coalesce(y.fit_wants, '{}') as you_wants,
       coalesce(y.fit_dont_wants, '{}') as you_dont_wants,
-      coalesce((select v.voters from friend_voters v where v.cand = c.id and v.voters >= 3), 0)::int as list_voters
+      coalesce((select v.voters from friend_voters v where v.cand = c.id and v.voters >= 3), 0)::int as list_voters,
+      exists (select 1 from public.preferences p where p.user_id = c.id and p.choice <> 'undecided') as voted
     from candidates c
     left join they_agg t on t.cand = c.id
     left join you_agg y on y.cand = c.id
@@ -365,6 +239,7 @@ as $$
     coalesce((select array_agg(p.line_id order by p.line_id) from public.preferences p
               where p.user_id = l.id and p.top), '{}'),
     l.list_voters,
+    l.voted,
     count(*) over ()
   from listed l
   order by
@@ -382,3 +257,10 @@ $$;
 revoke execute on function public.browse_players(text, boolean, int, int) from public, anon;
 grant execute on function public.browse_players(text, boolean, int, int) to authenticated;
 
+-- The community blend is gone (if it was ever run).
+drop function if exists public.refresh_community_rates();
+drop function if exists public.refresh_community_rates_now();
+drop function if exists public.blend_weight();
+drop function if exists public.list_share_cutoff();
+drop table if exists public.community_rates;
+drop table if exists public.community_rates_meta;

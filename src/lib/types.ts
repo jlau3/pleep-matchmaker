@@ -26,10 +26,12 @@ export interface MatchRow extends PlayerContact {
   you_fit_dont_wants?: string[];
   /** browse_players only: their starred Top 3. */
   top_wants?: string[];
-  /** browse_players only: their friends who've voted, 0 under 3 (their list is then the community average). */
-  list_voters?: number;
   /** browse_players only: how many players the current filter lists in all. */
   total_count?: number;
+  /** browse_players only: their friends who've voted, 0 under 3 ("for you" is a dash then). */
+  list_voters?: number;
+  /** browse_players only: whether they've voted on anything ("for them" is a dash until they do). */
+  voted?: boolean;
 }
 
 export interface LookupRow extends PlayerContact {

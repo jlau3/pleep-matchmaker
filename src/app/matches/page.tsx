@@ -23,14 +23,12 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
   const params = await searchParams;
   const q = await searchQuery(Promise.resolve(params));
   const opts = parseBrowse(params);
-  const [{ choices, tops }, profile, friendIds, pendingIds, votedResult, , matchesResult] = await Promise.all([
+  const [{ choices, tops }, profile, friendIds, pendingIds, votedResult, matchesResult] = await Promise.all([
     loadOwnVotes(supabase, user.id),
     loadOwnProfile(supabase, user.id),
     loadFriendIds(supabase, user.id),
     loadPendingIds(supabase, user.id),
     supabase.rpc("my_friends_voted"),
-    // Keeps the community averages (blended into every list) fresh; a no-op if refreshed within the hour.
-    supabase.rpc("refresh_community_rates"),
     supabase.rpc("browse_players", {
       sort: opts.sort,
       everyone: opts.everyone,
@@ -139,7 +137,7 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
             <Pills options={BROWSE_SORTS.map(([id, label]) => [link({ sort: id }), label, opts.sort === id])} />
           </div>
           <p className="text-xs text-slate-500">{BROWSE_SORT_HINTS[opts.sort]}</p>
-          <FitLegend friendsVoted={friendsVoted} />
+          <FitLegend friendsVoted={friendsVoted} youVoted={picked > 0} />
         </div>
 
         {picked === 0 && friendIds.size === 0 && !opts.everyone ? (
@@ -164,9 +162,7 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
               <li key={match.user_id} className="card p-4">
                 <PlayerHeader player={match} aside={<FitPair they={match.match_pct} you={match.you_fit_pct} />} />
                 <FitLists match={match} />
-                {match.match_pct === null && match.you_fit_pct == null && (
-                  <p className="mt-3 text-sm text-slate-500">Hasn&apos;t voted on any candy yet.</p>
-                )}
+                <NewPlayerNote match={match} name={playerName(match)} />
                 <div className="mt-4">
                   <ConnectSteps
                     userId={match.user_id}
@@ -202,6 +198,28 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
         )}
       </section>
     </div>
+  );
+}
+
+/**
+ * Why a player's numbers are dashes when it's on their side: they haven't
+ * voted ("for them"), or fewer than 3 of their friends have ("for you").
+ * Nothing is estimated in the meantime; the note says what's missing.
+ */
+function NewPlayerNote({ match, name }: { match: MatchRow; name: string }) {
+  const noVotes = match.voted === false;
+  const noList = (match.list_voters ?? 0) < 3;
+  if (!noVotes && !noList) return null;
+  const text =
+    noVotes && noList
+      ? `${name} hasn't voted yet and has fewer than 3 friends voting here, so their numbers aren't ready.`
+      : noVotes
+        ? `${name} hasn't voted yet, so "for them" isn't ready.`
+        : `${name} has fewer than 3 friends voting here, so "for you" isn't ready.`;
+  return (
+    <p className="mt-3 rounded-xl bg-sky/60 px-3 py-2 text-xs dark:bg-night-deep">
+      <b>New here:</b> {text} It fills in as they play along.
+    </p>
   );
 }
 
@@ -263,11 +281,6 @@ function FitLists({ match }: { match: MatchRow }) {
           <div className="mt-3 space-y-5">
             <div className="space-y-3">
               <h4 className="font-bold">They&apos;d send you</h4>
-              {(match.list_voters ?? 0) < 3 && (
-                <p className="text-sm text-slate-500">
-                  They don&apos;t have 3 friends voting here yet, so this uses what players generally want.
-                </p>
-              )}
               {group("Your wants their friends want", "text-want", toYou.want)}
               {group("Your don't-wants their friends want", "text-dont", toYou.dont)}
               {toYou.want.length + toYou.dont.length === 0 && (
