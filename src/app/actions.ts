@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { normalizeFriendCode } from "@/lib/format";
+import { MAX_FRIENDS } from "@/lib/friendship";
 import { META_COOKIE, META_POSTS, metaCookieValue } from "@/content/meta";
 import { HELP_COOKIE, HELP_VERSION, helpCookieValue } from "@/lib/help";
 import { LINKING_COOKIE, NEXT_COOKIE, safeNextPath } from "@/lib/nextPath";
@@ -266,6 +267,31 @@ export async function removeFriend(friendId: string, inactive = false): Promise<
   if (inactive) await supabase.rpc("report_inactive", { player: friendId });
   revalidatePath("/friends");
   revalidatePath("/tiers");
+  return {};
+}
+
+/**
+ * Placeholder for an in-game friend who hasn't signed up yet, by IGN. Adding
+ * a friend with that IGN clears it (friends_upkeep migration).
+ */
+export async function addPlaceholder(name: string): Promise<{ error?: string }> {
+  const { supabase, user } = await requireUser();
+  const clean = name.trim().replace(/\s+/g, " ");
+  if (!clean) return { error: "Type their in-game name." };
+  if (clean.length > 40) return { error: "That's longer than an in-game name can be." };
+  const { error } = await supabase.from("friend_placeholders").insert({ user_id: user.id, name: clean });
+  if (error?.code === "23505") return { error: "Already on your list." };
+  if (error?.message === "placeholder_limit") return { error: `That's ${MAX_FRIENDS} already. Remove one first.` };
+  if (error) return { error: "Couldn't save, try again" };
+  revalidatePath("/friends");
+  return {};
+}
+
+export async function removePlaceholder(name: string): Promise<{ error?: string }> {
+  const { supabase, user } = await requireUser();
+  const { error } = await supabase.from("friend_placeholders").delete().eq("user_id", user.id).eq("name", name);
+  if (error) return { error: "Couldn't remove, try again" };
+  revalidatePath("/friends");
   return {};
 }
 

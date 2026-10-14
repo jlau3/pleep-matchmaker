@@ -59,6 +59,19 @@ EXP_WEIGHTS = {1080: 0.4, 1320: 0.3, 900: 0.2}
 PIP_WEIGHTS = {16: 0.1}
 
 
+# Source typos, mapped to the three sleep types the game uses.
+SLEEP_TYPE_FIXES = {"snozing": "snoozing"}
+SLEEP_TYPES = {"dozing", "snoozing", "slumbering"}
+
+
+def sleep_type(p: dict) -> str:
+    """Dozing / Snoozing / Slumbering. Can differ inside a line (Pichu slumbers, Pikachu snoozes)."""
+    value = SLEEP_TYPE_FIXES.get(p["sleepType"], p["sleepType"])
+    if value not in SLEEP_TYPES:
+        raise ValueError(f"{p['name']}: unknown sleep type {p['sleepType']!r}")
+    return value
+
+
 def rarity_weight(base: dict) -> float:
     return EXP_WEIGHTS.get(base["exp"]) or PIP_WEIGHTS.get(base["fp"], 0.0)
 
@@ -106,7 +119,12 @@ def main() -> int:
                 if sprite in seen:
                     continue
                 seen.add(sprite)
-                line_members.append({"name": f"{p['form']} {base_name(p['name'])}", "dex": p["id"], "sprite": sprite})
+                line_members.append({
+                    "name": f"{p['form']} {base_name(p['name'])}",
+                    "dex": p["id"],
+                    "sprite": sprite,
+                    "sleepType": sleep_type(p),
+                })
                 continue
             form = p.get("form") if p.get("form") in REGIONAL_FORMS else None
             key = (p["id"], form)
@@ -119,6 +137,7 @@ def main() -> int:
                 "name": p["name"] if form else base_name(p["name"]),
                 "dex": p["id"],
                 "sprite": sprite,
+                "sleepType": sleep_type(p),
             })
         out.append({
             "id": slugify(base_name(rep["name"])),
