@@ -19,6 +19,7 @@ export function PlayerResults({
   friendIds,
   viewerId,
   suggestPlaceholder = true,
+  placeholder,
 }: {
   q: string;
   rows: LookupRow[];
@@ -26,6 +27,8 @@ export function PlayerResults({
   viewerId: string;
   /** Off inside Not here yet, where the name is already a placeholder. */
   suggestPlaceholder?: boolean;
+  /** Searching from this Not here yet name: adding a result clears it. */
+  placeholder?: string;
 }) {
   // You can't add or block yourself: say it's you instead of showing your own card.
   const foundSelf = rows.some((player) => player.user_id === viewerId);
@@ -51,6 +54,7 @@ export function PlayerResults({
               <PlayerHeader
                 player={player}
                 isFriend={friendIds.includes(player.user_id)}
+                placeholder={placeholder}
                 aside={
                   // No fit while there's nothing to compare against: no friends' votes and none of your own.
                   player.match_pct === null && player.you_fit_pct === null && player.wants.length > 0 ? (

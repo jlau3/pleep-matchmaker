@@ -216,10 +216,16 @@ const FRIEND_ERRORS: Record<string, string> = {
   friend_unavailable: "This player can't be added.",
 };
 
-export async function addFriend(friendId: string): Promise<{ error?: string }> {
+/**
+ * Adds a friend. `placeholder` is the Not here yet name they were found from: it's
+ * cleared even when it isn't exactly their IGN (a nickname or typo found by fuzzy
+ * search); an exact IGN match is cleared by the database either way.
+ */
+export async function addFriend(friendId: string, placeholder?: string): Promise<{ error?: string }> {
   const { supabase, user } = await requireUser();
   const { error } = await supabase.from("friends").insert({ user_id: user.id, friend_id: friendId });
   if (error && error.code !== "23505") return { error: FRIEND_ERRORS[error.message] ?? "Couldn't add friend, try again" };
+  if (placeholder) await supabase.from("friend_placeholders").delete().eq("user_id", user.id).eq("name", placeholder);
   // Whole layout: the "added you" banner may need to go.
   revalidatePath("/", "layout");
   return {};

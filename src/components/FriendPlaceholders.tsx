@@ -182,7 +182,7 @@ function PlaceholderItem({
       )}
       {results && (
         <div className="mt-3 space-y-3">
-          <PlayerResults q={row.name} rows={results} friendIds={friendIds} viewerId={viewerId} suggestPlaceholder={false} />
+          <PlayerResults q={row.name} rows={results} friendIds={friendIds} viewerId={viewerId} suggestPlaceholder={false} placeholder={row.name} />
         </div>
       )}
     </li>
