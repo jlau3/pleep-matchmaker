@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { lookupPlayers } from "@/app/actions";
 import { rethrowIfNavigation } from "@/lib/saveError";
 import type { LookupRow } from "@/lib/types";
@@ -8,8 +8,9 @@ import { PlayerResults } from "./PlayerResults";
 
 /**
  * The search box. Searching runs in place (a server action), so the friends
- * list below doesn't reload; the query still goes in the URL (replaceState)
- * so a reload or shared link shows the same search.
+ * list below doesn't reload. Searches stay out of the URL, so a refresh starts
+ * clean; a link that arrives with ?q= (a shared friend post) is searched once
+ * and then dropped from the address bar.
  */
 export function PlayerSearchBox({
   initialQ,
@@ -27,14 +28,18 @@ export function PlayerSearchBox({
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
+  // Arrived with ?q=: it's already searched (initialRows), so drop it and a refresh starts empty.
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    if (!url.searchParams.has("q")) return;
+    url.searchParams.delete("q");
+    window.history.replaceState(window.history.state, "", url);
+  }, []);
+
   function search(e: React.FormEvent) {
     e.preventDefault();
     const q = input.trim().slice(0, 64);
     setError(null);
-    const url = new URL(window.location.href);
-    if (q) url.searchParams.set("q", q);
-    else url.searchParams.delete("q");
-    window.history.replaceState(window.history.state, "", url);
     if (!q) return setResult({ q: "", rows: [] });
     startTransition(async () => {
       try {

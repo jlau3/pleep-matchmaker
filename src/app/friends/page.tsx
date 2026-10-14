@@ -46,7 +46,7 @@ export default async function FriendsPage({ searchParams }: { searchParams: Prom
   return (
     <div className="space-y-8">
       <section className="space-y-3">
-        <SubTabs tabs={FRIENDS_TABS} active="/friends" query={q ? `q=${encodeURIComponent(q)}` : undefined} />
+        <SubTabs tabs={FRIENDS_TABS} active="/friends" />
         <PlayerSearch supabase={supabase} q={q} friendIds={friendIds} viewerId={user.id} />
       </section>
 

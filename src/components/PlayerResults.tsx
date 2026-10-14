@@ -44,7 +44,8 @@ export function PlayerResults({
         <div className="space-y-2 py-4 text-center text-sm text-slate-500">
           <p>No one found. Try their exact name or friend code; some players turn lookup off.</p>
           {/* A friend code isn't a name to keep; anything else might be an IGN. */}
-          {suggestPlaceholder && !normalizeFriendCode(q) && <SuggestPlaceholder name={q} />}
+          {/* Keyed by name: a new search gets a fresh button instead of the last one's "Added". */}
+          {suggestPlaceholder && !normalizeFriendCode(q) && <SuggestPlaceholder key={q} name={q} />}
         </div>
       )}
       {players.length > 0 && (
