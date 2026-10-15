@@ -13,6 +13,8 @@ import { relativeTime } from "@/lib/format";
 import { requireUser } from "@/lib/supabase/server";
 import type { BlockedRow } from "@/lib/types";
 
+const card = "card p-5";
+
 export default async function ProfilePage({ searchParams }: { searchParams: Promise<{ error?: string; linked?: string }> }) {
   const { supabase, user } = await requireUser();
   const [profile, friendIds, blockedResult, identitiesResult] = await Promise.all([
@@ -40,7 +42,7 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
   return (
     <div>
       <SubTabs tabs={PROFILE_TABS} active="/profile" />
-      <div className="mx-auto max-w-md space-y-8">
+      <div className="space-y-6">
         <section className="flex items-center gap-3">
           {playerAvatar(profile) && <img src={playerAvatar(profile)!} alt="" className="h-14 w-14 rounded-full bg-sky object-contain dark:bg-night-deep" />}
           <div>
@@ -52,32 +54,37 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
 
         <ProfileForm profile={profile} friendListFull={friendIds.size >= MAX_FRIENDS} />
 
-        <SignInMethods linked={linkedProviders} discordName={profile.discord_username} notice={linkNotice} />
+        <div className="grid items-start gap-6 md:grid-cols-2">
+          <div className={card}>
+            <SignInMethods linked={linkedProviders} discordName={profile.discord_username} notice={linkNotice} />
+          </div>
+          <div className="space-y-6">
+            <section className={card}>
+              <h2 className="mb-2 font-semibold">Theme</h2>
+              <ThemePicker initial={theme} />
+              <p className="mt-1 text-xs text-slate-500">Saved on this device.</p>
+            </section>
 
-        <section>
-          <h2 className="mb-2 font-semibold">Theme</h2>
-          <ThemePicker initial={theme} />
-          <p className="mt-1 text-xs text-slate-500">Saved on this device.</p>
-        </section>
-
-        <section>
-          <h2 className="mb-2 font-semibold">Blocked players</h2>
-          {blocked.length === 0 ? (
-            <p className="text-sm text-slate-500">No one.</p>
-          ) : (
-            <ul className="space-y-2">
-              {blocked.map((row) => (
-                <li key={row.user_id} className="flex items-center justify-between text-sm">
-                  <span>
-                    {playerName(row)}
-                    {row.discord_username && <span className="ml-2 text-slate-500">@{row.discord_username}</span>}
-                  </span>
-                  <BlockButton userId={row.user_id} name={playerName(row)} blocked />
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
+            <section className={card}>
+              <h2 className="mb-2 font-semibold">Blocked players</h2>
+              {blocked.length === 0 ? (
+                <p className="text-sm text-slate-500">No one.</p>
+              ) : (
+                <ul className="space-y-2">
+                  {blocked.map((row) => (
+                    <li key={row.user_id} className="flex items-center justify-between text-sm">
+                      <span>
+                        {playerName(row)}
+                        {row.discord_username && <span className="ml-2 text-slate-500">@{row.discord_username}</span>}
+                      </span>
+                      <BlockButton userId={row.user_id} name={playerName(row)} blocked />
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </section>
+          </div>
+        </div>
 
         <section className="flex flex-wrap items-center gap-3 border-t border-slate-200 pt-6 dark:border-slate-800">
           <form action={signOut}>
