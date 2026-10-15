@@ -9,6 +9,7 @@ import { MAX_FRIENDS } from "@/lib/friendship";
 import { parseAvatar } from "@/lib/avatars";
 import type { LookupRow } from "@/lib/types";
 import { PROFILE_INCOMPLETE } from "@/lib/relations";
+import { nameMatch } from "@/lib/names";
 import { loadTop3Tiers, type Top3Tiers } from "@/lib/top3Tiers";
 import { META_COOKIE, META_POSTS, metaCookieValue } from "@/content/meta";
 import { FIRST_FRIEND_COOKIE, HELP_COOKIE, HELP_VERSION, helpCookieValue } from "@/lib/help";
@@ -311,7 +312,9 @@ export async function lookupPlayers(q: string): Promise<{ rows?: LookupRow[]; er
 
 /**
  * Not here yet's single search: looks up every saved name at once and returns the
- * names that turned someone up, in A-Z order. Names with no one found are left out.
+ * names that turned someone up, in A-Z order, with only the players whose IGN is
+ * that name (strongNameKey: case, spaces and symbols aside). Names with no one
+ * found are left out.
  */
 export async function searchPlaceholders(): Promise<{ hits?: { name: string; rows: LookupRow[] }[]; searched?: number; error?: string }> {
   const { supabase, user } = await requireUser();
@@ -321,7 +324,9 @@ export async function searchPlaceholders(): Promise<{ hits?: { name: string; row
   const results = await Promise.all(
     names.map(async (name) => {
       const found = await supabase.rpc("lookup_players", { q: name });
-      const rows = await withExtras(supabase, ((found.data ?? []) as LookupRow[]).filter((row) => row.user_id !== user.id));
+      // Exact IGN only (as the "may have joined" flag): no lookalikes, friend codes or Discord names.
+      const same = ((found.data ?? []) as LookupRow[]).filter((row) => row.user_id !== user.id && nameMatch(row.ign, name) === "strong");
+      const rows = await withExtras(supabase, same);
       return { name, rows };
     }),
   );
@@ -332,8 +337,8 @@ export async function searchPlaceholders(): Promise<{ hits?: { name: string; row
 }
 
 /**
- * Placeholder for an in-game friend who hasn't signed up yet, by IGN. Adding
- * a friend with that IGN clears it (friends_upkeep migration).
+ * Placeholder for an in-game friend who hasn't signed up yet, by IGN. It stays
+ * until removed (20261020000600_keep_placeholders.sql).
  */
 export async function addPlaceholder(name: string): Promise<{ error?: string }> {
   const { supabase, user } = await requireUser();
