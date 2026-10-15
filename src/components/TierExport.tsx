@@ -9,6 +9,20 @@ export interface ExportSection {
   tiers: Map<TierId, RankedLine[]>;
 }
 
+/** One labelled row of sprites in an exported image (a tier, or a vote). */
+export interface ImageRow {
+  /** Badge text; "\n" splits it over two lines. */
+  label: string;
+  color: { bg: string; fg: string };
+  /** Sprites left to right; `tops` puts a gold ★ count on the corner. */
+  items: { sprite: string; tops?: number }[];
+}
+
+export interface ImageSection {
+  heading?: string;
+  rows: ImageRow[];
+}
+
 /** Tier badge colors, same as TierBoard. */
 const TIER_COLOR: Record<TierId, { bg: string; fg: string }> = {
   top: { bg: "#ffd24d", fg: "#5b3e00" },
@@ -52,17 +66,11 @@ const STAR_GOLD = "#f2a900";
  * counts, so it stays small enough to share. Lines someone starred as a Top 3
  * get a gold ★ on the corner, with the count from 2 stars.
  */
-async function renderPng(title: string, voters: number, sections: ExportSection[]): Promise<Blob> {
+async function renderPng(heading: string, subtitle: string, sections: ImageSection[]): Promise<Blob> {
   await document.fonts.ready;
   const font = getComputedStyle(document.body).fontFamily;
 
-  const rows = sections.map((section) =>
-    // The ranked tiers only: the Top 3 row (players' favorites, not a tier) stays on the site.
-    TIERS.filter((tier) => tier.id !== "top").flatMap((tier) => {
-      const lines = section.tiers.get(tier.id) ?? [];
-      return lines.length ? [{ tier, lines }] : [];
-    }),
-  );
+  const rows = sections.map((section) => section.rows.filter((row) => row.items.length > 0));
   const rowHeight = (n: number) => Math.ceil(n / COLS) * (ICON + GAP) - GAP + ROW_PAD * 2;
   const HEADER = 58;
   const SECTION_HEAD = 30;
@@ -70,13 +78,13 @@ async function renderPng(title: string, voters: number, sections: ExportSection[
   let height = PAD + HEADER;
   sections.forEach((section, i) => {
     if (section.heading) height += SECTION_HEAD;
-    for (const row of rows[i]) height += rowHeight(row.lines.length) + 4;
+    for (const row of rows[i]) height += rowHeight(row.items.length) + 4;
     height += 6;
   });
   height += FOOTER;
 
   const sprites = new Map<string, HTMLImageElement | null>();
-  const urls = new Set(rows.flat().flatMap((row) => row.lines.map((r) => rankedSpriteUrl(r))));
+  const urls = new Set(rows.flat().flatMap((row) => row.items.map((item) => item.sprite)));
   await Promise.all([...urls].map(async (url) => sprites.set(url, await loadImage(url))));
 
   const canvas = document.createElement("canvas");
@@ -91,11 +99,10 @@ async function renderPng(title: string, voters: number, sections: ExportSection[
   ctx.fillStyle = "#2d3354";
   ctx.textBaseline = "alphabetic";
   ctx.font = `800 20px ${font}`;
-  ctx.fillText("Candy Tier List", PAD, PAD + 22);
+  ctx.fillText(heading, PAD, PAD + 22);
   ctx.font = `400 13px ${font}`;
   ctx.fillStyle = "#5a6385";
-  const date = new Date().toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
-  ctx.fillText(`${title} · ${voters} ${voters === 1 ? "player" : "players"} · ${date}`, PAD, PAD + 44);
+  ctx.fillText(subtitle, PAD, PAD + 44);
 
   let y = PAD + HEADER;
   sections.forEach((section, i) => {
@@ -105,33 +112,36 @@ async function renderPng(title: string, voters: number, sections: ExportSection[
       ctx.fillText(section.heading, PAD, y + 20);
       y += SECTION_HEAD;
     }
-    for (const { tier, lines } of rows[i]) {
-      const h = rowHeight(lines.length);
+    for (const { label, color, items } of rows[i]) {
+      const h = rowHeight(items.length);
       ctx.fillStyle = "#fffaf0";
       roundRect(ctx, PAD, y, WIDTH - PAD * 2, h, 10);
       ctx.fill();
       // Tier badge.
-      const color = TIER_COLOR[tier.id];
       ctx.fillStyle = color.bg;
       roundRect(ctx, PAD + 4, y + 4, LABEL_W - 4, h - 8, 8);
       ctx.fill();
       ctx.fillStyle = color.fg;
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
-      ctx.font = `900 ${tier.label.length > 2 ? 11 : 18}px ${font}`;
-      ctx.fillText(tier.label, PAD + 2 + LABEL_W / 2, y + h / 2, LABEL_W - 8);
+      const labelLines = label.split("\n");
+      const size = label.length > 2 ? 11 : 18;
+      ctx.font = `900 ${size}px ${font}`;
+      labelLines.forEach((text, k) =>
+        ctx.fillText(text, PAD + 2 + LABEL_W / 2, y + h / 2 + (k - (labelLines.length - 1) / 2) * (size + 2), LABEL_W - 8),
+      );
       ctx.textAlign = "left";
       ctx.textBaseline = "alphabetic";
       // Sprites, best first, left to right.
-      lines.forEach((ranked, j) => {
+      items.forEach((item, j) => {
         const x = PAD + LABEL_W + 8 + (j % COLS) * (ICON + GAP);
         const top = y + ROW_PAD + Math.floor(j / COLS) * (ICON + GAP);
         ctx.fillStyle = "#ffffff";
         roundRect(ctx, x, top, ICON, ICON, 10);
         ctx.fill();
-        const img = sprites.get(rankedSpriteUrl(ranked));
+        const img = sprites.get(item.sprite);
         if (img) ctx.drawImage(img, x + 2, top + 2, ICON - 4, ICON - 4);
-        if (ranked.tops > 0) drawStarCount(ctx, font, ranked.tops, x + ICON, top);
+        if (item.tops) drawStarCount(ctx, font, item.tops, x + ICON, top);
       });
       y += h + 4;
     }
@@ -167,13 +177,21 @@ function drawStarCount(ctx: CanvasRenderingContext2D, font: string, tops: number
   ctx.textBaseline = "alphabetic";
 }
 
-const fileName = (title: string) =>
-  `tier-list-${title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")}.png`;
+const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 
-/**
- * Export button: draws a compact image of the tier list currently shown and
- * opens it in a popup with Copy, Download and (on phones) Share.
- */
+/** The tier list currently shown, as image rows (the Top 3 row stays on the site: it isn't a tier). */
+function tierSections(sections: ExportSection[]): ImageSection[] {
+  return sections.map((section) => ({
+    heading: section.heading,
+    rows: TIERS.filter((tier) => tier.id !== "top").map((tier) => ({
+      label: tier.label,
+      color: TIER_COLOR[tier.id],
+      items: (section.tiers.get(tier.id) ?? []).map((r) => ({ sprite: rankedSpriteUrl(r), tops: r.tops })),
+    })),
+  }));
+}
+
+/** Tier List export: "Candy Tier List", the pool and filters, voters and date. */
 export function TierExport({
   title,
   voters,
@@ -183,6 +201,41 @@ export function TierExport({
   title: string;
   voters: number;
   sections: ExportSection[];
+  label?: string;
+}) {
+  return (
+    <ImageExport
+      title={title}
+      heading="Candy Tier List"
+      subtitle={() => `${title} · ${voters} ${voters === 1 ? "player" : "players"} · ${today()}`}
+      sections={() => tierSections(sections)}
+      file={`tier-list-${slug(title)}.png`}
+      label={label}
+    />
+  );
+}
+
+export const today = () => new Date().toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
+
+/**
+ * Export button: draws a compact image (a header, then labelled rows of
+ * sprites) and opens it in a popup with Copy, Download and (on phones) Share.
+ */
+export function ImageExport({
+  title,
+  heading,
+  subtitle,
+  sections,
+  file: fileName,
+  label = "Export image",
+}: {
+  /** Popup title and image alt text. */
+  title: string;
+  heading: string;
+  /** Built when drawing, so dates and counts are current. */
+  subtitle: () => string;
+  sections: () => ImageSection[];
+  file: string;
   label?: string;
 }) {
   const dialog = useRef<HTMLDialogElement>(null);
@@ -198,7 +251,7 @@ export function TierExport({
     setBusy(true);
     setStatus(null);
     try {
-      const blob = await renderPng(title, voters, sections);
+      const blob = await renderPng(heading, subtitle(), sections());
       setImage({ blob, url: URL.createObjectURL(blob) });
       dialog.current?.showModal();
     } catch {
@@ -218,7 +271,7 @@ export function TierExport({
     }
   }
 
-  const file = image ? new File([image.blob], fileName(title), { type: "image/png" }) : null;
+  const file = image ? new File([image.blob], fileName, { type: "image/png" }) : null;
   const canShare = typeof navigator !== "undefined" && !!file && !!navigator.canShare?.({ files: [file] });
 
   return (
@@ -238,7 +291,7 @@ export function TierExport({
         onClick={(e) => {
           if (e.target === e.currentTarget) dialog.current?.close();
         }}
-        aria-label="Export tier list"
+        aria-label={`Export: ${title}`}
         className="m-auto max-h-[92dvh] w-[calc(100%-2rem)] max-w-xl overflow-y-auto rounded-3xl bg-cream p-0 text-ink shadow-2xl backdrop:bg-black/60 dark:bg-night dark:text-[#eef1ff]"
       >
         <div className="space-y-4 p-5">
@@ -253,7 +306,7 @@ export function TierExport({
               ×
             </button>
           </div>
-          {image && <img src={image.url} alt={`Tier list: ${title}`} className="w-full rounded-xl" />}
+          {image && <img src={image.url} alt={title} className="w-full rounded-xl" />}
           <div className="flex flex-wrap gap-2">
             {image && typeof ClipboardItem !== "undefined" && (
               <button type="button" onClick={copy} className="btn-primary px-4 py-2">
@@ -261,7 +314,7 @@ export function TierExport({
               </button>
             )}
             {image && (
-              <a href={image.url} download={fileName(title)} className="btn-primary px-4 py-2">
+              <a href={image.url} download={fileName} className="btn-primary px-4 py-2">
                 Download
               </a>
             )}
