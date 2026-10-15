@@ -93,7 +93,7 @@ do $$ begin
   assert (select count(*) from public.inactive_reports) = 1, 'own report readable';
 end $$;
 
--- One report doesn't hide them from others; two do.
+-- One or two reports don't hide them from others; three do.
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0005-000000000006', false);
 do $$ begin
   assert (select match_pct from public.get_matches() where discord_username = 'cone') = 50, 'one report: still shown to others';
@@ -104,7 +104,13 @@ select public.report_inactive('00000000-0000-0000-0005-000000000004');
 select public.report_inactive(auth.uid()); -- reporting yourself is a no-op
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0005-000000000006', false);
 do $$ begin
-  assert not exists (select 1 from public.get_matches() where discord_username = 'cone'), 'two reports hide';
+  assert exists (select 1 from public.get_matches() where discord_username = 'cone'), 'two reports: still shown (20261020000200)';
+end $$;
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-0005-000000000005', false);
+select public.report_inactive('00000000-0000-0000-0005-000000000004');
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-0005-000000000006', false);
+do $$ begin
+  assert not exists (select 1 from public.get_matches() where discord_username = 'cone'), 'three reports hide';
 end $$;
 
 -- Coming back clears it.
