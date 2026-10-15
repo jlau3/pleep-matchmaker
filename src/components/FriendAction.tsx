@@ -41,7 +41,7 @@ export function FriendAction({
   userId: string;
   name: string;
   relation: Relation;
-  /** Their friend code is on the card, so "also send a request in Pokémon Sleep" makes sense. */
+  /** Their friend code is on the card. On a request to you, missing means they sent it as "already friends in the game". */
   showsCode?: boolean;
   /** Not here yet name this player was found from: after sending or accepting, asks whether to remove it. */
   placeholder?: string;
@@ -52,6 +52,8 @@ export function FriendAction({
   const [confirming, setConfirming] = useState(false);
   // The Not here yet name to offer removing, once a request or accept to them went through.
   const [askRemove, setAskRemove] = useState<string | null>(null);
+  // "We're already friends in Pokémon Sleep": send the request without your friend code.
+  const [inGame, setInGame] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busy, startTransition] = useTransition();
   const router = useRouter();
@@ -121,10 +123,10 @@ export function FriendAction({
             disabled={busy}
             onClick={() =>
               run(
-                () => sendFriendRequest(userId, Boolean(placeholder)),
+                () => sendFriendRequest(userId, Boolean(placeholder), !inGame),
                 (status) => (status === "friends" ? "friend" : "sent"),
-                showsCode
-                  ? `Also send ${name} a friend request in Pokémon Sleep with the code above.`
+                inGame
+                  ? `Sent without your friend code, since you're already friends in Pokémon Sleep.`
                   : `${name} gets your friend code with the request, to add you in Pokémon Sleep when they accept.`,
               )
             }
@@ -132,6 +134,12 @@ export function FriendAction({
           >
             {busy ? "Sending…" : "Send friend request"}
           </button>
+        )}
+        {relation === "none" && (
+          <label className="inline-flex cursor-pointer items-center gap-1.5 text-xs text-slate-600 dark:text-slate-300">
+            <input type="checkbox" checked={inGame} onChange={(e) => setInGame(e.target.checked)} className="h-3.5 w-3.5 accent-[var(--color-night)]" />
+            Already friends in Pokémon Sleep (don&apos;t send my code)
+          </label>
         )}
 
         {relation === "sent" && (
@@ -185,6 +193,7 @@ export function FriendAction({
 
         {relation === "incoming" && (
           <>
+            {!showsCode && <span className="w-full text-xs text-slate-500">{name} says you&apos;re already friends in Pokémon Sleep.</span>}
             <button
               type="button"
               disabled={busy}
@@ -192,7 +201,9 @@ export function FriendAction({
                 run(
                   () => acceptFriendRequest(userId, Boolean(placeholder)),
                   () => "friend",
-                  `You're friends now. If you haven't yet, add ${name} in Pokémon Sleep (their code goes away now, as in the game).`,
+                  showsCode
+                    ? `You're friends now. If you haven't yet, add ${name} in Pokémon Sleep (their code goes away now, as in the game).`
+                    : `You're friends now.`,
                 )
               }
               className={solid}

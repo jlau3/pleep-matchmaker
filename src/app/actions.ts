@@ -262,9 +262,11 @@ export async function sendFriendRequest(
   targetId: string,
   /** Leave the page as is (the card is asking about a Not here yet name); the client refreshes after. */
   deferRefresh = false,
+  /** Send your friend code with it; false for "We're already friends in Pokémon Sleep" (20261021001000). */
+  withCode = true,
 ): Promise<{ status?: "sent" | "friends"; error?: string }> {
   const { supabase } = await requireUser();
-  const { data, error } = await supabase.rpc("send_friend_request", { target: targetId });
+  const { data, error } = await supabase.rpc("send_friend_request", withCode ? { target: targetId } : { target: targetId, with_code: false });
   if (error) return { error: FRIEND_ERRORS[error.message] ?? "Couldn't send the request, try again" };
   // Whole layout: the requests banner and every Add friend button may change.
   if (!deferRefresh) revalidatePath("/", "layout");

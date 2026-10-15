@@ -40,4 +40,30 @@ do $$ begin
     'old columns gone';
 end $$;
 
+-- "Already friends in the game" (20261021001000): Bob asks Cid without his code.
+reset role;
+insert into auth.users (id, raw_user_meta_data) values ('00000000-0000-0000-0037-000000000003', '{"name":"cor_cid#0"}');
+update public.profiles set ign = 'CorCid', friend_code = '737300000003' where id = '00000000-0000-0000-0037-000000000003';
+set role authenticated;
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-0037-000000000002', false);
+do $$ begin
+  assert public.send_friend_request('00000000-0000-0000-0037-000000000003', false) = 'sent';
+end $$;
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-0037-000000000003', false);
+do $$ begin
+  assert exists (select 1 from public.get_friend_requests() where user_id = '00000000-0000-0000-0037-000000000002' and friend_code is null),
+    'request without the code';
+  assert (select friend_code from public.lookup_players('CorBob') where user_id = '00000000-0000-0000-0037-000000000002') is null,
+    'nor in search';
+end $$;
+-- Sending again with the code puts it back.
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-0037-000000000002', false);
+do $$ begin assert public.send_friend_request('00000000-0000-0000-0037-000000000003') = 'sent'; end $$;
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-0037-000000000003', false);
+do $$ begin
+  assert (select friend_code from public.get_friend_requests() where user_id = '00000000-0000-0000-0037-000000000002') = '737300000002',
+    'resent with the code';
+end $$;
+reset role;
+
 \echo 'ALL CODES ON REQUESTS TESTS PASSED'

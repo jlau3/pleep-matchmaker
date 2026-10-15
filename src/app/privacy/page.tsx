@@ -61,8 +61,9 @@ export default function PrivacyPage() {
             <b>Other players</b> can see your IGN, profile icon, roughly when you were last active
             (&quot;active this week&quot;), and match %s, depending on <b>Who can find you</b>: when they search your IGN
             or friend code, when you appear in their Find New, or when you send them a friend request.
-            Your <b>friend code</b> only goes to players you send a friend request to, so they can add you in Pokémon
-            Sleep, and is hidden again once you&apos;re friends.
+            Your <b>friend code</b> only goes to players you send a friend request to (unless you tick{" "}
+            <b>Already friends in Pokémon Sleep</b>), so they can add you in the game, and is hidden again once you&apos;re
+            friends.
           </li>
           <li>
             <b>Only your friends</b> see your candy votes and Top 3, your Discord name and picture if{" "}
