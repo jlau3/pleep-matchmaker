@@ -3,7 +3,7 @@ import { LineChips } from "@/components/LineChips";
 import { BrowseLayout } from "@/components/BrowseLayout";
 import { MatchTile } from "@/components/MatchTile";
 import { FitWithTop3 } from "@/components/Top3Tiers";
-import { loadTop3Tiers } from "@/lib/top3Tiers";
+import { loadTop3Tiers, type Top3Tiers } from "@/lib/top3Tiers";
 import { FriendAction } from "@/components/FriendAction";
 import { PlayerHeader, playerName } from "@/components/PlayerHeader";
 import { PlayerSearch, searchQuery } from "@/components/PlayerSearch";
@@ -44,8 +44,14 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
   ]);
   if (matchesResult.error) throw matchesResult.error;
   const matches = await withExtras(supabase, matchesResult.data as MatchRow[]);
-  // Sorting by your Top 3: show where each of yours sits on their Tier List.
-  const top3 = opts.sort === "top3" ? await loadTop3Tiers(supabase, matches.map((m) => m.user_id)) : null;
+  // Where each of your Top 3 sits on their Tier List, on every sort. browse_players carries it
+  // (20261020000000_top3_fast.sql); before that migration, one more lookup.
+  const top3: Top3Tiers | null =
+    tops.length === 0
+      ? null
+      : matches.length > 0 && "top3_tiers" in matches[0]
+        ? Object.fromEntries(matches.map((m) => [m.user_id, m.top3_tiers ?? {}]))
+        : await loadTop3Tiers(supabase, matches.map((m) => m.user_id));
   // "For them" is a dash until a friend has voted (assume they have if the check isn't deployed yet).
   const friendsVoted = votedResult.error ? true : Boolean(votedResult.data);
   const total = Number(matches[0]?.total_count ?? 0);

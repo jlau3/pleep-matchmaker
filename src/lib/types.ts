@@ -38,6 +38,8 @@ export interface MatchRow extends PlayerContact {
   list_voters?: number;
   /** browse_players only: whether they've voted on anything ("for them" is a dash until they do). */
   voted?: boolean;
+  /** browse_players only: your Top 3 line -> its tier on their Tier List; null or missing line = a dash. */
+  top3_tiers?: Record<string, string> | null;
 }
 
 export interface LookupRow extends PlayerContact {
@@ -109,10 +111,14 @@ export interface RequestRow extends PlayerContact {
   you_fit_pct: number | null;
 }
 
-/** Your request: still open, or declined (get_sent_requests). Their code shows only if they're open to new friends. */
+/**
+ * Your request: still open, declined, or expired (unanswered past the TTL;
+ * "open" from before 20261020000100_expired_requests.sql) (get_sent_requests).
+ * Their code shows only if they're open to new friends.
+ */
 export interface SentRequestRow extends PlayerContact {
   requested_at: string;
-  status: "open" | "declined";
+  status: "open" | "declined" | "expired";
 }
 
 /** An in-game friend who isn't here yet, kept by IGN (get_friend_placeholders). */
