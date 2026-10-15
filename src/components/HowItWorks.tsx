@@ -47,7 +47,8 @@ const STEPS: { title: string; body: React.ReactNode; href: string; cta: string }
       <>
         Find New Friends suggests players who match both ways, best match first: you&apos;d each send candy the other
         wants, so they&apos;re likely to add you back. Tap Add friend and send them a request in Pokémon Sleep with
-        their friend code; they wait under Pending until they accept, then tap again to add them.
+        their friend code; they wait under Pending until they accept. When they add you back here, they join your list
+        automatically (or tap again once they accept in the game).
       </>
     ),
     href: "/matches",

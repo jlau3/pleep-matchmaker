@@ -9,7 +9,8 @@ type Step = "idle" | "pending" | "added";
 /**
  * Add friend for players you don't know yet (Find New, pending list on My
  * Friends). Befriending happens in Pokémon Sleep, so the first tap only marks
- * them pending; once they accept in the game, a second tap adds them here.
+ * them pending; once they accept in the game, a second tap adds them here
+ * (or they join your list by themselves if they add you here first).
  * Cancel drops a request that fell through. Pending is saved to your account.
  */
 export function ConnectSteps({ userId, name, initialPending = false }: { userId: string; name: string; initialPending?: boolean }) {

@@ -120,7 +120,8 @@ export default async function FriendsPage({ searchParams }: { searchParams: Prom
             Pending in Pokémon Sleep <span className="text-sm font-normal text-slate-500">{pending.length}</span>
           </h2>
           <p className="mb-3 text-sm text-slate-500">
-            You&apos;ve asked these players in the game. Add each one here once they accept.
+            You&apos;ve asked these players in the game. If they add you here, they move to your friends by themselves;
+            otherwise add them once they accept.
           </p>
           <ul className="space-y-3">
             {pending.map((player) => (
