@@ -58,15 +58,16 @@ export default function PrivacyPage() {
       <Section title="Who can see what">
         <ul className="list-disc space-y-1 pl-5">
           <li>
-            <b>Other players</b> can see your IGN, friend code, profile icon, Reddit name, roughly when you were last active
+            <b>Other players</b> can see your IGN, friend code, profile icon, roughly when you were last active
             (&quot;active this week&quot;), and match %s, depending on <b>Who can find you</b>: when they search your IGN
             or friend code, when you appear in their Find New, or when you send them a friend request. With{" "}
             <b>Show my friend code before we&apos;re friends</b> off, your code only shows to friends, to people you send a
             request to, and to someone who already typed it.
           </li>
           <li>
-            <b>Only your friends</b> see your candy votes and Top 3, and your Discord name and picture if{" "}
-            <b>Show my Discord name to friends</b> is on.
+            <b>Only your friends</b> see your candy votes and Top 3, your Discord name and picture if{" "}
+            <b>Show my Discord name to friends</b> is on, and your Reddit name if <b>Show my Reddit name to friends</b> is
+            on.
           </li>
           <li>
             <b>Nobody else ever sees your email.</b> It&apos;s only used to sign you in.

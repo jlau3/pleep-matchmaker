@@ -92,6 +92,8 @@ export interface OwnProfile {
   reddit_username?: string | null;
   /** Strangers who find you (Find New, IGN search) see your friend code. Friends always do. */
   share_code?: boolean;
+  /** Friends see their Reddit name. Other players never do. */
+  show_reddit?: boolean;
   last_seen_at: string;
   prefs_updated_at: string | null;
 }

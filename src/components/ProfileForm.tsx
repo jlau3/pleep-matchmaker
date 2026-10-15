@@ -119,7 +119,7 @@ export function ProfileForm({ profile, friendListFull }: { profile: OwnProfile; 
             <span className="text-sm text-slate-500">u/</span>
             <input name="reddit_username" onBlur={saveIfChanged} defaultValue={profile.reddit_username ?? ""} maxLength={22} placeholder="your_reddit_name" className="field" />
           </span>
-          <span className={hint}>Shown under your name so Reddit friends recognize you. Not verified.</span>
+          <span className={hint}>Shown to your friends under your name. Not verified.</span>
         </label>
       </section>
 
@@ -187,6 +187,24 @@ export function ProfileForm({ profile, friendListFull }: { profile: OwnProfile; 
               detail="Other players never see it or find you by it, only friends."
             >
               Friends see @{profile.discord_username} and your Discord picture on your card.
+            </Toggle>
+          </div>
+        )}
+        {profile.reddit_username && profile.show_reddit !== undefined && (
+          <div className="border-t border-slate-200 dark:border-slate-700">
+            <input type="hidden" name="has_show_reddit" value="1" />
+            <Toggle
+              name="show_reddit"
+              defaultChecked={profile.show_reddit}
+              onChange={save}
+              title={
+                <>
+                  <RedditIcon /> Show my Reddit name to friends
+                </>
+              }
+              detail="Other players never see it."
+            >
+              Friends see u/{profile.reddit_username} under your name.
             </Toggle>
           </div>
         )}

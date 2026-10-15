@@ -77,8 +77,8 @@ export async function seedUndecided(
 export async function loadOwnProfile(supabase: SupabaseClient, userId: string): Promise<OwnProfile> {
   const base = "id, discord_username, discord_display_name, avatar_url, ign, friend_code, open_to_friends, allow_lookup, show_discord, last_seen_at, prefs_updated_at";
   const extras = `${base}, votes_private, game_avatar, reddit_username`;
-  // share_code: 20261021000100_hide_code.sql.
-  const newest = await supabase.from("profiles").select(`${extras}, share_code`).eq("id", userId).single();
+  // share_code, show_reddit: 20261021000100_hide_code.sql, 20261021000200_reddit_friends_only.sql.
+  const newest = await supabase.from("profiles").select(`${extras}, share_code, show_reddit`).eq("id", userId).single();
   if (!newest.error) return newest.data as OwnProfile;
   const full = await supabase.from("profiles").select(extras).eq("id", userId).single();
   if (!full.error) return full.data as OwnProfile;

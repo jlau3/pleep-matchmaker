@@ -226,6 +226,7 @@ export async function updateProfile(_prev: ProfileFormState, form: FormData): Pr
   }
   // Only sent while Everyone is picked (the switch is hidden otherwise).
   if (form.has("has_share_code")) extras.share_code = form.get("share_code") === "on";
+  if (form.has("has_show_reddit")) extras.show_reddit = form.get("show_reddit") === "on";
   let { error } = await supabase.from("profiles").update({ ...update, ...extras }).eq("id", user.id);
   // Before that migration runs, save the rest.
   if (error && Object.keys(extras).length > 0) ({ error } = await supabase.from("profiles").update(update).eq("id", user.id));
