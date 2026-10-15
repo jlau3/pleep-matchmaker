@@ -1,5 +1,5 @@
 import { gameAvatarUrl } from "@/lib/avatars";
-import { formatFriendCode, relativeTime } from "@/lib/format";
+import { activityLabel, formatFriendCode } from "@/lib/format";
 import type { PlayerContact } from "@/lib/types";
 import { BlockButton } from "./BlockButton";
 import { DiscordIcon, RedditIcon } from "./BrandIcons";
@@ -96,8 +96,7 @@ export function PlayerHeader({
         )}
       </div>
       <div className="flex flex-wrap items-center gap-x-3 text-[13px] text-slate-500">
-        <span>Seen {relativeTime(player.last_seen_at)}</span>
-        <span>Prefs updated {relativeTime(player.prefs_updated_at)}</span>
+        <span>{activityLabel(player.last_seen_at)}</span>
         <BlockButton userId={player.user_id} name={name} />
       </div>
       {(relation !== undefined || actions) && (
