@@ -66,8 +66,8 @@ export default function PrivacyPage() {
           </li>
           <li>
             <b>Only your friends</b> see your candy votes and Top 3, your Discord name and picture if{" "}
-            <b>Show my Discord name to friends</b> is on, and your Reddit name if <b>Show my Reddit name to friends</b> is
-            on.
+            <b>Show my Discord name to friends</b> is on (people you send a friend request to see them too, so they
+            know who&apos;s asking), and your Reddit name if <b>Show my Reddit name to friends</b> is on.
           </li>
           <li>
             <b>Nobody else ever sees your email.</b> It&apos;s only used to sign you in.
