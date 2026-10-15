@@ -2,6 +2,7 @@
 export const BROWSE_SORTS = [
   ["fit", "Best match"],
   ["you_fit", "Best for you"],
+  ["top3", "Your Top 3"],
   ["active", "Recently active"],
 ] as const;
 
@@ -9,6 +10,7 @@ export const BROWSE_SORTS = [
 export const BROWSE_SORT_HINTS: Record<(typeof BROWSE_SORTS)[number][0], string> = {
   fit: "Highest total of both match %s first (a – counts as 0): you'd each send candy the other wants, so they're likely to add you back.",
   you_fit: "Highest \"for you\" first: most of what you want is what their friends want.",
+  top3: "Players whose Tier List ranks your Top 3 highest first, so they're likeliest to send your favorite candy. Star your Top 3 in My Votes.",
   active: "Most recently online first, so they're likely to accept your friend request soon.",
 };
 export type BrowseSort = (typeof BROWSE_SORTS)[number][0];
