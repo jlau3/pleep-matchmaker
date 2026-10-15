@@ -5,7 +5,20 @@ import { LineChips } from "./LineChips";
  * A player's Top 3 (always shown), then wants and don't-wants in a dropdown.
  * Starred lines are listed under Top 3 only, not repeated under Wants.
  */
-export function PlayerLists({ wants, dontWants, topWants }: { wants: string[]; dontWants: string[]; topWants: string[] }) {
+export function PlayerLists({
+  wants,
+  dontWants,
+  topWants,
+  hidden = false,
+}: {
+  wants: string[];
+  dontWants: string[];
+  topWants: string[];
+  /** Friends-only votes kept from you: say so instead of showing empty lists. */
+  hidden?: boolean;
+}) {
+  if (hidden)
+    return <p className="mt-3 text-sm text-slate-500">Their votes are shared with friends only. You&apos;ll see them once you&apos;re friends.</p>;
   const tops = new Set(topWants);
   const otherWants = wants.filter((id) => !tops.has(id));
   return (

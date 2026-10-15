@@ -11,8 +11,25 @@ const color = (pct: number | null | undefined) =>
  * Either turns amber below LOW_FIT_PCT, so a lopsided friendship stands out.
  * A missing one shows a dash (not enough votes yet; see FitLegend).
  */
-export function FitPair({ they, you }: { they: number | null | undefined; you: number | null | undefined }) {
+export function FitPair({
+  they,
+  you,
+  compact = false,
+}: {
+  they: number | null | undefined;
+  you: number | null | undefined;
+  /** One small line, for grid tiles. */
+  compact?: boolean;
+}) {
   const low = (pct: number | null | undefined) => pct != null && pct < LOW_FIT_PCT;
+  const pct = (n: number | null | undefined) => (n == null ? "–" : `${n}%`);
+  if (compact)
+    return (
+      <span className="whitespace-nowrap text-xs font-semibold text-slate-500">
+        <b className={`text-sm ${color(you)}`} title="For you">{pct(you)}</b> you ·{" "}
+        <b className={`text-sm ${color(they)}`} title="For them">{pct(they)}</b> them
+      </span>
+    );
   return (
     <div className="shrink-0 whitespace-nowrap text-right leading-none">
       <div title="For you: how much of what you want their friends want, so the candy they send suits you">

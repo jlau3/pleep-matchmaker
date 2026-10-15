@@ -70,16 +70,22 @@ export function PlayerResults({
                   )
                 }
               />
-              <PlayerLists wants={player.wants} dontWants={player.dont_wants} topWants={player.top_wants} />
+              <PlayerLists wants={player.wants} dontWants={player.dont_wants} topWants={player.top_wants} hidden={player.votes_hidden} />
             </li>
           ))}
         </ul>
+      )}
+      {/* Results, but maybe not the right person: the name can still go on Not here yet. */}
+      {q && players.length > 0 && suggestPlaceholder && !normalizeFriendCode(q) && (
+        <div className="pt-1 text-center text-sm text-slate-500">
+          <SuggestPlaceholder key={q} name={q} notFound />
+        </div>
       )}
     </>
   );
 }
 
-function SuggestPlaceholder({ name }: { name: string }) {
+function SuggestPlaceholder({ name, notFound = false }: { name: string; /** Results came up, just not them. */ notFound?: boolean }) {
   const [state, setState] = useState<"idle" | "saved" | string>("idle");
   const [pending, startTransition] = useTransition();
   if (state === "saved")
@@ -90,10 +96,17 @@ function SuggestPlaceholder({ name }: { name: string }) {
     );
   return (
     <div className="mx-auto max-w-sm rounded-2xl bg-sky/60 p-3 text-slate-700 dark:bg-night-deep dark:text-slate-200">
-      <p>
-        Friends with them in Pokémon Sleep? Keep <b>{name}</b> under Not here yet as a reminder while you track them
-        down or invite them.
-      </p>
+      {notFound ? (
+        <p>
+          Not who you were looking for? Save <b>{name}</b> to your Not here yet list as a reminder while you track them
+          down or invite them.
+        </p>
+      ) : (
+        <p>
+          Friends with them in Pokémon Sleep? Keep <b>{name}</b> under Not here yet as a reminder while you track them
+          down or invite them.
+        </p>
+      )}
       <button
         type="button"
         disabled={pending}

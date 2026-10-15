@@ -1,13 +1,5 @@
-import { type RankedLine, rankedSpriteUrl, type TierId, TIERS, TOP_ROW_SIZE } from "@/lib/tiers";
+import { type RankedLine, rankedSpriteUrl, type TierId, TIER_STYLE, TIERS, TOP_ROW_SIZE } from "@/lib/tiers";
 
-const TIER_STYLE: Record<string, string> = {
-  top: "bg-gradient-to-br from-sun to-[#ff8fab] text-[#5b3e00] shadow-[0_3px_0_var(--color-sun-deep)]",
-  S: "bg-[#ff8fab] text-white shadow-[0_3px_0_#e0607f]",
-  A: "bg-[#ffb36b] text-white shadow-[0_3px_0_#e08a3a]",
-  B: "bg-sun text-[#5b3e00] shadow-[0_3px_0_var(--color-sun-deep)]",
-  C: "bg-[#a8dd7a] text-[#2f5a12] shadow-[0_3px_0_#7cba4c]",
-  avoid: "bg-meh text-white shadow-[0_3px_0_#6b778a]",
-};
 
 const panel = "card p-3";
 /** The Top 3 row isn't a tier: a dashed gold frame and a gap set it apart from S. */

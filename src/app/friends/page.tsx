@@ -16,6 +16,8 @@ import { type FriendItem, FriendsBoard } from "@/components/FriendsBoard";
 import { FRIEND_SORTS, friendRank, parseFriendSort } from "@/lib/friendSort";
 import { withExtras } from "@/lib/extras";
 import { nameMatch } from "@/lib/names";
+import { Top3Tiers } from "@/components/Top3Tiers";
+import { loadTop3Tiers } from "@/lib/top3Tiers";
 
 const card = "card p-4";
 
@@ -42,6 +44,8 @@ export default async function FriendsPage({ searchParams }: { searchParams: Prom
   // In-game friends not here yet (null until that migration runs, which hides the section).
   const placeholders = placeholdersResult.error ? null : ((placeholdersResult.data ?? []) as PlaceholderRow[]);
   const friends = await withExtras(supabase, friendsResult.data as FriendRow[]);
+  // Where your Top 3 sits on each friend's Tier List (nothing to show without a Top 3).
+  const top3 = tops.length > 0 ? await loadTop3Tiers(supabase, friends.map((f) => f.user_id)) : {};
   // A request from someone with a Not here yet name is probably that friend: those go first, in gold. Having
   // asked you is strong evidence on its own, so a close name counts here too (worded as a question).
   const placeholderFor = (ign: string | null): { name: string; strong: boolean } | null => {
@@ -166,6 +170,7 @@ export default async function FriendsPage({ searchParams }: { searchParams: Prom
                       relation="friend"
                       aside={<FitPair they={friend.match_pct} you={friend.you_fit_pct} />}
                     />
+                    <Top3Tiers tops={tops} tiers={top3[friend.user_id]} />
                     <PlayerLists wants={friend.wants} dontWants={friend.dont_wants} topWants={friend.top_wants} />
                   </>
                 ) : (

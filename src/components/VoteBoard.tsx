@@ -9,6 +9,7 @@ import { rethrowIfNavigation, SAVE_FAILED } from "@/lib/saveError";
 import { markVotesChanged } from "@/lib/votesChanged";
 import type { LineVotes } from "@/lib/tiers";
 import { CollectionGrid } from "./CollectionGrid";
+import { ExportVotes } from "./ExportVotes";
 import { PickFlow } from "./PickFlow";
 import { NewCandyCard } from "./NewCandyCard";
 import { StarButton } from "./StarButton";
@@ -286,6 +287,8 @@ export function VoteBoard({
           })}
         </ul>
       </section>
+
+      <ExportVotes choices={choices} tops={tops} />
 
       <div className="mb-4 space-y-3">
         <div className="flex gap-2">
