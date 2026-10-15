@@ -27,6 +27,6 @@ describe("relationOf", () => {
     expect(relationOf(relations, "i")).toBe("incoming");
     expect(relationOf(relations, "n")).toBe("none");
     expect(relationOf({ ...relations, profileReady: false }, "n")).toBe("setup");
-    expect(relationOf({ ...relations, profileReady: false }, "i")).toBe("incoming");
+    expect(relationOf({ ...relations, profileReady: false }, "i")).toBe("incoming-setup");
   });
 });

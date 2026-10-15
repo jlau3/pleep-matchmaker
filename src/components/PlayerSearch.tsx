@@ -26,14 +26,14 @@ export async function PlayerSearch({
   relations: Relations;
   viewerId: string;
 }) {
-  // No IGN, no search (the database returns nothing either): point at Profile instead.
+  // No IGN and friend code, no search (the database returns nothing either): point at Profile instead.
   if (relations.canSearch === false)
     return (
       <div className="card p-4 text-center text-sm">
         <p className="text-slate-600 dark:text-slate-300">
           To search for players, first{" "}
           <Link href="/profile" className="font-semibold underline">
-            add your in-game name
+            add your in-game name and friend code
           </Link>
           , so the people you find know who you are.
         </p>

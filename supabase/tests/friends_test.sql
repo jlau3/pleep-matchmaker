@@ -99,7 +99,7 @@ select u::uuid, l, 'want'::public.choice
 from unnest(array['00000000-0000-0000-0001-000000000001', '00000000-0000-0000-0001-000000000100']) u,
      unnest(array['a1', 'a2', 'a3']) l;
 -- Searching needs your own IGN (20261021000300_search_needs_ign.sql).
-update public.profiles set ign = coalesce(ign, 'ZzSearcher100') where id = '00000000-0000-0000-0001-000000000100';
+update public.profiles set ign = coalesce(ign, 'ZzSearcher100'), friend_code = coalesce(friend_code, '420001100000') where id = '00000000-0000-0000-0001-000000000100';
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0001-000000000100', false);
 set role authenticated;
 do $$ begin

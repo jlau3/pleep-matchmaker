@@ -205,6 +205,21 @@ export function FriendAction({
           </>
         )}
 
+        {relation === "incoming-setup" && (
+          <>
+            <span className="text-sm text-slate-600 dark:text-slate-300">
+              To accept,{" "}
+              <Link href="/profile" className="font-semibold underline">
+                add your in-game name and friend code
+              </Link>{" "}
+              so they can add you in Pokémon Sleep.
+            </span>
+            <button type="button" disabled={busy} onClick={() => run(() => declineFriendRequest(userId), () => "declined-them")} className={outline}>
+              Decline
+            </button>
+          </>
+        )}
+
         {relation === "declined-them" && <span className="text-sm text-slate-500">Declined.</span>}
 
         {relation === "friend" && (

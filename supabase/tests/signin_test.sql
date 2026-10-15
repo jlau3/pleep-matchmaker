@@ -50,7 +50,7 @@ end $$;
 -- A Google/email player is found by IGN.
 update public.profiles set ign = 'JaneSleeps' where id = '00000000-0000-0000-0007-000000000002';
 -- Searching needs your own IGN (20261021000300_search_needs_ign.sql).
-update public.profiles set ign = coalesce(ign, 'ZzSearcher003') where id = '00000000-0000-0000-0007-000000000003';
+update public.profiles set ign = coalesce(ign, 'ZzSearcher003'), friend_code = coalesce(friend_code, '420007003000') where id = '00000000-0000-0000-0007-000000000003';
 set role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0007-000000000003', false);
 do $$ begin

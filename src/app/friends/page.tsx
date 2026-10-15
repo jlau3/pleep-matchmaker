@@ -104,7 +104,7 @@ export default async function FriendsPage({ searchParams }: { searchParams: Prom
                   )}
                   <PlayerHeader
                     player={player}
-                    relation="incoming"
+                    relation={relations.profileReady ? "incoming" : "incoming-setup"}
                     placeholder={maybe?.name}
                     aside={<FitPair they={player.match_pct} you={player.you_fit_pct} />}
                   />

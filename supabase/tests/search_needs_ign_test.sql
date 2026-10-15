@@ -14,6 +14,10 @@ do $$ begin
 end $$;
 update public.profiles set ign = 'SniSearcher' where id = auth.uid();
 do $$ begin
+  assert not exists (select 1 from public.lookup_players('FindableNapper')), 'IGN but no code: still nothing (20261021000700)';
+end $$;
+update public.profiles set friend_code = '666600000002' where id = auth.uid();
+do $$ begin
   assert exists (select 1 from public.lookup_players('FindableNapper')), 'with an IGN: found';
 end $$;
 reset role;

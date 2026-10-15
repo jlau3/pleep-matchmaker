@@ -83,7 +83,7 @@ set role authenticated;
 -- Friends, lookup and community stats expose the stars.
 reset role;
 -- Searching needs your own IGN (20261021000300_search_needs_ign.sql).
-update public.profiles set ign = coalesce(ign, 'ZzSearcher002') where id = '00000000-0000-0000-0003-000000000002';
+update public.profiles set ign = coalesce(ign, 'ZzSearcher002'), friend_code = coalesce(friend_code, '420003002000') where id = '00000000-0000-0000-0003-000000000002';
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0003-000000000002', false);
 -- Friends both ways: votes are friends-only (20261020000800_private_votes.sql).
 select public.test_befriend('00000000-0000-0000-0003-000000000002', '00000000-0000-0000-0003-000000000001');
