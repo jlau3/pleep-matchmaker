@@ -12,7 +12,7 @@ import { PROFILE_INCOMPLETE } from "@/lib/relations";
 import { nameMatch } from "@/lib/names";
 import { loadTop3Tiers, type Top3Tiers } from "@/lib/top3Tiers";
 import { META_COOKIE, META_POSTS, metaCookieValue } from "@/content/meta";
-import { FIRST_FRIEND_COOKIE, HELP_COOKIE, HELP_VERSION, helpCookieValue } from "@/lib/help";
+import { FIRST_FRIEND_COOKIE, HELP_COOKIE, HELP_VERSION, helpCookieValue, SETUP_COOKIE } from "@/lib/help";
 import { LINKING_COOKIE, NEXT_COOKIE, safeNextPath } from "@/lib/nextPath";
 import { isChoice, LINES_BY_ID, MAX_TOP } from "@/lib/lines";
 import { createClient, requireUser } from "@/lib/supabase/server";
@@ -393,6 +393,28 @@ export async function markHelpSeen(): Promise<void> {
   const { supabase, user } = await requireUser();
   const { error } = await supabase.from("profiles").update({ help_seen_version: HELP_VERSION }).eq("id", user.id);
   if (!error) (await cookies()).set(HELP_COOKIE, helpCookieValue(user.id), { path: "/", maxAge: 31536000, sameSite: "lax" });
+}
+
+/**
+ * Records that the player finished or skipped the setup checklist (SetupChecklist).
+ * Finishing it on the Tier List with a friend already covers the first-friend note.
+ */
+export async function markSetupDone(finished = false): Promise<void> {
+  const { supabase, user } = await requireUser();
+  const friends = finished
+    ? (await supabase.from("friends").select("friend_id", { count: "exact", head: true }).eq("user_id", user.id)).count
+    : 0;
+  const { error } = await supabase
+    .from("profiles")
+    .update(friends ? { setup_done: true, first_friend_noted: true } : { setup_done: true })
+    .eq("id", user.id);
+  if (!error) (await cookies()).set(SETUP_COOKIE, user.id, { path: "/", maxAge: 31536000, sameSite: "lax" });
+}
+
+/** Records that the voting guide has opened by itself once (VoteGuide). */
+export async function markVoteGuideSeen(): Promise<void> {
+  const { supabase, user } = await requireUser();
+  await supabase.from("profiles").update({ vote_guide_seen: true }).eq("id", user.id);
 }
 
 /** Your Top 3's tiers on these players' Tier Lists, for Find New's Top 3 sort (FindNewBoard). */

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useRef } from "react";
 import { markHelpSeen } from "@/app/actions";
 import { HELP_COOKIE } from "@/lib/help";
@@ -9,7 +10,8 @@ import { HowItWorks } from "./HowItWorks";
  * The ? in the nav, and the How it works popup it opens over the current page
  * (a native <dialog>: darkened backdrop, Esc or a click outside closes it).
  * `autoOpen` opens it by itself, for a player who hasn't seen this
- * HELP_VERSION; closing it records that on their account.
+ * HELP_VERSION; closing it records that on their account. That first time it
+ * ends with "Let's get set up", into the setup checklist (SetupChecklist).
  */
 export function HelpModal({
   signedIn,
@@ -73,9 +75,21 @@ export function HelpModal({
           </div>
           <p className="mb-5 text-sm text-slate-600 dark:text-slate-300">A candy wishlist for Pokémon Sleep players and their friends.</p>
           <HowItWorks links={signedIn} />
-          <button type="button" onClick={() => dialog.current?.close()} className="btn-primary mt-6 w-full py-2">
-            Got it
-          </button>
+          {autoOpen ? (
+            // First sign-in: lead into the setup checklist, starting with Profile.
+            <div className="mt-6 space-y-2 text-center">
+              <Link href="/profile" className="btn-primary block w-full py-2">
+                Let&apos;s get set up →
+              </Link>
+              <button type="button" onClick={() => dialog.current?.close()} className="text-sm font-semibold text-slate-500 underline">
+                Look around first
+              </button>
+            </div>
+          ) : (
+            <button type="button" onClick={() => dialog.current?.close()} className="btn-primary mt-6 w-full py-2">
+              Got it
+            </button>
+          )}
         </div>
       </dialog>
     </>

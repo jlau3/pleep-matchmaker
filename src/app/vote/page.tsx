@@ -1,8 +1,7 @@
 import { PROFILE_TABS, SubTabs } from "@/components/SubTabs";
 import { VoteBoard } from "@/components/VoteBoard";
 import { loadCommunityStats } from "@/lib/communityStats";
-import Link from "next/link";
-import { loadOwnProfile, loadOwnVotes, seedUndecided } from "@/lib/data";
+import { loadOwnVotes, seedUndecided } from "@/lib/data";
 import { CROWD_MIN_VOTERS } from "@/lib/crowd";
 import { LINES, recentLines } from "@/lib/lines";
 import type { LineVotes } from "@/lib/tiers";
@@ -10,9 +9,12 @@ import { requireUser } from "@/lib/supabase/server";
 
 export default async function VotePage() {
   const { supabase, user } = await requireUser();
-  const [{ choices: own, tops }, profile] = await Promise.all([loadOwnVotes(supabase, user.id), loadOwnProfile(supabase, user.id)]);
-  // Google/email players, and Discord players hiding their name, are known by IGN only.
-  const needsIgn = !profile.ign && !(profile.show_discord && profile.discord_username);
+  const [{ choices: own, tops }, guide] = await Promise.all([
+    loadOwnVotes(supabase, user.id),
+    supabase.from("profiles").select("vote_guide_seen").eq("id", user.id).maybeSingle(),
+  ]);
+  // The voting guide opens by itself once (shut if the lookup fails, e.g. before 20261021000000_onboarding.sql).
+  const guideAutoOpen = !guide.error && guide.data?.vote_guide_seen === false;
   const { choices, newIds } = await seedUndecided(supabase, user.id, own);
 
   // Everyone's totals (a shared 5-minute cache): the new candy cards and "Show what others pick".
@@ -27,18 +29,9 @@ export default async function VotePage() {
   return (
     <div>
       <SubTabs tabs={PROFILE_TABS} active="/vote" />
-      {needsIgn && (
-        <p className="mb-4 rounded-lg bg-amber-100 px-3 py-2 text-sm text-amber-900 dark:bg-amber-900/30 dark:text-amber-200">
-          Add your in-game name and friend code in{" "}
-          <Link href="/profile" className="font-semibold underline">
-            Settings
-          </Link>{" "}
-          so friends can recognize and find you.
-        </p>
-      )}
       <VoteBoard
         initial={choices} initialTops={tops} firstVisit={newIds.length === LINES.length} newCandy={newCandy}
-        crowd={crowd} />
+        crowd={crowd} guideAutoOpen={guideAutoOpen} />
     </div>
   );
 }

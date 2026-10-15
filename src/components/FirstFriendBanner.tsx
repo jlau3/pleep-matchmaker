@@ -8,18 +8,21 @@ import { FirstFriendBannerView } from "./FirstFriendBannerView";
  * their first friendship (they may have accepted, or been accepted while away).
  * Points them at the Tier List's My Friends view. Absent when signed out, once
  * noted (the cookie skips the lookup), or if the lookup fails (e.g. before
- * 20261020000400_first_friend_note.sql).
+ * 20261021000000_onboarding.sql). Waits while the setup checklist is pending.
  */
 export async function FirstFriendBanner() {
   const { supabase, userId } = await getAuth();
   if (!userId) return null;
   if ((await cookies()).get(FIRST_FRIEND_COOKIE)?.value === userId) return null;
   const [profile, friends] = await Promise.all([
-    supabase.from("profiles").select("first_friend_noted").eq("id", userId).maybeSingle(),
+    supabase.from("profiles").select("first_friend_noted, setup_done").eq("id", userId).maybeSingle(),
     supabase.from("friends").select("friend_id", { count: "exact", head: true }).eq("user_id", userId),
   ]);
   if (profile.error || !profile.data || friends.error) return null;
-  const noted = Boolean((profile.data as { first_friend_noted: boolean }).first_friend_noted);
+  const row = profile.data as { first_friend_noted: boolean; setup_done: boolean };
+  // The setup checklist's Tier List step says the same thing; this waits until it's done or skipped.
+  if (!row.setup_done) return null;
+  const noted = Boolean(row.first_friend_noted);
   if (!noted && !friends.count) return null;
   return <FirstFriendBannerView userId={userId} noted={noted} />;
 }

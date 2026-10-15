@@ -14,6 +14,7 @@ import { PickFlow } from "./PickFlow";
 import { NewCandyCard } from "./NewCandyCard";
 import { StarButton } from "./StarButton";
 import { SwapTopDialog } from "./SwapTopDialog";
+import { VoteGuide } from "./VoteGuide";
 
 type Filter = "all" | Choice;
 
@@ -47,6 +48,7 @@ export function VoteBoard({
   firstVisit,
   newCandy,
   crowd,
+  guideAutoOpen = false,
 }: {
   initial: Record<string, Choice>;
   initialTops: string[];
@@ -55,6 +57,8 @@ export function VoteBoard({
   newCandy?: { ids: string[]; votes: Record<string, LineVotes>; voters: number };
   /** Everyone's vote totals for "Show what others pick"; absent while too few have voted. */
   crowd?: { votes: Record<string, LineVotes>; voters: number };
+  /** Open the voting guide by itself (first visit). */
+  guideAutoOpen?: boolean;
 }) {
   const [choices, setChoices] = useState(initial);
   const [tops, setTops] = useState(() => new Set(initialTops));
@@ -266,7 +270,10 @@ export function VoteBoard({
               <strong>{counts.undecided}</strong> neutral
             </span>
           </span>
-          <ExportVotes choices={choices} tops={tops} />
+          <span className="flex shrink-0 items-center gap-3">
+            <VoteGuide autoOpen={guideAutoOpen} />
+            <ExportVotes choices={choices} tops={tops} />
+          </span>
         </div>
         {error && (
           <div role="alert" className="mt-2 flex items-center justify-between gap-3 text-sm text-dont">

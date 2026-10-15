@@ -19,3 +19,12 @@ export const helpCookieValue = (userId: string) => `${HELP_VERSION}:${userId}`;
  * pages skip its lookup (FirstFriendBanner).
  */
 export const FIRST_FRIEND_COOKIE = "pm_first_friend";
+
+/**
+ * Set (to the user id) once the player has finished or skipped the setup
+ * checklist, so pages skip its lookup (SetupChecklist).
+ */
+export const SETUP_COOKIE = "pm_setup_done";
+
+/** sessionStorage key: "Not now" on the setup checklist hides it until the browser session ends. */
+export const SETUP_SNOOZE_KEY = "pm_setup_snoozed";

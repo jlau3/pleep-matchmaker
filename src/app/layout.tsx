@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { M_PLUS_Rounded_1c } from "next/font/google";
 import { RequestsBanner } from "@/components/RequestsBanner";
 import { FirstFriendBanner } from "@/components/FirstFriendBanner";
+import { SetupChecklist } from "@/components/SetupChecklist";
 import { Nav } from "@/components/Nav";
 import { SupportFooter } from "@/components/SupportFooter";
 import { VotesChangedRefresh } from "@/components/VotesChangedRefresh";
@@ -53,6 +54,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <Nav />
         <RequestsBanner />
         <FirstFriendBanner />
+        <SetupChecklist />
         <main className="mx-auto max-w-5xl px-4 pb-16 pt-4">{children}</main>
         <SupportFooter />
         <VotesChangedRefresh />

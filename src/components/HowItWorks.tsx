@@ -5,27 +5,28 @@ import { InviteButton } from "./InviteButton";
 
 const STEPS: { title: string; body: React.ReactNode; href: string; cta: string }[] = [
   {
+    title: "Set up your profile",
+    body: (
+      <>
+        Add your in-game name and friend code, and pick the profile icon you use in Pokémon Sleep. IGNs aren&apos;t
+        unique, so a matching icon tells friends it&apos;s really you.
+      </>
+    ),
+    href: "/profile",
+    cta: "Profile",
+  },
+  {
     title: "Vote on every candy",
     body: (
       <>
         Mark each Pokémon Sleep candy line <b>Want</b>, <b>Don&apos;t Want</b> or leave it <b>Neutral</b>. Tap the ★ to
         pick your Top {MAX_TOP}: your personal favorites. They don&apos;t move the Tier List, so a niche pick never
-        counts against you. Friends can see them and send you that candy anyway, wherever it ranks.
+        counts against you. Friends can see them and send you that candy anyway, wherever it ranks. Your votes shape
+        your friends&apos; Tier Lists, not your own.
       </>
     ),
     href: "/vote",
     cta: "My Votes",
-  },
-  {
-    title: "See what your friends want",
-    body: (
-      <>
-        The Tier List ranks every candy by what your friends (or all players) want, so you know which candies to send
-        the people you play with.
-      </>
-    ),
-    href: "/tiers",
-    cta: "Tier List",
   },
   {
     title: "Add your in-game friends",
@@ -33,7 +34,7 @@ const STEPS: { title: string; body: React.ReactNode; href: string; cta: string }
       <>
         This list should match your in-game one, since it decides whose wants your Tier List follows. Look them up
         by IGN or friend code and send a friend request; once they accept, you&apos;re on each
-        other&apos;s lists (up to {MAX_FRIENDS}). Each player shows two match %s:
+        other&apos;s lists (up to {MAX_FRIENDS}). Each player shows two match %s:{" "}
         <b>for you</b> (your wants match what their friends want, so the candy they send suits you) and{" "}
         <b>for them</b> (their wants match what your friends want, so the candy you send suits them).
       </>
@@ -53,10 +54,21 @@ const STEPS: { title: string; body: React.ReactNode; href: string; cta: string }
     href: "/matches",
     cta: "Find New Friends",
   },
+  {
+    title: "See what your friends want",
+    body: (
+      <>
+        The Tier List ranks every candy by what your friends (or all players) want, so you know which candies to send
+        the people you play with.
+      </>
+    ),
+    href: "/tiers",
+    cta: "Tier List",
+  },
 ];
 
 /**
- * What the app does, in four steps. Shown on the sign-in page and in the
+ * What the app does, in five steps. Shown on the sign-in page and in the
  * How it works popup (HelpModal), which opens from the ? in the nav and by
  * itself on a player's first sign-in.
  */
@@ -90,10 +102,8 @@ export function HowItWorks({ links = true }: { links?: boolean }) {
         <InviteButton />
       </div>
       <p className="mt-5 text-xs text-slate-500">
-        Your friend code and IGN are only shown to matches and to people who look you up by name or friend code. You can turn off
-        matching (which also hides your friend code from name searches) or lookup in Profile → Settings, and stay hidden
-        from matches automatically once your friend list is full.
-        Players inactive for 2 months drop out of matching.
+        Your votes are only shown to your friends. Who can find you (by search or in Find New) is up to you in
+        Profile. Players inactive for 2 months drop out of Find New.
       </p>
     </div>
   );
