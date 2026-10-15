@@ -18,7 +18,7 @@ describe("sortRequests", () => {
 });
 
 describe("relationOf", () => {
-  const relations = { friendIds: ["f"], sent: { s: "open" as const, x: "declined" as const, o: "expired" as const, i: "expired" as const }, incoming: ["i"] };
+  const relations = { friendIds: ["f"], sent: { s: "open" as const, x: "declined" as const, o: "expired" as const, i: "expired" as const }, incoming: ["i"], profileReady: true };
   it("names each state", () => {
     expect(relationOf(relations, "f")).toBe("friend");
     expect(relationOf(relations, "s")).toBe("sent");
@@ -26,5 +26,7 @@ describe("relationOf", () => {
     expect(relationOf(relations, "o")).toBe("expired");
     expect(relationOf(relations, "i")).toBe("incoming");
     expect(relationOf(relations, "n")).toBe("none");
+    expect(relationOf({ ...relations, profileReady: false }, "n")).toBe("setup");
+    expect(relationOf({ ...relations, profileReady: false }, "i")).toBe("incoming");
   });
 });

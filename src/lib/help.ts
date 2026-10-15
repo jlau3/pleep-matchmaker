@@ -13,3 +13,9 @@ export const HELP_VERSION = 1;
 export const HELP_COOKIE = "pm_help_seen";
 
 export const helpCookieValue = (userId: string) => `${HELP_VERSION}:${userId}`;
+
+/**
+ * Set (to the user id) once the player has seen the first-friend note, so
+ * pages skip its lookup (FirstFriendBanner).
+ */
+export const FIRST_FRIEND_COOKIE = "pm_first_friend";

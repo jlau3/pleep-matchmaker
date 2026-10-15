@@ -8,8 +8,9 @@ import { normalizeFriendCode } from "@/lib/format";
 import { MAX_FRIENDS } from "@/lib/friendship";
 import { parseAvatar } from "@/lib/avatars";
 import type { LookupRow } from "@/lib/types";
+import { PROFILE_INCOMPLETE } from "@/lib/relations";
 import { META_COOKIE, META_POSTS, metaCookieValue } from "@/content/meta";
-import { HELP_COOKIE, HELP_VERSION, helpCookieValue } from "@/lib/help";
+import { FIRST_FRIEND_COOKIE, HELP_COOKIE, HELP_VERSION, helpCookieValue } from "@/lib/help";
 import { LINKING_COOKIE, NEXT_COOKIE, safeNextPath } from "@/lib/nextPath";
 import { isChoice, LINES_BY_ID, MAX_TOP } from "@/lib/lines";
 import { createClient, requireUser } from "@/lib/supabase/server";
@@ -234,6 +235,7 @@ const FRIEND_ERRORS: Record<string, string> = {
   their_list_full: "Their friend list is full (50).",
   friend_unavailable: "This player can't be added.",
   request_limit: "You have 50 requests waiting. Cancel some first.",
+  profile_incomplete: PROFILE_INCOMPLETE,
   request_gone: "That request isn't open anymore.",
 };
 
@@ -380,6 +382,13 @@ export async function markHelpSeen(): Promise<void> {
   const { supabase, user } = await requireUser();
   const { error } = await supabase.from("profiles").update({ help_seen_version: HELP_VERSION }).eq("id", user.id);
   if (!error) (await cookies()).set(HELP_COOKIE, helpCookieValue(user.id), { path: "/", maxAge: 31536000, sameSite: "lax" });
+}
+
+/** Records that the player has seen the "You have your first friend!" note (FirstFriendBanner). */
+export async function markFirstFriendNoted(): Promise<void> {
+  const { supabase, user } = await requireUser();
+  const { error } = await supabase.from("profiles").update({ first_friend_noted: true }).eq("id", user.id);
+  if (!error) (await cookies()).set(FIRST_FRIEND_COOKIE, user.id, { path: "/", maxAge: 31536000, sameSite: "lax" });
 }
 
 /** Records that the player closed the new-Pokémon note `postId` (see src/content/meta.tsx). */

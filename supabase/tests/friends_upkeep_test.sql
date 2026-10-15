@@ -14,6 +14,9 @@ update public.profiles set ign = 'FuCalIgn' where id = '00000000-0000-0000-0015-
 insert into public.blocks (blocker_id, blocked_id)
   values ('00000000-0000-0000-0015-000000000004', '00000000-0000-0000-0015-000000000001');
 
+-- Senders need an IGN and friend code (20261020000300).
+select public.test_complete_profiles('00000000-0000-0000-0015-');
+
 set role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0015-000000000001', false);
 

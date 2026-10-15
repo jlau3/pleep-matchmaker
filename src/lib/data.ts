@@ -95,10 +95,13 @@ export async function loadFriendIds(supabase: SupabaseClient, userId: string): P
  * are empty if the friend_requests table isn't there yet (migration not run).
  */
 export async function loadRelations(supabase: SupabaseClient, userId: string): Promise<Relations> {
-  const [friendIds, requests] = await Promise.all([
+  const [friendIds, requests, profile] = await Promise.all([
     loadFriendIds(supabase, userId),
     supabase.from("friend_requests").select("from_id, to_id, status, created_at").or(`from_id.eq.${userId},to_id.eq.${userId}`),
+    supabase.from("profiles").select("ign, friend_code").eq("id", userId).single(),
   ]);
   const sorted = requests.error ? { sent: {}, incoming: [] } : sortRequests(requests.data, userId);
-  return { friendIds: [...friendIds], ...sorted };
+  // Unknown (lookup failed): let them try; the database still checks.
+  const profileReady = profile.error ? true : Boolean(profile.data.ign && profile.data.friend_code);
+  return { friendIds: [...friendIds], ...sorted, profileReady };
 }

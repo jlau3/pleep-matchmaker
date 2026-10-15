@@ -7,6 +7,9 @@ insert into auth.users (id, raw_user_meta_data) values
   ('00000000-0000-0000-0016-000000000003', '{"name":"px_cal#0"}');
 update public.profiles set ign = 'PxAnnIgn' where id = '00000000-0000-0000-0016-000000000001';
 
+-- Senders need an IGN and friend code (20261020000300).
+select public.test_complete_profiles('00000000-0000-0000-0016-');
+
 set role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0016-000000000001', false);
 insert into public.preferences (user_id, line_id, choice, top) values

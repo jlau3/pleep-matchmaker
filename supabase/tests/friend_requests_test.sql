@@ -12,6 +12,9 @@ update public.profiles set friend_code = '200000000001' where id = '00000000-000
 update public.profiles set friend_code = '200000000002' where id = '00000000-0000-0000-0020-000000000002';
 update public.profiles set friend_code = '200000000003', open_to_friends = false where id = '00000000-0000-0000-0020-000000000003';
 
+-- Senders need an IGN and friend code (20261020000300).
+select public.test_complete_profiles('00000000-0000-0000-0020-');
+
 set role authenticated;
 
 -- 1. Ann asks Bob: nobody is on anyone's list yet.
@@ -140,6 +143,7 @@ reset role;
 insert into public.friends (user_id, friend_id) values ('00000000-0000-0000-0020-000000000004', '00000000-0000-0000-0020-000000000003');
 \ir ../migrations/20261019000000_friend_requests.sql
 \ir ../migrations/20261020000100_expired_requests.sql
+\ir ../migrations/20261020000300_request_needs_profile.sql
 do $$ begin
   assert not exists (select 1 from public.friends where user_id = '00000000-0000-0000-0020-000000000004' and friend_id = '00000000-0000-0000-0020-000000000003'), 'one-way add removed';
   assert (select status from public.friend_requests where from_id = '00000000-0000-0000-0020-000000000004' and to_id = '00000000-0000-0000-0020-000000000003') = 'open', 'now a request';

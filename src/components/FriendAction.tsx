@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState, useTransition } from "react";
 import {
   acceptFriendRequest,
@@ -8,7 +9,7 @@ import {
   removeFriend,
   sendFriendRequest,
 } from "@/app/actions";
-import type { Relation } from "@/lib/relations";
+import { PROFILE_INCOMPLETE, type Relation } from "@/lib/relations";
 import { rethrowIfNavigation, SAVE_FAILED } from "@/lib/saveError";
 
 const solid = "rounded-lg bg-want px-3 py-1 text-sm font-semibold text-white disabled:opacity-50";
@@ -73,6 +74,14 @@ export function FriendAction({
   const errorLine = error && (
     <span role="alert" className="text-xs text-dont">
       {error}
+      {error === PROFILE_INCOMPLETE && (
+        <>
+          {" "}
+          <Link href="/profile" className="font-semibold underline">
+            Go to Profile
+          </Link>
+        </>
+      )}
     </span>
   );
 
@@ -133,6 +142,16 @@ export function FriendAction({
               OK
             </button>
           </>
+        )}
+
+        {relation === "setup" && (
+          <span className="text-sm text-slate-600 dark:text-slate-300">
+            To send friend requests,{" "}
+            <Link href="/profile" className="font-semibold underline">
+              add your in-game name and friend code
+            </Link>{" "}
+            so they know who&apos;s asking.
+          </span>
         )}
 
         {relation === "expired" && (

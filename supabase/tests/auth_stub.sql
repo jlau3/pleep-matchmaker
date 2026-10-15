@@ -35,3 +35,17 @@ begin
   insert into public.friends (user_id, friend_id) values (a, b), (b, a) on conflict do nothing;
 end
 $$;
+
+-- Test fixtures only: an IGN and friend code for every player whose id starts
+-- with id_prefix and lacks one, so they can send friend requests
+-- (20261020000300_request_needs_profile.sql). Existing values are kept.
+create function public.test_complete_profiles(id_prefix text) returns void
+language plpgsql security definer
+as $$
+begin
+  update public.profiles
+  set ign = coalesce(ign, 'tester' || right(id::text, 4)),
+      friend_code = coalesce(friend_code, '9999' || right(replace(id::text, '-', ''), 8))
+  where id::text like id_prefix || '%';
+end
+$$;
