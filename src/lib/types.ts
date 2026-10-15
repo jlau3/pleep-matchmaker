@@ -38,6 +38,10 @@ export interface MatchRow extends PlayerContact {
   list_voters?: number;
   /** browse_players only: whether they've voted on anything ("for them" is a dash until they do). */
   voted?: boolean;
+  /** browse_all only: "for them" + "for you", a dash counting 0; null when both are dashes (Best match order). */
+  both_pct?: number | null;
+  /** browse_all only: listed under Good matches (both fits high enough, 3+ of your wants on their list). */
+  good?: boolean;
   /** browse_players only: your Top 3 line -> its tier on their Tier List; null or missing line = a dash. */
   top3_tiers?: Record<string, string> | null;
 }

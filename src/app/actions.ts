@@ -9,6 +9,7 @@ import { MAX_FRIENDS } from "@/lib/friendship";
 import { parseAvatar } from "@/lib/avatars";
 import type { LookupRow } from "@/lib/types";
 import { PROFILE_INCOMPLETE } from "@/lib/relations";
+import { loadTop3Tiers, type Top3Tiers } from "@/lib/top3Tiers";
 import { META_COOKIE, META_POSTS, metaCookieValue } from "@/content/meta";
 import { FIRST_FRIEND_COOKIE, HELP_COOKIE, HELP_VERSION, helpCookieValue } from "@/lib/help";
 import { LINKING_COOKIE, NEXT_COOKIE, safeNextPath } from "@/lib/nextPath";
@@ -382,6 +383,12 @@ export async function markHelpSeen(): Promise<void> {
   const { supabase, user } = await requireUser();
   const { error } = await supabase.from("profiles").update({ help_seen_version: HELP_VERSION }).eq("id", user.id);
   if (!error) (await cookies()).set(HELP_COOKIE, helpCookieValue(user.id), { path: "/", maxAge: 31536000, sameSite: "lax" });
+}
+
+/** Your Top 3's tiers on these players' Tier Lists, for Find New's Top 3 sort (FindNewBoard). */
+export async function loadTop3TiersFor(ids: string[]): Promise<Top3Tiers> {
+  const { supabase } = await requireUser();
+  return loadTop3Tiers(supabase, ids.filter((id) => typeof id === "string").slice(0, 1000));
 }
 
 /** Records that the player has seen the "You have your first friend!" note (FirstFriendBanner). */
