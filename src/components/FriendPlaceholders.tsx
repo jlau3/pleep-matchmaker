@@ -15,7 +15,7 @@ type Hits = { name: string; rows: LookupRow[] }[];
  * add box, looks up every name at once and lists only the ones that turned
  * someone up, above the names themselves. IGNs aren't
  * unique, so a match is only a maybe: you check it's them before adding,
- * which clears the name.
+ * and you can then take the name off the list.
  */
 export function FriendPlaceholders({
   rows,
@@ -31,7 +31,8 @@ export function FriendPlaceholders({
   const [pending, startTransition] = useTransition();
   const [hits, setHits] = useState<{ hits: Hits; searched: number } | null>(null);
   const [searching, startSearch] = useTransition();
-  const maybes = rows.filter((row) => row.signed_up).length;
+  // Joined, but not yet one of your friends (a friend's name gets its own note).
+  const maybes = rows.filter((row) => row.signed_up && !row.friend).length;
   // A–Z, ignoring case and accents, so a name is easy to find in a long list.
   const sorted = [...rows].sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: "base", numeric: true }));
   const details = useRef<HTMLDetailsElement>(null);
@@ -87,7 +88,7 @@ export function FriendPlaceholders({
         <p className="text-sm text-slate-500">
           Add their <b>exact IGN</b>, spelled as it shows in their Pokémon Sleep profile, as a reminder and search now and
           then. We flag a name here when someone with that exact name joins (capitals, spaces and symbols don&apos;t
-          matter). Once they join, send them a friend request and they drop off this list.
+          matter). Once they join, send them a friend request; you'll be asked whether to take the name off this list.
         </p>
         <form
           className="flex flex-wrap items-center gap-2"
@@ -151,8 +152,22 @@ export function FriendPlaceholders({
                   <span className="block truncate font-semibold" title={row.name}>
                     {row.name}
                   </span>
-                  {row.signed_up && (
-                    <span className="block text-xs text-want">Someone with this IGN joined. Search to check it&apos;s them.</span>
+                  {row.friend ? (
+                    <span className="block text-xs text-want">
+                      A friend of yours has this IGN. If it&apos;s them, you can remove it.{" "}
+                      <button
+                        type="button"
+                        disabled={pending}
+                        onClick={() => run(() => removePlaceholder(row.name))}
+                        className="font-semibold underline disabled:opacity-50"
+                      >
+                        Remove
+                      </button>
+                    </span>
+                  ) : (
+                    row.signed_up && (
+                      <span className="block text-xs text-want">Someone with this IGN joined. Search to check it&apos;s them.</span>
+                    )
                   )}
                 </span>
                 <button

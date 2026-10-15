@@ -241,34 +241,28 @@ const FRIEND_ERRORS: Record<string, string> = {
 };
 
 /** Clears the Not here yet name a player was found from (it may not be exactly their IGN). */
-async function clearPlaceholder(supabase: SupabaseClient, userId: string, placeholder?: string) {
-  if (placeholder) await supabase.from("friend_placeholders").delete().eq("user_id", userId).eq("name", placeholder);
-}
-
 /**
  * Sends a friend request (which also means "I'll send you one in Pokémon
  * Sleep"). "friends" when they had already asked you: both of you said yes.
- * `placeholder` is the Not here yet name they were found from; it's cleared.
  */
 export async function sendFriendRequest(
   targetId: string,
-  placeholder?: string,
+  /** Leave the page as is (the card is asking about a Not here yet name); the client refreshes after. */
+  deferRefresh = false,
 ): Promise<{ status?: "sent" | "friends"; error?: string }> {
-  const { supabase, user } = await requireUser();
+  const { supabase } = await requireUser();
   const { data, error } = await supabase.rpc("send_friend_request", { target: targetId });
   if (error) return { error: FRIEND_ERRORS[error.message] ?? "Couldn't send the request, try again" };
-  await clearPlaceholder(supabase, user.id, placeholder);
   // Whole layout: the requests banner and every Add friend button may change.
-  revalidatePath("/", "layout");
+  if (!deferRefresh) revalidatePath("/", "layout");
   return { status: data === "friends" ? "friends" : "sent" };
 }
 
-export async function acceptFriendRequest(requesterId: string, placeholder?: string): Promise<{ error?: string }> {
-  const { supabase, user } = await requireUser();
+export async function acceptFriendRequest(requesterId: string, deferRefresh = false): Promise<{ error?: string }> {
+  const { supabase } = await requireUser();
   const { error } = await supabase.rpc("accept_friend_request", { requester: requesterId });
   if (error) return { error: FRIEND_ERRORS[error.message] ?? "Couldn't accept, try again" };
-  await clearPlaceholder(supabase, user.id, placeholder);
-  revalidatePath("/", "layout");
+  if (!deferRefresh) revalidatePath("/", "layout");
   return {};
 }
 

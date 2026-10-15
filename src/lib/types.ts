@@ -133,4 +133,6 @@ export interface PlaceholderRow {
   created_at: string;
   /** A player with exactly this IGN can be found here now (maybe not them: IGNs aren't unique). */
   signed_up: boolean;
+  /** One of your friends has this IGN (20261020000600_keep_placeholders.sql; missing before). */
+  friend?: boolean;
 }

@@ -98,8 +98,8 @@ export default async function FriendsPage({ searchParams }: { searchParams: Prom
                       ) : (
                         <b>★ Could this be {maybe.name} from your Not here yet list?</b>
                       )}{" "}
-                      {maybe.strong ? "If it's them" : "The names are close; check their icon. If it's them"}, accept and
-                      they come off that list.
+                      {maybe.strong ? "If it's them" : "The names are close; check their icon. If it's them"}, accept; you
+                      can then take the name off that list.
                     </p>
                   )}
                   <PlayerHeader

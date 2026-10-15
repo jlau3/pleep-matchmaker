@@ -68,7 +68,10 @@ select set_config('request.jwt.claim.sub', '00000000-0000-0000-0015-000000000003
 select public.accept_friend_request('00000000-0000-0000-0015-000000000001');
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0015-000000000001', false);
 do $$ begin
-  assert (select count(*) from public.get_friend_placeholders()) = 2, 'becoming friends with bob cleared his';
+  -- Kept since 20261020000600_keep_placeholders.sql, flagged as a friend's name.
+  assert (select count(*) from public.get_friend_placeholders()) = 3, 'becoming friends with bob keeps his name';
+  assert (select friend from public.get_friend_placeholders() where name = 'fubobign'), 'flagged: bob is a friend now';
+  assert not (select friend from public.get_friend_placeholders() where name = 'Not Here Yet'), 'others not flagged';
 end $$;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0015-000000000002', false);
 do $$ begin
