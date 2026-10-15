@@ -7,8 +7,8 @@ import { FitPair } from "./FitPair";
  * it sits in there (same letters and colours as the Tier List), so you can
  * see who's likeliest to send your favorites. No label: it sits under the
  * fits on cards (FitWithTop3) and on grid tiles. Nothing if you haven't starred
- * any, or the player has no list yet (fewer than 3 friends voting: the card's
- * New here note says so).
+ * any. A player with no list yet (fewer than 3 friends voting) shows dashes, as
+ * "for you" does.
  */
 export function Top3Tiers({
   tops,
@@ -17,31 +17,38 @@ export function Top3Tiers({
 }: {
   /** Your starred line ids. */
   tops: string[];
-  /** Line → tier on their list. Empty or missing: no list yet, so nothing shows. A line missing from a filled map is Avoid. */
+  /** Line → tier on their list. Empty or missing: no list yet (dashes). A line missing from a filled map is Avoid. */
   tiers: Record<string, string> | undefined;
   /** "end" under the fits at a card's top right; "center" on grid tiles. */
   align?: "center" | "end";
 }) {
   const lines = tops.flatMap((id) => LINES_BY_ID.get(id) ?? []);
-  if (lines.length === 0 || !tiers || Object.keys(tiers).length === 0) return null;
+  if (lines.length === 0) return null;
+  const noList = !tiers || Object.keys(tiers).length === 0;
   return (
     <div className={`flex items-center gap-x-1.5 text-xs ${align === "end" ? "justify-end" : "flex-wrap justify-center"}`}>
       {lines.map((line) => {
         // Avoid: unlikely from this player (none of their friends want it, or more don't than do).
-        const tier = tiers[line.id] ?? "Avoid";
+        const tier = noList ? null : (tiers[line.id] ?? "Avoid");
         return (
           <span
             key={line.id}
             className="inline-flex items-center"
-            title={tier === "Avoid" ? `${line.name}: unlikely from this player` : `${line.name}: ${tier} on their Tier List`}
+            title={
+              !tier
+                ? `${line.name}: no list yet (fewer than 3 of their friends vote)`
+                : tier === "Avoid"
+                  ? `${line.name}: unlikely from this player`
+                  : `${line.name}: ${tier} on their Tier List`
+            }
           >
             <img src={lineSpriteUrl(line)} alt={line.name} className="h-5 w-5" />
             <span
               className={`rounded px-1 text-[11px] font-extrabold leading-4 ${
-                TIER_STYLE[tier === "Avoid" ? "avoid" : tier]
+                tier ? TIER_STYLE[tier === "Avoid" ? "avoid" : tier] : "text-slate-500"
               }`}
             >
-              {tier}
+              {tier ?? "–"}
             </span>
           </span>
         );
