@@ -39,7 +39,7 @@ end $$;
 
 -- The viewer stars q6, q8 and an unvoted line. Only q6 is wanted by the
 -- player's friends (4 of whom want something): it gets its tier, the others
--- a dash (no row), as "for you" would have nothing for them.
+-- Avoid (20261020001000_top3_avoid.sql): unlikely from this player.
 insert into public.preferences (user_id, line_id, choice, top) values
   ('00000000-0000-0000-0023-000000000006', 'q6', 'want', true),
   ('00000000-0000-0000-0023-000000000006', 'q8', 'want', true),
@@ -51,11 +51,11 @@ declare got jsonb;
 begin
   select jsonb_object_agg(line_id, tier) into got
   from public.top3_tiers(array['00000000-0000-0000-0023-000000000001'::uuid], 10);
-  assert got = '{"q6":"A"}', format('card tiers: %s', got);
+  assert got = '{"q6":"A","q8":"Avoid","u9":"Avoid"}', format('card tiers: %s', got);
 end $$;
 reset role;
 
--- Fewer than 3 friends wanting anything: no tiers at all (all dashes).
+-- Fewer than 3 friends wanting anything: no list, so no rows (the app hides the row).
 reset role;
 delete from public.friends where user_id = '00000000-0000-0000-0023-000000000001'
   and friend_id in ('00000000-0000-0000-0023-000000000004', '00000000-0000-0000-0023-000000000005');
