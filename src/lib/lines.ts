@@ -40,8 +40,6 @@ export interface CandyLine {
   dex: number;
   type: string;
   addedAt: string;
-  /** Rarity tie-break: legendary 0.4, mythical 0.3, pseudo-legendary 0.2, 16-pip 0.1, else 0. */
-  weight: number;
   members: LineMember[];
 }
 

@@ -5,7 +5,6 @@
     "dex": 1,
     "type": "grass",
     "addedAt": "2023-07-17",
-    "weight": 0.0,
     "members": [
       {
         "name": "Bulbasaur",
@@ -33,7 +32,6 @@
     "dex": 4,
     "type": "fire",
     "addedAt": "2023-07-17",
-    "weight": 0.0,
     "members": [
       {
         "name": "Charmander",
@@ -61,7 +59,6 @@
     "dex": 7,
     "type": "water",
     "addedAt": "2023-07-17",
-    "weight": 0.0,
     "members": [
       {
         "name": "Squirtle",
@@ -89,7 +86,6 @@
     "dex": 10,
     "type": "bug",
     "addedAt": "2023-07-17",
-    "weight": 0.0,
     "members": [
       {
         "name": "Caterpie",
@@ -117,7 +113,6 @@
     "dex": 19,
     "type": "normal",
     "addedAt": "2023-07-17",
-    "weight": 0.0,
     "members": [
       {
         "name": "Rattata",
@@ -139,7 +134,6 @@
     "dex": 23,
     "type": "poison",
     "addedAt": "2023-07-17",
-    "weight": 0.0,
     "members": [
       {
         "name": "Ekans",
@@ -161,7 +155,6 @@
     "dex": 25,
     "type": "electric",
     "addedAt": "2023-07-17",
-    "weight": 0.0,
     "members": [
       {
         "name": "Pichu",
@@ -207,7 +200,6 @@
     "dex": 27,
     "type": "ground",
     "addedAt": "2026-04-27",
-    "weight": 0.0,
     "members": [
       {
         "name": "Sandshrew",
@@ -229,7 +221,6 @@
     "dex": 35,
     "type": "fairy",
     "addedAt": "2023-09-28",
-    "weight": 0.0,
     "members": [
       {
         "name": "Cleffa",
@@ -257,7 +248,6 @@
     "dex": 37,
     "type": "fire",
     "addedAt": "2024-05-06",
-    "weight": 0.0,
     "members": [
       {
         "name": "Vulpix",
@@ -291,7 +281,6 @@
     "dex": 39,
     "type": "fairy",
     "addedAt": "2023-07-17",
-    "weight": 0.0,
     "members": [
       {
         "name": "Igglybuff",
@@ -319,7 +308,6 @@
     "dex": 50,
     "type": "ground",
     "addedAt": "2023-07-17",
-    "weight": 0.0,
     "members": [
       {
         "name": "Diglett",
@@ -341,7 +329,6 @@
     "dex": 52,
     "type": "normal",
     "addedAt": "2023-07-17",
-    "weight": 0.0,
     "members": [
       {
         "name": "Meowth",
@@ -363,7 +350,6 @@
     "dex": 54,
     "type": "water",
     "addedAt": "2023-07-17",
-    "weight": 0.0,
     "members": [
       {
         "name": "Psyduck",
@@ -385,7 +371,6 @@
     "dex": 56,
     "type": "fighting",
     "addedAt": "2023-07-17",
-    "weight": 0.0,
     "members": [
       {
         "name": "Mankey",
@@ -407,7 +392,6 @@
     "dex": 58,
     "type": "fire",
     "addedAt": "2023-07-17",
-    "weight": 0.0,
     "members": [
       {
         "name": "Growlithe",
@@ -429,7 +413,6 @@
     "dex": 69,
     "type": "grass",
     "addedAt": "2023-07-17",
-    "weight": 0.0,
     "members": [
       {
         "name": "Bellsprout",
@@ -457,7 +440,6 @@
     "dex": 74,
     "type": "rock",
     "addedAt": "2023-07-17",
-    "weight": 0.0,
     "members": [
       {
         "name": "Geodude",
@@ -485,7 +467,6 @@
     "dex": 79,
     "type": "water",
     "addedAt": "2023-07-17",
-    "weight": 0.0,
     "members": [
       {
         "name": "Slowpoke",
@@ -513,7 +494,6 @@
     "dex": 81,
     "type": "steel",
     "addedAt": "2023-07-17",
-    "weight": 0.0,
     "members": [
       {
         "name": "Magnemite",
@@ -541,7 +521,6 @@
     "dex": 83,
     "type": "flying",
     "addedAt": "2025-06-23",
-    "weight": 0.1,
     "members": [
       {
         "name": "Farfetch'd",
@@ -557,7 +536,6 @@
     "dex": 84,
     "type": "flying",
     "addedAt": "2023-07-17",
-    "weight": 0.0,
     "members": [
       {
         "name": "Doduo",
@@ -579,7 +557,6 @@
     "dex": 92,
     "type": "ghost",
     "addedAt": "2023-07-17",
-    "weight": 0.0,
     "members": [
       {
         "name": "Gastly",
@@ -607,7 +584,6 @@
     "dex": 95,
     "type": "rock",
     "addedAt": "2023-11-14",
-    "weight": 0.1,
     "members": [
       {
         "name": "Onix",
@@ -629,7 +605,6 @@
     "dex": 104,
     "type": "ground",
     "addedAt": "2023-07-17",
-    "weight": 0.0,
     "members": [
       {
         "name": "Cubone",
@@ -651,7 +626,6 @@
     "dex": 113,
     "type": "normal",
     "addedAt": "2025-05-05",
-    "weight": 0.0,
     "members": [
       {
         "name": "Happiny",
@@ -679,7 +653,6 @@
     "dex": 115,
     "type": "normal",
     "addedAt": "2023-07-17",
-    "weight": 0.1,
     "members": [
       {
         "name": "Kangaskhan",
@@ -695,7 +668,6 @@
     "dex": 122,
     "type": "psychic",
     "addedAt": "2023-09-12",
-    "weight": 0.0,
     "members": [
       {
         "name": "Mime Jr.",
@@ -717,7 +689,6 @@
     "dex": 127,
     "type": "bug",
     "addedAt": "2023-07-17",
-    "weight": 0.1,
     "members": [
       {
         "name": "Pinsir",
@@ -733,7 +704,6 @@
     "dex": 132,
     "type": "normal",
     "addedAt": "2023-07-17",
-    "weight": 0.1,
     "members": [
       {
         "name": "Ditto",
@@ -749,7 +719,6 @@
     "dex": 133,
     "type": "normal",
     "addedAt": "2023-07-17",
-    "weight": 0.0,
     "members": [
       {
         "name": "Eevee",
@@ -825,7 +794,6 @@
     "dex": 147,
     "type": "dragon",
     "addedAt": "2024-01-24",
-    "weight": 0.2,
     "members": [
       {
         "name": "Dratini",
@@ -853,7 +821,6 @@
     "dex": 150,
     "type": "psychic",
     "addedAt": "2026-09-14",
-    "weight": 0.4,
     "members": [
       {
         "name": "Mewtwo",
@@ -869,7 +836,6 @@
     "dex": 151,
     "type": "psychic",
     "addedAt": "2026-03-05",
-    "weight": 0.3,
     "members": [
       {
         "name": "Mew",
@@ -885,7 +851,6 @@
     "dex": 152,
     "type": "grass",
     "addedAt": "2023-07-17",
-    "weight": 0.0,
     "members": [
       {
         "name": "Chikorita",
@@ -913,7 +878,6 @@
     "dex": 155,
     "type": "fire",
     "addedAt": "2023-07-17",
-    "weight": 0.0,
     "members": [
       {
         "name": "Cyndaquil",
@@ -941,7 +905,6 @@
     "dex": 158,
     "type": "water",
     "addedAt": "2023-07-17",
-    "weight": 0.0,
     "members": [
       {
         "name": "Totodile",
@@ -969,7 +932,6 @@
     "dex": 175,
     "type": "fairy",
     "addedAt": "2023-07-17",
-    "weight": 0.0,
     "members": [
       {
         "name": "Togepi",
@@ -997,7 +959,6 @@
     "dex": 177,
     "type": "psychic",
     "addedAt": "2025-09-29",
-    "weight": 0.0,
     "members": [
       {
         "name": "Natu",
@@ -1019,7 +980,6 @@
     "dex": 179,
     "type": "electric",
     "addedAt": "2023-07-17",
-    "weight": 0.0,
     "members": [
       {
         "name": "Mareep",
@@ -1047,7 +1007,6 @@
     "dex": 185,
     "type": "rock",
     "addedAt": "2023-07-17",
-    "weight": 0.0,
     "members": [
       {
         "name": "Bonsly",
@@ -1069,7 +1028,6 @@
     "dex": 194,
     "type": "water",
     "addedAt": "2024-08-19",
-    "weight": 0.0,
     "members": [
       {
         "name": "Wooper",
@@ -1103,7 +1061,6 @@
     "dex": 198,
     "type": "dark",
     "addedAt": "2025-05-26",
-    "weight": 0.1,
     "members": [
       {
         "name": "Murkrow",
@@ -1125,7 +1082,6 @@
     "dex": 202,
     "type": "psychic",
     "addedAt": "2023-07-17",
-    "weight": 0.0,
     "members": [
       {
         "name": "Wynaut",
@@ -1147,7 +1103,6 @@
     "dex": 213,
     "type": "bug",
     "addedAt": "2026-01-19",
-    "weight": 0.1,
     "members": [
       {
         "name": "Shuckle",
@@ -1163,7 +1118,6 @@
     "dex": 214,
     "type": "bug",
     "addedAt": "2023-07-17",
-    "weight": 0.1,
     "members": [
       {
         "name": "Heracross",
@@ -1179,7 +1133,6 @@
     "dex": 215,
     "type": "dark",
     "addedAt": "2024-12-03",
-    "weight": 0.1,
     "members": [
       {
         "name": "Sneasel",
@@ -1201,7 +1154,6 @@
     "dex": 225,
     "type": "flying",
     "addedAt": "2023-12-18",
-    "weight": 0.1,
     "members": [
       {
         "name": "Delibird",
@@ -1217,7 +1169,6 @@
     "dex": 228,
     "type": "dark",
     "addedAt": "2023-07-17",
-    "weight": 0.0,
     "members": [
       {
         "name": "Houndour",
@@ -1239,7 +1190,6 @@
     "dex": 243,
     "type": "electric",
     "addedAt": "2024-03-24",
-    "weight": 0.4,
     "members": [
       {
         "name": "Raikou",
@@ -1255,7 +1205,6 @@
     "dex": 244,
     "type": "fire",
     "addedAt": "2024-05-20",
-    "weight": 0.4,
     "members": [
       {
         "name": "Entei",
@@ -1271,7 +1220,6 @@
     "dex": 245,
     "type": "water",
     "addedAt": "2024-09-02",
-    "weight": 0.4,
     "members": [
       {
         "name": "Suicune",
@@ -1287,7 +1235,6 @@
     "dex": 246,
     "type": "rock",
     "addedAt": "2023-07-17",
-    "weight": 0.2,
     "members": [
       {
         "name": "Larvitar",
@@ -1315,7 +1262,6 @@
     "dex": 252,
     "type": "grass",
     "addedAt": "2025-07-14",
-    "weight": 0.0,
     "members": [
       {
         "name": "Treecko",
@@ -1343,7 +1289,6 @@
     "dex": 255,
     "type": "fire",
     "addedAt": "2025-07-14",
-    "weight": 0.0,
     "members": [
       {
         "name": "Torchic",
@@ -1371,7 +1316,6 @@
     "dex": 258,
     "type": "water",
     "addedAt": "2025-07-14",
-    "weight": 0.0,
     "members": [
       {
         "name": "Mudkip",
@@ -1399,7 +1343,6 @@
     "dex": 280,
     "type": "psychic",
     "addedAt": "2024-01-24",
-    "weight": 0.0,
     "members": [
       {
         "name": "Ralts",
@@ -1433,7 +1376,6 @@
     "dex": 287,
     "type": "normal",
     "addedAt": "2023-07-17",
-    "weight": 0.0,
     "members": [
       {
         "name": "Slakoth",
@@ -1461,7 +1403,6 @@
     "dex": 302,
     "type": "dark",
     "addedAt": "2023-07-17",
-    "weight": 0.1,
     "members": [
       {
         "name": "Sableye",
@@ -1477,7 +1418,6 @@
     "dex": 303,
     "type": "steel",
     "addedAt": "2025-06-09",
-    "weight": 0.1,
     "members": [
       {
         "name": "Mawile",
@@ -1493,7 +1433,6 @@
     "dex": 304,
     "type": "steel",
     "addedAt": "2024-10-02",
-    "weight": 0.0,
     "members": [
       {
         "name": "Aron",
@@ -1521,7 +1460,6 @@
     "dex": 311,
     "type": "electric",
     "addedAt": "2025-07-14",
-    "weight": 0.0,
     "members": [
       {
         "name": "Plusle",
@@ -1537,7 +1475,6 @@
     "dex": 312,
     "type": "electric",
     "addedAt": "2025-07-14",
-    "weight": 0.0,
     "members": [
       {
         "name": "Minun",
@@ -1553,7 +1490,6 @@
     "dex": 316,
     "type": "poison",
     "addedAt": "2023-07-17",
-    "weight": 0.0,
     "members": [
       {
         "name": "Gulpin",
@@ -1575,7 +1511,6 @@
     "dex": 328,
     "type": "ground",
     "addedAt": "2025-11-06",
-    "weight": 0.0,
     "members": [
       {
         "name": "Trapinch",
@@ -1603,7 +1538,6 @@
     "dex": 333,
     "type": "flying",
     "addedAt": "2023-07-17",
-    "weight": 0.0,
     "members": [
       {
         "name": "Swablu",
@@ -1625,7 +1559,6 @@
     "dex": 353,
     "type": "ghost",
     "addedAt": "2023-10-30",
-    "weight": 0.0,
     "members": [
       {
         "name": "Shuppet",
@@ -1647,7 +1580,6 @@
     "dex": 359,
     "type": "dark",
     "addedAt": "2023-07-17",
-    "weight": 0.1,
     "members": [
       {
         "name": "Absol",
@@ -1663,7 +1595,6 @@
     "dex": 363,
     "type": "ice",
     "addedAt": "2023-07-17",
-    "weight": 0.0,
     "members": [
       {
         "name": "Spheal",
@@ -1697,7 +1628,6 @@
     "dex": 371,
     "type": "dragon",
     "addedAt": "2025-11-06",
-    "weight": 0.2,
     "members": [
       {
         "name": "Bagon",
@@ -1725,7 +1655,6 @@
     "dex": 380,
     "type": "dragon",
     "addedAt": "2026-04-06",
-    "weight": 0.4,
     "members": [
       {
         "name": "Latias",
@@ -1741,7 +1670,6 @@
     "dex": 381,
     "type": "dragon",
     "addedAt": "2026-06-08",
-    "weight": 0.4,
     "members": [
       {
         "name": "Latios",
@@ -1757,7 +1685,6 @@
     "dex": 387,
     "type": "grass",
     "addedAt": "2026-07-13",
-    "weight": 0.0,
     "members": [
       {
         "name": "Turtwig",
@@ -1785,7 +1712,6 @@
     "dex": 390,
     "type": "fire",
     "addedAt": "2026-07-13",
-    "weight": 0.0,
     "members": [
       {
         "name": "Chimchar",
@@ -1813,7 +1739,6 @@
     "dex": 393,
     "type": "water",
     "addedAt": "2026-07-13",
-    "weight": 0.0,
     "members": [
       {
         "name": "Piplup",
@@ -1841,7 +1766,6 @@
     "dex": 403,
     "type": "electric",
     "addedAt": "2024-10-02",
-    "weight": 0.0,
     "members": [
       {
         "name": "Shinx",
@@ -1869,7 +1793,6 @@
     "dex": 425,
     "type": "ghost",
     "addedAt": "2024-10-11",
-    "weight": 0.0,
     "members": [
       {
         "name": "Drifloon",
@@ -1891,7 +1814,6 @@
     "dex": 442,
     "type": "dark",
     "addedAt": "2025-12-01",
-    "weight": 0.1,
     "members": [
       {
         "name": "Spiritomb",
@@ -1907,7 +1829,6 @@
     "dex": 447,
     "type": "fighting",
     "addedAt": "2023-07-17",
-    "weight": 0.0,
     "members": [
       {
         "name": "Riolu",
@@ -1929,7 +1850,6 @@
     "dex": 453,
     "type": "poison",
     "addedAt": "2023-07-17",
-    "weight": 0.0,
     "members": [
       {
         "name": "Croagunk",
@@ -1951,7 +1871,6 @@
     "dex": 459,
     "type": "ice",
     "addedAt": "2023-12-18",
-    "weight": 0.0,
     "members": [
       {
         "name": "Snover",
@@ -1973,7 +1892,6 @@
     "dex": 488,
     "type": "psychic",
     "addedAt": "2025-03-31",
-    "weight": 0.4,
     "members": [
       {
         "name": "Cresselia",
@@ -1989,7 +1907,6 @@
     "dex": 491,
     "type": "dark",
     "addedAt": "2025-04-07",
-    "weight": 0.3,
     "members": [
       {
         "name": "Darkrai",
@@ -2005,7 +1922,6 @@
     "dex": 517,
     "type": "psychic",
     "addedAt": "2025-03-17",
-    "weight": 0.0,
     "members": [
       {
         "name": "Munna",
@@ -2027,7 +1943,6 @@
     "dex": 557,
     "type": "bug",
     "addedAt": "2025-11-06",
-    "weight": 0.0,
     "members": [
       {
         "name": "Dwebble",
@@ -2049,7 +1964,6 @@
     "dex": 590,
     "type": "poison",
     "addedAt": "2026-10-05",
-    "weight": 0.0,
     "members": [
       {
         "name": "Foongus",
@@ -2071,7 +1985,6 @@
     "dex": 627,
     "type": "flying",
     "addedAt": "2025-01-20",
-    "weight": 0.0,
     "members": [
       {
         "name": "Rufflet",
@@ -2093,7 +2006,6 @@
     "dex": 696,
     "type": "rock",
     "addedAt": "2026-05-11",
-    "weight": 0.0,
     "members": [
       {
         "name": "Tyrunt",
@@ -2115,7 +2027,6 @@
     "dex": 701,
     "type": "flying",
     "addedAt": "2026-08-10",
-    "weight": 0.1,
     "members": [
       {
         "name": "Hawlucha",
@@ -2131,7 +2042,6 @@
     "dex": 702,
     "type": "electric",
     "addedAt": "2024-03-11",
-    "weight": 0.1,
     "members": [
       {
         "name": "Dedenne",
@@ -2147,7 +2057,6 @@
     "dex": 710,
     "type": "ghost",
     "addedAt": "2025-10-22",
-    "weight": 0.0,
     "members": [
       {
         "name": "Pumpkaboo",
@@ -2169,7 +2078,6 @@
     "dex": 714,
     "type": "dragon",
     "addedAt": "2026-03-23",
-    "weight": 0.0,
     "members": [
       {
         "name": "Noibat",
@@ -2191,7 +2099,6 @@
     "dex": 736,
     "type": "bug",
     "addedAt": "2024-10-02",
-    "weight": 0.0,
     "members": [
       {
         "name": "Grubbin",
@@ -2219,7 +2126,6 @@
     "dex": 742,
     "type": "fairy",
     "addedAt": "2026-02-09",
-    "weight": 0.0,
     "members": [
       {
         "name": "Cutiefly",
@@ -2241,7 +2147,6 @@
     "dex": 759,
     "type": "fighting",
     "addedAt": "2024-01-24",
-    "weight": 0.0,
     "members": [
       {
         "name": "Stufful",
@@ -2263,7 +2168,6 @@
     "dex": 764,
     "type": "fairy",
     "addedAt": "2024-04-22",
-    "weight": 0.1,
     "members": [
       {
         "name": "Comfey",
@@ -2279,7 +2183,6 @@
     "dex": 777,
     "type": "steel",
     "addedAt": "2025-12-22",
-    "weight": 0.1,
     "members": [
       {
         "name": "Togedemaru",
@@ -2295,7 +2198,6 @@
     "dex": 778,
     "type": "ghost",
     "addedAt": "2024-10-28",
-    "weight": 0.1,
     "members": [
       {
         "name": "Mimikyu",
@@ -2311,7 +2213,6 @@
     "dex": 780,
     "type": "dragon",
     "addedAt": "2026-05-25",
-    "weight": 0.1,
     "members": [
       {
         "name": "Drampa",
@@ -2327,7 +2228,6 @@
     "dex": 845,
     "type": "flying",
     "addedAt": "2024-06-17",
-    "weight": 0.1,
     "members": [
       {
         "name": "Cramorant",
@@ -2343,7 +2243,6 @@
     "dex": 848,
     "type": "poison",
     "addedAt": "2025-08-11",
-    "weight": 0.0,
     "members": [
       {
         "name": "Toxel",
@@ -2365,7 +2264,6 @@
     "dex": 906,
     "type": "grass",
     "addedAt": "2024-07-15",
-    "weight": 0.0,
     "members": [
       {
         "name": "Sprigatito",
@@ -2393,7 +2291,6 @@
     "dex": 909,
     "type": "fire",
     "addedAt": "2024-07-15",
-    "weight": 0.0,
     "members": [
       {
         "name": "Fuecoco",
@@ -2421,7 +2318,6 @@
     "dex": 912,
     "type": "water",
     "addedAt": "2024-07-15",
-    "weight": 0.0,
     "members": [
       {
         "name": "Quaxly",
@@ -2449,7 +2345,6 @@
     "dex": 921,
     "type": "electric",
     "addedAt": "2024-12-23",
-    "weight": 0.0,
     "members": [
       {
         "name": "Pawmi",
@@ -2477,7 +2372,6 @@
     "dex": 957,
     "type": "fairy",
     "addedAt": "2026-08-17",
-    "weight": 0.0,
     "members": [
       {
         "name": "Tinkatink",
@@ -2505,7 +2399,6 @@
     "dex": 974,
     "type": "ice",
     "addedAt": "2025-12-22",
-    "weight": 0.0,
     "members": [
       {
         "name": "Cetoddle",

@@ -51,14 +51,6 @@ FORM_SPRITES = {
     (194, "Paldea"): 10253, # Paldean Wooper
 }
 
-# Tie-break weight for perceived rarity, read off the line's first stage. The
-# source has no legendary flag, so the EXP curve stands in for it: 1080 is
-# legendary, 1320 mythical, 900 pseudo-legendary. 16 friendship points (pips)
-# marks the rare single-stage spawns (Ditto, Absol, Mimikyu, ...).
-EXP_WEIGHTS = {1080: 0.4, 1320: 0.3, 900: 0.2}
-PIP_WEIGHTS = {16: 0.1}
-
-
 # Source typos, mapped to the three sleep types the game uses.
 SLEEP_TYPE_FIXES = {"snozing": "snoozing"}
 SLEEP_TYPES = {"dozing", "snoozing", "slumbering"}
@@ -70,10 +62,6 @@ def sleep_type(p: dict) -> str:
     if value not in SLEEP_TYPES:
         raise ValueError(f"{p['name']}: unknown sleep type {p['sleepType']!r}")
     return value
-
-
-def rarity_weight(base: dict) -> float:
-    return EXP_WEIGHTS.get(base["exp"]) or PIP_WEIGHTS.get(base["fp"], 0.0)
 
 
 def fetch(url: str) -> bytes:
@@ -106,7 +94,6 @@ def main() -> int:
     for members in lines.values():
         # Name the line after its lowest dex number: candy is "Pikachu", not "Pichu".
         rep = min((p for p in members if not p.get("form")), key=lambda p: p["id"], default=members[0])
-        first = min(members, key=lambda p: (p["evolutionCount"], bool(p.get("form")), p["id"]))
         seen = set()
         line_members = []
         ordered = sorted(
@@ -145,7 +132,6 @@ def main() -> int:
             "dex": rep["id"],
             "type": rep["type"],
             "addedAt": min(p["arrival"] for p in members),
-            "weight": rarity_weight(first),
             "members": line_members,
         })
 

@@ -9,7 +9,7 @@ export function friendPostProps(profile: OwnProfile, choices: Record<string, Cho
     allowLookup: profile.allow_lookup,
     topNames: linesFromIds(tops).map((line) => line.name),
     wantNames: linesFromIds(Object.keys(choices).filter((id) => choices[id] === "want"))
-      .sort((a, b) => b.weight - a.weight || a.dex - b.dex)
+      .sort((a, b) => a.dex - b.dex)
       .slice(0, 3)
       .map((line) => line.name),
   };

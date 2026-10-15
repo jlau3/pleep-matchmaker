@@ -113,14 +113,12 @@ export function ratingOf(score: number, voters: number): number | null {
 const byRank = (a: RankedLine, b: RankedLine) =>
   b.score - a.score ||
   b.tops - a.tops ||
-  b.line.weight - a.line.weight ||
   a.dontWants - b.dontWants ||
   a.line.dex - b.line.dex;
 
 /**
  * Buckets lines into tiers (see TIER_SHARES), best first inside each tier (score,
- * then Top 3 stars, then rarity weight, then fewer don't-wants, then
- * dex). Lines that tie on score share a tier whatever their stars. The Top 3 row
+ * then Top 3 stars, then fewer don't-wants, then dex). Lines that tie on score share a tier whatever their stars. The Top 3 row
  * holds every starred line, ordered by stars and then the same keys.
  */
 export function buildTiers(
