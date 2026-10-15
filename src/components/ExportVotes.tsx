@@ -26,15 +26,15 @@ export function ExportVotes({ choices, tops }: { choices: Record<string, Choice>
     }));
   const count = (choice: Choice) => LINES.filter((line) => (choices[line.id] ?? "undecided") === choice).length;
   return (
-    <div className="mb-4">
+    <span className="shrink-0">
       <ImageExport
         title="My votes"
         heading="My Candy Votes"
         subtitle={() => `Want ${count("want")} · Neutral ${count("undecided")} · Don't Want ${count("dont_want")} · ${today()}`}
         sections={() => [{ rows: rows() }]}
         file="my-candy-votes.png"
-        label="Export my votes"
+        label="Export"
       />
-    </div>
+    </span>
   );
 }
