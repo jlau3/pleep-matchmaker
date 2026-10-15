@@ -22,7 +22,18 @@ export function ProfileForm({ profile, friendListFull }: { profile: OwnProfile; 
       <AvatarPicker initial={profile.game_avatar ?? null} discordAvatar={profile.avatar_url} />
       <label className="block space-y-1">
         <span className="text-sm font-medium">In-game name</span>
-        <input name="ign" onBlur={saveIfChanged} defaultValue={profile.ign ?? ""} maxLength={40} className={input} />
+        <input
+          name="ign"
+          onBlur={saveIfChanged}
+          defaultValue={profile.ign ?? ""}
+          maxLength={40}
+          placeholder="Exactly as it shows in Pokémon Sleep"
+          className={input}
+        />
+        <span className="text-xs text-slate-500">
+          <b>Type it exactly</b>, spelled as it shows in the game. Friends who saved you to their Not here yet list only get
+          told you joined when the spelling matches (capitals, spaces and symbols don&apos;t matter).
+        </span>
       </label>
       <label className="block space-y-1">
         <span className="text-sm font-medium">Friend code</span>

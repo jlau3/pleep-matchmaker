@@ -13,9 +13,17 @@ insert into public.preferences (user_id, line_id, choice) values
 set role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0001-000000000001', false);
 
-insert into public.friends (user_id, friend_id) values
-  (auth.uid(), '00000000-0000-0000-0001-000000000002'),
-  (auth.uid(), '00000000-0000-0000-0001-000000000003');
+select public.test_befriend(auth.uid(), '00000000-0000-0000-0001-000000000002');
+select public.test_befriend(auth.uid(), '00000000-0000-0000-0001-000000000003');
+
+-- Players can't write friendships directly; only a request and accept can.
+do $$ begin
+  begin
+    insert into public.friends (user_id, friend_id) values (auth.uid(), '00000000-0000-0000-0001-000000000004');
+    assert false, 'direct insert should be refused';
+  exception when insufficient_privilege then null;
+  end;
+end $$;
 
 do $$
 declare r record;
@@ -34,28 +42,24 @@ declare r record;
 begin
   select * into r from public.get_friends() where discord_username = 'f3';
   assert not r.visible and r.wants = '{}' and r.ign is null, 'hidden friend';
-  begin
-    insert into public.friends (user_id, friend_id) values (auth.uid(), '00000000-0000-0000-0001-000000000004');
-    -- f4 has lookup on; fine.
-  end;
 end $$;
+select public.test_befriend(auth.uid(), '00000000-0000-0000-0001-000000000004');
 
--- Can't add someone with lookup off.
+-- Can't send a request to someone with lookup off.
+reset role;
+update public.profiles set allow_lookup = false where discord_username = 'f5';
+set role authenticated;
 do $$ begin
   begin
-    reset role;
-    update public.profiles set allow_lookup = false where discord_username = 'f5';
-    set role authenticated;
-    insert into public.friends (user_id, friend_id) values (auth.uid(), '00000000-0000-0000-0001-000000000005');
-    assert false, 'should reject lookup-off add';
+    perform public.send_friend_request('00000000-0000-0000-0001-000000000005');
+    assert false, 'should reject lookup-off request';
   exception when raise_exception then
     assert sqlerrm = 'friend_unavailable', sqlerrm;
   end;
 end $$;
 
 -- Cap at 50: currently 3 (f2, f3, f4). Add f6..f52 = 47 more -> 50, then one more fails.
-insert into public.friends (user_id, friend_id)
-select auth.uid(), ('00000000-0000-0000-0001-' || lpad(g::text, 12, '0'))::uuid from generate_series(6, 52) g;
+select public.test_befriend(auth.uid(), ('00000000-0000-0000-0001-' || lpad(g::text, 12, '0'))::uuid) from generate_series(6, 52) g;
 do $$ begin
   assert (select count(*) from public.friends where user_id = auth.uid()) = 50, 'at cap';
 end $$;
@@ -64,8 +68,8 @@ insert into auth.users (id, raw_user_meta_data) values ('00000000-0000-0000-0001
 set role authenticated;
 do $$ begin
   begin
-    insert into public.friends (user_id, friend_id) values (auth.uid(), '00000000-0000-0000-0001-000000000099');
-    assert false, 'should reject 51st friend';
+    perform public.send_friend_request('00000000-0000-0000-0001-000000000099');
+    assert false, 'should reject a request past 50 friends';
   exception when raise_exception then
     assert sqlerrm = 'friend_limit', sqlerrm;
   end;
@@ -78,9 +82,7 @@ do $$ begin
 end $$;
 
 -- Can't read anyone else's friend list.
-reset role;
-insert into public.friends (user_id, friend_id) values ('00000000-0000-0000-0001-000000000004', '00000000-0000-0000-0001-000000000006');
-set role authenticated;
+select public.test_befriend('00000000-0000-0000-0001-000000000004', '00000000-0000-0000-0001-000000000006');
 do $$ begin
   assert (select count(*) from public.friends where user_id <> auth.uid()) = 0, 'friends RLS';
 end $$;
@@ -88,14 +90,16 @@ end $$;
 -- A full friend list (f1 has 50) hides you from other people's matches,
 -- without touching open_to_friends; dropping below the cap brings you back.
 -- (Blocking f2 above dropped f1 to 49; top back up.)
-insert into public.friends (user_id, friend_id) values (auth.uid(), '00000000-0000-0000-0001-000000000099');
+select public.test_befriend(auth.uid(), '00000000-0000-0000-0001-000000000099');
+-- Seen from a player who isn't f1's friend (friends are left out of matches anyway).
 reset role;
-update public.profiles set friend_code = '111122223333' where discord_username in ('f1', 'f4');
+insert into auth.users (id, raw_user_meta_data) values ('00000000-0000-0000-0001-000000000100', '{"name":"viewer#0"}');
+update public.profiles set friend_code = '111122223333' where discord_username in ('f1', 'viewer');
 insert into public.preferences (user_id, line_id, choice)
 select u::uuid, l, 'want'::public.choice
-from unnest(array['00000000-0000-0000-0001-000000000001', '00000000-0000-0000-0001-000000000004']) u,
+from unnest(array['00000000-0000-0000-0001-000000000001', '00000000-0000-0000-0001-000000000100']) u,
      unnest(array['a1', 'a2', 'a3']) l;
-select set_config('request.jwt.claim.sub', '00000000-0000-0000-0001-000000000004', false);
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-0001-000000000100', false);
 set role authenticated;
 do $$ begin
   assert not exists (select 1 from public.browse_players('fit', true, 50, 0) where discord_username = 'f1'), 'full list hidden from matches';

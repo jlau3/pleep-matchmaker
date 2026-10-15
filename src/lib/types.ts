@@ -95,21 +95,22 @@ export interface FriendRow extends PlayerContact {
   match_pct: number | null;
   /** "For you": how much of what you want their friends want. Null when hidden or unknown. */
   you_fit_pct?: number | null;
-  /** They have you on their friend list too. */
+  /** They have you on their list too (always, now that friendships are mutual). */
   added_me: boolean;
 }
 
-/** A player you asked in Pokémon Sleep and haven't added here yet (get_pending_friends). */
-export interface PendingRow extends PlayerContact {
-  pending_since: string;
-}
-
-/** Someone who added you and you haven't added back or dismissed (get_added_me). */
-export interface AddedMeRow extends PlayerContact {
-  added_at: string;
-  /** Both fits, only when asked for (get_added_me(with_fit)); see MatchRow. */
+/** A friend request to you that's still open (get_friend_requests). Their friend code always shows. */
+export interface RequestRow extends PlayerContact {
+  requested_at: string;
+  /** Both fits, only when asked for (get_friend_requests(with_fit)); see MatchRow. */
   match_pct: number | null;
   you_fit_pct: number | null;
+}
+
+/** Your request: still open, or declined (get_sent_requests). Their code shows only if they're open to new friends. */
+export interface SentRequestRow extends PlayerContact {
+  requested_at: string;
+  status: "open" | "declined";
 }
 
 /** An in-game friend who isn't here yet, kept by IGN (get_friend_placeholders). */

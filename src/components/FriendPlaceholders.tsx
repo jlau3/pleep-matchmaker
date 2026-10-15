@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, useTransition } from "react";
 import { addPlaceholder, removePlaceholder, searchPlaceholders } from "@/app/actions";
 import { rethrowIfNavigation, SAVE_FAILED } from "@/lib/saveError";
+import type { Relations } from "@/lib/relations";
 import type { LookupRow, PlaceholderRow } from "@/lib/types";
 import { PlayerResults } from "./PlayerResults";
 
@@ -10,18 +11,19 @@ type Hits = { name: string; rows: LookupRow[] }[];
 
 /**
  * Not here yet: in-game friends who haven't signed up, by IGN, so you
- * remember to check on them. Folded by default. One Search looks up every
- * name at once and lists only the ones that turned someone up. IGNs aren't
+ * remember to check on them. Folded by default. One Search, right under the
+ * add box, looks up every name at once and lists only the ones that turned
+ * someone up, above the names themselves. IGNs aren't
  * unique, so a match is only a maybe: you check it's them before adding,
  * which clears the name.
  */
 export function FriendPlaceholders({
   rows,
-  friendIds,
+  relations,
   viewerId,
 }: {
   rows: PlaceholderRow[];
-  friendIds: string[];
+  relations: Relations;
   viewerId: string;
 }) {
   const [name, setName] = useState("");
@@ -83,7 +85,9 @@ export function FriendPlaceholders({
       </summary>
       <div className="mt-3 space-y-3">
         <p className="text-sm text-slate-500">
-          Add their IGN as a reminder and search now and then. Once they join, add them and they drop off this list.
+          Add their <b>exact IGN</b>, spelled as it shows in their Pokémon Sleep profile, as a reminder and search now and
+          then. We flag a name here when someone with that exact name joins (capitals, spaces and symbols don&apos;t
+          matter). Once they join, send them a friend request and they drop off this list.
         </p>
         <form
           className="flex flex-wrap items-center gap-2"
@@ -96,7 +100,7 @@ export function FriendPlaceholders({
             value={name}
             onChange={(e) => setName(e.target.value)}
             maxLength={40}
-            placeholder="Their in-game name"
+            placeholder="Their exact in-game name"
             aria-label="In-game name"
             className="min-w-0 flex-1 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm dark:border-slate-600 dark:bg-night-deep"
           />
@@ -110,42 +114,16 @@ export function FriendPlaceholders({
           </p>
         )}
         {rows.length > 0 && (
-          <>
-            <ul className="divide-y divide-slate-200 rounded-2xl border border-slate-200 dark:divide-slate-700 dark:border-slate-700">
-              {sorted.map((row) => (
-                <li key={row.name} className="flex items-center gap-2 px-3 py-2 text-sm">
-                  <span className="min-w-0 flex-1">
-                    <span className="block truncate font-semibold" title={row.name}>
-                      {row.name}
-                    </span>
-                    {row.signed_up && (
-                      <span className="block text-xs text-want">Someone with this IGN joined. Search to check it&apos;s them.</span>
-                    )}
-                  </span>
-                  <button
-                    type="button"
-                    disabled={pending}
-                    onClick={() => run(() => removePlaceholder(row.name))}
-                    aria-label={`Remove ${row.name}`}
-                    title="Remove"
-                    className="shrink-0 rounded-lg px-2 py-1 text-slate-400 hover:text-slate-700 disabled:opacity-50 dark:hover:text-white"
-                  >
-                    ✕
-                  </button>
-                </li>
-              ))}
-            </ul>
-            <button
-              type="button"
-              disabled={searching}
-              onClick={searchAll}
-              className={`w-full rounded-full py-2 text-sm font-bold disabled:opacity-60 ${
-                maybes > 0 ? "bg-want text-white" : "border border-slate-300 dark:border-slate-600"
-              }`}
-            >
-              {searching ? "Searching…" : `Search for all ${rows.length}`}
-            </button>
-          </>
+          <button
+            type="button"
+            disabled={searching}
+            onClick={searchAll}
+            className={`w-full rounded-full py-2 text-sm font-bold disabled:opacity-60 ${
+              maybes > 0 ? "bg-want text-white" : "border border-slate-300 dark:border-slate-600"
+            }`}
+          >
+            {searching ? "Searching…" : `Search for all ${rows.length}`}
+          </button>
         )}
         {hits && (
           <div className="space-y-4">
@@ -159,11 +137,37 @@ export function FriendPlaceholders({
                   <h4 className="text-sm font-semibold">
                     Possible match{hit.rows.length === 1 ? "" : "es"} for <span className="text-want">{hit.name}</span>
                   </h4>
-                  <PlayerResults q={hit.name} rows={hit.rows} friendIds={friendIds} viewerId={viewerId} suggestPlaceholder={false} placeholder={hit.name} />
+                  <PlayerResults q={hit.name} rows={hit.rows} relations={relations} viewerId={viewerId} suggestPlaceholder={false} placeholder={hit.name} />
                 </div>
               ))
             )}
           </div>
+        )}
+        {rows.length > 0 && (
+          <ul className="divide-y divide-slate-200 rounded-2xl border border-slate-200 dark:divide-slate-700 dark:border-slate-700">
+            {sorted.map((row) => (
+              <li key={row.name} className="flex items-center gap-2 px-3 py-2 text-sm">
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate font-semibold" title={row.name}>
+                    {row.name}
+                  </span>
+                  {row.signed_up && (
+                    <span className="block text-xs text-want">Someone with this IGN joined. Search to check it&apos;s them.</span>
+                  )}
+                </span>
+                <button
+                  type="button"
+                  disabled={pending}
+                  onClick={() => run(() => removePlaceholder(row.name))}
+                  aria-label={`Remove ${row.name}`}
+                  title="Remove"
+                  className="shrink-0 rounded-lg px-2 py-1 text-slate-400 hover:text-slate-700 disabled:opacity-50 dark:hover:text-white"
+                >
+                  ✕
+                </button>
+              </li>
+            ))}
+          </ul>
         )}
       </div>
     </details>

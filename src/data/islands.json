@@ -69,6 +69,7 @@
       "latios",
       "turtwig",
       "chimchar",
+      "piplup",
       "drifloon",
       "spiritomb",
       "riolu",
@@ -366,6 +367,11 @@
         "Monferno",
         "Infernape"
       ],
+      "piplup": [
+        "Piplup",
+        "Prinplup",
+        "Empoleon"
+      ],
       "drifloon": [
         "Drifloon"
       ],
@@ -519,6 +525,7 @@
       "latios",
       "turtwig",
       "chimchar",
+      "piplup",
       "drifloon",
       "spiritomb",
       "snover",
@@ -787,6 +794,11 @@
         "Monferno",
         "Infernape"
       ],
+      "piplup": [
+        "Piplup",
+        "Prinplup",
+        "Empoleon"
+      ],
       "drifloon": [
         "Drifloon",
         "Drifblim"
@@ -910,6 +922,7 @@
       "heracross",
       "suicune",
       "treecko",
+      "piplup",
       "gulpin",
       "croagunk",
       "darkrai",
@@ -1003,6 +1016,11 @@
         "Treecko",
         "Grovyle",
         "Sceptile"
+      ],
+      "piplup": [
+        "Piplup",
+        "Prinplup",
+        "Empoleon"
       ],
       "gulpin": [
         "Gulpin"
@@ -1377,6 +1395,7 @@
       "swablu",
       "absol",
       "spheal",
+      "piplup",
       "spiritomb",
       "riolu",
       "snover",
@@ -1454,6 +1473,11 @@
         "Spheal",
         "Sealeo",
         "Walrein"
+      ],
+      "piplup": [
+        "Piplup",
+        "Prinplup",
+        "Empoleon"
       ],
       "spiritomb": [
         "Spiritomb"

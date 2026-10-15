@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState, useTransition } from "react";
 import { addPlaceholder } from "@/app/actions";
 import { normalizeFriendCode } from "@/lib/format";
+import { type Relations, relationOf } from "@/lib/relations";
 import type { LookupRow } from "@/lib/types";
 import { FitPair } from "./FitPair";
 import { PlayerHeader } from "./PlayerHeader";
@@ -16,18 +17,18 @@ import { PlayerLists } from "./PlayerLists";
 export function PlayerResults({
   q,
   rows,
-  friendIds,
+  relations,
   viewerId,
   suggestPlaceholder = true,
   placeholder,
 }: {
   q: string;
   rows: LookupRow[];
-  friendIds: string[];
+  relations: Relations;
   viewerId: string;
   /** Off inside Not here yet, where the name is already a placeholder. */
   suggestPlaceholder?: boolean;
-  /** Searching from this Not here yet name: adding a result clears it. */
+  /** Searching from this Not here yet name: sending a request to (or accepting) a result clears it. */
   placeholder?: string;
 }) {
   // You can't add or block yourself: say it's you instead of showing your own card.
@@ -54,7 +55,7 @@ export function PlayerResults({
             <li key={player.user_id} className="card p-4">
               <PlayerHeader
                 player={player}
-                isFriend={friendIds.includes(player.user_id)}
+                relation={relationOf(relations, player.user_id)}
                 placeholder={placeholder}
                 aside={
                   // No fit while there's nothing to compare against: no friends' votes and none of your own.

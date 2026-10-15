@@ -50,6 +50,7 @@ EXTRA_SPAWNS = {
     "darkrai": "*",
     "turtwig": ["greengrass-isle", "greengrass-isle-expert", "taupe-hollow", "lapis-lakeside"],
     "chimchar": ["greengrass-isle", "greengrass-isle-expert", "taupe-hollow", "amber-canyon"],
+    "piplup": ["greengrass-isle", "greengrass-isle-expert", "cyan-beach", "cyan-beach-expert", "snowdrop-tundra"],
 }
 
 ROW = re.compile(r'<td class="cen"><a href="/pokemonsleep/pokemon/[^"]+\.shtml"><u>([^<]+)</u></a></td>')

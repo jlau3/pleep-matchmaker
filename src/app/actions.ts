@@ -1,5 +1,6 @@
 "use server";
 
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { revalidatePath } from "next/cache";
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
@@ -229,60 +230,67 @@ export async function blockUser(userId: string): Promise<{ error?: string }> {
 
 const FRIEND_ERRORS: Record<string, string> = {
   friend_limit: "You already have 50 friends. Remove someone first.",
+  their_list_full: "Their friend list is full (50).",
   friend_unavailable: "This player can't be added.",
+  request_limit: "You have 50 requests waiting. Cancel some first.",
+  request_gone: "That request isn't open anymore.",
 };
 
+/** Clears the Not here yet name a player was found from (it may not be exactly their IGN). */
+async function clearPlaceholder(supabase: SupabaseClient, userId: string, placeholder?: string) {
+  if (placeholder) await supabase.from("friend_placeholders").delete().eq("user_id", userId).eq("name", placeholder);
+}
+
 /**
- * Adds a friend. `placeholder` is the Not here yet name they were found from: it's
- * cleared even when it isn't exactly their IGN (a nickname or typo found by fuzzy
- * search); an exact IGN match is cleared by the database either way.
+ * Sends a friend request (which also means "I'll send you one in Pokémon
+ * Sleep"). "friends" when they had already asked you: both of you said yes.
+ * `placeholder` is the Not here yet name they were found from; it's cleared.
  */
-export async function addFriend(friendId: string, placeholder?: string): Promise<{ error?: string }> {
+export async function sendFriendRequest(
+  targetId: string,
+  placeholder?: string,
+): Promise<{ status?: "sent" | "friends"; error?: string }> {
   const { supabase, user } = await requireUser();
-  const { error } = await supabase.from("friends").insert({ user_id: user.id, friend_id: friendId });
-  if (error && error.code !== "23505") return { error: FRIEND_ERRORS[error.message] ?? "Couldn't add friend, try again" };
-  if (placeholder) await supabase.from("friend_placeholders").delete().eq("user_id", user.id).eq("name", placeholder);
-  // Whole layout: the "added you" banner may need to go.
+  const { data, error } = await supabase.rpc("send_friend_request", { target: targetId });
+  if (error) return { error: FRIEND_ERRORS[error.message] ?? "Couldn't send the request, try again" };
+  await clearPlaceholder(supabase, user.id, placeholder);
+  // Whole layout: the requests banner and every Add friend button may change.
+  revalidatePath("/", "layout");
+  return { status: data === "friends" ? "friends" : "sent" };
+}
+
+export async function acceptFriendRequest(requesterId: string, placeholder?: string): Promise<{ error?: string }> {
+  const { supabase, user } = await requireUser();
+  const { error } = await supabase.rpc("accept_friend_request", { requester: requesterId });
+  if (error) return { error: FRIEND_ERRORS[error.message] ?? "Couldn't accept, try again" };
+  await clearPlaceholder(supabase, user.id, placeholder);
   revalidatePath("/", "layout");
   return {};
 }
 
-/** "Not now" on someone who added you: stops prompting about them (they stay addable by search). */
-export async function dismissAddedYou(adderId: string): Promise<{ error?: string }> {
-  const { supabase, user } = await requireUser();
-  const { error } = await supabase.from("friend_prompt_dismissals").insert({ user_id: user.id, adder_id: adderId });
-  if (error && error.code !== "23505") return { error: "Couldn't update, try again" };
-  revalidatePath("/", "layout");
-  return {};
-}
-
-/**
- * Removes a friend. `inactive` records that they stopped playing, which keeps
- * them out of your Find New and, once enough people say so, everyone's (until
- * they come back). A failed report doesn't undo the removal.
- */
-/**
- * Find New's Add friend: marks them pending while the request goes through in
- * Pokémon Sleep. They're added here for real (addFriend) once you're friends there.
- */
-export async function markPending(targetId: string): Promise<{ error?: string }> {
-  const { supabase, user } = await requireUser();
-  if (targetId === user.id) return { error: "That's you." };
-  const { error } = await supabase.from("pending_friends").insert({ user_id: user.id, target_id: targetId });
-  if (error && error.code !== "23505") return { error: "Couldn't save, try again" };
-  revalidatePath("/friends");
-  return {};
-}
-
-/** Drops a pending request that fell through. */
-export async function cancelPending(targetId: string): Promise<{ error?: string }> {
-  const { supabase, user } = await requireUser();
-  const { error } = await supabase.from("pending_friends").delete().eq("user_id", user.id).eq("target_id", targetId);
+/** Declines a request to you; the sender sees it was declined. */
+export async function declineFriendRequest(requesterId: string): Promise<{ error?: string }> {
+  const { supabase } = await requireUser();
+  const { error } = await supabase.rpc("decline_friend_request", { requester: requesterId });
   if (error) return { error: "Couldn't update, try again" };
-  revalidatePath("/friends");
+  revalidatePath("/", "layout");
   return {};
 }
 
+/** Withdraws your request, or clears one they declined (you can ask again after). */
+export async function cancelFriendRequest(targetId: string): Promise<{ error?: string }> {
+  const { supabase } = await requireUser();
+  const { error } = await supabase.rpc("cancel_friend_request", { target: targetId });
+  if (error) return { error: "Couldn't update, try again" };
+  revalidatePath("/", "layout");
+  return {};
+}
+
+/**
+ * Removes a friend, from both lists. `inactive` records that they stopped
+ * playing, which keeps them out of your Find New and, once enough people say
+ * so, everyone's (until they come back). A failed report doesn't undo the removal.
+ */
 export async function removeFriend(friendId: string, inactive = false): Promise<{ error?: string }> {
   const { supabase, user } = await requireUser();
   const { error } = await supabase.from("friends").delete().eq("user_id", user.id).eq("friend_id", friendId);

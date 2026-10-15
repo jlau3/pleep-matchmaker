@@ -24,3 +24,14 @@ grant usage on schema public to anon, authenticated;
 -- on new functions; migrations narrow this with RLS and explicit revokes.
 alter default privileges in schema public grant all on tables to anon, authenticated;
 alter default privileges in schema public grant execute on functions to anon, authenticated;
+
+-- Test fixtures only: a mutual friendship written directly, the end state of
+-- a request and accept (players can't insert into public.friends). plpgsql,
+-- so the table only has to exist when it's called.
+create function public.test_befriend(a uuid, b uuid) returns void
+language plpgsql security definer
+as $$
+begin
+  insert into public.friends (user_id, friend_id) values (a, b), (b, a) on conflict do nothing;
+end
+$$;

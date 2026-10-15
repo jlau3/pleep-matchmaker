@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { LineChips } from "@/components/LineChips";
-import { ConnectSteps } from "@/components/ConnectSteps";
+import { FriendAction } from "@/components/FriendAction";
 import { PlayerHeader, playerName } from "@/components/PlayerHeader";
 import { PlayerSearch, searchQuery } from "@/components/PlayerSearch";
 import { FRIENDS_TABS, SubTabs } from "@/components/SubTabs";
@@ -10,7 +10,8 @@ import { FriendshipLevel5 } from "@/components/FriendshipLevel5";
 import { FitLegend } from "@/components/FitLegend";
 import { FitPair } from "@/components/FitPair";
 import { LOW_FIT_PCT } from "@/lib/fit";
-import { loadFriendIds, loadOwnProfile, loadOwnVotes, loadPendingIds, MAX_FRIENDS } from "@/lib/data";
+import { loadOwnProfile, loadOwnVotes, loadRelations, MAX_FRIENDS } from "@/lib/data";
+import { relationOf } from "@/lib/relations";
 import { LINES, LINES_BY_ID, linesFromIds } from "@/lib/lines";
 import { BROWSE_PAGE_SIZE, BROWSE_SORT_HINTS, BROWSE_SORTS, browseQuery, parseBrowse } from "@/lib/browse";
 import { requireUser } from "@/lib/supabase/server";
@@ -24,11 +25,10 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
   const params = await searchParams;
   const q = await searchQuery(Promise.resolve(params));
   const opts = parseBrowse(params);
-  const [{ choices, tops }, profile, friendIds, pendingIds, votedResult, matchesResult] = await Promise.all([
+  const [{ choices, tops }, profile, relations, votedResult, matchesResult] = await Promise.all([
     loadOwnVotes(supabase, user.id),
     loadOwnProfile(supabase, user.id),
-    loadFriendIds(supabase, user.id),
-    loadPendingIds(supabase, user.id),
+    loadRelations(supabase, user.id),
     supabase.rpc("my_friends_voted"),
     supabase.rpc("browse_players", {
       sort: opts.sort,
@@ -65,7 +65,7 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
         Add your friend code in <Link href="/profile" className="underline">Profile</Link> so others can find you.
       </>,
     );
-  if (friendIds.size >= MAX_FRIENDS)
+  if (relations.friendIds.length >= MAX_FRIENDS)
     notices.push(
       <>
         Your friend list is full ({MAX_FRIENDS}/{MAX_FRIENDS}), so you're hidden from other people's matches.{" "}
@@ -91,7 +91,7 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
     <div className="space-y-4">
       <div>
         <SubTabs tabs={FRIENDS_TABS} active="/matches" />
-        <PlayerSearch supabase={supabase} q={q} friendIds={friendIds} viewerId={user.id} />
+        <PlayerSearch supabase={supabase} q={q} relations={relations} viewerId={user.id} />
         <div className="mt-4">
           <FriendPostCard {...friendPostProps(profile, choices, tops)} />
         </div>
@@ -129,7 +129,7 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
           <FitLegend friendsVoted={friendsVoted} youVoted={picked > 0} />
         </div>
 
-        {picked === 0 && friendIds.size === 0 && !opts.everyone ? (
+        {picked === 0 && relations.friendIds.length === 0 && !opts.everyone ? (
           <p className="py-8 text-center text-slate-500">
             Add your friends (or <Link href="/vote" className="underline">vote</Link> on some lines) so we know what your
             group wants, or <Link href={link({ everyone: true })} className="underline">see everyone</Link>.
@@ -153,10 +153,11 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
                 <FitLists match={match} />
                 <NewPlayerNote match={match} name={playerName(match)} />
                 <div className="mt-4">
-                  <ConnectSteps
+                  <FriendAction
                     userId={match.user_id}
                     name={playerName(match)}
-                    initialPending={pendingIds.has(match.user_id)}
+                    relation={relationOf(relations, match.user_id)}
+                    showsCode={Boolean(match.friend_code)}
                   />
                 </div>
               </li>

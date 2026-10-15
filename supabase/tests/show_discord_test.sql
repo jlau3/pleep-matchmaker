@@ -27,14 +27,14 @@ begin
   assert found and r.discord_username is null and r.avatar_url is null, 'match masked';
 end $$;
 
-insert into public.friends (user_id, friend_id) values (auth.uid(), '00000000-0000-0000-000b-000000000001');
+select public.test_befriend(auth.uid(), '00000000-0000-0000-000b-000000000001');
 insert into public.blocks (blocker_id, blocked_id) values (auth.uid(), '00000000-0000-0000-000b-000000000001');
 do $$ begin
   assert (select ign from public.get_blocked()) = 'QuietNapper', 'blocked list has IGN';
   assert (select discord_username from public.get_blocked()) is null, 'blocked list masked';
 end $$;
 delete from public.blocks where blocker_id = auth.uid();
-insert into public.friends (user_id, friend_id) values (auth.uid(), '00000000-0000-0000-000b-000000000001');
+select public.test_befriend(auth.uid(), '00000000-0000-0000-000b-000000000001');
 do $$ begin
   assert (select discord_username from public.get_friends()) is null, 'friend masked';
 end $$;

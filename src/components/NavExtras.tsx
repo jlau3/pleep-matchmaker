@@ -14,7 +14,7 @@ const icon =
 export function NavExtras({ donateUrl }: { donateUrl?: string }) {
   const pathname = usePathname();
   return (
-    <div className="ml-auto flex shrink-0 items-center gap-2 pl-2">
+    <div className="flex shrink-0 items-center gap-2">
       {pathname !== "/feedback" && (
         <Link href={`/feedback?from=${encodeURIComponent(pathname)}`} aria-label="Send feedback" title="Send feedback" className={icon}>
           <svg viewBox="0 0 20 20" className="h-4 w-4" fill="currentColor" aria-hidden>

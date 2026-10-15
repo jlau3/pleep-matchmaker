@@ -9,7 +9,7 @@ update public.profiles set friend_code = '888800000002' where discord_username =
 set role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0008-000000000001', false);
 
-insert into public.friends (user_id, friend_id) values (auth.uid(), '00000000-0000-0000-0008-000000000002');
+select public.test_befriend(auth.uid(), '00000000-0000-0000-0008-000000000002');
 insert into public.blocks (blocker_id, blocked_id) values (auth.uid(), '00000000-0000-0000-0008-000000000002');
 do $$ begin
   assert (select count(*) from public.get_blocked()) = 1, 'blocked';

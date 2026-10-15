@@ -21,7 +21,7 @@ export function FitLegend({ friendsVoted = true, youVoted = true }: { friendsVot
       {!friendsVoted && (
         <p className="text-xs font-semibold text-amber-700 dark:text-amber-300">
           &ldquo;For them&rdquo; shows &ndash; until your friends here have voted, since it&apos;s based on what they
-          want. Add your Pokémon Sleep friends (in the game first, then here) and ask them to vote.
+          want. Send your Pokémon Sleep friends a friend request here and ask them to vote.
         </p>
       )}
     </div>
