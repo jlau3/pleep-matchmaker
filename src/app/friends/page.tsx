@@ -83,8 +83,8 @@ export default async function FriendsPage({ searchParams }: { searchParams: Prom
             Friend requests <span className="text-sm font-normal text-slate-500">{requests.length}</span>
           </h2>
           <p className="mb-3 text-sm text-slate-500">
-            These players want to be friends here and in Pokémon Sleep. Accept to add each other; their friend code is
-            on the card so you can accept (or send) their request in the game too.
+            These players want to be friends here and in Pokémon Sleep. Add them in the game with the friend code on
+            their card first, then accept: the code goes away once you&apos;re friends, as in the game.
           </p>
           <ul className="space-y-3">
             {requestsSorted.map((player) => {

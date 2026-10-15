@@ -73,7 +73,7 @@ begin
   select * into r from public.get_matches() where user_id = public.test_uid('bob');
   assert r.match_pct = 60, format('bob pct %s', r.match_pct);
   assert cardinality(r.fit_wants) = 6, 'bob fit wants';
-  assert r.friend_code is not null, 'contact info returned for match';
+  assert r.friend_code is null, 'no friend code in matches (20261021000900)';
 
   select * into r from public.get_matches() where user_id = public.test_uid('cara');
   assert r.match_pct = 60, format('cara pct %s', r.match_pct);

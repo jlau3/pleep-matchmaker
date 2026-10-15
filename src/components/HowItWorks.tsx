@@ -47,8 +47,9 @@ const STEPS: { title: string; body: React.ReactNode; href: string; cta: string }
     body: (
       <>
         Find New Friends suggests players who match both ways, best match first: you&apos;d each send candy the other
-        wants, so they&apos;re likely to say yes. Send a friend request here and one in Pokémon Sleep with their
-        friend code; they show under Sent requests until they accept, then you&apos;re friends on both.
+        wants, so they&apos;re likely to say yes. Send a friend request here: it gives them your friend code to add
+        you in Pokémon Sleep. It shows under Sent requests until they accept, then you&apos;re friends on both.
+        Friend codes are never shown anywhere else.
       </>
     ),
     href: "/matches",

@@ -75,9 +75,6 @@ export interface BlockedRow {
   blocked_at: string;
 }
 
-/** Who sees your friend code, widest first: Find New matches, searchers, friends, nobody. */
-export type CodeVisibility = "matches" | "search" | "friends" | "nobody";
-
 export interface OwnProfile {
   id: string;
   discord_username: string | null;
@@ -93,8 +90,6 @@ export interface OwnProfile {
   votes_private?: boolean;
   game_avatar?: string | null;
   reddit_username?: string | null;
-  /** Who sees your friend code (20261021000800_code_visibility.sql). */
-  code_visibility?: CodeVisibility;
   /** Friends see their Reddit name. Other players never do. */
   show_reddit?: boolean;
   last_seen_at: string;
@@ -116,7 +111,7 @@ export interface FriendRow extends PlayerContact {
   added_me: boolean;
 }
 
-/** A friend request to you that's still open (get_friend_requests). Their friend code always shows. */
+/** A friend request to you that's still open (get_friend_requests). It carries their friend code. */
 export interface RequestRow extends PlayerContact {
   requested_at: string;
   /** Both fits, only when asked for (get_friend_requests(with_fit)); see MatchRow. */
@@ -127,7 +122,7 @@ export interface RequestRow extends PlayerContact {
 /**
  * Your request: still open, declined, or expired (unanswered past the TTL;
  * "open" from before 20261020000100_expired_requests.sql) (get_sent_requests).
- * Their code shows only if they're open to new friends.
+ * Their code never shows: codes travel only with requests to you (20261021000900).
  */
 export interface SentRequestRow extends PlayerContact {
   requested_at: string;

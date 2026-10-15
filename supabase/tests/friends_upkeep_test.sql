@@ -6,7 +6,7 @@ insert into auth.users (id, raw_user_meta_data) values
   ('00000000-0000-0000-0015-000000000002', '{"name":"fu_ann#0"}'),
   ('00000000-0000-0000-0015-000000000003', '{"name":"fu_bob#0"}'),
   ('00000000-0000-0000-0015-000000000004', '{"name":"fu_cal#0"}');
-update public.profiles set ign = 'FuAnnIgn', friend_code = '771122223377', open_to_friends = false, code_visibility = 'friends'
+update public.profiles set ign = 'FuAnnIgn', friend_code = '771122223377', open_to_friends = false
   where id = '00000000-0000-0000-0015-000000000002';
 update public.profiles set ign = 'FuBobIgn', friend_code = '444455556666'
   where id = '00000000-0000-0000-0015-000000000003';
@@ -24,7 +24,7 @@ select set_config('request.jwt.claim.sub', '00000000-0000-0000-0015-000000000001
 do $$ begin
   assert (select friend_code from public.lookup_players('FuAnnIgn') where user_id = '00000000-0000-0000-0015-000000000002') is null, 'closed hides the code';
   assert (select friend_code from public.lookup_players('7711 2222 3377') where user_id = '00000000-0000-0000-0015-000000000002') = '771122223377', 'typing the code finds it';
-  assert (select friend_code from public.lookup_players('FuBobIgn') where user_id = '00000000-0000-0000-0015-000000000003') = '444455556666', 'open shows it';
+  assert (select friend_code from public.lookup_players('FuBobIgn') where user_id = '00000000-0000-0000-0015-000000000003') is null, 'search by IGN: no code (20261021000900)';
 end $$;
 
 -- 2. Unfriending removes both sides. (Ann is closed to new friends but can still accept.)
@@ -33,7 +33,7 @@ select set_config('request.jwt.claim.sub', '00000000-0000-0000-0015-000000000002
 select public.accept_friend_request('00000000-0000-0000-0015-000000000001');
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0015-000000000001', false);
 do $$ begin
-  assert (select friend_code from public.lookup_players('FuAnnIgn') where user_id = '00000000-0000-0000-0015-000000000002') = '771122223377', 'friends see it';
+  assert (select friend_code from public.lookup_players('FuAnnIgn') where user_id = '00000000-0000-0000-0015-000000000002') is null, 'friends: dropped (20261021000900)';
 end $$;
 delete from public.friends where user_id = auth.uid() and friend_id = '00000000-0000-0000-0015-000000000002';
 reset role;

@@ -224,9 +224,6 @@ export async function updateProfile(_prev: ProfileFormState, form: FormData): Pr
     extras.reddit_username = reddit || null;
     extras.game_avatar = avatar || null;
   }
-  const codeVisibility = form.get("code_visibility");
-  if (codeVisibility === "matches" || codeVisibility === "search" || codeVisibility === "friends" || codeVisibility === "nobody")
-    extras.code_visibility = codeVisibility;
   if (form.has("has_show_reddit")) extras.show_reddit = form.get("show_reddit") === "on";
   let { error } = await supabase.from("profiles").update({ ...update, ...extras }).eq("id", user.id);
   // Before that migration runs, save the rest.

@@ -3,7 +3,7 @@
 import { useActionState, useRef } from "react";
 import { type ProfileFormState, updateProfile } from "@/app/actions";
 import { formatFriendCode } from "@/lib/format";
-import type { CodeVisibility, OwnProfile } from "@/lib/types";
+import type { OwnProfile } from "@/lib/types";
 import { AvatarPicker } from "./AvatarPicker";
 import { DiscordIcon, RedditIcon } from "./BrandIcons";
 
@@ -42,14 +42,6 @@ function Toggle({
 const card = "card space-y-4 p-5";
 
 type Visibility = "everyone" | "known" | "friends";
-
-/** Who sees your friend code, widest first (profiles.code_visibility, 20261021000800_code_visibility.sql). */
-const CODE_VISIBILITY: { value: CodeVisibility; title: string; text: string }[] = [
-  { value: "matches", title: "Find New matches", text: "Anyone who finds you, so they can add you in Pokémon Sleep straight away." },
-  { value: "search", title: "People who search me", text: "Players who look up your IGN, and friends. Not shown in Find New." },
-  { value: "friends", title: "Only my friends", text: "Strangers see your IGN and icon; you add each other in the game once you're friends." },
-  { value: "nobody", title: "Nobody", text: "Not even friends. You'll need to add them in Pokémon Sleep with their code." },
-];
 
 /** "Who can find you": each option sets search (allow_lookup) and Find New (open_to_friends) together. */
 const VISIBILITY: { value: Visibility; title: string; text: string }[] = [
@@ -161,34 +153,6 @@ export function ProfileForm({ profile, friendListFull }: { profile: OwnProfile; 
             </label>
           ))}
         </fieldset>
-        {profile.code_visibility !== undefined && (
-          <fieldset className="space-y-2 border-t border-slate-200 pt-4 dark:border-slate-700">
-            <legend className="mb-2 text-sm font-semibold">Who can see your friend code</legend>
-            {CODE_VISIBILITY.map((option) => (
-              <label
-                key={option.value}
-                className="flex cursor-pointer items-start gap-3 rounded-2xl border-2 border-transparent bg-white px-3 py-2 has-[:checked]:border-night dark:bg-night-deep dark:has-[:checked]:border-sun"
-              >
-                <input
-                  type="radio"
-                  name="code_visibility"
-                  value={option.value}
-                  defaultChecked={profile.code_visibility === option.value}
-                  onChange={save}
-                  className="mt-1 h-4 w-4 accent-[var(--color-night)]"
-                />
-                <span>
-                  <span className="block text-sm font-semibold">{option.title}</span>
-                  <span className="block text-sm text-slate-600 dark:text-slate-300">{option.text}</span>
-                </span>
-              </label>
-            ))}
-            <p className="text-xs text-slate-500">
-              Each step hides it from more people. Anyone who already typed your code can still find you by it, and a friend
-              request you send shows your code to that player unless you pick Nobody.
-            </p>
-          </fieldset>
-        )}
         {profile.discord_username && (
           <div className="border-t border-slate-200 dark:border-slate-700">
             <input type="hidden" name="has_show_discord" value="1" />
