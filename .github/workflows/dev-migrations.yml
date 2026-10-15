@@ -1,0 +1,27 @@
+# Keeps the dev database (behind Vercel previews) on the latest schema: any
+# push to a branch other than main that changes supabase/migrations applies
+# the new ones there (scripts/dev-migrate.sh). Production stays manual.
+# Needs the DEV_DATABASE_URL secret: the dev project's Session pooler
+# connection string (GitHub runners have no IPv6 for the direct one).
+name: Dev database migrations
+
+on:
+  push:
+    branches-ignore: [main]
+    paths: ["supabase/migrations/**"]
+  workflow_dispatch:
+
+concurrency:
+  group: dev-database
+  cancel-in-progress: false
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply new migrations to the dev database
+        env:
+          DATABASE_URL: ${{ secrets.DEV_DATABASE_URL }}
+        run: scripts/dev-migrate.sh
