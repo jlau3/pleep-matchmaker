@@ -54,6 +54,8 @@ update public.profiles pr set
   friend_code = '5' || lpad(s.g::text, 11, '0'),
   game_avatar = ({array(AVATARS)})[1 + (s.g * 7919) % {len(AVATARS)}] || ':normal',
   open_to_friends = s.g % 10 <> 0,
+  -- Every 6th hides their code before you're friends (DevDozy1, DevYawn7, DevCozy13, ...).
+  share_code = s.g % 6 <> 1,
   last_seen_at = now() - case when s.g % 25 = 0 then interval '90 days' else random() * interval '20 days' end
 from (select ('{PREFIX}' || lpad(g::text, 12, '0'))::uuid as id, g from generate_series(1, {PLAYERS}) g) s
 where pr.id = s.id;
