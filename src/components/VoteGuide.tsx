@@ -1,33 +1,21 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import { markVoteGuideSeen } from "@/app/actions";
 import { MAX_TOP } from "@/lib/lines";
 
-/**
- * How to vote: what Want / Neutral / Don't Want mean, what your votes change,
- * and when new Pokémon show up. Opens by itself on a player's first My Votes
- * visit (`autoOpen`), unless another popup is already up, in which case it
- * waits for the next visit. Afterwards it opens from its button.
- */
-export function VoteGuide({ autoOpen }: { autoOpen: boolean }) {
+/** Detailed voting help, opened only when the player asks for it. */
+export function VoteGuide() {
   const dialog = useRef<HTMLDialogElement>(null);
 
-  useEffect(() => {
-    if (!autoOpen) return;
-    // Give the nav's popups (new-Pokémon note, How it works) a moment to open first.
-    const timer = setTimeout(() => {
-      if (document.querySelector("dialog[open]")) return;
-      dialog.current?.showModal();
-      void markVoteGuideSeen().catch(() => {});
-    }, 400);
-    return () => clearTimeout(timer);
-  }, [autoOpen]);
-
+  const open = () => {
+    dialog.current?.showModal();
+    void markVoteGuideSeen().catch(() => {});
+  };
   const close = () => dialog.current?.close();
   return (
     <>
-      <button type="button" onClick={() => dialog.current?.showModal()} className="text-sm font-semibold underline">
+      <button type="button" onClick={open} className="text-sm font-semibold underline">
         How to vote
       </button>
       <dialog

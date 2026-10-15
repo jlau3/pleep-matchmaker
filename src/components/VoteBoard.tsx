@@ -48,7 +48,7 @@ export function VoteBoard({
   firstVisit,
   newCandy,
   crowd,
-  guideAutoOpen = false,
+  showGuideIntro = false,
 }: {
   initial: Record<string, Choice>;
   initialTops: string[];
@@ -57,8 +57,8 @@ export function VoteBoard({
   newCandy?: { ids: string[]; votes: Record<string, LineVotes>; voters: number };
   /** Everyone's vote totals for "Show what others pick"; absent while too few have voted. */
   crowd?: { votes: Record<string, LineVotes>; voters: number };
-  /** Open the voting guide by itself (first visit). */
-  guideAutoOpen?: boolean;
+  /** Show a short inline introduction until the player has read the voting guide. */
+  showGuideIntro?: boolean;
 }) {
   const [choices, setChoices] = useState(initial);
   const [tops, setTops] = useState(() => new Set(initialTops));
@@ -271,7 +271,7 @@ export function VoteBoard({
             </span>
           </span>
           <span className="flex shrink-0 items-center gap-3">
-            <VoteGuide autoOpen={guideAutoOpen} />
+            <VoteGuide />
             <ExportVotes choices={choices} tops={tops} />
           </span>
         </div>
@@ -285,10 +285,15 @@ export function VoteBoard({
         )}
       </div>
 
-      {firstVisit && (
-        <p className="mb-4 text-center text-sm text-slate-500">
-          Pick Want or Don&apos;t Want on the candies you care about. Everything else stays Neutral.
-        </p>
+      {(firstVisit || showGuideIntro) && (
+        <section className="card mb-4 space-y-2 p-4 text-sm" aria-labelledby="vote-intro-title">
+          <h2 id="vote-intro-title" className="font-bold">Start with the candy you care about</h2>
+          <p className="text-slate-600 dark:text-slate-300">
+            Pick <b className="text-want">Want</b> for Pokémon you&apos;re building and <b className="text-dont">Don&apos;t Want</b> for
+            candy you don&apos;t need. Leave the rest Neutral. You don&apos;t have to decide on every Pokémon.
+          </p>
+          <p className="text-slate-600 dark:text-slate-300">Every change saves automatically. Your votes help your friends choose what candy to send you.</p>
+        </section>
       )}
 
       {newCards.map((id) => (

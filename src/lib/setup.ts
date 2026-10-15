@@ -38,7 +38,7 @@ export function setupSteps(progress: SetupProgress): SetupStep[] {
     {
       id: "vote",
       label: "Vote",
-      next: "Mark the candies you Want and Don't Want. Everything else stays Neutral.",
+      next: "Pick Want or Don't Want for the candy you care about. Start with a few; the rest can stay Neutral.",
       href: "/vote",
       cta: "Let's vote",
       done: progress.voted,
@@ -46,7 +46,7 @@ export function setupSteps(progress: SetupProgress): SetupStep[] {
     {
       id: "friends",
       label: "Add friends",
-      next: "Look up your Pokémon Sleep friends by IGN or friend code, or find new ones who want the same candy.",
+      next: "Look up your Pokémon Sleep friends by their exact in-game name, or find new friends. Send a request to get started.",
       href: "/friends",
       cta: "Add friends",
       done: progress.friends,

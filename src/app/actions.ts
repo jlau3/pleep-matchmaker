@@ -410,19 +410,24 @@ export async function markHelpSeen(): Promise<void> {
  * Records that the player finished or skipped the setup checklist (SetupChecklist).
  * Finishing it on the Tier List with a friend already covers the first-friend note.
  */
-export async function markSetupDone(finished = false): Promise<void> {
+export async function markSetupDone(finished = false): Promise<{ error?: string }> {
   const { supabase, user } = await requireUser();
-  const friends = finished
-    ? (await supabase.from("friends").select("friend_id", { count: "exact", head: true }).eq("user_id", user.id)).count
-    : 0;
+  let friends = 0;
+  if (finished) {
+    const result = await supabase.from("friends").select("friend_id", { count: "exact", head: true }).eq("user_id", user.id);
+    if (result.error) return { error: "Couldn't save your setup progress. Please try again." };
+    friends = result.count ?? 0;
+  }
   const { error } = await supabase
     .from("profiles")
     .update(friends ? { setup_done: true, first_friend_noted: true } : { setup_done: true })
     .eq("id", user.id);
-  if (!error) (await cookies()).set(SETUP_COOKIE, user.id, { path: "/", maxAge: 31536000, sameSite: "lax" });
+  if (error) return { error: "Couldn't save your setup progress. Please try again." };
+  (await cookies()).set(SETUP_COOKIE, user.id, { path: "/", maxAge: 31536000, sameSite: "lax" });
+  return {};
 }
 
-/** Records that the voting guide has opened by itself once (VoteGuide). */
+/** Records that the player opened the detailed voting guide (VoteGuide). */
 export async function markVoteGuideSeen(): Promise<void> {
   const { supabase, user } = await requireUser();
   await supabase.from("profiles").update({ vote_guide_seen: true }).eq("id", user.id);

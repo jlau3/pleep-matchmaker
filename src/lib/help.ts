@@ -28,3 +28,14 @@ export const SETUP_COOKIE = "pm_setup_done";
 
 /** sessionStorage key: "Not now" on the setup checklist hides it until the browser session ends. */
 export const SETUP_SNOOZE_KEY = "pm_setup_snoozed";
+
+/** Welcome comes first; announcements wait until setup is finished or skipped. */
+export function automaticPopup({ helpSeen, setupDone, metaSeen }: {
+  helpSeen: boolean;
+  setupDone: boolean;
+  metaSeen: boolean;
+}): "help" | "meta" | null {
+  if (!helpSeen) return "help";
+  if (setupDone && !metaSeen) return "meta";
+  return null;
+}

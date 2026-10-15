@@ -6,7 +6,7 @@ import { NavExtras } from "./NavExtras";
 import { NavLinks } from "./NavLinks";
 import { NavStars } from "./NavStars";
 import { activeMetaPost, META_COOKIE, metaCookieValue } from "@/content/meta";
-import { HELP_COOKIE, HELP_VERSION, helpCookieValue } from "@/lib/help";
+import { HELP_COOKIE, HELP_VERSION, helpCookieValue, automaticPopup } from "@/lib/help";
 import { LINES_BY_ID, lineSpriteUrl } from "@/lib/lines";
 import { getAuth } from "@/lib/supabase/server";
 
@@ -14,10 +14,8 @@ type Popup = { autoOpen: boolean; rememberSeen: string | null };
 const SHUT: Popup = { autoOpen: false, rememberSeen: null };
 
 /**
- * Which popups open by themselves for a signed-in player: the active
- * new-Pokémon note (src/content/meta.tsx) if they haven't closed it, else How
- * it works if they haven't seen this HELP_VERSION (it then waits for the next
- * page). Cookies skip the profile lookup once both are seen; if the lookup
+ * The welcome opens first; new-Pokémon notes wait until setup is finished or
+ * skipped. Cookies skip the profile lookup once both are seen; if the lookup
  * fails (e.g. a migration hasn't run), both stay shut.
  */
 async function popupState(userId: string | null, metaId: string | null): Promise<{ help: Popup; meta: Popup }> {
@@ -29,19 +27,17 @@ async function popupState(userId: string | null, metaId: string | null): Promise
   const metaKnown = !metaValue || jar.get(META_COOKIE)?.value === metaValue;
   if (helpKnown && metaKnown) return { help: SHUT, meta: SHUT };
 
-  const columns = metaKnown ? "help_seen_version" : "help_seen_version, meta_seen_id";
+  const columns = metaKnown ? "help_seen_version" : "help_seen_version, meta_seen_id, setup_done";
   const { supabase } = await getAuth();
   const { data, error } = await supabase.from("profiles").select(columns).eq("id", userId).maybeSingle();
   if (error || !data) return { help: SHUT, meta: SHUT };
-  const row = data as unknown as { help_seen_version: number; meta_seen_id?: string | null };
+  const row = data as unknown as { help_seen_version: number; meta_seen_id?: string | null; setup_done?: boolean };
 
   const metaSeen = metaKnown || row.meta_seen_id === metaId;
-  const meta: Popup = metaKnown ? SHUT : { autoOpen: !metaSeen, rememberSeen: metaSeen ? metaValue : null };
   const helpSeen = helpKnown || row.help_seen_version >= HELP_VERSION;
-  const help: Popup = helpKnown
-    ? SHUT
-    : // The note goes first; How it works waits until it's closed.
-      { autoOpen: !helpSeen && !meta.autoOpen, rememberSeen: helpSeen ? helpValue : null };
+  const popup = automaticPopup({ helpSeen, metaSeen, setupDone: row.setup_done === true });
+  const meta: Popup = metaKnown ? SHUT : { autoOpen: popup === "meta", rememberSeen: metaSeen ? metaValue : null };
+  const help: Popup = helpKnown ? SHUT : { autoOpen: popup === "help", rememberSeen: helpSeen ? helpValue : null };
   return { help, meta };
 }
 

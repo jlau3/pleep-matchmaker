@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { markHelpSeen } from "@/app/actions";
 import { HELP_COOKIE } from "@/lib/help";
 import { HowItWorks } from "./HowItWorks";
@@ -25,14 +25,20 @@ export function HelpModal({
 }) {
   const dialog = useRef<HTMLDialogElement>(null);
   const pendingSeen = useRef(autoOpen);
+  const [welcome, setWelcome] = useState(autoOpen);
 
   useEffect(() => {
-    if (autoOpen) dialog.current?.showModal();
+    if (autoOpen) {
+      pendingSeen.current = true;
+      setWelcome(true);
+      dialog.current?.showModal();
+    }
     // Already seen, but this browser hasn't cached that yet: skip the lookup next time.
     else if (rememberSeen) document.cookie = `${HELP_COOKIE}=${rememberSeen}; path=/; max-age=31536000; samesite=lax`;
   }, [autoOpen, rememberSeen]);
 
   function onClose() {
+    setWelcome(false);
     if (!pendingSeen.current) return;
     pendingSeen.current = false;
     void markHelpSeen().catch(() => {});
@@ -62,7 +68,7 @@ export function HelpModal({
         <div className="p-6">
           <div className="mb-1 flex items-start justify-between gap-3">
             <h2 id="help-title" className="text-2xl font-extrabold">
-              How Pleep Matchmaker works
+              {welcome ? "Welcome to Pleep Matchmaker" : "How Pleep Matchmaker works"}
             </h2>
             <button
               type="button"
@@ -73,13 +79,27 @@ export function HelpModal({
               ×
             </button>
           </div>
-          <p className="mb-5 text-sm text-slate-600 dark:text-slate-300">A candy wishlist for Pokémon Sleep players and their friends.</p>
-          <HowItWorks links={signedIn} />
-          {autoOpen ? (
+          {welcome ? (
+            <div className="mt-4 space-y-4 text-sm text-slate-600 dark:text-slate-300">
+              <p>Know which candy to send your Pokémon Sleep friends, and help them send the candy you want.</p>
+              <ol className="space-y-3">
+                <li><strong className="text-ink dark:text-white">1. Make yourself recognizable.</strong> Add your in-game name and icon.</li>
+                <li><strong className="text-ink dark:text-white">2. Pick the candy you want.</strong> Everything else can stay Neutral.</li>
+                <li><strong className="text-ink dark:text-white">3. Add your in-game friends.</strong> Their votes build your candy Tier List.</li>
+              </ol>
+              <p>You can take it one step at a time. The setup card will guide you, and help is always in the ? menu.</p>
+            </div>
+          ) : (
+            <>
+              <p className="mb-5 text-sm text-slate-600 dark:text-slate-300">A candy wishlist for Pokémon Sleep players and their friends.</p>
+              <HowItWorks links={signedIn} />
+            </>
+          )}
+          {welcome ? (
             // First sign-in: lead into the setup checklist, starting with Profile.
             <div className="mt-6 space-y-2 text-center">
               <Link href="/profile" className="btn-primary block w-full py-2">
-                Let&apos;s get set up →
+                Set up my profile →
               </Link>
               <button type="button" onClick={() => dialog.current?.close()} className="text-sm font-semibold text-slate-500 underline">
                 Look around first
