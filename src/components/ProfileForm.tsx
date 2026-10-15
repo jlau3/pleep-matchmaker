@@ -184,7 +184,7 @@ export function ProfileForm({ profile, friendListFull }: { profile: OwnProfile; 
                   <DiscordIcon /> Show my Discord name to friends
                 </>
               }
-              detail="Other players never see it or find you by it, except people you send a friend request to."
+              detail="Other players never see it or find you by it, except you and someone with a friend request between you."
             >
               Friends see @{profile.discord_username} and your Discord picture on your card.
             </Toggle>
