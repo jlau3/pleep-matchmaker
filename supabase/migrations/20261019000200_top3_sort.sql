@@ -1,15 +1,130 @@
--- Find New sort "Your Top 3": players whose Tier List (their friends' wants)
--- ranks your starred lines highest, so they're likeliest to send your
--- favorite candy. Score: the sum of each Top 3 line's share of their
--- friends' demand; players without a list yet (fewer than 3 friends voting)
--- go last, ties fall back to Best match. browse_players as in profile_extras
--- otherwise (same columns). Safe to re-run.
+-- Your Top 3 on other players' Tier Lists. For any player, each of your
+-- starred lines gets the tier (S/A/B/C/Avoid) it has on THEIR Tier List: the
+-- same rules as src/lib/tiers.ts (buildTiers), from their friends' votes.
+-- Shown on Find New (with the new "Your Top 3" sort) and on My Friends.
+--
+-- The tiers depend on every candy line, voted or not, and the line catalogue
+-- lives in the app, so callers pass line_count (LINES.length); lines nobody
+-- voted on all score as Neutral. Tier edges use float8 like the app's
+-- Math.ceil(share * n), so both agree to the line. Safe to re-run.
 
-create or replace function public.browse_players(
+-- Tier of every line on player's Tier List (their friends who've voted, as on
+-- the Tier List page). line_id '' stands for all the lines nobody voted on.
+-- Empty when none of their friends has voted.
+create or replace function public.list_tiers(player uuid, line_count int)
+returns table (line_id text, tier text)
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  with
+  voters as (
+    select f.friend_id
+    from public.friends f
+    join public.profiles fp on fp.id = f.friend_id and fp.allow_lookup
+    where f.user_id = player
+      and exists (select 1 from public.preferences p where p.user_id = f.friend_id and p.choice <> 'undecided')
+  ),
+  nv as (select count(*)::int as n from voters),
+  votes as (
+    select p.line_id,
+      count(*) filter (where p.choice = 'want')::int as w,
+      count(*) filter (where p.choice = 'dont_want')::int as d
+    from public.preferences p
+    join voters v on v.friend_id = p.user_id
+    where p.choice <> 'undecided'
+    group by p.line_id
+  ),
+  -- POINTS: Want +3, Neutral +1 (everyone else), Don't Want -3. cnt: how many lines share the row.
+  scored as (
+    select vo.line_id, 3 * vo.w + (nv.n - vo.w - vo.d) - 3 * vo.d as score, 1 as cnt
+    from votes vo, nv
+    union all
+    select '', nv.n, greatest(line_count - (select count(*) from votes)::int, 0)
+    from nv
+    where line_count > (select count(*) from votes)
+  ),
+  runs as (select s.score, sum(s.cnt)::int as size from scored s where s.score >= 0 group by s.score),
+  pos as (
+    select r.score, r.size,
+      coalesce(sum(r.size) over (order by r.score desc rows between unbounded preceding and 1 preceding), 0)::int as start,
+      sum(r.size) over ()::int as n
+    from runs r
+  ),
+  -- A run of tied lines takes the tier of its middle position; the best run is always S.
+  tiered as (
+    select p.score,
+      case
+        when p.start = 0 then 'S'
+        when (p.start + p.start + p.size - 1) / 2 < ceil((0.2::float8) * p.n) then 'S'
+        when (p.start + p.start + p.size - 1) / 2 < ceil((0.2::float8 + 0.25::float8) * p.n) then 'A'
+        when (p.start + p.start + p.size - 1) / 2 < ceil((0.2::float8 + 0.25::float8 + 0.3::float8) * p.n) then 'B'
+        else 'C'
+      end as tier
+    from pos p
+  )
+  select s.line_id, case when s.score < 0 then 'Avoid' else t.tier end
+  from scored s
+  left join tiered t on t.score = s.score
+  where (select n from nv) > 0
+$$;
+revoke execute on function public.list_tiers(uuid, int) from public, anon, authenticated;
+
+-- The viewer's starred lines with their tier on player's Tier List. Empty when
+-- player has no list (no friend has voted).
+create or replace function public.top3_tiers_for(player uuid, viewer uuid, line_count int)
+returns table (line_id text, tier text)
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  with lt as (select * from public.list_tiers(player, line_count))
+  select p.line_id, coalesce(
+    (select lt.tier from lt where lt.line_id = p.line_id),
+    (select lt.tier from lt where lt.line_id = '')
+  )
+  from public.preferences p
+  where p.user_id = viewer and p.top
+    and exists (select 1 from lt)
+$$;
+revoke execute on function public.top3_tiers_for(uuid, uuid, int) from public, anon, authenticated;
+
+-- For the cards: your Top 3's tiers on each of these players' Tier Lists
+-- (up to 50; findable, unblocked players only).
+create or replace function public.top3_tiers(players uuid[], line_count int)
+returns table (user_id uuid, line_id text, tier text)
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select pr.id, t.line_id, t.tier
+  from public.profiles pr
+  cross join lateral public.top3_tiers_for(pr.id, auth.uid(), line_count) t
+  where pr.id = any(players[1:50])
+    and pr.allow_lookup
+    and not exists (
+      select 1 from public.blocks b
+      where (b.blocker_id = auth.uid() and b.blocked_id = pr.id)
+         or (b.blocker_id = pr.id and b.blocked_id = auth.uid())
+    )
+$$;
+revoke execute on function public.top3_tiers(uuid[], int) from public, anon;
+grant execute on function public.top3_tiers(uuid[], int) to authenticated;
+
+-- Find New: sort 'top3', and line_count for it. browse_players as in
+-- profile_extras otherwise (same columns).
+drop function if exists public.browse_players(text, boolean, int, int);
+drop function if exists public.browse_players(text, boolean, int, int, int);
+
+create function public.browse_players(
   sort text default 'fit',
   everyone boolean default false,
   page_size int default 20,
-  page_offset int default 0
+  page_offset int default 0,
+  line_count int default 0
 )
 returns table (
   user_id uuid,
@@ -42,7 +157,7 @@ as $$
   -- Your friends' demand (your Tier List), for "fits your list".
   g as (select * from public.group_demand((select id from me))),
   mine as (
-    select p.line_id, p.choice, p.top
+    select p.line_id, p.choice
     from public.preferences p
     where p.user_id = (select id from me) and p.choice <> 'undecided'
   ),
@@ -105,8 +220,6 @@ as $$
     select
       c.id as cand,
       coalesce(sum(coalesce(d.share, 0)) filter (where m.choice = 'want'), 0) as hit,
-      -- Your Top 3 on their Tier List: each starred line's share of their friends' demand (0..3).
-      coalesce(sum(coalesce(d.share, 0)) filter (where m.top), 0) as top_hit,
       least(count(*) filter (where m.choice = 'want'), coalesce(max(dc.cap), 0))
         + public.dont_want_weight() * coalesce(sum(d.share) filter (where m.choice = 'dont_want'), 0) as total,
       coalesce(array_agg(m.line_id order by d.share desc, m.line_id)
@@ -143,8 +256,6 @@ as $$
       coalesce(t.fit_wants, '{}') as they_wants,
       coalesce(t.fit_dont_wants, '{}') as they_dont_wants,
       case when y.total > 0 and dc.cand is not null then round(100.0 * y.hit / y.total)::int end as you_pct,
-      -- Null without a list of their own (fewer than 3 friends voting): those go last.
-      case when dc.cand is not null then y.top_hit end as top_score,
       coalesce(y.fit_wants, '{}') as you_wants,
       coalesce(y.fit_dont_wants, '{}') as you_dont_wants,
       coalesce((select v.voters from friend_voters v where v.cand = c.id and v.voters >= 3), 0)::int as list_voters,
@@ -196,7 +307,11 @@ as $$
     case when sort = 'active' then l.last_seen_at end desc nulls last,
     case when sort = 'you_fit' then l.you_pct end desc nulls last,
     case when sort = 'they_fit' then l.they_pct end desc nulls last,
-    case when sort = 'top3' then l.top_score end desc nulls last,
+    -- Your Top 3 by the tier each sits in on their Tier List (S 4 .. C 1, Avoid 0); no list: last.
+    case when sort = 'top3' then (
+      select sum(case t.tier when 'S' then 4 when 'A' then 3 when 'B' then 2 when 'C' then 1 else 0 end)
+      from public.top3_tiers_for(l.id, (select id from me), line_count) t
+    ) end desc nulls last,
     l.both_pct desc nulls last,
     cardinality(l.you_wants) desc,
     l.last_seen_at desc,
@@ -204,3 +319,6 @@ as $$
   limit least(greatest(page_size, 1), 50)
   offset greatest(page_offset, 0)
 $$;
+
+revoke execute on function public.browse_players(text, boolean, int, int, int) from public, anon;
+grant execute on function public.browse_players(text, boolean, int, int, int) to authenticated;

@@ -37,6 +37,17 @@ export const POINTS = { want: 3, neutral: 1, dontWant: -3 } as const;
 
 const pct = (x: number) => Math.round(x * 100);
 
+/** Each tier's colours on the Tier List (and its letter badges elsewhere). */
+export const TIER_STYLE: Record<string, string> = {
+  top: "bg-gradient-to-br from-sun to-[#ff8fab] text-[#5b3e00] shadow-[0_3px_0_var(--color-sun-deep)]",
+  S: "bg-[#ff8fab] text-white shadow-[0_3px_0_#e0607f]",
+  A: "bg-[#ffb36b] text-white shadow-[0_3px_0_#e08a3a]",
+  B: "bg-sun text-[#5b3e00] shadow-[0_3px_0_var(--color-sun-deep)]",
+  C: "bg-[#a8dd7a] text-[#2f5a12] shadow-[0_3px_0_#7cba4c]",
+  avoid: "bg-meh text-white shadow-[0_3px_0_#6b778a]",
+};
+
+
 export const TIERS: Tier[] = [
   { id: "top", label: "Top 3", hint: "players' favorites, not part of the ranking" },
   { id: "S", label: "S", hint: `top ${pct(TIER_SHARES.S)}% most wanted` },

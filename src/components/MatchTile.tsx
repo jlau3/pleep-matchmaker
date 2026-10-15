@@ -6,13 +6,23 @@ import { CopyButton } from "./CopyButton";
 import { FitPair } from "./FitPair";
 import { FriendAction } from "./FriendAction";
 import { playerAvatar, playerName } from "./PlayerHeader";
+import { Top3Tiers } from "./Top3Tiers";
 
 /**
  * Grid view: one compact tile per player, like an in-game friend list. Icon,
  * name, both fits, Top 3 sprites, friend code and the request button; the
  * list view keeps the full breakdown.
  */
-export function MatchTile({ match, relation }: { match: MatchRow; relation: Relation }) {
+export function MatchTile({
+  match,
+  relation,
+  top3,
+}: {
+  match: MatchRow;
+  relation: Relation;
+  /** Sorting by your Top 3: your starred lines and their tiers on this player's list (instead of their own Top 3). */
+  top3?: { tops: string[]; tiers: Record<string, string> | undefined };
+}) {
   const name = playerName(match);
   const avatar = playerAvatar(match);
   const tops = linesFromIds(match.top_wants ?? []);
@@ -27,7 +37,9 @@ export function MatchTile({ match, relation }: { match: MatchRow; relation: Rela
         {name}
       </span>
       <FitPair they={match.match_pct} you={match.you_fit_pct} compact />
-      {match.votes_hidden ? (
+      {top3 ? (
+        <Top3Tiers tops={top3.tops} tiers={top3.tiers} compact />
+      ) : match.votes_hidden ? (
         <span className="text-xs text-slate-500">🔒 Votes friends-only</span>
       ) : (
         tops.length > 0 && (

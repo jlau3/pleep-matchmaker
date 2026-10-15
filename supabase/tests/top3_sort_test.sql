@@ -2,7 +2,7 @@
 
 -- 20261019000200_top3_sort.sql: Find New's "Your Top 3" sort.
 -- The viewer stars t3a and also wants t3b. Ann's three friends all want t3a
--- (her Tier List ranks the viewer's Top 3 first); Bob's want t3b; Cal has no
+-- (S on her Tier List); Bob's want t3b, so t3a is lower on his; Cal has no
 -- friends voting yet, so no list: last.
 insert into auth.users (id, raw_user_meta_data)
 select ('00000000-0000-0000-0022-' || lpad(g::text, 12, '0'))::uuid, jsonb_build_object('name', 't3s' || g || '#0')
@@ -25,8 +25,10 @@ select set_config('request.jwt.claim.sub', '00000000-0000-0000-0022-000000000001
 do $$
 declare order_ids text[];
 begin
-  select array_agg(right(b.user_id::text, 1) order by b.ordinality) into order_ids
-  from public.browse_players('top3', true, 50, 0) with ordinality as b
+  -- Every page (other tests leave plenty of players), in order.
+  select array_agg(right(b.user_id::text, 1) order by pg.n, b.ordinality) into order_ids
+  from generate_series(0, 9) pg(n)
+  cross join lateral public.browse_players('top3', true, 50, pg.n * 50, 120) with ordinality as b
   where b.user_id in ('00000000-0000-0000-0022-000000000002', '00000000-0000-0000-0022-000000000003', '00000000-0000-0000-0022-000000000004');
   assert order_ids = '{2,3,4}', format('Ann (your Top 3 on her list), then Bob, then Cal with no list: %s', order_ids);
 end $$;

@@ -2,6 +2,8 @@ import Link from "next/link";
 import { LineChips } from "@/components/LineChips";
 import { BrowseLayout } from "@/components/BrowseLayout";
 import { MatchTile } from "@/components/MatchTile";
+import { Top3Tiers } from "@/components/Top3Tiers";
+import { loadTop3Tiers } from "@/lib/top3Tiers";
 import { FriendAction } from "@/components/FriendAction";
 import { PlayerHeader, playerName } from "@/components/PlayerHeader";
 import { PlayerSearch, searchQuery } from "@/components/PlayerSearch";
@@ -37,10 +39,14 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
       everyone: opts.everyone,
       page_size: BROWSE_PAGE_SIZE,
       page_offset: (opts.page - 1) * BROWSE_PAGE_SIZE,
+      // Tiers count every candy line, voted or not (the "Your Top 3" sort).
+      line_count: LINES.length,
     }),
   ]);
   if (matchesResult.error) throw matchesResult.error;
   const matches = await withExtras(supabase, matchesResult.data as MatchRow[]);
+  // Sorting by your Top 3: show where each of yours sits on their Tier List.
+  const top3 = opts.sort === "top3" ? await loadTop3Tiers(supabase, matches.map((m) => m.user_id)) : null;
   // "For them" is a dash until a friend has voted (assume they have if the check isn't deployed yet).
   const friendsVoted = votedResult.error ? true : Boolean(votedResult.data);
   const total = Number(matches[0]?.total_count ?? 0);
@@ -154,6 +160,7 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
               {matches.map((match) => (
                 <li key={match.user_id} className="card p-4">
                   <PlayerHeader player={match} aside={<FitPair they={match.match_pct} you={match.you_fit_pct} />} />
+                {top3 && <Top3Tiers tops={tops} tiers={top3[match.user_id]} />}
                   <FitLists match={match} />
                   <NewPlayerNote match={match} name={playerName(match)} />
                   <div className="mt-4">
@@ -171,7 +178,12 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
             grid={
               <ul className="grid grid-cols-2 items-start gap-3 sm:grid-cols-3 lg:grid-cols-4">
                 {matches.map((match) => (
-                  <MatchTile key={match.user_id} match={match} relation={relationOf(relations, match.user_id)} />
+                  <MatchTile
+                    key={match.user_id}
+                    match={match}
+                    relation={relationOf(relations, match.user_id)}
+                    top3={top3 ? { tops, tiers: top3[match.user_id] } : undefined}
+                  />
                 ))}
               </ul>
             }
