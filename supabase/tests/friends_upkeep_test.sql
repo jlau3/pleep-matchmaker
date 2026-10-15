@@ -6,7 +6,7 @@ insert into auth.users (id, raw_user_meta_data) values
   ('00000000-0000-0000-0015-000000000002', '{"name":"fu_ann#0"}'),
   ('00000000-0000-0000-0015-000000000003', '{"name":"fu_bob#0"}'),
   ('00000000-0000-0000-0015-000000000004', '{"name":"fu_cal#0"}');
-update public.profiles set ign = 'FuAnnIgn', friend_code = '771122223377', open_to_friends = false
+update public.profiles set ign = 'FuAnnIgn', friend_code = '771122223377', open_to_friends = false, code_visibility = 'friends'
   where id = '00000000-0000-0000-0015-000000000002';
 update public.profiles set ign = 'FuBobIgn', friend_code = '444455556666'
   where id = '00000000-0000-0000-0015-000000000003';

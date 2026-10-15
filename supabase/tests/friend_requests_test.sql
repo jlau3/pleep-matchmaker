@@ -10,7 +10,7 @@ insert into auth.users (id, raw_user_meta_data) values
   ('00000000-0000-0000-0020-000000000005', '{"name":"fr_eve#0"}');
 update public.profiles set friend_code = '200000000001' where id = '00000000-0000-0000-0020-000000000001';
 update public.profiles set friend_code = '200000000002' where id = '00000000-0000-0000-0020-000000000002';
-update public.profiles set friend_code = '200000000003', open_to_friends = false where id = '00000000-0000-0000-0020-000000000003';
+update public.profiles set friend_code = '200000000003', open_to_friends = false, code_visibility = 'friends' where id = '00000000-0000-0000-0020-000000000003';
 
 -- Senders need an IGN and friend code (20261020000300).
 select public.test_complete_profiles('00000000-0000-0000-0020-');
@@ -156,6 +156,7 @@ insert into public.friends (user_id, friend_id) values ('00000000-0000-0000-0020
 \ir ../migrations/20261021000500_requests_show_reddit.sql
 \ir ../migrations/20261021000600_sent_requests_show_discord.sql
 \ir ../migrations/20261021000700_identity_required.sql
+\ir ../migrations/20261021000800_code_visibility.sql
 do $$ begin
   assert not exists (select 1 from public.friends where user_id = '00000000-0000-0000-0020-000000000004' and friend_id = '00000000-0000-0000-0020-000000000003'), 'one-way add removed';
   assert (select status from public.friend_requests where from_id = '00000000-0000-0000-0020-000000000004' and to_id = '00000000-0000-0000-0020-000000000003') = 'open', 'now a request';

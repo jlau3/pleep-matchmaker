@@ -1,13 +1,14 @@
 \set ON_ERROR_STOP on
 
--- 20261021000100_hide_code.sql: with share_code off, strangers who find you
--- (Find New, IGN search) don't get your friend code; typing it, a request
--- from you, or being friends still shows it.
+-- Friend code visibility (20261021000100_hide_code.sql, now
+-- 20261021000800_code_visibility.sql): at 'friends', strangers who find you
+-- (Find New, IGN search) don't get your code; typing it, a request from you,
+-- or being friends still shows it. Then 'search' and 'nobody'.
 insert into auth.users (id, raw_user_meta_data) values
   ('00000000-0000-0000-0032-000000000001', '{"name":"hc_hider#0"}'),
   ('00000000-0000-0000-0032-000000000002', '{"name":"hc_viewer#0"}'),
   ('00000000-0000-0000-0032-000000000003', '{"name":"hc_sharer#0"}');
-update public.profiles set ign = 'HiddenCode', friend_code = '777700000001', share_code = false where id = '00000000-0000-0000-0032-000000000001';
+update public.profiles set ign = 'HiddenCode', friend_code = '777700000001', code_visibility = 'friends' where id = '00000000-0000-0000-0032-000000000001';
 update public.profiles set ign = 'HcViewer', friend_code = '777700000002' where id = '00000000-0000-0000-0032-000000000002';
 update public.profiles set ign = 'HcSharer', friend_code = '777700000003' where id = '00000000-0000-0000-0032-000000000003';
 insert into public.preferences (user_id, line_id, choice)
@@ -57,11 +58,43 @@ do $$ begin
   assert (select friend_code from public.lookup_players('HiddenCode')) = '777700000001', 'friend sees code in search';
 end $$;
 
--- Players can't flip someone else's setting.
-update public.profiles set share_code = true where id = '00000000-0000-0000-0032-000000000001';
+-- 'nobody': not even friends, nor the player they asked; still themselves and a typed code.
+reset role;
+update public.profiles set code_visibility = 'nobody' where id = '00000000-0000-0000-0032-000000000001';
+set role authenticated;
+do $$ begin
+  assert (select friend_code from public.get_friends() where user_id = '00000000-0000-0000-0032-000000000001') is null, 'nobody: friend doesn''t see it';
+  assert (select friend_code from public.lookup_players('HiddenCode') where user_id = '00000000-0000-0000-0032-000000000001') is null, 'nobody: not in search either';
+  assert (select friend_code from public.lookup_players('7777 0000 0001') where user_id = '00000000-0000-0000-0032-000000000001') = '777700000001', 'nobody: typed code still shown';
+end $$;
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-0032-000000000003', false);
+do $$ begin
+  assert (select friend_code from public.get_friend_requests() where user_id = '00000000-0000-0000-0032-000000000001') is null,
+    'nobody: their request doesn''t carry it';
+end $$;
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-0032-000000000001', false);
+do $$ begin
+  assert (select friend_code from public.lookup_players('HiddenCode') where user_id = '00000000-0000-0000-0032-000000000001') = '777700000001', 'nobody: you still see your own';
+end $$;
+
+-- 'search': strangers who search see it, Find New doesn't.
+reset role;
+update public.profiles set code_visibility = 'search' where id = '00000000-0000-0000-0032-000000000001';
+delete from public.friends where user_id in ('00000000-0000-0000-0032-000000000001', '00000000-0000-0000-0032-000000000002')
+  and friend_id in ('00000000-0000-0000-0032-000000000001', '00000000-0000-0000-0032-000000000002');
+set role authenticated;
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-0032-000000000002', false);
+do $$ begin
+  assert (select friend_code from public.lookup_players('HiddenCode') where user_id = '00000000-0000-0000-0032-000000000001') = '777700000001', 'search: shown in search';
+  assert not exists (select 1 from public.browse_all()
+                     where user_id = '00000000-0000-0000-0032-000000000001' and friend_code is not null), 'search: not in Find New';
+end $$;
+
+-- Players can't change someone else's setting.
+update public.profiles set code_visibility = 'matches' where id = '00000000-0000-0000-0032-000000000001';
 reset role;
 do $$ begin
-  assert not (select share_code from public.profiles where id = '00000000-0000-0000-0032-000000000001'), 'others untouched';
+  assert (select code_visibility from public.profiles where id = '00000000-0000-0000-0032-000000000001') = 'search', 'others untouched';
 end $$;
 
 \echo 'ALL HIDE CODE TESTS PASSED'

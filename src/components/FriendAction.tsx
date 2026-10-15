@@ -125,7 +125,7 @@ export function FriendAction({
                 (status) => (status === "friends" ? "friend" : "sent"),
                 showsCode
                   ? `Also send ${name} a friend request in Pokémon Sleep with the code above.`
-                  : `${name} sees your friend code with the request, so they can add you in Pokémon Sleep once they accept.`,
+                  : `Once ${name} accepts, add each other in Pokémon Sleep. Your request shows them your code unless you've hidden it from everyone.`,
               )
             }
             className={solid}

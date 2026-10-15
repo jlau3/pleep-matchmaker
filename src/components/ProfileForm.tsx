@@ -1,9 +1,9 @@
 "use client";
 
-import { useActionState, useRef, useState } from "react";
+import { useActionState, useRef } from "react";
 import { type ProfileFormState, updateProfile } from "@/app/actions";
 import { formatFriendCode } from "@/lib/format";
-import type { OwnProfile } from "@/lib/types";
+import type { CodeVisibility, OwnProfile } from "@/lib/types";
 import { AvatarPicker } from "./AvatarPicker";
 import { DiscordIcon, RedditIcon } from "./BrandIcons";
 
@@ -43,6 +43,14 @@ const card = "card space-y-4 p-5";
 
 type Visibility = "everyone" | "known" | "friends";
 
+/** Who sees your friend code, widest first (profiles.code_visibility, 20261021000800_code_visibility.sql). */
+const CODE_VISIBILITY: { value: CodeVisibility; title: string; text: string }[] = [
+  { value: "matches", title: "Find New matches", text: "Anyone who finds you, so they can add you in Pokémon Sleep straight away." },
+  { value: "search", title: "People who search me", text: "Players who look up your IGN, and friends. Not shown in Find New." },
+  { value: "friends", title: "Only my friends", text: "Strangers see your IGN and icon; you add each other in the game once you're friends." },
+  { value: "nobody", title: "Nobody", text: "Not even friends. You'll need to add them in Pokémon Sleep with their code." },
+];
+
 /** "Who can find you": each option sets search (allow_lookup) and Find New (open_to_friends) together. */
 const VISIBILITY: { value: Visibility; title: string; text: string }[] = [
   { value: "everyone", title: "Everyone", text: "Suggested to good matches in Find New, and findable by your exact IGN or friend code." },
@@ -67,9 +75,7 @@ export function ProfileForm({ profile, friendListFull }: { profile: OwnProfile; 
     if (e.currentTarget.value !== e.currentTarget.defaultValue) save();
   };
   const hint = "block text-xs text-slate-500";
-  const initialVisibility: Visibility = !profile.allow_lookup ? "friends" : profile.open_to_friends ? "everyone" : "known";
-  // Tracked so the friend code switch shows only under Everyone.
-  const [visibility, setVisibility] = useState<Visibility>(initialVisibility);
+  const visibility: Visibility = !profile.allow_lookup ? "friends" : profile.open_to_friends ? "everyone" : "known";
   const status = (
     <span className="text-xs" aria-live="polite">
       {pending ? (
@@ -141,11 +147,8 @@ export function ProfileForm({ profile, friendListFull }: { profile: OwnProfile; 
                 type="radio"
                 name="visibility"
                 value={option.value}
-                defaultChecked={initialVisibility === option.value}
-                onChange={() => {
-                  setVisibility(option.value);
-                  save();
-                }}
+                defaultChecked={visibility === option.value}
+                onChange={save}
                 className="mt-1 h-4 w-4 accent-[var(--color-night)]"
               />
               <span>
@@ -158,19 +161,33 @@ export function ProfileForm({ profile, friendListFull }: { profile: OwnProfile; 
             </label>
           ))}
         </fieldset>
-        {visibility === "everyone" && profile.share_code !== undefined && (
-          <div className="border-t border-slate-200 dark:border-slate-700">
-            <input type="hidden" name="has_share_code" value="1" />
-            <Toggle
-              name="share_code"
-              defaultChecked={profile.share_code}
-              onChange={save}
-              title="Show my friend code before we're friends"
-              detail="Off: they see your IGN and icon. Their friend request shows you their code, so you add them in Pokémon Sleep once you accept. Friends always see your code."
-            >
-              Players who find you in Find New or by your IGN can add you in Pokémon Sleep straight away.
-            </Toggle>
-          </div>
+        {profile.code_visibility !== undefined && (
+          <fieldset className="space-y-2 border-t border-slate-200 pt-4 dark:border-slate-700">
+            <legend className="mb-2 text-sm font-semibold">Who can see your friend code</legend>
+            {CODE_VISIBILITY.map((option) => (
+              <label
+                key={option.value}
+                className="flex cursor-pointer items-start gap-3 rounded-2xl border-2 border-transparent bg-white px-3 py-2 has-[:checked]:border-night dark:bg-night-deep dark:has-[:checked]:border-sun"
+              >
+                <input
+                  type="radio"
+                  name="code_visibility"
+                  value={option.value}
+                  defaultChecked={profile.code_visibility === option.value}
+                  onChange={save}
+                  className="mt-1 h-4 w-4 accent-[var(--color-night)]"
+                />
+                <span>
+                  <span className="block text-sm font-semibold">{option.title}</span>
+                  <span className="block text-sm text-slate-600 dark:text-slate-300">{option.text}</span>
+                </span>
+              </label>
+            ))}
+            <p className="text-xs text-slate-500">
+              Each step hides it from more people. Anyone who already typed your code can still find you by it, and a friend
+              request you send shows your code to that player unless you pick Nobody.
+            </p>
+          </fieldset>
         )}
         {profile.discord_username && (
           <div className="border-t border-slate-200 dark:border-slate-700">

@@ -75,6 +75,9 @@ export interface BlockedRow {
   blocked_at: string;
 }
 
+/** Who sees your friend code, widest first: Find New matches, searchers, friends, nobody. */
+export type CodeVisibility = "matches" | "search" | "friends" | "nobody";
+
 export interface OwnProfile {
   id: string;
   discord_username: string | null;
@@ -90,8 +93,8 @@ export interface OwnProfile {
   votes_private?: boolean;
   game_avatar?: string | null;
   reddit_username?: string | null;
-  /** Strangers who find you (Find New, IGN search) see your friend code. Friends always do. */
-  share_code?: boolean;
+  /** Who sees your friend code (20261021000800_code_visibility.sql). */
+  code_visibility?: CodeVisibility;
   /** Friends see their Reddit name. Other players never do. */
   show_reddit?: boolean;
   last_seen_at: string;
