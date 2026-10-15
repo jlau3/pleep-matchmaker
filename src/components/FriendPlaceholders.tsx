@@ -85,7 +85,7 @@ export function FriendPlaceholders({
       <div className="mt-3 space-y-3">
         <p className="text-sm text-slate-500">
           Add their <b>exact IGN</b>, spelled as it shows in their Pokémon Sleep profile, as a reminder and search now and
-          then. We flag a name here when someone with that exact name joins (capitals, spaces and symbols like ★ don&apos;t
+          then. We flag a name here when someone with that exact name joins (capitals, spaces and symbols don&apos;t
           matter). Once they join, add them and they drop off this list.
         </p>
         <form
