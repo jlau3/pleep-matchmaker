@@ -30,6 +30,7 @@ export default async function VotePage() {
     <div>
       <SubTabs tabs={PROFILE_TABS} active="/vote" />
       <VoteBoard
+        userId={user.id}
         initial={choices} initialTops={tops} firstVisit={newIds.length === LINES.length} newCandy={newCandy}
         crowd={crowd} showGuideIntro={showGuideIntro} />
     </div>

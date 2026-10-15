@@ -1,51 +1,62 @@
-/** Where a new player stands, read off their real data (SetupChecklist). */
+/** Setup checks follow the player's saved data, rather than visits or button clicks. */
 export interface SetupProgress {
-  /** IGN, friend code and an in-game icon are all set. */
-  profile: boolean;
-  /** At least one Want or Don't Want. */
+  name: boolean;
+  code: boolean;
+  picture: boolean;
+  /** At least one Want or Don't Want. Neutral is the default. */
   voted: boolean;
-  /** Has a friend, or an open request out to someone. */
+  /** An accepted friend or an unexpired outgoing request. */
   friends: boolean;
 }
 
-export type SetupStepId = "profile" | "vote" | "friends" | "tiers";
+export type SetupStepId = "name" | "code" | "picture" | "vote" | "friends" | "tiers";
 
 export interface SetupStep {
   id: SetupStepId;
   label: string;
-  /** What to do, shown while it's the current step. */
   next: string;
   href: string;
   cta: string;
   done: boolean;
 }
 
-/**
- * The four setup steps in order. The Tier List step is never done here: the
- * checklist finishes when the player opens the Tier List with the first three
- * done (or skips it).
- */
 export function setupSteps(progress: SetupProgress): SetupStep[] {
   return [
     {
-      id: "profile",
-      label: "Profile",
-      next: "Add your in-game name, friend code and the icon you use in Pokémon Sleep, so friends know it's you.",
+      id: "name",
+      label: "In-game name",
+      next: "Add your name exactly as it appears in Pokémon Sleep, so friends can find you.",
       href: "/profile?setup=profile",
-      cta: "Set up profile",
-      done: progress.profile,
+      cta: "Add my name",
+      done: progress.name,
+    },
+    {
+      id: "code",
+      label: "Friend code",
+      next: "Add your 12-digit Pokémon Sleep friend code. Find it in Research Community in the game.",
+      href: "/profile?setup=profile",
+      cta: "Add my friend code",
+      done: progress.code,
+    },
+    {
+      id: "picture",
+      label: "Profile picture",
+      next: "Choose the Pokémon profile picture you use in the game. Your Discord picture doesn't complete this step.",
+      href: "/profile?setup=profile",
+      cta: "Choose my picture",
+      done: progress.picture,
     },
     {
       id: "vote",
-      label: "Vote",
+      label: "Candy choices",
       next: "Pick Want or Don't Want for the candy you care about. Start with a few; the rest can stay Neutral.",
       href: "/vote",
-      cta: "Let's vote",
+      cta: "Choose my candy",
       done: progress.voted,
     },
     {
       id: "friends",
-      label: "Add friends",
+      label: "Add a friend",
       next: "Look up your Pokémon Sleep friends by their exact in-game name, or find new friends. Send a request to get started.",
       href: "/friends",
       cta: "Add friends",
@@ -53,7 +64,7 @@ export function setupSteps(progress: SetupProgress): SetupStep[] {
     },
     {
       id: "tiers",
-      label: "Tier List",
+      label: "See Tier List",
       next: "See which candies your friends want most. It fills in as they accept and vote.",
       href: "/tiers?pool=friends",
       cta: "See Tier List",
@@ -62,7 +73,12 @@ export function setupSteps(progress: SetupProgress): SetupStep[] {
   ];
 }
 
-/** The first step not done yet. */
 export function currentStep(steps: SetupStep[]): SetupStep {
   return steps.find((step) => !step.done) ?? steps[steps.length - 1];
+}
+
+/** Live completion on My Votes, emitted only after the vote was saved successfully. */
+export const SETUP_VOTE_EVENT = "pm-setup-vote-saved";
+export function notifySetupVotesSaved(userId: string, voted: boolean) {
+  window.dispatchEvent(new CustomEvent(SETUP_VOTE_EVENT, { detail: { userId, voted } }));
 }

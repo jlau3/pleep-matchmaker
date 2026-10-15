@@ -1,11 +1,14 @@
 import { cookies } from "next/headers";
 import { SETUP_COOKIE } from "@/lib/help";
+import { parseAvatar } from "@/lib/avatars";
+import { normalizeFriendCode } from "@/lib/format";
+import { REQUEST_TTL_DAYS } from "@/lib/relations";
 import { setupSteps } from "@/lib/setup";
 import { getAuth } from "@/lib/supabase/server";
 import { SetupChecklistView } from "./SetupChecklistView";
 
 /**
- * "Get set up": Profile → Vote → Add friends → Tier List, as a card under the
+ * "Get set up": name, code, picture, votes, friends and Tier List, under the
  * nav on every page until the player finishes or skips it. Each step ticks
  * itself off from their real data, so it can't drift out of sync. Absent when
  * signed out, once done (the cookie skips the lookup), or if the lookup fails
@@ -19,13 +22,20 @@ export async function SetupChecklist() {
     supabase.from("profiles").select("ign, friend_code, game_avatar, setup_done").eq("id", userId).maybeSingle(),
     supabase.from("preferences").select("line_id", { count: "exact", head: true }).eq("user_id", userId).neq("choice", "undecided"),
     supabase.from("friends").select("friend_id", { count: "exact", head: true }).eq("user_id", userId),
-    supabase.from("friend_requests").select("to_id", { count: "exact", head: true }).eq("from_id", userId).eq("status", "open"),
+    supabase
+      .from("friend_requests")
+      .select("to_id", { count: "exact", head: true })
+      .eq("from_id", userId)
+      .eq("status", "open")
+      .gt("created_at", new Date(Date.now() - REQUEST_TTL_DAYS * 86_400_000).toISOString()),
   ]);
   if (profile.error || !profile.data || votes.error || friends.error) return null;
   const row = profile.data as { ign: string | null; friend_code: string | null; game_avatar: string | null; setup_done: boolean };
   if (row.setup_done) return <SetupChecklistView userId={userId} done steps={[]} />;
   const steps = setupSteps({
-    profile: Boolean(row.ign && row.friend_code && row.game_avatar),
+    name: Boolean(row.ign?.trim()),
+    code: Boolean(row.friend_code && normalizeFriendCode(row.friend_code)),
+    picture: Boolean(parseAvatar(row.game_avatar ?? "")),
     voted: Boolean(votes.count),
     friends: Boolean(friends.count) || Boolean(!sent.error && sent.count),
   });

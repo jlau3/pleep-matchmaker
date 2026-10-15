@@ -6,6 +6,7 @@ import { setChoice, setTop, swapTop } from "@/app/actions";
 import { CHOICE_LABEL, type Choice, LINES, LINES_BY_ID, lineSpriteUrl, MAX_TOP } from "@/lib/lines";
 import { type CrowdHint, crowdHint } from "@/lib/crowd";
 import { rethrowIfNavigation, SAVE_FAILED } from "@/lib/saveError";
+import { notifySetupVotesSaved } from "@/lib/setup";
 import { markVotesChanged } from "@/lib/votesChanged";
 import type { LineVotes } from "@/lib/tiers";
 import { CollectionGrid } from "./CollectionGrid";
@@ -43,6 +44,7 @@ const pill = (active: boolean) =>
  * the player's Top 3, shown pinned above the list. Every click saves immediately.
  */
 export function VoteBoard({
+  userId,
   initial,
   initialTops,
   firstVisit,
@@ -50,6 +52,7 @@ export function VoteBoard({
   crowd,
   showGuideIntro = false,
 }: {
+  userId: string;
   initial: Record<string, Choice>;
   initialTops: string[];
   firstVisit: boolean;
@@ -61,6 +64,11 @@ export function VoteBoard({
   showGuideIntro?: boolean;
 }) {
   const [choices, setChoices] = useState(initial);
+  const savedChoices = useRef({ ...initial });
+  function reportSavedChoice(lineId: string, choice: Choice) {
+    savedChoices.current[lineId] = choice;
+    notifySetupVotesSaved(userId, Object.values(savedChoices.current).some((value) => value !== "undecided"));
+  }
   const [tops, setTops] = useState(() => new Set(initialTops));
   const [error, setError] = useState<string | null>(null);
   /** Line the player tried to star while their Top 3 was full; opens the swap prompt. */
@@ -179,7 +187,7 @@ export function VoteBoard({
     if (failure) {
       setError(failure);
       apply(previous.choice, previous.top);
-    }
+    } else reportSavedChoice(lineId, next.choice);
   }
 
   function choose(lineId: string, choice: Choice) {
@@ -227,7 +235,7 @@ export function VoteBoard({
         else delete out[inId];
         return out;
       });
-    }
+    } else reportSavedChoice(inId, "want");
   }
 
   const topLines = LINES.filter((line) => tops.has(line.id));
