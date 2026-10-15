@@ -128,7 +128,7 @@ export function ProfileForm({ profile, friendListFull }: { profile: OwnProfile; 
             defaultChecked={profile.allow_lookup}
             onChange={save}
             title="Findable by search"
-            detail="Off also takes your votes off your friends' Tier Lists, and they see your list as private."
+            detail="Off only stops searches: friends still see everything, and Find New still shows you if that's on."
           >
             People can find you by searching your exact IGN or friend code
             {profile.discord_username && profile.show_discord ? " (or Discord name)" : ""}.

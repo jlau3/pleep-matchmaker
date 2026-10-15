@@ -73,14 +73,14 @@ begin
   assert (select match_pct from public.get_friends() where discord_username = 'ftwo') = 50, 'f2 fit';
 end $$;
 
--- A friend with a private list doesn't count toward the group: with f2 hidden,
--- fc (only f2 wants it) drops out, so c4 goes from 25% to 0%.
+-- A friend who turns search off still counts toward the group (since
+-- 20261020000700_lookup_only_search.sql): c4 stays at 25%.
 reset role;
 update public.profiles set allow_lookup = false where discord_username = 'ftwo';
 set role authenticated;
 do $$ begin
-  assert (select match_pct from public.lookup_players('cfour')) = 0,
-    format('hidden friend excluded %s', (select match_pct from public.lookup_players('cfour')));
+  assert (select match_pct from public.lookup_players('cfour')) = 25,
+    format('unsearchable friend still counts %s', (select match_pct from public.lookup_players('cfour')));
 end $$;
 reset role;
 update public.profiles set allow_lookup = true where discord_username = 'ftwo';
