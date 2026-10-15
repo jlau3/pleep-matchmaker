@@ -9,7 +9,7 @@ import type { LineStatRow } from "./types";
 export const COMMUNITY_STATS_TTL_SECONDS = 300;
 
 export interface CommunityStats {
-  /** Want / don't-want / star counts per line among active players. */
+  /** Want / don't-want / star counts per line among active players, and how many of them have seen it. */
   votes: Record<string, LineVotes>;
   /** Active players with at least one want or don't-want. */
   voters: number;
@@ -39,11 +39,16 @@ export async function loadCommunityStats(supabase: SupabaseClient): Promise<Comm
       if (count.error) throw count.error;
       const votes: Record<string, LineVotes> = {};
       for (const row of stats.data as LineStatRow[]) {
-        votes[row.line_id] = { wants: Number(row.wants), dontWants: Number(row.dont_wants), tops: Number(row.tops) };
+        votes[row.line_id] = {
+          wants: Number(row.wants),
+          dontWants: Number(row.dont_wants),
+          tops: Number(row.tops),
+          ...(row.seen != null && { seen: Number(row.seen) }),
+        };
       }
       return { votes, voters: Number(count.data) };
     },
-    ["community-stats-v1"],
+    ["community-stats-v2"],
     { revalidate: COMMUNITY_STATS_TTL_SECONDS },
   )();
 }

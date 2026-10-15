@@ -1,6 +1,6 @@
 "use client";
 
-import type { CrowdHint } from "@/lib/crowd";
+import { CROWD_MIN_VOTERS, type CrowdHint } from "@/lib/crowd";
 import { type CandyLine, CHOICE_LABEL, type Choice, spriteUrl } from "@/lib/lines";
 import { ChoiceButtons } from "./ChoiceButtons";
 import { StarButton } from "./StarButton";
@@ -46,8 +46,10 @@ export function LineCard({
   );
 }
 
-function hintText({ lean, wantPct, dontPct }: CrowdHint): string {
-  const shares = `${wantPct}% want · ${dontPct}% don't`;
+function hintText({ lean, wantPct, dontPct, seen, early }: CrowdHint): string {
+  if (seen < CROWD_MIN_VOTERS) return `Too few votes yet (${seen} so far)`;
+  // A new line: shares are out of those who've voted on it, and more are still to come.
+  const shares = `${wantPct}% want · ${dontPct}% don't${early ? ` · ${seen} votes so far` : ""}`;
   if (lean !== "undecided") return `Most players: ${CHOICE_LABEL[lean]} (${shares})`;
   return Math.max(wantPct, dontPct) >= 25 ? `Players are split (${shares})` : `Few players feel strongly (${shares})`;
 }

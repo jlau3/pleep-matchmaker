@@ -58,6 +58,8 @@ export interface LineStatRow {
   wants: number;
   dont_wants: number;
   tops: number;
+  /** Active voters with any vote on it, Neutral included (20261020000200_line_seen.sql); missing before. */
+  seen?: number;
 }
 
 export interface BlockedRow {
