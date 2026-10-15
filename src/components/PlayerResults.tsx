@@ -70,7 +70,7 @@ export function PlayerResults({
                   )
                 }
               />
-              <PlayerLists wants={player.wants} dontWants={player.dont_wants} topWants={player.top_wants} />
+              <PlayerLists wants={player.wants} dontWants={player.dont_wants} topWants={player.top_wants} hidden={player.votes_hidden} />
             </li>
           ))}
         </ul>

@@ -247,7 +247,9 @@ function FitLists({ match }: { match: MatchRow }) {
   const chips = (ids: string[] | undefined) => (ids ?? []).flatMap((id) => LINES_BY_ID.get(id) ?? []);
   const toYou = { want: match.you_fit_wants ?? [], dont: match.you_fit_dont_wants ?? [] };
   const toThem = { want: match.fit_wants, dont: match.fit_dont_wants };
-  const any = toYou.want.length + toYou.dont.length + toThem.want.length + toThem.dont.length > 0;
+  // Friends-only votes: their side comes back empty, so don't present it as "0 they want".
+  const hidden = Boolean(match.votes_hidden);
+  const any = hidden || toYou.want.length + toYou.dont.length + toThem.want.length + toThem.dont.length > 0;
   if (tops.length === 0 && !any) return null;
   const group = (title: string, color: string, ids: string[]) =>
     ids.length > 0 && (
@@ -267,7 +269,8 @@ function FitLists({ match }: { match: MatchRow }) {
       {any && (
         <details>
           <summary className="cursor-pointer text-sm font-semibold">
-            They&apos;d send you {toYou.want.length} you want · You&apos;d send them {toThem.want.length} they want
+            They&apos;d send you {toYou.want.length} you want ·{" "}
+            {hidden ? "Their votes are friends-only" : <>You&apos;d send them {toThem.want.length} they want</>}
           </summary>
           <div className="mt-3 space-y-5">
             <div className="space-y-3">
@@ -280,9 +283,15 @@ function FitLists({ match }: { match: MatchRow }) {
             </div>
             <div className="space-y-3">
               <h4 className="font-bold">You&apos;d send them</h4>
+              {hidden && (
+                <p className="text-sm text-slate-500">
+                  They share their votes with friends only, so this shows once you&apos;re friends. Their % for them still
+                  counts them.
+                </p>
+              )}
               {group("Their wants matching your friends' wants", "text-want", toThem.want)}
               {group("Their don't-wants matching your friends' wants", "text-dont", toThem.dont)}
-              {toThem.want.length + toThem.dont.length === 0 && (
+              {!hidden && toThem.want.length + toThem.dont.length === 0 && (
                 <p className="text-sm text-slate-500">Nothing they've voted on is on your list yet.</p>
               )}
             </div>

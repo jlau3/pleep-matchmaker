@@ -13,6 +13,8 @@ export interface PlayerContact {
   game_avatar?: string | null;
   /** Reddit handle (unverified), added by withExtras. */
   reddit_username?: string | null;
+  /** Friends-only votes they keep from you: lists come back empty, match %s still count them. Added by withExtras. */
+  votes_hidden?: boolean;
 }
 
 export interface MatchRow extends PlayerContact {

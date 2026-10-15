@@ -76,6 +76,11 @@ export function PlayerHeader({
               <span className="truncate">u/{player.reddit_username}</span>
             </span>
           )}
+          {player.votes_hidden && (
+            <span className="block text-sm text-slate-500" title="Their match %s still count their votes">
+              🔒 Votes shared with friends only
+            </span>
+          )}
         </div>
         {aside}
       </div>
