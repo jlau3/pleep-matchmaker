@@ -40,6 +40,7 @@ jobs:
           python3 scripts/build_lines.py
           python3 scripts/build_icons.py --missing-only
           python3 scripts/build_islands.py
+          python3 scripts/build_avatars.py
 
       - name: Anything changed?
         id: diff
@@ -83,6 +84,7 @@ jobs:
           add-paths: |
             src/data/**
             public/sprites/**
+            public/avatars/**
             scripts/icons-state.json
 
       - name: Ping Discord
