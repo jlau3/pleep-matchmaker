@@ -50,15 +50,13 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
   const picked = Object.values(choices).filter((c) => c !== "undecided").length;
   const unsorted = LINES.length - Object.keys(choices).length;
 
-  // A shown Discord name lets friends find you even without an IGN (see the notice below).
-  const shownDiscord = profile.show_discord ? profile.discord_username : null;
-
   const notices: React.ReactNode[] = [];
-  if (!profile.ign && !shownDiscord)
+  // Other players only see your IGN (Discord names are friends-only), and Find New skips players without one.
+  if (!profile.ign)
     notices.push(
       <>
-        Add your in-game name in <Link href="/profile" className="underline">Profile</Link> so friends can recognize and find
-        you{profile.discord_username ? " (your Discord name is hidden)" : ""}.
+        Add your in-game name in <Link href="/profile" className="underline">Profile</Link> so other players can recognize
+        and find you. Until then you don&apos;t show up here.
       </>,
     );
   if (!profile.friend_code)

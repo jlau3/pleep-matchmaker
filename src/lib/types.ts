@@ -84,7 +84,7 @@ export interface OwnProfile {
   friend_code: string | null;
   open_to_friends: boolean;
   allow_lookup: boolean;
-  /** Whether other players see (and can search) their Discord name and avatar. */
+  /** Whether their friends see (and can search) their Discord name and avatar. Other players never do. */
   show_discord: boolean;
   /** Wants, don't-wants and Top 3 show only to people on your friend list. */
   votes_private?: boolean;

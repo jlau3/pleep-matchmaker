@@ -70,17 +70,17 @@ select discord_username, match_pct, fit_wants, fit_dont_wants from public.get_ma
 do $$
 declare r record;
 begin
-  select * into r from public.get_matches() where discord_username = 'bob';
+  select * into r from public.get_matches() where user_id = public.test_uid('bob');
   assert r.match_pct = 60, format('bob pct %s', r.match_pct);
   assert cardinality(r.fit_wants) = 6, 'bob fit wants';
   assert r.friend_code is not null, 'contact info returned for match';
 
-  select * into r from public.get_matches() where discord_username = 'cara';
+  select * into r from public.get_matches() where user_id = public.test_uid('cara');
   assert r.match_pct = 60, format('cara pct %s', r.match_pct);
   assert r.fit_dont_wants = '{w10,w9}', format('cara dont-wants %s', r.fit_dont_wants);
 
-  assert not exists (select 1 from public.get_matches() where discord_username = 'dan'), 'dan below min shared wants';
-  assert not exists (select 1 from public.get_matches() where discord_username = 'eve'), 'eve stale';
+  assert not exists (select 1 from public.get_matches() where user_id = public.test_uid('dan')), 'dan below min shared wants';
+  assert not exists (select 1 from public.get_matches() where user_id = public.test_uid('eve')), 'eve stale';
   assert (select count(*) from public.get_matches()) = 2, 'exactly two matches';
 end $$;
 
@@ -93,7 +93,7 @@ end $$;
 -- Blocking hides in both directions.
 insert into public.blocks (blocker_id, blocked_id) values (auth.uid(), '00000000-0000-0000-0000-00000000000b');
 do $$ begin
-  assert not exists (select 1 from public.get_matches() where discord_username = 'bob'), 'blocked hidden';
+  assert not exists (select 1 from public.get_matches() where user_id = public.test_uid('bob')), 'blocked hidden';
   assert not exists (select 1 from public.lookup_players('bob') where user_id = '00000000-0000-0000-0000-00000000000b'), 'blocked hidden from lookup';
   assert (select count(*) from public.get_blocked()) = 1, 'get_blocked';
 end $$;
@@ -104,7 +104,7 @@ reset role;
 update public.profiles set open_to_friends = false where discord_username = 'bob';
 set role authenticated;
 do $$ begin
-  assert not exists (select 1 from public.get_matches() where discord_username = 'bob'), 'closed hidden from matches';
+  assert not exists (select 1 from public.get_matches() where user_id = public.test_uid('bob')), 'closed hidden from matches';
   assert exists (select 1 from public.lookup_players('BOB') where user_id = '00000000-0000-0000-0000-00000000000b'), 'closed still found by lookup';
 end $$;
 

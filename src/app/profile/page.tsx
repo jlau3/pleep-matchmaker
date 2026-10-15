@@ -31,7 +31,7 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
   const linkNotice = errorText
     ? { tone: "error" as const, text: errorText }
     : linked === "discord"
-      ? { tone: "ok" as const, text: "Discord linked. Your Discord name now shows to friends; you can hide it above." }
+      ? { tone: "ok" as const, text: "Discord linked. Your Discord name now shows to your friends; you can hide it under Privacy." }
       : linked === "google"
         ? { tone: "ok" as const, text: "Google linked. You can now sign in with either." }
         : linked === "removed"

@@ -45,8 +45,8 @@ export default function PrivacyPage() {
             matching after 2 months. If you remove a friend and say they stopped playing, we note that too.
           </li>
           <li>
-            <b>Feedback you send.</b> The message, the page you sent it from, and your Discord name or IGN, delivered to the
-            developer&apos;s private Discord channel.
+            <b>Feedback you send.</b> The message and the page you sent it from, with your names, friend code, email and
+            sign-in methods so the developer can reply, delivered to the developer&apos;s private Discord channel.
           </li>
           <li>
             <b>Cookies.</b> Only ones the app needs: your sign-in session, and small preferences like your theme and whether
@@ -58,19 +58,20 @@ export default function PrivacyPage() {
       <Section title="Who can see what">
         <ul className="list-disc space-y-1 pl-5">
           <li>
-            <b>Other players</b> can see your IGN, friend code, profile icon, Reddit name, candy votes and Top 3 (only your
-            friends, if <b>Friends-only votes</b> is on), when you were last active, and your Discord name and avatar if{" "}
-            <b>Show my Discord name</b> is on. They see this when they search for your name (or
-            something close to it) or friend code, when you appear in their matches, when you send them a friend request (your
-            friend code always shows to the player you ask), or when you&apos;re friends.
+            <b>Other players</b> can see your IGN, friend code, profile icon, Reddit name, roughly when you were last active
+            (&quot;active this week&quot;), and match %s, depending on <b>Who can find you</b>: when they search your IGN
+            or friend code, when you appear in their Find New, or when you send them a friend request.
+          </li>
+          <li>
+            <b>Only your friends</b> see your candy votes and Top 3, and your Discord name and picture if{" "}
+            <b>Show my Discord name to friends</b> is on.
           </li>
           <li>
             <b>Nobody else ever sees your email.</b> It&apos;s only used to sign you in.
           </li>
           <li>
-            <b>You control it</b> in Profile → Settings: turn off &quot;Let people look me up&quot; to hide your list from
-            searches and friends, turn on &quot;Friends-only votes&quot;, turn off &quot;Open to new friends&quot; to leave
-            matching, hide your Discord name, or block anyone.
+            <b>You control it</b> in Profile under Privacy: <b>Who can find you</b> (everyone, people who know your IGN or
+            code, or only your friends), whether friends see your Discord name, and who you block.
           </li>
           <li>
             <b>The developer</b> can see the database, including sign-in emails, to run and fix the app.

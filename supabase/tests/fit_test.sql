@@ -51,16 +51,18 @@ insert into public.friends (user_id, friend_id) values
   ('00000000-0000-0000-0005-000000000006', '00000000-0000-0000-0005-000000000002'),
   ('00000000-0000-0000-0005-000000000006', '00000000-0000-0000-0005-000000000003');
 
+-- Strangers see IGNs, not Discord names (20261020001100_discord_friends_only.sql): IGN = Discord name here.
+update public.profiles set ign = coalesce(ign, discord_username) where id::text like '00000000-0000-0000-0005-%';
 set role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0005-000000000001', false);
 
 do $$
 declare r record;
 begin
-  select * into r from public.get_matches() where discord_username = 'cone';
+  select * into r from public.get_matches() where user_id = public.test_uid('cone');
   assert r.match_pct = 50, format('c1 fit %s', r.match_pct);
   assert r.fit_wants = '{fa,fb,fc}', format('fit wants ordered by demand %s', r.fit_wants);
-  assert not exists (select 1 from public.get_matches() where discord_username = 'ctwo'), 'c2 below min_pct';
+  assert not exists (select 1 from public.get_matches() where user_id = public.test_uid('ctwo')), 'c2 below min_pct';
   -- Easygoing cap: the group's list sends fa 1 + fb 0.5 + fc 0.5 = 2 lines' worth,
   -- so c2's 9 wants count as 2. c2 wants everything the list sends: 2 / 2.
   assert (select match_pct from public.lookup_players('ctwo')) = 100, 'easygoing player not marked down';
@@ -69,8 +71,8 @@ begin
   -- Each friend is compared with the rest of the list:
   -- f1 (fa, fb) vs f2 (fa, fc): 1 / 2 = 50%, f1's star on fa adds nothing;
   -- f2 (fa, fc) vs f1 (fa, fb): 1 / 2 = 50%.
-  assert (select match_pct from public.get_friends() where discord_username = 'fone') = 50, 'f1 fit, star ignored';
-  assert (select match_pct from public.get_friends() where discord_username = 'ftwo') = 50, 'f2 fit';
+  assert (select match_pct from public.get_friends() where user_id = public.test_uid('fone')) = 50, 'f1 fit, star ignored';
+  assert (select match_pct from public.get_friends() where user_id = public.test_uid('ftwo')) = 50, 'f2 fit';
 end $$;
 
 -- A friend who turns search off still counts toward the group (since
@@ -89,14 +91,14 @@ set role authenticated;
 -- Inactive reports: yours hide them from your Find New right away.
 select public.report_inactive('00000000-0000-0000-0005-000000000004');
 do $$ begin
-  assert not exists (select 1 from public.get_matches() where discord_username = 'cone'), 'hidden after my report';
+  assert not exists (select 1 from public.get_matches() where user_id = public.test_uid('cone')), 'hidden after my report';
   assert (select count(*) from public.inactive_reports) = 1, 'own report readable';
 end $$;
 
 -- One report doesn't hide them from others; two do.
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0005-000000000006', false);
 do $$ begin
-  assert (select match_pct from public.get_matches() where discord_username = 'cone') = 50, 'one report: still shown to others';
+  assert (select match_pct from public.get_matches() where user_id = public.test_uid('cone')) = 50, 'one report: still shown to others';
   assert (select count(*) from public.inactive_reports) = 0, 'others'' reports not readable';
 end $$;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0005-000000000007', false);
@@ -104,7 +106,7 @@ select public.report_inactive('00000000-0000-0000-0005-000000000004');
 select public.report_inactive(auth.uid()); -- reporting yourself is a no-op
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0005-000000000006', false);
 do $$ begin
-  assert not exists (select 1 from public.get_matches() where discord_username = 'cone'), 'two reports hide';
+  assert not exists (select 1 from public.get_matches() where user_id = public.test_uid('cone')), 'two reports hide';
 end $$;
 
 -- Coming back clears it.
@@ -112,11 +114,11 @@ reset role;
 update public.profiles set last_seen_at = now() + interval '1 second' where discord_username = 'cone';
 set role authenticated;
 do $$ begin
-  assert exists (select 1 from public.get_matches() where discord_username = 'cone'), 'back after a visit';
+  assert exists (select 1 from public.get_matches() where user_id = public.test_uid('cone')), 'back after a visit';
 end $$;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0005-000000000001', false);
 do $$ begin
-  assert exists (select 1 from public.get_matches() where discord_username = 'cone'), 'my old report expired too';
+  assert exists (select 1 from public.get_matches() where user_id = public.test_uid('cone')), 'my old report expired too';
 end $$;
 
 -- Reports can't be written directly.

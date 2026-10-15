@@ -27,14 +27,14 @@ select set_config('request.jwt.claim.sub', '00000000-0000-0000-0003-000000000001
 -- Before any stars all shares are 1. tom's three wants are all in it, but he doesn't want td, which
 -- tara wants: 3 / (3 + 1) = 75%.
 do $$ begin
-  assert (select match_pct from public.get_matches() where discord_username = 'tom') = 75, 'pct without stars';
+  assert (select match_pct from public.get_matches() where user_id = public.test_uid('tom')) = 75, 'pct without stars';
 end $$;
 
 -- Star ta: stars don't count in fit, so tom stays at 75%.
 update public.preferences set top = true where user_id = auth.uid() and line_id = 'ta';
 do $$ begin
-  assert (select match_pct from public.get_matches() where discord_username = 'tom') = 75,
-    format('pct with star %s', (select match_pct from public.get_matches() where discord_username = 'tom'));
+  assert (select match_pct from public.get_matches() where user_id = public.test_uid('tom')) = 75,
+    format('pct with star %s', (select match_pct from public.get_matches() where user_id = public.test_uid('tom')));
 end $$;
 
 -- Cap at three.
@@ -74,7 +74,7 @@ reset role;
 insert into public.friends (user_id, friend_id) values ('00000000-0000-0000-0003-000000000001', '00000000-0000-0000-0003-000000000002');
 set role authenticated;
 do $$ begin
-  assert not exists (select 1 from public.get_matches() where discord_username = 'tom'), 'friend not in Find New';
+  assert not exists (select 1 from public.get_matches() where user_id = public.test_uid('tom')), 'friend not in Find New';
 end $$;
 reset role;
 delete from public.friends where user_id = '00000000-0000-0000-0003-000000000001';

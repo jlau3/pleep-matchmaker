@@ -6,6 +6,8 @@ insert into auth.users (id, raw_user_meta_data) values
   ('00000000-0000-0000-0008-000000000001', '{"name":"blocker#0"}'),
   ('00000000-0000-0000-0008-000000000002', '{"name":"blockee#0"}');
 update public.profiles set friend_code = '888800000002' where discord_username = 'blockee';
+-- Strangers see IGNs, not Discord names (20261020001100_discord_friends_only.sql): IGN = Discord name here.
+update public.profiles set ign = coalesce(ign, discord_username) where id::text like '00000000-0000-0000-0008-%';
 set role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0008-000000000001', false);
 

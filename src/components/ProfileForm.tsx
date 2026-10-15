@@ -162,12 +162,12 @@ export function ProfileForm({ profile, friendListFull }: { profile: OwnProfile; 
               onChange={save}
               title={
                 <>
-                  <DiscordIcon /> Show Discord name
+                  <DiscordIcon /> Show my Discord name to friends
                 </>
               }
-              detail="Off: you're shown by IGN only, and people can't find you by your Discord name."
+              detail="Other players never see it or find you by it, only friends."
             >
-              Show @{profile.discord_username} and your Discord picture on your card.
+              Friends see @{profile.discord_username} and your Discord picture on your card.
             </Toggle>
           </div>
         )}

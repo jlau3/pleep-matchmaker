@@ -49,3 +49,14 @@ begin
   where id::text like id_prefix || '%';
 end
 $$;
+
+-- Test fixtures only: a player's id by Discord name, and back. Results from
+-- search and Find New don't carry strangers' Discord names
+-- (20261020001100_discord_friends_only.sql), so tests match rows by id.
+-- plpgsql, so public.profiles only has to exist when they're called.
+create function public.test_uid(name text) returns uuid
+language plpgsql stable security definer
+as $$ begin return (select id from public.profiles where discord_username = name); end $$;
+create function public.test_name(uid uuid) returns text
+language plpgsql stable security definer
+as $$ begin return (select discord_username from public.profiles where id = uid); end $$;

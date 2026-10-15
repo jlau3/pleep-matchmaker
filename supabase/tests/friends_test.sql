@@ -10,6 +10,8 @@ insert into public.preferences (user_id, line_id, choice) values
   ('00000000-0000-0000-0001-000000000002', 'eevee', 'dont_want'),
   ('00000000-0000-0000-0001-000000000003', 'pikachu', 'want');
 
+-- Strangers see IGNs, not Discord names (20261020001100_discord_friends_only.sql): IGN = Discord name here.
+update public.profiles set ign = coalesce(ign, discord_username) where id::text like '00000000-0000-0000-0001-%';
 set role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0001-000000000001', false);
 
@@ -99,14 +101,14 @@ from unnest(array['00000000-0000-0000-0001-000000000001', '00000000-0000-0000-00
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0001-000000000100', false);
 set role authenticated;
 do $$ begin
-  assert not exists (select 1 from public.browse_players('fit', true, 50, 0) where discord_username = 'f1'), 'full list hidden from matches';
+  assert not exists (select 1 from public.browse_players('fit', true, 50, 0) where user_id = public.test_uid('f1')), 'full list hidden from matches';
   assert exists (select 1 from public.lookup_players('f1')), 'full list still found by lookup';
 end $$;
 reset role;
 delete from public.friends where user_id = '00000000-0000-0000-0001-000000000001' and friend_id = '00000000-0000-0000-0001-000000000052';
 set role authenticated;
 do $$ begin
-  assert exists (select 1 from public.browse_players('fit', true, 50, 0) where discord_username = 'f1'), 'back in matches below cap';
+  assert exists (select 1 from public.browse_players('fit', true, 50, 0) where user_id = public.test_uid('f1')), 'back in matches below cap';
 end $$;
 reset role;
 do $$ begin
