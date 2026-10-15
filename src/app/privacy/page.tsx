@@ -3,7 +3,7 @@ import Link from "next/link";
 
 export const metadata: Metadata = { title: "Privacy · Pleep Matchmaker" };
 
-const UPDATED = "October 13, 2026";
+const UPDATED = "October 15, 2026";
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -61,7 +61,8 @@ export default function PrivacyPage() {
             <b>Other players</b> can see your IGN, friend code, profile icon, Reddit name, candy votes and Top 3 (only your
             friends, if <b>Friends-only votes</b> is on), when you were last active, and your Discord name and avatar if{" "}
             <b>Show my Discord name</b> is on. They see this when they search for your name (or
-            something close to it) or friend code, when you appear in their matches, or when they&apos;ve added you as a friend.
+            something close to it) or friend code, when you appear in their matches, when you send them a friend request (your
+            friend code always shows to the player you ask), or when you&apos;re friends.
           </li>
           <li>
             <b>Nobody else ever sees your email.</b> It&apos;s only used to sign you in.

@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, useTransition } from "react";
 import { addPlaceholder, removePlaceholder, searchPlaceholders } from "@/app/actions";
 import { rethrowIfNavigation, SAVE_FAILED } from "@/lib/saveError";
+import type { Relations } from "@/lib/relations";
 import type { LookupRow, PlaceholderRow } from "@/lib/types";
 import { PlayerResults } from "./PlayerResults";
 
@@ -18,11 +19,11 @@ type Hits = { name: string; rows: LookupRow[] }[];
  */
 export function FriendPlaceholders({
   rows,
-  friendIds,
+  relations,
   viewerId,
 }: {
   rows: PlaceholderRow[];
-  friendIds: string[];
+  relations: Relations;
   viewerId: string;
 }) {
   const [name, setName] = useState("");
@@ -86,7 +87,7 @@ export function FriendPlaceholders({
         <p className="text-sm text-slate-500">
           Add their <b>exact IGN</b>, spelled as it shows in their Pokémon Sleep profile, as a reminder and search now and
           then. We flag a name here when someone with that exact name joins (capitals, spaces and symbols don&apos;t
-          matter). Once they join, add them and they drop off this list.
+          matter). Once they join, send them a friend request and they drop off this list.
         </p>
         <form
           className="flex flex-wrap items-center gap-2"
@@ -136,7 +137,7 @@ export function FriendPlaceholders({
                   <h4 className="text-sm font-semibold">
                     Possible match{hit.rows.length === 1 ? "" : "es"} for <span className="text-want">{hit.name}</span>
                   </h4>
-                  <PlayerResults q={hit.name} rows={hit.rows} friendIds={friendIds} viewerId={viewerId} suggestPlaceholder={false} placeholder={hit.name} />
+                  <PlayerResults q={hit.name} rows={hit.rows} relations={relations} viewerId={viewerId} suggestPlaceholder={false} placeholder={hit.name} />
                 </div>
               ))
             )}

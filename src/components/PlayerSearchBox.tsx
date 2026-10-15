@@ -3,6 +3,7 @@
 import { useEffect, useState, useTransition } from "react";
 import { lookupPlayers } from "@/app/actions";
 import { rethrowIfNavigation } from "@/lib/saveError";
+import type { Relations } from "@/lib/relations";
 import type { LookupRow } from "@/lib/types";
 import { PlayerResults } from "./PlayerResults";
 
@@ -15,12 +16,12 @@ import { PlayerResults } from "./PlayerResults";
 export function PlayerSearchBox({
   initialQ,
   initialRows,
-  friendIds,
+  relations,
   viewerId,
 }: {
   initialQ: string;
   initialRows: LookupRow[];
-  friendIds: string[];
+  relations: Relations;
   viewerId: string;
 }) {
   const [input, setInput] = useState(initialQ);
@@ -73,7 +74,7 @@ export function PlayerSearchBox({
         </p>
       )}
       <div className={`space-y-3 ${pending ? "opacity-60" : ""}`}>
-        <PlayerResults q={result.q} rows={result.rows} friendIds={friendIds} viewerId={viewerId} />
+        <PlayerResults q={result.q} rows={result.rows} relations={relations} viewerId={viewerId} />
       </div>
     </div>
   );

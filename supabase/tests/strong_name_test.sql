@@ -31,9 +31,12 @@ do $$ begin
   assert (select signed_up from public.get_friend_placeholders() where name = '★mr_time'), 'same name, different separators';
   assert not (select signed_up from public.get_friend_placeholders() where name = 'Mr Tme'), 'a typo is not a strong match';
 end $$;
-insert into public.friends (user_id, friend_id) values (auth.uid(), '00000000-0000-0000-0018-000000000002');
+select public.send_friend_request('00000000-0000-0000-0018-000000000002');
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-0018-000000000002', false);
+select public.accept_friend_request('00000000-0000-0000-0018-000000000001');
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-0018-000000000001', false);
 do $$ begin
-  assert (select array_agg(name order by name) from public.get_friend_placeholders()) = '{"Mr Tme",☆}', 'adding them cleared only the strong match';
+  assert (select array_agg(name order by name) from public.get_friend_placeholders()) = '{"Mr Tme",☆}', 'becoming friends cleared only the strong match';
 end $$;
 reset role;
 

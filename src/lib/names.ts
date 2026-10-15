@@ -65,7 +65,7 @@ function withinOneEdit(a: string[], b: string[]): boolean {
  * "strong": the same name (strongNameKey). "close": one contains the other
  * (3+ characters), one typo apart (5+), or both only symbols. Strong is safe
  * to act on; close is only a hint for the player to check (e.g. on someone
- * who added you).
+ * who sent you a friend request).
  */
 export function nameMatch(a: string | null | undefined, b: string | null | undefined): "strong" | "close" | null {
   if (!a || !b) return null;

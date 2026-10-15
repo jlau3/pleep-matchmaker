@@ -1,6 +1,7 @@
 import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { type Choice, isChoice, LINES } from "./lines";
+import { type Relations, sortRequests } from "./relations";
 import type { OwnProfile } from "./types";
 
 export { MAX_FRIENDS } from "./friendship";
@@ -90,11 +91,14 @@ export async function loadFriendIds(supabase: SupabaseClient, userId: string): P
 }
 
 /**
- * Players you marked pending (asked in Pokémon Sleep, not added here yet).
- * Empty if the pending_friends table isn't there yet (migration not run).
+ * Friends plus requests either way, for every Add friend button. Requests
+ * are empty if the friend_requests table isn't there yet (migration not run).
  */
-export async function loadPendingIds(supabase: SupabaseClient, userId: string): Promise<Set<string>> {
-  const { data, error } = await supabase.from("pending_friends").select("target_id").eq("user_id", userId);
-  if (error) return new Set();
-  return new Set(data.map((row) => row.target_id as string));
+export async function loadRelations(supabase: SupabaseClient, userId: string): Promise<Relations> {
+  const [friendIds, requests] = await Promise.all([
+    loadFriendIds(supabase, userId),
+    supabase.from("friend_requests").select("from_id, to_id, status, created_at").or(`from_id.eq.${userId},to_id.eq.${userId}`),
+  ]);
+  const sorted = requests.error ? { sent: {}, incoming: [] } : sortRequests(requests.data, userId);
+  return { friendIds: [...friendIds], ...sorted };
 }

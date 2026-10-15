@@ -4,7 +4,8 @@ import type { PlayerContact } from "@/lib/types";
 import { BlockButton } from "./BlockButton";
 import { DiscordIcon, RedditIcon } from "./BrandIcons";
 import { CopyButton } from "./CopyButton";
-import { FriendButton } from "./FriendButton";
+import type { Relation } from "@/lib/relations";
+import { FriendAction } from "./FriendAction";
 
 /** In-game name first (what friends know them by in Pokémon Sleep), else their shown Discord name. */
 export function playerName(p: Pick<PlayerContact, "discord_display_name" | "discord_username" | "ign">): string {
@@ -29,15 +30,15 @@ export function playerAvatar(p: Pick<PlayerContact, "game_avatar" | "avatar_url"
 export function PlayerHeader({
   player,
   aside,
-  isFriend,
+  relation,
   placeholder,
   actions,
 }: {
   player: PlayerContact;
   aside?: React.ReactNode;
-  /** Shows the add/remove friend button when set. */
-  isFriend?: boolean;
-  /** Not here yet name the player was searched from (see FriendButton). */
+  /** Shows the friend button (send request, accept, remove…) for where you stand with them. */
+  relation?: Relation;
+  /** Not here yet name the player was found from (see FriendAction). */
   placeholder?: string;
   /** Extra buttons on the same line as the friend button (e.g. "Not now"). */
   actions?: React.ReactNode;
@@ -91,9 +92,11 @@ export function PlayerHeader({
         <span>Prefs updated {relativeTime(player.prefs_updated_at)}</span>
         <BlockButton userId={player.user_id} name={name} />
       </div>
-      {(isFriend !== undefined || actions) && (
+      {(relation !== undefined || actions) && (
         <div className="flex flex-wrap items-center gap-2">
-          {isFriend !== undefined && <FriendButton userId={player.user_id} isFriend={isFriend} name={name} placeholder={placeholder} />}
+          {relation !== undefined && (
+            <FriendAction userId={player.user_id} name={name} relation={relation} showsCode={Boolean(player.friend_code)} placeholder={placeholder} />
+          )}
           {actions}
         </div>
       )}

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { FriendButton } from "@/components/FriendButton";
+import { FriendAction } from "@/components/FriendAction";
 import { PlayerHeader, playerName } from "@/components/PlayerHeader";
 import { PlayerLists } from "@/components/PlayerLists";
 import { FriendPostCard } from "@/components/FriendPostCard";
@@ -8,13 +8,10 @@ import { InviteReminder } from "@/components/InviteReminder";
 import { FitPair } from "@/components/FitPair";
 import { PlayerSearch, searchQuery } from "@/components/PlayerSearch";
 import { FRIENDS_TABS, SubTabs } from "@/components/SubTabs";
-import { loadOwnProfile, loadOwnVotes, MAX_FRIENDS } from "@/lib/data";
+import { loadOwnProfile, loadOwnVotes, loadRelations, MAX_FRIENDS } from "@/lib/data";
 import { requireUser } from "@/lib/supabase/server";
-import type { AddedMeRow, FriendRow, PendingRow, PlaceholderRow } from "@/lib/types";
+import type { FriendRow, PlaceholderRow, RequestRow, SentRequestRow } from "@/lib/types";
 import { FriendPlaceholders } from "@/components/FriendPlaceholders";
-import { ConfirmPlaceholder } from "@/components/ConfirmPlaceholder";
-import { ConnectSteps } from "@/components/ConnectSteps";
-import { DismissAddedYou } from "@/components/DismissAddedYou";
 import { type FriendItem, FriendsBoard } from "@/components/FriendsBoard";
 import { FRIEND_SORTS, friendRank, parseFriendSort } from "@/lib/friendSort";
 import { withExtras } from "@/lib/extras";
@@ -28,25 +25,25 @@ export default async function FriendsPage({ searchParams }: { searchParams: Prom
   const q = await searchQuery(Promise.resolve(params));
   const sort = parseFriendSort(params.sort);
 
-  const [friendsResult, addedMeResult, pendingResult, placeholdersResult, profile, { choices, tops }] = await Promise.all([
-    supabase.rpc("get_friends"),
-    supabase.rpc("get_added_me", { with_fit: true }),
-    supabase.rpc("get_pending_friends"),
-    supabase.rpc("get_friend_placeholders"),
-    loadOwnProfile(supabase, user.id),
-    loadOwnVotes(supabase, user.id),
-  ]);
+  const [friendsResult, requestsResult, sentResult, placeholdersResult, relations, profile, { choices, tops }] =
+    await Promise.all([
+      supabase.rpc("get_friends"),
+      supabase.rpc("get_friend_requests", { with_fit: true }),
+      supabase.rpc("get_sent_requests"),
+      supabase.rpc("get_friend_placeholders"),
+      loadRelations(supabase, user.id),
+      loadOwnProfile(supabase, user.id),
+      loadOwnVotes(supabase, user.id),
+    ]);
   if (friendsResult.error) throw friendsResult.error;
-  // People who added you and are waiting on you (empty if that lookup isn't available yet).
-  const addedMe = await withExtras(supabase, (addedMeResult.data ?? []) as AddedMeRow[]);
-  // Asked in Pokémon Sleep, not added here yet (empty until that migration runs).
-  const pending = await withExtras(supabase, (pendingResult.data ?? []) as PendingRow[]);
+  // Requests to you, and yours (empty if the friend_requests migration hasn't run yet).
+  const requests = await withExtras(supabase, (requestsResult.data ?? []) as RequestRow[]);
+  const sent = await withExtras(supabase, (sentResult.data ?? []) as SentRequestRow[]);
   // In-game friends not here yet (null until that migration runs, which hides the section).
   const placeholders = placeholdersResult.error ? null : ((placeholdersResult.data ?? []) as PlaceholderRow[]);
   const friends = await withExtras(supabase, friendsResult.data as FriendRow[]);
-  const friendIds = new Set(friends.map((f) => f.user_id));
-  // Someone who added you with a Not here yet name is probably that friend: those go first, in gold. Having
-  // added you is strong evidence on its own, so a close name counts here too (worded as a question).
+  // A request from someone with a Not here yet name is probably that friend: those go first, in gold. Having
+  // asked you is strong evidence on its own, so a close name counts here too (worded as a question).
   const placeholderFor = (ign: string | null): { name: string; strong: boolean } | null => {
     let close: string | null = null;
     for (const p of placeholders ?? []) {
@@ -60,28 +57,30 @@ export default async function FriendsPage({ searchParams }: { searchParams: Prom
     const m = placeholderFor(ign);
     return m ? (m.strong ? 2 : 1) : 0;
   };
-  const addedMeSorted = [...addedMe].sort((a, b) => rank(b.ign) - rank(a.ign));
+  const requestsSorted = [...requests].sort((a, b) => rank(b.ign) - rank(a.ign));
+  // Declines first: they need an OK from you.
+  const sentSorted = [...sent].sort((a, b) => Number(b.status === "declined") - Number(a.status === "declined"));
 
   return (
     <div className="space-y-8">
       <section className="space-y-3">
         <SubTabs tabs={FRIENDS_TABS} active="/friends" />
-        <PlayerSearch supabase={supabase} q={q} friendIds={friendIds} viewerId={user.id} />
+        <PlayerSearch supabase={supabase} q={q} relations={relations} viewerId={user.id} />
       </section>
 
       <FriendPostCard {...friendPostProps(profile, choices, tops)} />
 
-      {addedMe.length > 0 && (
-        <section id="added-you" className="scroll-mt-20">
+      {requests.length > 0 && (
+        <section id="requests" className="scroll-mt-20">
           <h2 className="mb-1 text-lg font-semibold">
-            Added you <span className="text-sm font-normal text-slate-500">{addedMe.length}</span>
+            Friend requests <span className="text-sm font-normal text-slate-500">{requests.length}</span>
           </h2>
           <p className="mb-3 text-sm text-slate-500">
-            These players have you on their friend list here. Once you&apos;re friends in Pokémon Sleep too, add them
-            back so their candy shows on your Tier List.
+            These players want to be friends here and in Pokémon Sleep. Accept to add each other; their friend code is
+            on the card so you can accept (or send) their request in the game too.
           </p>
           <ul className="space-y-3">
-            {addedMeSorted.map((player) => {
+            {requestsSorted.map((player) => {
               const maybe = placeholderFor(player.ign);
               return (
                 <li key={player.user_id} className={maybe ? `${card} ring-2 ring-sun-deep` : card}>
@@ -92,20 +91,15 @@ export default async function FriendsPage({ searchParams }: { searchParams: Prom
                       ) : (
                         <b>★ Could this be {maybe.name} from your Not here yet list?</b>
                       )}{" "}
-                      {maybe.strong ? "If it's them" : "The names are close; check their icon. If it's them"}, add them back
-                      and they come off that list.
+                      {maybe.strong ? "If it's them" : "The names are close; check their icon. If it's them"}, accept and
+                      they come off that list.
                     </p>
                   )}
                   <PlayerHeader
                     player={player}
-                    isFriend={maybe ? undefined : false}
+                    relation="incoming"
+                    placeholder={maybe?.name}
                     aside={<FitPair they={player.match_pct} you={player.you_fit_pct} />}
-                    actions={
-                      <>
-                        {maybe && <ConfirmPlaceholder userId={player.user_id} placeholder={maybe.name} />}
-                        <DismissAddedYou userId={player.user_id} />
-                      </>
-                    }
                   />
                 </li>
               );
@@ -114,22 +108,19 @@ export default async function FriendsPage({ searchParams }: { searchParams: Prom
         </section>
       )}
 
-      {pending.length > 0 && (
-        <section id="pending" className="scroll-mt-20">
+      {sent.length > 0 && (
+        <section id="sent" className="scroll-mt-20">
           <h2 className="mb-1 text-lg font-semibold">
-            Pending in Pokémon Sleep <span className="text-sm font-normal text-slate-500">{pending.length}</span>
+            Sent requests <span className="text-sm font-normal text-slate-500">{sent.length}</span>
           </h2>
           <p className="mb-3 text-sm text-slate-500">
-            You&apos;ve asked these players in the game. If they add you here, they move to your friends by themselves;
-            otherwise add them once they accept.
+            Waiting for these players to accept. Send them a request in Pokémon Sleep too. Requests not answered in 30
+            days lapse; you can send another.
           </p>
           <ul className="space-y-3">
-            {pending.map((player) => (
+            {sentSorted.map((player) => (
               <li key={player.user_id} className={card}>
-                <PlayerHeader player={player} />
-                <div className="mt-3">
-                  <ConnectSteps userId={player.user_id} name={playerName(player)} initialPending />
-                </div>
+                <PlayerHeader player={player} relation={player.status === "declined" ? "declined" : "sent"} />
               </li>
             ))}
           </ul>
@@ -145,7 +136,7 @@ export default async function FriendsPage({ searchParams }: { searchParams: Prom
         </h2>
         {placeholders && (
           <div id="not-here-yet" className="mb-3 scroll-mt-20">
-            <FriendPlaceholders rows={placeholders} friendIds={[...friendIds]} viewerId={user.id} />
+            <FriendPlaceholders rows={placeholders} relations={relations} viewerId={user.id} />
           </div>
         )}
         {friends.length < MAX_FRIENDS && (
@@ -155,7 +146,7 @@ export default async function FriendsPage({ searchParams }: { searchParams: Prom
         )}
         {friends.length === 0 ? (
           <p className="text-sm text-slate-500">
-            Search for your Pokémon Sleep friends above and add them, or find new ones in{" "}
+            Search for your Pokémon Sleep friends above and send them a friend request, or find new ones in{" "}
             <Link href="/matches" className="underline">Find New Friends</Link>. Then check the{" "}
             <Link href="/tiers" className="underline">Tier List</Link> to see which candy they want most.
           </p>
@@ -172,14 +163,9 @@ export default async function FriendsPage({ searchParams }: { searchParams: Prom
                   <>
                     <PlayerHeader
                       player={friend}
-                      isFriend
+                      relation="friend"
                       aside={<FitPair they={friend.match_pct} you={friend.you_fit_pct} />}
                     />
-                    {friend.added_me && (
-                      <p className="mt-1 text-xs font-semibold text-want" title="They have you on their friend list too">
-                        ↔ Added you too
-                      </p>
-                    )}
                     <PlayerLists wants={friend.wants} dontWants={friend.dont_wants} topWants={friend.top_wants} />
                   </>
                 ) : (
@@ -188,7 +174,7 @@ export default async function FriendsPage({ searchParams }: { searchParams: Prom
                       <strong>{playerName(friend)}</strong>
                       <span className="ml-2 text-slate-500">has made their list private</span>
                     </span>
-                    <FriendButton userId={friend.user_id} isFriend name={playerName(friend)} />
+                    <FriendAction userId={friend.user_id} name={playerName(friend)} relation="friend" />
                   </div>
                 ),
               }),

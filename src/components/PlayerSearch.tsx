@@ -1,4 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import type { Relations } from "@/lib/relations";
 import type { LookupRow } from "@/lib/types";
 import { PlayerSearchBox } from "./PlayerSearchBox";
 import { withExtras } from "@/lib/extras";
@@ -16,12 +17,12 @@ export async function searchQuery(searchParams: Promise<{ q?: string }>): Promis
 export async function PlayerSearch({
   supabase,
   q,
-  friendIds,
+  relations,
   viewerId,
 }: {
   supabase: SupabaseClient;
   q: string;
-  friendIds: Set<string>;
+  relations: Relations;
   viewerId: string;
 }) {
   let rows: LookupRow[] = [];
@@ -30,5 +31,5 @@ export async function PlayerSearch({
     if (error) throw error;
     rows = await withExtras(supabase, data as LookupRow[]);
   }
-  return <PlayerSearchBox initialQ={q} initialRows={rows} friendIds={[...friendIds]} viewerId={viewerId} />;
+  return <PlayerSearchBox initialQ={q} initialRows={rows} relations={relations} viewerId={viewerId} />;
 }

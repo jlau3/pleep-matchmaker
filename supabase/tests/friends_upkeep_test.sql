@@ -24,10 +24,10 @@ do $$ begin
   assert (select friend_code from public.lookup_players('FuBobIgn') where user_id = '00000000-0000-0000-0015-000000000003') = '444455556666', 'open shows it';
 end $$;
 
--- 2. Unfriending removes both sides.
-insert into public.friends (user_id, friend_id) values (auth.uid(), '00000000-0000-0000-0015-000000000002');
+-- 2. Unfriending removes both sides. (Ann is closed to new friends but can still accept.)
+select public.send_friend_request('00000000-0000-0000-0015-000000000002');
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0015-000000000002', false);
-insert into public.friends (user_id, friend_id) values (auth.uid(), '00000000-0000-0000-0015-000000000001');
+select public.accept_friend_request('00000000-0000-0000-0015-000000000001');
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0015-000000000001', false);
 do $$ begin
   assert (select friend_code from public.lookup_players('FuAnnIgn') where user_id = '00000000-0000-0000-0015-000000000002') = '771122223377', 'friends see it';
@@ -60,9 +60,12 @@ do $$ begin
   exception when insufficient_privilege then null;
   end;
 end $$;
-insert into public.friends (user_id, friend_id) values (auth.uid(), '00000000-0000-0000-0015-000000000003');
+select public.send_friend_request('00000000-0000-0000-0015-000000000003');
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-0015-000000000003', false);
+select public.accept_friend_request('00000000-0000-0000-0015-000000000001');
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-0015-000000000001', false);
 do $$ begin
-  assert (select count(*) from public.get_friend_placeholders()) = 2, 'adding bob cleared his';
+  assert (select count(*) from public.get_friend_placeholders()) = 2, 'becoming friends with bob cleared his';
 end $$;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0015-000000000002', false);
 do $$ begin
