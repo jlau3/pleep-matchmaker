@@ -2,7 +2,7 @@
 
 import { useMemo, useRef, useState } from "react";
 import { flushSync } from "react-dom";
-import { AVATAR_NAMES, AVATAR_VARIANTS, AVATARS, avatarLabel, avatarSrc, parseAvatar, type AvatarVariant } from "@/lib/avatars";
+import { AVATAR_NAMES, AVATAR_VARIANTS, AVATARS, avatarLabel, avatarSrc, DEFAULT_AVATAR, parseAvatar, type AvatarVariant } from "@/lib/avatars";
 
 /**
  * In-game icon picker for the profile form. Tapping your picture opens a
@@ -58,7 +58,7 @@ export function AvatarPicker({ initial, discordAvatar }: { initial: string | nul
         ) : discordAvatar ? (
           <img src={discordAvatar} alt="" className={big} />
         ) : (
-          <span className={`block ${big} bg-slate-200 dark:bg-slate-700`} />
+          <img src={DEFAULT_AVATAR} alt="" className={`${big} bg-sky object-contain dark:bg-night-deep`} />
         )}
         <span className="absolute left-11 top-11 flex h-6 w-6 items-center justify-center rounded-full bg-white text-xs shadow ring-1 ring-slate-300 group-hover:bg-sun dark:bg-night dark:ring-slate-600">
           ✎
@@ -91,7 +91,7 @@ export function AvatarPicker({ initial, discordAvatar }: { initial: string | nul
             ) : discordAvatar ? (
               <img src={discordAvatar} alt="" className="h-14 w-14 shrink-0 rounded-full" />
             ) : (
-              <span className="block h-14 w-14 shrink-0 rounded-full bg-slate-200 dark:bg-slate-700" />
+              <img src={DEFAULT_AVATAR} alt="" className="h-14 w-14 shrink-0 rounded-full bg-sky object-contain dark:bg-night-deep" />
             )}
             <div className="min-w-0 flex-1">
               <h2 id="avatar-title" className="font-bold">

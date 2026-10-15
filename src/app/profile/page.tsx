@@ -44,7 +44,7 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
       <SubTabs tabs={PROFILE_TABS} active="/profile" />
       <div className="space-y-6">
         <section className="flex items-center gap-3">
-          {playerAvatar(profile) && <img src={playerAvatar(profile)!} alt="" className="h-14 w-14 rounded-full bg-sky object-contain dark:bg-night-deep" />}
+          <img src={playerAvatar(profile)} alt="" className="h-14 w-14 rounded-full bg-sky object-contain dark:bg-night-deep" />
           <div>
             <h1 className="text-xl font-bold">{playerName(profile)}</h1>
             {profile.discord_username && <p className="text-sm text-slate-500">@{profile.discord_username}</p>}

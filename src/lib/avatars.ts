@@ -26,6 +26,9 @@ export function avatarSrc(name: string, variant: AvatarVariant): string {
   return `/avatars/${folder}/${name}${variant.endsWith("shiny") ? "_shiny" : ""}.webp`;
 }
 
+/** Shown for players with no icon (and no Discord picture you can see): Unown's "?" form. */
+export const DEFAULT_AVATAR = "/avatars/default.webp";
+
 /** Image URL for a stored icon key, or null. */
 export function gameAvatarUrl(key: string | null | undefined): string | null {
   const parsed = parseAvatar(key);

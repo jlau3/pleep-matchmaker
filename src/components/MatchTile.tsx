@@ -28,11 +28,7 @@ export function MatchTile({
   const tops = linesFromIds(match.top_wants ?? []);
   return (
     <li className="card flex flex-col items-center gap-2 p-3 text-center">
-      {avatar ? (
-        <img src={avatar} alt="" className="h-16 w-16 rounded-full bg-sky object-contain dark:bg-night-deep" />
-      ) : (
-        <span className="block h-16 w-16 rounded-full bg-slate-200 dark:bg-slate-700" />
-      )}
+      <img src={avatar} alt="" className="h-16 w-16 rounded-full bg-sky object-contain dark:bg-night-deep" />
       <span className="w-full truncate font-semibold" title={name}>
         {name}
       </span>

@@ -1,4 +1,4 @@
-import { gameAvatarUrl } from "@/lib/avatars";
+import { DEFAULT_AVATAR, gameAvatarUrl } from "@/lib/avatars";
 import { activityLabel, formatFriendCode } from "@/lib/format";
 import type { PlayerContact } from "@/lib/types";
 import { BlockButton } from "./BlockButton";
@@ -21,9 +21,9 @@ function discordLine(p: PlayerContact, name: string): string | null {
   return parts.length > 0 ? parts.join(" · ") : null;
 }
 
-/** Their in-game icon if they picked one, else their shown Discord picture. */
-export function playerAvatar(p: Pick<PlayerContact, "game_avatar" | "avatar_url">): string | null {
-  return gameAvatarUrl(p.game_avatar) ?? p.avatar_url;
+/** Their in-game icon if they picked one, else their shown Discord picture, else the default "?" (Unown). */
+export function playerAvatar(p: Pick<PlayerContact, "game_avatar" | "avatar_url">): string {
+  return gameAvatarUrl(p.game_avatar) ?? p.avatar_url ?? DEFAULT_AVATAR;
 }
 
 /** Avatar, IGN, Discord and Reddit names, friend code and activity for one player. */
@@ -47,22 +47,20 @@ export function PlayerHeader({
   const discord = discordLine(player, name);
   const avatar = playerAvatar(player);
   const game = Boolean(gameAvatarUrl(player.game_avatar));
+  // Pokémon art (their icon or the default) sits on a tinted circle; a Discord photo fills it.
+  const art = game || !player.avatar_url;
   return (
     <div className="space-y-2">
       {/* Avatar, name and the aside (fits) on top; everything else full width below, flush left. */}
       <div className="flex items-start gap-3">
         {/* Name centred on the avatar, not on the aside (which grows with the Top 3 row). */}
         <div className="flex min-w-0 flex-1 items-center gap-3">
-          {avatar ? (
-            <img
-              src={avatar}
-              alt=""
-              title={game ? "Their Pokémon Sleep icon" : undefined}
-              className={`h-12 w-12 shrink-0 rounded-full ${game ? "bg-sky object-contain dark:bg-night-deep" : ""}`}
-            />
-          ) : (
-            <div className="h-12 w-12 shrink-0 rounded-full bg-slate-200 dark:bg-slate-700" />
-          )}
+          <img
+            src={avatar}
+            alt=""
+            title={game ? "Their Pokémon Sleep icon" : art ? "No icon picked" : undefined}
+            className={`h-12 w-12 shrink-0 rounded-full ${art ? "bg-sky object-contain dark:bg-night-deep" : ""}`}
+          />
           <div className="min-w-0 flex-1">
             {/* IGN, then Discord and Reddit names on their own lines; long names wrap and the others trim, so none run into the fits. */}
             <span className="block break-words font-semibold">{name}</span>
