@@ -7,9 +7,11 @@ import { CopyButton } from "./CopyButton";
 import type { Relation } from "@/lib/relations";
 import { FriendAction } from "./FriendAction";
 
-/** In-game name first (what friends know them by in Pokémon Sleep), else their shown Discord name. */
-export function playerName(p: Pick<PlayerContact, "discord_display_name" | "discord_username" | "ign">): string {
-  return p.ign || p.discord_display_name || p.discord_username || "Unknown player";
+/** In-game name first (what friends know them by in Pokémon Sleep), else their shown Discord name, else Reddit name. */
+export function playerName(
+  p: Pick<PlayerContact, "discord_display_name" | "discord_username" | "ign"> & { reddit_username?: string | null },
+): string {
+  return p.ign || p.discord_display_name || p.discord_username || (p.reddit_username ? `u/${p.reddit_username}` : "Unknown player");
 }
 
 /** The Discord line under the name: "Display · @username", minus whatever the top line already shows. */
@@ -70,7 +72,7 @@ export function PlayerHeader({
                 <span className="truncate">{discord}</span>
               </span>
             )}
-            {player.reddit_username && (
+            {player.reddit_username && name !== `u/${player.reddit_username}` && (
               <span className="flex min-w-0 items-center gap-1 text-sm text-slate-500" title="Reddit name (added by the player, not verified)">
                 <RedditIcon />
                 <span className="truncate">u/{player.reddit_username}</span>
