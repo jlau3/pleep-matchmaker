@@ -15,7 +15,7 @@ import type { BlockedRow } from "@/lib/types";
 
 const card = "card p-5";
 
-export default async function ProfilePage({ searchParams }: { searchParams: Promise<{ error?: string; linked?: string }> }) {
+export default async function ProfilePage({ searchParams }: { searchParams: Promise<{ error?: string; linked?: string; setup?: string }> }) {
   const { supabase, user } = await requireUser();
   const [profile, friendIds, blockedResult, identitiesResult] = await Promise.all([
     loadOwnProfile(supabase, user.id),
@@ -26,7 +26,7 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
   if (blockedResult.error) throw blockedResult.error;
   const blocked = blockedResult.data as BlockedRow[];
   const linkedProviders = (identitiesResult.data?.identities ?? []).map((i) => i.provider);
-  const { error, linked } = await searchParams;
+  const { error, linked, setup } = await searchParams;
   const errorText = error ? linkErrorText(error) : null;
   const linkNotice = errorText
     ? { tone: "error" as const, text: errorText }
@@ -52,7 +52,7 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
           </div>
         </section>
 
-        <ProfileForm profile={profile} friendListFull={friendIds.size >= MAX_FRIENDS} />
+        <ProfileForm profile={profile} friendListFull={friendIds.size >= MAX_FRIENDS} guideRequested={setup === "profile"} />
 
         <div className="grid items-start gap-6 md:grid-cols-2">
           <div className={card}>

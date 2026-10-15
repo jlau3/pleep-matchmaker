@@ -1,24 +1,27 @@
 "use client";
 
-import { useActionState, useRef } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 import { type ProfileFormState, updateProfile } from "@/app/actions";
+import { rethrowIfNavigation, SAVE_FAILED } from "@/lib/saveError";
 import { formatFriendCode } from "@/lib/format";
 import type { OwnProfile } from "@/lib/types";
+import { firstProfileGuideStep, profileGuideSteps } from "@/lib/profileGuide";
+import { ProfileGuide } from "./ProfileGuide";
 import { AvatarPicker } from "./AvatarPicker";
 import { DiscordIcon, RedditIcon } from "./BrandIcons";
 
 /** A settings switch: title and one line on the left, the switch on the right; `detail` is the fine print. */
 function Toggle({
   name,
-  defaultChecked,
+  checked,
   onChange,
   title,
   children,
   detail,
 }: {
   name: string;
-  defaultChecked: boolean;
-  onChange: () => void;
+  checked: boolean;
+  onChange: (checked: boolean) => void;
   title: React.ReactNode;
   children: React.ReactNode;
   detail?: React.ReactNode;
@@ -31,7 +34,7 @@ function Toggle({
         {detail && <span className="mt-0.5 block text-xs text-slate-500">{detail}</span>}
       </span>
       <span className="relative mt-0.5 inline-flex shrink-0">
-        <input type="checkbox" role="switch" name={name} defaultChecked={defaultChecked} onChange={onChange} className="peer sr-only" />
+        <input type="checkbox" role="switch" name={name} checked={checked} onChange={(event) => onChange(event.currentTarget.checked)} className="peer sr-only" />
         <span className="h-6 w-11 rounded-full bg-slate-300 transition-colors peer-checked:bg-want peer-focus-visible:ring-2 peer-focus-visible:ring-night dark:bg-slate-600" />
         <span className="pointer-events-none absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform peer-checked:translate-x-5" />
       </span>
@@ -59,15 +62,51 @@ const VISIBILITY: { value: Visibility; title: string; text: string }[] = [
  * button: switches save on click, text fields when you leave them (or press
  * Enter), the icon from its popup.
  */
-export function ProfileForm({ profile, friendListFull }: { profile: OwnProfile; friendListFull: boolean }) {
-  const [state, action, pending] = useActionState<ProfileFormState, FormData>(updateProfile, {});
+export function ProfileForm({ profile, friendListFull, guideRequested = false }: { profile: OwnProfile; friendListFull: boolean; guideRequested?: boolean }) {
+  const [state, action, pending] = useActionState<ProfileFormState & { submission: number }, FormData>(async (previous, values) => {
+    try {
+      return { ...await updateProfile(previous, values), submission: previous.submission + 1 };
+    } catch (error) {
+      rethrowIfNavigation(error);
+      return { error: SAVE_FAILED, submission: previous.submission + 1 };
+    }
+  }, { submission: 0 });
+  const [guideOpen, setGuideOpen] = useState(false);
+  const guideDismissedKey = `pm_profile_guide_dismissed:${profile.id}`;
+  useEffect(() => {
+    if (!guideRequested) return;
+    try {
+      if (sessionStorage.getItem(guideDismissedKey)) return;
+    } catch { /* Storage is optional. */ }
+    setGuideOpen(true);
+  }, [guideRequested, guideDismissedKey]);
+  useEffect(() => {
+    const open = () => setGuideOpen(true);
+    window.addEventListener("pm-profile-guide-open", open);
+    return () => window.removeEventListener("pm-profile-guide-open", open);
+  }, []);
+  const closeGuide = () => {
+    setGuideOpen(false);
+    try { sessionStorage.setItem(guideDismissedKey, "1"); } catch { /* Storage is optional. */ }
+  };
   const form = useRef<HTMLFormElement>(null);
+  // Controlled fields survive failed saves and form-action resets.
+  const [ign, setIgn] = useState(profile.ign ?? "");
+  const [friendCode, setFriendCode] = useState(profile.friend_code ? formatFriendCode(profile.friend_code) : "");
+  const [redditName, setRedditName] = useState(profile.reddit_username ?? "");
+  const [showDiscord, setShowDiscord] = useState(profile.show_discord);
+  const [showReddit, setShowReddit] = useState(profile.show_reddit ?? true);
   const save = () => form.current?.requestSubmit();
+  const savedText: Record<string, string> = {
+    ign: profile.ign ?? "",
+    friend_code: profile.friend_code ? formatFriendCode(profile.friend_code) : "",
+    reddit_username: profile.reddit_username ?? "",
+  };
   const saveIfChanged = (e: React.FocusEvent<HTMLInputElement>) => {
-    if (e.currentTarget.value !== e.currentTarget.defaultValue) save();
+    if (e.currentTarget.value !== savedText[e.currentTarget.name]) save();
   };
   const hint = "block text-xs text-slate-500";
-  const visibility: Visibility = !profile.allow_lookup ? "friends" : profile.open_to_friends ? "everyone" : "known";
+  const [visibility, setVisibility] = useState<Visibility>(!profile.allow_lookup ? "friends" : profile.open_to_friends ? "everyone" : "known");
   const status = (
     <span className="text-xs" aria-live="polite">
       {pending ? (
@@ -89,24 +128,28 @@ export function ProfileForm({ profile, friendListFull }: { profile: OwnProfile; 
           <h2 id="profile-details" className="text-lg font-bold">Your profile</h2>
           {status}
         </div>
-        <AvatarPicker initial={profile.game_avatar ?? null} discordAvatar={profile.avatar_url} />
+        <button type="button" onClick={() => setGuideOpen(true)} className="text-sm font-semibold underline">Show me what to fill in</button>
+        <div id="profile-picture" data-profile-step="game_avatar">
+          <AvatarPicker initial={profile.game_avatar ?? null} discordAvatar={profile.avatar_url} requiredForSetup={guideOpen} />
+        </div>
         <div className="grid gap-4 sm:grid-cols-2">
-          <label className="block space-y-1">
+          <label data-profile-step="ign" className="block space-y-1">
             <span className="text-sm font-semibold">In-game name</span>
-            <input name="ign" onBlur={saveIfChanged} defaultValue={profile.ign ?? ""} maxLength={40} placeholder="Exactly as in Pokémon Sleep" className="field" />
+            <input name="ign" onBlur={saveIfChanged} value={ign} onChange={(event) => setIgn(event.currentTarget.value)} maxLength={40} placeholder="Exactly as in Pokémon Sleep" className="field" />
             <span className={hint}>Spelled exactly as in the game, so friends can find you.</span>
           </label>
-          <label className="block space-y-1">
+          <label data-profile-step="friend_code" className="block space-y-1">
             <span className="text-sm font-semibold">Friend code</span>
             <input
               name="friend_code"
               onBlur={saveIfChanged}
-              defaultValue={profile.friend_code ? formatFriendCode(profile.friend_code) : ""}
+              value={friendCode}
+              onChange={(event) => setFriendCode(event.currentTarget.value)}
               inputMode="numeric"
               placeholder="1234 5678 9012"
               className="field font-mono"
             />
-            <span className={hint}>Needed to show up in Find New and to send requests.</span>
+            <span className={hint}>Find it in Research Community in Pokémon Sleep. Needed to search and add friends here.</span>
           </label>
         </div>
         <label className="block space-y-1">
@@ -115,7 +158,7 @@ export function ProfileForm({ profile, friendListFull }: { profile: OwnProfile; 
           </span>
           <span className="flex items-center gap-1">
             <span className="text-sm text-slate-500">u/</span>
-            <input name="reddit_username" onBlur={saveIfChanged} defaultValue={profile.reddit_username ?? ""} maxLength={22} placeholder="your_reddit_name" className="field" />
+            <input name="reddit_username" onBlur={saveIfChanged} value={redditName} onChange={(event) => setRedditName(event.currentTarget.value)} maxLength={22} placeholder="your_reddit_name" className="field" />
           </span>
           <span className={hint}>Shown to your friends under your name. Not verified.</span>
         </label>
@@ -128,7 +171,7 @@ export function ProfileForm({ profile, friendListFull }: { profile: OwnProfile; 
             <b>Your votes are only shown to friends.</b> Everyone else sees match %s.
           </p>
         </div>
-        <fieldset className="space-y-2">
+        <fieldset data-profile-step="visibility" className="space-y-2">
           <legend className="mb-2 text-sm font-semibold">Who can find you</legend>
           {VISIBILITY.map((option) => (
             <label
@@ -139,8 +182,8 @@ export function ProfileForm({ profile, friendListFull }: { profile: OwnProfile; 
                 type="radio"
                 name="visibility"
                 value={option.value}
-                defaultChecked={visibility === option.value}
-                onChange={save}
+                checked={visibility === option.value}
+                onChange={() => { setVisibility(option.value); save(); }}
                 className="mt-1 h-4 w-4 accent-[var(--color-night)]"
               />
               <span>
@@ -153,43 +196,55 @@ export function ProfileForm({ profile, friendListFull }: { profile: OwnProfile; 
             </label>
           ))}
         </fieldset>
-        {profile.discord_username && (
-          <div className="border-t border-slate-200 dark:border-slate-700">
-            <input type="hidden" name="has_show_discord" value="1" />
-            <Toggle
-              name="show_discord"
-              defaultChecked={profile.show_discord}
-              onChange={save}
-              title={
-                <>
-                  <DiscordIcon /> Show my Discord name to friends
-                </>
-              }
-              detail="Other players never see it or find you by it, except you and someone with a friend request between you."
-            >
-              Friends see @{profile.discord_username} and your Discord picture on your card.
-            </Toggle>
-          </div>
-        )}
-        {profile.reddit_username && profile.show_reddit !== undefined && (
-          <div className="border-t border-slate-200 dark:border-slate-700">
-            <input type="hidden" name="has_show_reddit" value="1" />
-            <Toggle
-              name="show_reddit"
-              defaultChecked={profile.show_reddit}
-              onChange={save}
-              title={
-                <>
-                  <RedditIcon /> Show my Reddit name to friends
-                </>
-              }
-              detail="Other players never see it."
-            >
-              Friends see u/{profile.reddit_username} under your name.
-            </Toggle>
-          </div>
-        )}
+        <div data-profile-step="sharing">
+          {profile.discord_username && (
+            <div className="border-t border-slate-200 dark:border-slate-700">
+              <input type="hidden" name="has_show_discord" value="1" />
+              <Toggle
+                name="show_discord"
+                checked={showDiscord}
+                onChange={(value) => { setShowDiscord(value); save(); }}
+                title={
+                  <>
+                    <DiscordIcon /> Show my Discord name to friends
+                  </>
+                }
+                detail="Other players never see it or find you by it, except you and someone with a friend request between you."
+              >
+                Friends see @{profile.discord_username} and your Discord picture on your card.
+              </Toggle>
+            </div>
+          )}
+          {profile.reddit_username && profile.show_reddit !== undefined && (
+            <div className="border-t border-slate-200 dark:border-slate-700">
+              <input type="hidden" name="has_show_reddit" value="1" />
+              <Toggle
+                name="show_reddit"
+                checked={showReddit}
+                onChange={(value) => { setShowReddit(value); save(); }}
+                title={
+                  <>
+                    <RedditIcon /> Show my Reddit name to friends
+                  </>
+                }
+                detail="People you send a pending friend request to can also see it. Other players cannot."
+              >
+                Friends see u/{profile.reddit_username} under your name.
+              </Toggle>
+            </div>
+          )}
+        </div>
       </section>
+      {guideOpen && (
+        <ProfileGuide
+          form={form}
+          steps={profileGuideSteps(Boolean(profile.discord_username || (profile.reddit_username && profile.show_reddit !== undefined)))}
+          initialStep={firstProfileGuideStep(profile)}
+          pending={pending}
+          result={state}
+          onClose={closeGuide}
+        />
+      )}
     </form>
   );
 }

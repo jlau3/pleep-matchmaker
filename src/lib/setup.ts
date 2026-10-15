@@ -31,7 +31,7 @@ export function setupSteps(progress: SetupProgress): SetupStep[] {
       id: "profile",
       label: "Profile",
       next: "Add your in-game name, friend code and the icon you use in Pokémon Sleep, so friends know it's you.",
-      href: "/profile",
+      href: "/profile?setup=profile",
       cta: "Set up profile",
       done: progress.profile,
     },

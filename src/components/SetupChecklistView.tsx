@@ -113,7 +113,9 @@ export function SetupChecklistView({ userId, done, steps }: { userId: string; do
               {step.cta} →
             </Link>
           ) : (
-            after && (
+            step.id === "profile" ? (
+              <button type="button" onClick={() => window.dispatchEvent(new Event("pm-profile-guide-open"))} className="btn-primary px-3 py-1 text-sm">Show me what to fill in →</button>
+            ) : after && (
               // Players can explore freely; completed steps still come from their saved data.
               <Link href={after.href} className="text-sm font-semibold underline">
                 Continue to {after.label} →

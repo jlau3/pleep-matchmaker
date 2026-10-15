@@ -7,6 +7,7 @@ import { redirect } from "next/navigation";
 import { normalizeFriendCode } from "@/lib/format";
 import { MAX_FRIENDS } from "@/lib/friendship";
 import { parseAvatar } from "@/lib/avatars";
+import { profileGuideError, profileGuideSteps } from "@/lib/profileGuide";
 import type { LookupRow } from "@/lib/types";
 import { PROFILE_INCOMPLETE, SEARCH_NEEDS_PROFILE } from "@/lib/relations";
 import { nameMatch } from "@/lib/names";
@@ -199,6 +200,32 @@ function visibilityFields(form: FormData): { open_to_friends: boolean; allow_loo
 
 export async function updateProfile(_prev: ProfileFormState, form: FormData): Promise<ProfileFormState> {
   const { supabase, user } = await requireUser();
+  const scope = form.get("profile_step");
+  if (scope !== null) {
+    const step = profileGuideSteps(true).find((candidate) => candidate.id === scope);
+    if (!step) return { error: "Unknown profile step. Refresh and try again." };
+    const invalid = profileGuideError(step.id, form);
+    if (invalid) return { error: invalid };
+    let fields: Record<string, unknown> = {};
+    if (step.id === "ign") {
+      const name = String(form.get("ign") ?? "").trim();
+      if (name.length > 40) return { error: "IGN is too long (40 characters max)" };
+      fields = { ign: name };
+    } else if (step.id === "friend_code") fields = { friend_code: normalizeFriendCode(String(form.get("friend_code") ?? "")) };
+    else if (step.id === "game_avatar") fields = { game_avatar: String(form.get("game_avatar")) };
+    else if (step.id === "visibility") {
+      if (!["everyone", "known", "friends"].includes(String(form.get("visibility")))) return { error: "Choose who can find you." };
+      fields = visibilityFields(form);
+    } else {
+      if (form.has("has_show_discord")) fields.show_discord = form.get("show_discord") === "on";
+      if (form.has("has_show_reddit")) fields.show_reddit = form.get("show_reddit") === "on";
+      if (Object.keys(fields).length === 0) return { error: "No name-sharing options are available." };
+    }
+    const { error } = await supabase.from("profiles").update(fields).eq("id", user.id);
+    if (error) return { error: "Couldn't save your profile, try again" };
+    revalidatePath("/", "layout");
+    return { saved: true };
+  }
   const ign = String(form.get("ign") ?? "").trim();
   const rawCode = String(form.get("friend_code") ?? "").trim();
   const friendCode = rawCode ? normalizeFriendCode(rawCode) : null;
@@ -225,9 +252,8 @@ export async function updateProfile(_prev: ProfileFormState, form: FormData): Pr
     extras.game_avatar = avatar || null;
   }
   if (form.has("has_show_reddit")) extras.show_reddit = form.get("show_reddit") === "on";
-  let { error } = await supabase.from("profiles").update({ ...update, ...extras }).eq("id", user.id);
-  // Before that migration runs, save the rest.
-  if (error && Object.keys(extras).length > 0) ({ error } = await supabase.from("profiles").update(update).eq("id", user.id));
+  // A guided step must only advance after every submitted field was saved.
+  const { error } = await supabase.from("profiles").update({ ...update, ...extras }).eq("id", user.id);
   if (error) return { error: "Couldn't save your profile, try again" };
   revalidatePath("/", "layout");
   return { saved: true };

@@ -111,3 +111,17 @@ button:not(:disabled),
 summary {
   cursor: pointer;
 }
+
+/* The profile walkthrough keeps the actual field above its dimmed backdrop. */
+.profile-guide-target {
+  position: relative;
+  z-index: 50;
+  border-radius: 0.75rem;
+  background: var(--color-cream);
+  outline: 4px solid var(--color-sun);
+  outline-offset: 6px;
+}
+:root.dark .profile-guide-target { background: var(--color-night); }
+@media (prefers-color-scheme: dark) {
+  :root:not(.light) .profile-guide-target { background: var(--color-night); }
+}

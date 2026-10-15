@@ -98,7 +98,7 @@ export function HelpModal({
           {welcome ? (
             // First sign-in: lead into the setup checklist, starting with Profile.
             <div className="mt-6 space-y-2 text-center">
-              <Link href="/profile" className="btn-primary block w-full py-2">
+              <Link href="/profile?setup=profile" className="btn-primary block w-full py-2">
                 Set up my profile →
               </Link>
               <button type="button" onClick={() => dialog.current?.close()} className="text-sm font-semibold text-slate-500 underline">

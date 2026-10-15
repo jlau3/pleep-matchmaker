@@ -10,7 +10,7 @@ import { AVATAR_NAMES, AVATAR_VARIANTS, AVATARS, avatarLabel, avatarSrc, DEFAULT
  * stay pinned below it. Saving submits the whole profile form with
  * game_avatar ("pikachu:happy"), or empty for the Discord picture.
  */
-export function AvatarPicker({ initial, discordAvatar }: { initial: string | null; discordAvatar: string | null }) {
+export function AvatarPicker({ initial, discordAvatar, requiredForSetup = false }: { initial: string | null; discordAvatar: string | null; requiredForSetup?: boolean }) {
   const start = parseAvatar(initial);
   // Saved value (the hidden input) and the draft being picked in the popup.
   const [saved, setSaved] = useState<string>(start ? `${start[0]}:${start[1]}` : "");
@@ -42,16 +42,17 @@ export function AvatarPicker({ initial, discordAvatar }: { initial: string | nul
     hidden.current?.form?.requestSubmit();
   }
 
-  const big = "h-16 w-16 rounded-full";
+  const big = "h-20 w-20 shrink-0 rounded-full";
   return (
     <div className="space-y-1">
       <input ref={hidden} type="hidden" name="game_avatar" value={saved} />
-      <span className="block text-sm font-medium">Profile icon</span>
+      <span className="block text-sm font-semibold">Pokémon Sleep profile picture</span>
+      {requiredForSetup && !savedParsed && <p className="text-sm font-semibold text-slate-600 dark:text-slate-300">Choose a picture to complete this setup step.</p>}
       <button
         type="button"
         onClick={openPicker}
-        aria-label="Change profile icon"
-        className="group relative flex items-center gap-3 text-left"
+        aria-label={savedParsed ? "Change profile picture" : "Choose profile picture"}
+        className="group flex w-full items-center gap-3 rounded-2xl border-2 border-sun bg-sun/10 p-3 text-left hover:bg-sun/20"
       >
         {savedParsed ? (
           <img src={avatarSrc(...savedParsed)} alt="" className={`${big} bg-sky object-contain dark:bg-night-deep`} />
@@ -60,20 +61,17 @@ export function AvatarPicker({ initial, discordAvatar }: { initial: string | nul
         ) : (
           <img src={DEFAULT_AVATAR} alt="" className={`${big} bg-sky object-contain dark:bg-night-deep`} />
         )}
-        <span className="absolute left-11 top-11 flex h-6 w-6 items-center justify-center rounded-full bg-white text-xs shadow ring-1 ring-slate-300 group-hover:bg-sun dark:bg-night dark:ring-slate-600">
-          ✎
-        </span>
-        <span className="text-sm">
-          <span className="block font-semibold">
-            {savedParsed ? `${avatarLabel(savedParsed[0])}${savedParsed[1] === "normal" ? "" : ` (${AVATAR_VARIANTS.find(([v]) => v === savedParsed[1])?.[1]})`}` : discordAvatar ? "Discord picture" : "No icon"}
+        <span className="min-w-0 text-sm">
+          <span className="mb-2 block font-semibold">
+            {savedParsed ? `${avatarLabel(savedParsed[0])}${savedParsed[1] === "normal" ? "" : ` (${AVATAR_VARIANTS.find(([v]) => v === savedParsed[1])?.[1]})`}` : discordAvatar ? "Currently using your Discord picture" : "No picture chosen yet"}
           </span>
-          <span className="text-xs text-slate-500 underline group-hover:text-slate-700 dark:group-hover:text-slate-300">
-            Tap to pick your in-game icon
+          <span className="btn-primary inline-flex min-h-11 items-center px-4 py-2 text-sm">
+            {savedParsed ? "Change picture" : "Choose picture"} →
           </span>
         </span>
       </button>
       <p className="text-xs text-slate-500">
-        Use the same icon you have in Pokémon Sleep. IGNs aren&apos;t unique, so a matching icon helps friends tell it&apos;s
+        Choose the same Pokémon picture you use in Pokémon Sleep. IGNs aren&apos;t unique, so a matching picture helps friends tell it&apos;s
         really you.
       </p>
 
@@ -95,7 +93,7 @@ export function AvatarPicker({ initial, discordAvatar }: { initial: string | nul
             )}
             <div className="min-w-0 flex-1">
               <h2 id="avatar-title" className="font-bold">
-                {name ? avatarLabel(name) : "Pick your icon"}
+                {name ? avatarLabel(name) : "Choose your profile picture"}
               </h2>
               <input
                 value={filter}
@@ -137,7 +135,7 @@ export function AvatarPicker({ initial, discordAvatar }: { initial: string | nul
           </div>
 
           <div className="space-y-3 border-t border-slate-200 p-4 dark:border-slate-700">
-            <div role="radiogroup" aria-label="Icon style" className="grid grid-cols-4 gap-1.5">
+            <div role="radiogroup" aria-label="Picture style" className="grid grid-cols-4 gap-1.5">
               {AVATAR_VARIANTS.map(([v, label]) => {
                 const available = variants.includes(v);
                 return (
@@ -168,7 +166,7 @@ export function AvatarPicker({ initial, discordAvatar }: { initial: string | nul
                 onClick={() => name && save(`${name}:${current}`)}
                 className="btn-primary px-5 py-2 disabled:opacity-50"
               >
-                Save icon
+                Use this picture
               </button>
             </div>
           </div>
