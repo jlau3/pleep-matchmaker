@@ -43,7 +43,10 @@ export function PlayerResults({
       )}
       {q && !foundSelf && players.length === 0 && (
         <div className="space-y-2 py-4 text-center text-sm text-slate-500">
-          <p>No one found. Try their exact name or friend code; some players turn lookup off.</p>
+          <p>
+            No one found. Names must match exactly, so check the spelling (capitals and spaces don&apos;t matter). Some
+            players also turn search off.
+          </p>
           {/* A friend code isn't a name to keep; anything else might be an IGN. */}
           {/* Keyed by name: a new search gets a fresh button instead of the last one's "Added". */}
           {suggestPlaceholder && !normalizeFriendCode(q) && <SuggestPlaceholder key={q} name={q} />}
