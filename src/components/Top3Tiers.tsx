@@ -25,13 +25,14 @@ export function Top3Tiers({
   return (
     <div className={`flex items-center gap-x-1.5 text-xs ${align === "end" ? "justify-end" : "flex-wrap justify-center"}`}>
       {lines.map((line) => {
-        // No tier, like "for you" showing nothing: none of their friends want it, or too few of them vote.
+        // No tier: unlikely from this player. None of their friends want it, more of them don't want it
+        // than do (Avoid on their list), or too few of them vote.
         const tier = tiers?.[line.id];
         return (
           <span
             key={line.id}
             className="inline-flex items-center"
-            title={tier ? `${line.name}: ${tier} on their Tier List` : `${line.name}: not on their list yet`}
+            title={tier ? `${line.name}: ${tier} on their Tier List` : `${line.name}: unlikely from this player`}
           >
             <img src={lineSpriteUrl(line)} alt={line.name} className="h-5 w-5" />
             <span

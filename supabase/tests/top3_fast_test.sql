@@ -32,13 +32,14 @@ begin
   select array_agg(t.user_id || ':' || t.line_id || ':' || t.tier order by t.user_id, t.line_id) into got
   from public.top3_tiers_set(everyone, viewer, 15) t;
   -- Reference: each player's list_tiers, a tier only when 3+ friends besides
-  -- the viewer want something and one of them wants that line (20261019000300).
+  -- the viewer want something and one of them wants that line (20261019000300);
+  -- Avoid shows as a dash too (20261020000900).
   select array_agg(x order by x) into want from (
     select pl.id || ':' || p.line_id || ':' || lt.tier as x
     from unnest(everyone) pl(id)
     cross join public.preferences p
     cross join lateral public.list_tiers(pl.id, 15) lt
-    where p.user_id = viewer and p.top and lt.line_id = p.line_id
+    where p.user_id = viewer and p.top and lt.line_id = p.line_id and lt.tier <> 'Avoid'
       and (
         select count(*) from public.friends f
         join public.profiles fp on fp.id = f.friend_id and fp.allow_lookup
