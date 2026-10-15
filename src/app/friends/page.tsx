@@ -18,6 +18,7 @@ import { DismissAddedYou } from "@/components/DismissAddedYou";
 import { type FriendItem, FriendsBoard } from "@/components/FriendsBoard";
 import { FRIEND_SORTS, friendRank, parseFriendSort } from "@/lib/friendSort";
 import { withExtras } from "@/lib/extras";
+import { nameMatch } from "@/lib/names";
 
 const card = "card p-4";
 
@@ -44,11 +45,22 @@ export default async function FriendsPage({ searchParams }: { searchParams: Prom
   const placeholders = placeholdersResult.error ? null : ((placeholdersResult.data ?? []) as PlaceholderRow[]);
   const friends = await withExtras(supabase, friendsResult.data as FriendRow[]);
   const friendIds = new Set(friends.map((f) => f.user_id));
-  // Someone who added you and has the IGN of a Not here yet name is probably that friend: those go first, in gold.
-  const nameKey = (name: string | null | undefined) => (name ?? "").normalize("NFKC").trim().replace(/\s+/g, " ").toLowerCase();
-  const placeholderFor = (ign: string | null) =>
-    ign ? (placeholders ?? []).find((p) => nameKey(p.name) === nameKey(ign))?.name ?? null : null;
-  const addedMeSorted = [...addedMe].sort((a, b) => Number(Boolean(placeholderFor(b.ign))) - Number(Boolean(placeholderFor(a.ign))));
+  // Someone who added you with a Not here yet name is probably that friend: those go first, in gold. Having
+  // added you is strong evidence on its own, so a close name counts here too (worded as a question).
+  const placeholderFor = (ign: string | null): { name: string; strong: boolean } | null => {
+    let close: string | null = null;
+    for (const p of placeholders ?? []) {
+      const match = nameMatch(p.name, ign);
+      if (match === "strong") return { name: p.name, strong: true };
+      if (match === "close") close ??= p.name;
+    }
+    return close ? { name: close, strong: false } : null;
+  };
+  const rank = (ign: string | null) => {
+    const m = placeholderFor(ign);
+    return m ? (m.strong ? 2 : 1) : 0;
+  };
+  const addedMeSorted = [...addedMe].sort((a, b) => rank(b.ign) - rank(a.ign));
 
   return (
     <div className="space-y-8">
@@ -75,8 +87,13 @@ export default async function FriendsPage({ searchParams }: { searchParams: Prom
                 <li key={player.user_id} className={maybe ? `${card} ring-2 ring-sun-deep` : card}>
                   {maybe && (
                     <p className="-mx-4 -mt-4 mb-3 rounded-t-3xl bg-sun/40 px-4 py-2 text-sm dark:bg-sun/20">
-                      <b>★ This may be {maybe} from your Not here yet list!</b> If it&apos;s them, add them back and
-                      they come off that list.
+                      {maybe.strong ? (
+                        <b>★ This may be {maybe.name} from your Not here yet list!</b>
+                      ) : (
+                        <b>★ Could this be {maybe.name} from your Not here yet list?</b>
+                      )}{" "}
+                      {maybe.strong ? "If it's them" : "The names are close; check their icon. If it's them"}, add them back
+                      and they come off that list.
                     </p>
                   )}
                   <PlayerHeader
@@ -85,7 +102,7 @@ export default async function FriendsPage({ searchParams }: { searchParams: Prom
                     aside={<FitPair they={player.match_pct} you={player.you_fit_pct} />}
                     actions={
                       <>
-                        {maybe && <ConfirmPlaceholder userId={player.user_id} placeholder={maybe} />}
+                        {maybe && <ConfirmPlaceholder userId={player.user_id} placeholder={maybe.name} />}
                         <DismissAddedYou userId={player.user_id} />
                       </>
                     }

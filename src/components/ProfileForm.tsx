@@ -31,8 +31,8 @@ export function ProfileForm({ profile, friendListFull }: { profile: OwnProfile; 
           className={input}
         />
         <span className="text-xs text-slate-500">
-          <b>Type it exactly</b>, with the same spelling, symbols and spaces. Friends who saved you to their Not here yet
-          list only get told you joined when it matches. Capital letters don&apos;t matter.
+          <b>Type it exactly</b>, spelled as it shows in the game. Friends who saved you to their Not here yet list only get
+          told you joined when the spelling matches (capitals, spaces and symbols like ★ don&apos;t matter).
         </span>
       </label>
       <label className="block space-y-1">
