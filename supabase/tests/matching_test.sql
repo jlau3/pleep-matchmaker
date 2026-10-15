@@ -105,7 +105,7 @@ update public.profiles set open_to_friends = false where discord_username = 'bob
 set role authenticated;
 do $$ begin
   assert not exists (select 1 from public.get_matches() where user_id = public.test_uid('bob')), 'closed hidden from matches';
-  assert exists (select 1 from public.lookup_players('BOB') where user_id = '00000000-0000-0000-0000-00000000000b'), 'closed still found by lookup';
+  assert exists (select 1 from public.lookup_players('IGN_BOB') where user_id = '00000000-0000-0000-0000-00000000000b'), 'closed still found by lookup';
 end $$;
 
 -- Lookup by username/IGN/friend code (close names too, see search_test); allow_lookup=false hides.
@@ -113,7 +113,7 @@ do $$
 declare r record;
 begin
   assert not exists (select 1 from public.lookup_players('bo') where user_id <> auth.uid()), 'two letters: exact only';
-  assert exists (select 1 from public.lookup_players('@Bob')), 'leading @ and case ignored';
+  assert exists (select 1 from public.lookup_players('@IGN_Bob')), 'leading @ and case ignored';
   assert exists (select 1 from public.lookup_players('ign_cara')), 'by ign';
   assert exists (select 1 from public.lookup_players('IGN_CARA')), 'ign any case';
   assert exists (select 1 from public.lookup_players('  ign_cara  ')), 'surrounding spaces';

@@ -26,16 +26,17 @@ declare
   s constant uuid := '00000000-0000-0000-0017-000000000003';
 begin
   assert not exists (select 1 from public.lookup_players('mrl') where user_id = t), 'mrl is not Mr Time';
-  assert exists (select 1 from public.lookup_players('tim') where user_id = t), 'word start';
+  -- Exact names only since 20261021001100_exact_search.sql.
+  assert not exists (select 1 from public.lookup_players('tim') where user_id = t), 'word start: no';
   assert exists (select 1 from public.lookup_players('mrtime') where user_id = t), 'spaces ignored';
-  assert exists (select 1 from public.lookup_players('r ti') where user_id = t), 'substring';
-  assert exists (select 1 from public.lookup_players('lax lov') where user_id = s), 'substring across _';
-  assert exists (select 1 from public.lookup_players('snorlx') where user_id = s), 'typo from 5 characters';
+  assert not exists (select 1 from public.lookup_players('r ti') where user_id = t), 'substring: no';
+  assert not exists (select 1 from public.lookup_players('lax lov') where user_id = s), 'substring across _: no';
+  assert not exists (select 1 from public.lookup_players('snorlx') where user_id = s), 'typo: no';
   assert not exists (select 1 from public.lookup_players('snrl') where user_id = s), 'no typos under 5 characters';
   -- 20261018000100_one_letter_names.sql: exact names at any length, nothing looser below 3.
   assert (select array_agg(ign) from public.lookup_players('m')) = '{M}', 'one letter: only the exact name';
   assert (select array_agg(ign) from public.lookup_players('MO')) = '{Mo}', 'two letters: only the exact name';
-  assert (select count(*) from public.lookup_players('mol')) = 1, 'three letters: partial matches start';
+  assert not exists (select 1 from public.lookup_players('mol')), 'three letters: still exact only';
 end $$;
 reset role;
 

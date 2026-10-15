@@ -11,7 +11,7 @@ export async function searchQuery(searchParams: Promise<{ q?: string }>): Promis
 }
 
 /**
- * Player search (exact or close names, friend codes), shared by My Friends and Find New.
+ * Player search (exact names, ignoring case, spacing and lookalike symbols; friend codes), shared by My Friends and Find New.
  * A ?q= in the link (shared friend posts, SubTabs) is searched on the server so it shows on
  * first paint; later searches run in the box without reloading the page.
  */

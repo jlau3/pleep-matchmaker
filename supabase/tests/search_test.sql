@@ -50,16 +50,18 @@ select set_config('request.jwt.claim.sub', '00000000-0000-0000-0009-000000000002
 do $$
 declare first_id uuid;
 begin
-  assert exists (select 1 from public.lookup_players('snorlax') where user_id = '00000000-0000-0000-0009-000000000001'),
-    'partial IGN';
-  assert exists (select 1 from public.lookup_players('snorlx fan') where user_id = '00000000-0000-0000-0009-000000000001'),
-    'typo in IGN';
-  assert exists (select 1 from public.lookup_players('mixedcase') where user_id = '00000000-0000-0000-0009-000000000001'),
-    'partial Discord name';
+  -- Exact names only since 20261021001100_exact_search.sql: no partial names or typos.
+  assert not exists (select 1 from public.lookup_players('snorlax') where user_id = '00000000-0000-0000-0009-000000000001'),
+    'partial IGN: no';
+  assert not exists (select 1 from public.lookup_players('snorlx fan') where user_id = '00000000-0000-0000-0009-000000000001'),
+    'typo in IGN: no';
+  assert not exists (select 1 from public.lookup_players('mixedcase') where user_id = '00000000-0000-0000-0009-000000000001'),
+    'partial Discord name: no';
   assert not exists (select 1 from public.lookup_players('sn') where user_id = '00000000-0000-0000-0009-000000000001'),
     'two letters: exact only';
   assert not exists (select 1 from public.lookup_players('qqqqzz')), 'nothing close';
-  assert (select count(*) from public.lookup_players('fz_sleeper')) = 10, 'at most 10';
+  assert not exists (select 1 from public.lookup_players('fz_sleeper')), 'a shared prefix finds nobody';
+  assert (select count(*) from public.lookup_players('fz_sleeper_7')) = 1, 'only the exact name';
   -- The exact name comes first.
   select user_id into first_id from public.lookup_players('fz_sleeper_7') limit 1;
   assert first_id = '00000000-0000-0000-0009-000000000011', format('exact first, got %s', first_id);
