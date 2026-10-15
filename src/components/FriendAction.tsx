@@ -24,8 +24,9 @@ const link = "font-semibold underline disabled:opacity-50";
  * Send request → Request sent (Cancel) → they Accept or Decline (you see a
  * decline and can clear it; one left unanswered for 30 days shows as expired,
  * to send again or clear) → Remove friend. Sending also means sending a
- * request in Pokémon Sleep, so when their code is showing it says so; a
- * closed player's code stays hidden, and they usually know you already.
+ * request in Pokémon Sleep, so when their code is showing it says so; when
+ * it's hidden (closed, or they don't show it before you're friends), your
+ * request carries yours and they add you in-game after accepting.
  * Removing asks inline first (native confirm() is suppressed in some in-app
  * browsers, e.g. Discord's), including whether they stopped playing, which
  * feeds the inactive reports Find New uses.
@@ -122,7 +123,9 @@ export function FriendAction({
               run(
                 () => sendFriendRequest(userId, Boolean(placeholder)),
                 (status) => (status === "friends" ? "friend" : "sent"),
-                showsCode ? `Also send ${name} a friend request in Pokémon Sleep with the code above.` : undefined,
+                showsCode
+                  ? `Also send ${name} a friend request in Pokémon Sleep with the code above.`
+                  : `${name} sees your friend code with the request, so they can add you in Pokémon Sleep once they accept.`,
               )
             }
             className={solid}
@@ -189,7 +192,7 @@ export function FriendAction({
                 run(
                   () => acceptFriendRequest(userId, Boolean(placeholder)),
                   () => "friend",
-                  `You're friends now. Accept ${name}'s request in Pokémon Sleep too.`,
+                  `You're friends now. Add ${name} in Pokémon Sleep with their code above, or accept their request there.`,
                 )
               }
               className={solid}

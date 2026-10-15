@@ -60,7 +60,9 @@ export default function PrivacyPage() {
           <li>
             <b>Other players</b> can see your IGN, friend code, profile icon, Reddit name, roughly when you were last active
             (&quot;active this week&quot;), and match %s, depending on <b>Who can find you</b>: when they search your IGN
-            or friend code, when you appear in their Find New, or when you send them a friend request.
+            or friend code, when you appear in their Find New, or when you send them a friend request. With{" "}
+            <b>Show my friend code before we&apos;re friends</b> off, your code only shows to friends, to people you send a
+            request to, and to someone who already typed it.
           </li>
           <li>
             <b>Only your friends</b> see your candy votes and Top 3, and your Discord name and picture if{" "}

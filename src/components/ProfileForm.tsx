@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useRef } from "react";
+import { useActionState, useRef, useState } from "react";
 import { type ProfileFormState, updateProfile } from "@/app/actions";
 import { formatFriendCode } from "@/lib/format";
 import type { OwnProfile } from "@/lib/types";
@@ -67,7 +67,9 @@ export function ProfileForm({ profile, friendListFull }: { profile: OwnProfile; 
     if (e.currentTarget.value !== e.currentTarget.defaultValue) save();
   };
   const hint = "block text-xs text-slate-500";
-  const visibility: Visibility = !profile.allow_lookup ? "friends" : profile.open_to_friends ? "everyone" : "known";
+  const initialVisibility: Visibility = !profile.allow_lookup ? "friends" : profile.open_to_friends ? "everyone" : "known";
+  // Tracked so the friend code switch shows only under Everyone.
+  const [visibility, setVisibility] = useState<Visibility>(initialVisibility);
   const status = (
     <span className="text-xs" aria-live="polite">
       {pending ? (
@@ -139,8 +141,11 @@ export function ProfileForm({ profile, friendListFull }: { profile: OwnProfile; 
                 type="radio"
                 name="visibility"
                 value={option.value}
-                defaultChecked={visibility === option.value}
-                onChange={save}
+                defaultChecked={initialVisibility === option.value}
+                onChange={() => {
+                  setVisibility(option.value);
+                  save();
+                }}
                 className="mt-1 h-4 w-4 accent-[var(--color-night)]"
               />
               <span>
@@ -153,6 +158,20 @@ export function ProfileForm({ profile, friendListFull }: { profile: OwnProfile; 
             </label>
           ))}
         </fieldset>
+        {visibility === "everyone" && profile.share_code !== undefined && (
+          <div className="border-t border-slate-200 dark:border-slate-700">
+            <input type="hidden" name="has_share_code" value="1" />
+            <Toggle
+              name="share_code"
+              defaultChecked={profile.share_code}
+              onChange={save}
+              title="Show my friend code before we're friends"
+              detail="Off: they see your IGN and icon. Their friend request shows you their code, so you add them in Pokémon Sleep once you accept. Friends always see your code."
+            >
+              Players who find you in Find New or by your IGN can add you in Pokémon Sleep straight away.
+            </Toggle>
+          </div>
+        )}
         {profile.discord_username && (
           <div className="border-t border-slate-200 dark:border-slate-700">
             <input type="hidden" name="has_show_discord" value="1" />

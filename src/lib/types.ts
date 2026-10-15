@@ -90,6 +90,8 @@ export interface OwnProfile {
   votes_private?: boolean;
   game_avatar?: string | null;
   reddit_username?: string | null;
+  /** Strangers who find you (Find New, IGN search) see your friend code. Friends always do. */
+  share_code?: boolean;
   last_seen_at: string;
   prefs_updated_at: string | null;
 }
