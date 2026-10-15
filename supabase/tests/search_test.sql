@@ -7,6 +7,8 @@ insert into auth.users (id, raw_user_meta_data) values
 update public.profiles set ign = 'SnorLAX  Fan' where id = '00000000-0000-0000-0009-000000000001';
 -- Discord names are friends-only (20261020001100_discord_friends_only.sql): a
 -- stranger finds MixedCase_User by IGN only; a friend by Discord name too.
+-- Searching needs your own IGN (20261021000300_search_needs_ign.sql).
+update public.profiles set ign = coalesce(ign, 'ZzSearcher002') where id = '00000000-0000-0000-0009-000000000002';
 set role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0009-000000000002', false);
 do $$ begin

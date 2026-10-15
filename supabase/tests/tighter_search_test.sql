@@ -16,6 +16,8 @@ update public.profiles set ign = 'Mo' where id = '00000000-0000-0000-0017-000000
 update public.profiles set ign = 'Molli' where id = '00000000-0000-0000-0017-000000000006';
 update public.profiles set ign = 'Mah' where id = '00000000-0000-0000-0017-000000000007';
 
+-- Searching needs your own IGN (20261021000300_search_needs_ign.sql).
+update public.profiles set ign = coalesce(ign, 'ZzSearcher001') where id = '00000000-0000-0000-0017-000000000001';
 set role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0017-000000000001', false);
 do $$

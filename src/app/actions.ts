@@ -8,7 +8,7 @@ import { normalizeFriendCode } from "@/lib/format";
 import { MAX_FRIENDS } from "@/lib/friendship";
 import { parseAvatar } from "@/lib/avatars";
 import type { LookupRow } from "@/lib/types";
-import { PROFILE_INCOMPLETE } from "@/lib/relations";
+import { PROFILE_INCOMPLETE, SEARCH_NEEDS_IGN } from "@/lib/relations";
 import { nameMatch } from "@/lib/names";
 import { loadTop3Tiers, type Top3Tiers } from "@/lib/top3Tiers";
 import { META_COOKIE, META_POSTS, metaCookieValue } from "@/content/meta";
@@ -314,11 +314,18 @@ export async function removeFriend(friendId: string, inactive = false): Promise<
   return {};
 }
 
+/** Searching needs your own IGN (the database enforces it too). A failed lookup lets the search run. */
+async function hasIgn(supabase: SupabaseClient, userId: string): Promise<boolean> {
+  const { data, error } = await supabase.from("profiles").select("ign").eq("id", userId).maybeSingle();
+  return Boolean(error || data?.ign);
+}
+
 /** Player search as an action, so the search box and Not here yet can look people up without reloading the page. */
 export async function lookupPlayers(q: string): Promise<{ rows?: LookupRow[]; error?: string }> {
-  const { supabase } = await requireUser();
+  const { supabase, user } = await requireUser();
   const query = q.trim().slice(0, 64);
   if (!query) return { rows: [] };
+  if (!(await hasIgn(supabase, user.id))) return { error: SEARCH_NEEDS_IGN };
   const { data, error } = await supabase.rpc("lookup_players", { q: query });
   if (error) return { error: "Search failed, try again" };
   return { rows: await withExtras(supabase, data as LookupRow[]) };
@@ -332,6 +339,7 @@ export async function lookupPlayers(q: string): Promise<{ rows?: LookupRow[]; er
  */
 export async function searchPlaceholders(): Promise<{ hits?: { name: string; rows: LookupRow[] }[]; searched?: number; error?: string }> {
   const { supabase, user } = await requireUser();
+  if (!(await hasIgn(supabase, user.id))) return { error: SEARCH_NEEDS_IGN };
   const { data, error } = await supabase.from("friend_placeholders").select("name").eq("user_id", user.id);
   if (error) return { error: "Search failed, try again" };
   const names = (data ?? []).map((r) => r.name as string);

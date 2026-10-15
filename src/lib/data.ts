@@ -107,5 +107,6 @@ export async function loadRelations(supabase: SupabaseClient, userId: string): P
   const sorted = requests.error ? { sent: {}, incoming: [] } : sortRequests(requests.data, userId);
   // Unknown (lookup failed): let them try; the database still checks.
   const profileReady = profile.error ? true : Boolean(profile.data.ign && profile.data.friend_code);
-  return { friendIds: [...friendIds], ...sorted, profileReady };
+  const canSearch = profile.error ? true : Boolean(profile.data.ign);
+  return { friendIds: [...friendIds], ...sorted, profileReady, canSearch };
 }

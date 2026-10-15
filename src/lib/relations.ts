@@ -17,6 +17,8 @@ export interface Relations {
   incoming: string[];
   /** You have an IGN and friend code, which sending a request needs (else "setup" in place of "none"). */
   profileReady: boolean;
+  /** You have an IGN, which searching for players needs (20261021000300_search_needs_ign.sql). Missing: allowed. */
+  canSearch?: boolean;
 }
 
 /** How long an unanswered request stays open (public.request_ttl()). */
@@ -25,6 +27,9 @@ export const REQUEST_TTL_DAYS = 30;
 export const NO_RELATIONS: Relations = { friendIds: [], sent: {}, incoming: [], profileReady: true };
 
 /** send_friend_request's error when your IGN or friend code is missing (20261020000300_request_needs_profile.sql). */
+/** Shown in place of search results when you have no IGN. */
+export const SEARCH_NEEDS_IGN = "Add your in-game name in Profile to search for players.";
+
 export const PROFILE_INCOMPLETE = "Add your in-game name and friend code in Profile first, so they know who's asking.";
 
 export function relationOf(relations: Relations, userId: string): Relation {
