@@ -272,7 +272,8 @@ function FitLists({ match }: { match: MatchRow }) {
   const toThem = { want: match.fit_wants, dont: match.fit_dont_wants };
   // Votes are friends-only: a stranger's side comes back empty, so don't present it as "0 they want".
   const hidden = Boolean(match.votes_hidden);
-  const any = hidden || toYou.want.length + toYou.dont.length + toThem.want.length + toThem.dont.length > 0;
+  // Not friends yet (always, on Find New): their side is hidden, so only "They'd send you" is shown.
+  const any = toYou.want.length + toYou.dont.length + (hidden ? 0 : toThem.want.length + toThem.dont.length) > 0;
   if (tops.length === 0 && !any) return null;
   const group = (title: string, color: string, ids: string[]) =>
     ids.length > 0 && (
@@ -292,8 +293,8 @@ function FitLists({ match }: { match: MatchRow }) {
       {any && (
         <details>
           <summary className="cursor-pointer text-sm font-semibold">
-            They&apos;d send you {toYou.want.length} you want ·{" "}
-            {hidden ? "Their votes show once you're friends" : <>You&apos;d send them {toThem.want.length} they want</>}
+            They&apos;d send you {toYou.want.length} you want
+            {!hidden && <> · You&apos;d send them {toThem.want.length} they want</>}
           </summary>
           <div className="mt-3 space-y-5">
             <div className="space-y-3">
@@ -304,20 +305,16 @@ function FitLists({ match }: { match: MatchRow }) {
                 <p className="text-sm text-slate-500">Nothing you&apos;ve voted on is on their list yet.</p>
               )}
             </div>
-            <div className="space-y-3">
-              <h4 className="font-bold">You&apos;d send them</h4>
-              {hidden && (
-                <p className="text-sm text-slate-500">
-                  Votes are only shown between friends, so this shows once you&apos;re friends. Their % for them still counts
-                  them.
-                </p>
-              )}
-              {group("Their wants matching your friends' wants", "text-want", toThem.want)}
-              {group("Their don't-wants matching your friends' wants", "text-dont", toThem.dont)}
-              {!hidden && toThem.want.length + toThem.dont.length === 0 && (
-                <p className="text-sm text-slate-500">Nothing they&apos;ve voted on is on your list yet.</p>
-              )}
-            </div>
+            {!hidden && (
+              <div className="space-y-3">
+                <h4 className="font-bold">You&apos;d send them</h4>
+                {group("Their wants matching your friends' wants", "text-want", toThem.want)}
+                {group("Their don't-wants matching your friends' wants", "text-dont", toThem.dont)}
+                {toThem.want.length + toThem.dont.length === 0 && (
+                  <p className="text-sm text-slate-500">Nothing they&apos;ve voted on is on your list yet.</p>
+                )}
+              </div>
+            )}
           </div>
         </details>
       )}
