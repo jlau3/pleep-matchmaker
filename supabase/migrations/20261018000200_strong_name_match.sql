@@ -3,7 +3,10 @@
 -- decorations as well as case ("Mr_Time" and "★mr time" are "Mr Time"), so a
 -- name typed slightly differently isn't silently missed. Spelling still has to
 -- match; looser matches stay in search, where the player checks the results.
--- Keep the symbol list in step with SYMBOLS in src/lib/names.ts. Safe to re-run.
+-- Names that are only symbols (valid IGNs) keep them, with lookalikes folded,
+-- and search finds them that way too ("☆" finds "★").
+-- The symbol lists come from src/lib/names.ts (names.test.ts checks they
+-- match). Safe to re-run.
 
 create or replace function public.strong_name_key(t text)
 returns text
@@ -12,11 +15,13 @@ immutable
 parallel safe
 set search_path = ''
 as $$
-  -- A name that is only symbols keeps them ("★★" only matches "★★").
+  -- A name that is only symbols keeps them, with lookalikes folded ("☆" = "★", not "♪").
+  with c as (select regexp_replace(public.search_key(t), '[\s\uFE0E\uFE0F]', '', 'g') as s)
   select coalesce(
-    nullif(translate(regexp_replace(public.search_key(t), '\s', '', 'g'), '_.-''"`~・·•☆★♪♫♬♡♥❤!?*^=+|/\()[]{}<>,:;#@&%$。、', ''), ''),
-    public.search_key(t)
+    nullif(translate(c.s, '_.-''"`!?*^=+|/\()[]{}<>,:;#@&%$。、★☆✩✪✫✬✭✮✯✰⭐🌟♥♡❤❥❣💕💗💖💓💞💘💝🧡💛💚💙💜🤍🖤🤎♪♫♬♩🎵🎶●○◦◯⚪⚫・·•~〜', ''), ''),
+    translate(c.s, '★☆✩✪✫✬✭✮✯✰⭐🌟♥♡❤❥❣💕💗💖💓💞💘💝🧡💛💚💙💜🤍🖤🤎♪♫♬♩🎵🎶●○◦◯⚪⚫・·•~〜', '★★★★★★★★★★★★♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♥♪♪♪♪♪♪○○○○○○・・・~~')
   )
+  from c
 $$;
 
 create index if not exists profiles_ign_strong_key_idx on public.profiles (public.strong_name_key(ign));
@@ -72,3 +77,32 @@ $$;
 
 revoke execute on function public.get_friend_placeholders() from public, anon;
 grant execute on function public.get_friend_placeholders() to authenticated;
+
+-- Search: the "same name" tier uses strong_name_key, so lookalike symbols and
+-- separators count as the same name (still exact spelling). As in
+-- 20261018000000_tighter_fuzzy_search.sql otherwise.
+create or replace function public.name_match(name text, q text)
+returns numeric
+language sql
+stable
+set search_path = ''
+as $$
+  with k as (
+    select
+      public.search_key(name) as key,
+      -- Separators (space, _ . -) as single spaces.
+      btrim(regexp_replace(public.search_key(name), '[\s_.\-]+', ' ', 'g')) as words,
+      btrim(regexp_replace(q, '[\s_.\-]+', ' ', 'g')) as q_words
+  )
+  select case
+    when name is null or q is null or q = '' then null
+    when k.key = q then 1
+    when public.strong_name_key(name) = public.strong_name_key(q) then 0.95
+    when k.q_words = '' then null
+    when strpos(' ' || k.words, ' ' || k.q_words) > 0 then 0.92
+    when strpos(replace(k.words, ' ', ''), replace(k.q_words, ' ', '')) > 0 then 0.9
+    when char_length(k.q_words) < 5 then null
+    else least(extensions.word_similarity(q, k.key)::numeric, 0.89)
+  end
+  from k
+$$;

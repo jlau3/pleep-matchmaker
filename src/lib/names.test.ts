@@ -1,5 +1,6 @@
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { nameMatch, strongNameKey } from "./names";
+import { FOLD_FROM, FOLD_TO, nameMatch, strongNameKey, SYMBOLS } from "./names";
 
 describe("strongNameKey", () => {
   it("ignores case, spaces, separators and decorations", () => {
@@ -9,8 +10,18 @@ describe("strongNameKey", () => {
     expect(strongNameKey("ゆき・だるま")).toBe("ゆきだるま");
     expect(strongNameKey("ユーキ")).toBe("ユーキ"); // the long vowel mark is part of the name
   });
-  it("keeps an all-symbol name as typed", () => {
+  it("keeps an all-symbol name, with lookalikes folded", () => {
     expect(strongNameKey("★★")).toBe("★★");
+    expect(strongNameKey("☆ ☆")).toBe("★★");
+    expect(strongNameKey("❤️")).toBe("♥"); // emoji variation selector dropped
+    expect(strongNameKey("♡")).toBe("♥");
+    expect(strongNameKey("♪")).toBe("♪");
+  });
+  it("matches the database's lists", () => {
+    const sql = readFileSync("supabase/migrations/20261018000200_strong_name_match.sql", "utf8");
+    const q = (s: string) => `'${s.replaceAll("'", "''")}'`;
+    expect(sql).toContain(`translate(c.s, ${q(SYMBOLS)}, '')`);
+    expect(sql).toContain(`translate(c.s, ${q(FOLD_FROM)}, ${q(FOLD_TO)})`);
   });
 });
 
@@ -18,6 +29,7 @@ describe("nameMatch", () => {
   it("strong for the same name written differently", () => {
     expect(nameMatch("Mr_Time", "mr time")).toBe("strong");
     expect(nameMatch("M", "m")).toBe("strong");
+    expect(nameMatch("☆", "★")).toBe("strong");
   });
   it("close for a contained name or one typo", () => {
     expect(nameMatch("Snorlax", "Snorlax Lover")).toBe("close");
@@ -30,5 +42,9 @@ describe("nameMatch", () => {
     expect(nameMatch("mrl", "Mr Time")).toBeNull();
     expect(nameMatch("Anna", "Hanna")).toBe("close"); // contained, 4+ characters
     expect(nameMatch(null, "x")).toBeNull();
+  });
+  it("close for two different all-symbol names, never strong", () => {
+    expect(nameMatch("★", "♪")).toBe("close");
+    expect(nameMatch("★", "Mo")).toBeNull();
   });
 });

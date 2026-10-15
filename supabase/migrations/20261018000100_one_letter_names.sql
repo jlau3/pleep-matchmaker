@@ -1,5 +1,6 @@
 -- One-letter names: a player called "M" couldn't be found, because search
--- ignored anything under 2 characters. Exact names now match at any length;
+-- ignored anything under 2 characters. Exact names, and the "same name" tier
+-- (0.95, see strong_name_match), now match at any length;
 -- partial and typo matches still need 3+ characters, so searching "M" finds
 -- only players named exactly M (not Mo, Molli or Mah). lookup_players as in
 -- profile_extras, with that one change. Safe to re-run.
@@ -56,7 +57,9 @@ as $$
     select s.*
     from scored s, needle n
     -- You only find yourself by exact name (the page then says "That's you").
-    where s.score = 1 or (s.id <> auth.uid() and char_length(n.text_q) >= 3 and s.score >= public.fuzzy_name_min())
+    where s.score = 1
+       or (s.id <> auth.uid() and s.score >= 0.95)
+       or (s.id <> auth.uid() and char_length(n.text_q) >= 3 and s.score >= public.fuzzy_name_min())
     order by s.score desc, s.last_seen_at desc
     limit 10
   )
