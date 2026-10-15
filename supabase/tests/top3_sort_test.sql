@@ -31,6 +31,13 @@ begin
   cross join lateral public.browse_players('top3', true, 50, pg.n * 50, 120) with ordinality as b
   where b.user_id in ('00000000-0000-0000-0022-000000000002', '00000000-0000-0000-0022-000000000003', '00000000-0000-0000-0022-000000000004');
   assert order_ids = '{2,3,4}', format('Ann (your Top 3 on her list), then Bob, then Cal with no list: %s', order_ids);
+  -- Each card carries the tiers, whatever the sort (20261020000000_top3_fast.sql).
+  assert (select b.top3_tiers from generate_series(0, 9) pg(n)
+          cross join lateral public.browse_players('fit', true, 50, pg.n * 50, 120) b
+          where b.user_id = '00000000-0000-0000-0022-000000000002') = '{"t3a": "S"}', 'Ann: S, on Best match too';
+  assert exists (select 1 from generate_series(0, 9) pg(n)
+          cross join lateral public.browse_players('fit', true, 50, pg.n * 50, 120) b
+          where b.user_id = '00000000-0000-0000-0022-000000000004' and b.top3_tiers is null), 'Cal: dashes';
 end $$;
 reset role;
 
