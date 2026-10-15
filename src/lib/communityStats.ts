@@ -48,7 +48,8 @@ export async function loadCommunityStats(supabase: SupabaseClient): Promise<Comm
       }
       return { votes, voters: Number(count.data) };
     },
-    ["community-stats-v2"],
+    // Keyed by database too: previews on the dev database must never fill production's cache.
+    ["community-stats-v2", supabaseEnv().url],
     { revalidate: COMMUNITY_STATS_TTL_SECONDS },
   )();
 }

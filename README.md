@@ -107,6 +107,18 @@ npm install
 npm run dev
 ```
 
+### 3b. Dev database for previews
+
+Vercel previews should use their own Supabase project, so new migrations are tried there before production.
+
+1. Create a second Supabase project (free tier allows two), set up like step 1.
+2. Load the schema: `scripts/bundle-migrations.sh > all.sql` and run it in the dev project's SQL editor. Later, only the new ones: `scripts/bundle-migrations.sh 20261020000500 > new.sql` (any prefix; it starts there).
+3. Fake players: `python3 scripts/dev_seed.py > seed.sql` and run it there. It refuses to run on a database with real players, and running it again replaces them. After signing in on a preview and setting your IGN in Profile, `select public.dev_befriend('YOUR_IGN', 15);` gives you friends and `select public.dev_requests_to('YOUR_IGN', 3);` some friend requests.
+4. Sign-in: in the Discord developer portal add the dev project's `https://<dev-project>.supabase.co/auth/v1/callback` redirect, then enable Discord in the dev project with the same client ID and secret. Under **Authentication → URL Configuration** set the Site URL to the branch preview URL and add `https://<project>-*-<team>.vercel.app/**` and `http://localhost:3000/**` as redirect URLs.
+5. In Vercel, set `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` to the dev project's values for the **Preview** environment only (Production keeps the real ones), then redeploy the preview: `NEXT_PUBLIC_` values are built in.
+
+The dev project pauses after a week without traffic (the keepalive cron only runs in production); restore it from the Supabase dashboard.
+
 ### 4. Deploy to Vercel
 
 Import the repo in Vercel and set `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` and `CRON_SECRET`. Optional:
