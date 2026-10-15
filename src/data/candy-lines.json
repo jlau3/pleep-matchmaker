@@ -5,6 +5,7 @@
     "dex": 1,
     "type": "grass",
     "addedAt": "2023-07-17",
+    "rare": false,
     "members": [
       {
         "name": "Bulbasaur",
@@ -32,6 +33,7 @@
     "dex": 4,
     "type": "fire",
     "addedAt": "2023-07-17",
+    "rare": false,
     "members": [
       {
         "name": "Charmander",
@@ -59,6 +61,7 @@
     "dex": 7,
     "type": "water",
     "addedAt": "2023-07-17",
+    "rare": false,
     "members": [
       {
         "name": "Squirtle",
@@ -86,6 +89,7 @@
     "dex": 10,
     "type": "bug",
     "addedAt": "2023-07-17",
+    "rare": false,
     "members": [
       {
         "name": "Caterpie",
@@ -113,6 +117,7 @@
     "dex": 19,
     "type": "normal",
     "addedAt": "2023-07-17",
+    "rare": false,
     "members": [
       {
         "name": "Rattata",
@@ -134,6 +139,7 @@
     "dex": 23,
     "type": "poison",
     "addedAt": "2023-07-17",
+    "rare": false,
     "members": [
       {
         "name": "Ekans",
@@ -155,6 +161,7 @@
     "dex": 25,
     "type": "electric",
     "addedAt": "2023-07-17",
+    "rare": false,
     "members": [
       {
         "name": "Pichu",
@@ -200,6 +207,7 @@
     "dex": 27,
     "type": "ground",
     "addedAt": "2026-04-27",
+    "rare": false,
     "members": [
       {
         "name": "Sandshrew",
@@ -221,6 +229,7 @@
     "dex": 35,
     "type": "fairy",
     "addedAt": "2023-09-28",
+    "rare": false,
     "members": [
       {
         "name": "Cleffa",
@@ -248,6 +257,7 @@
     "dex": 37,
     "type": "fire",
     "addedAt": "2024-05-06",
+    "rare": false,
     "members": [
       {
         "name": "Vulpix",
@@ -281,6 +291,7 @@
     "dex": 39,
     "type": "fairy",
     "addedAt": "2023-07-17",
+    "rare": false,
     "members": [
       {
         "name": "Igglybuff",
@@ -308,6 +319,7 @@
     "dex": 50,
     "type": "ground",
     "addedAt": "2023-07-17",
+    "rare": false,
     "members": [
       {
         "name": "Diglett",
@@ -329,6 +341,7 @@
     "dex": 52,
     "type": "normal",
     "addedAt": "2023-07-17",
+    "rare": false,
     "members": [
       {
         "name": "Meowth",
@@ -350,6 +363,7 @@
     "dex": 54,
     "type": "water",
     "addedAt": "2023-07-17",
+    "rare": false,
     "members": [
       {
         "name": "Psyduck",
@@ -371,6 +385,7 @@
     "dex": 56,
     "type": "fighting",
     "addedAt": "2023-07-17",
+    "rare": false,
     "members": [
       {
         "name": "Mankey",
@@ -392,6 +407,7 @@
     "dex": 58,
     "type": "fire",
     "addedAt": "2023-07-17",
+    "rare": false,
     "members": [
       {
         "name": "Growlithe",
@@ -413,6 +429,7 @@
     "dex": 69,
     "type": "grass",
     "addedAt": "2023-07-17",
+    "rare": false,
     "members": [
       {
         "name": "Bellsprout",
@@ -440,6 +457,7 @@
     "dex": 74,
     "type": "rock",
     "addedAt": "2023-07-17",
+    "rare": false,
     "members": [
       {
         "name": "Geodude",
@@ -467,6 +485,7 @@
     "dex": 79,
     "type": "water",
     "addedAt": "2023-07-17",
+    "rare": false,
     "members": [
       {
         "name": "Slowpoke",
@@ -494,6 +513,7 @@
     "dex": 81,
     "type": "steel",
     "addedAt": "2023-07-17",
+    "rare": false,
     "members": [
       {
         "name": "Magnemite",
@@ -521,6 +541,7 @@
     "dex": 83,
     "type": "flying",
     "addedAt": "2025-06-23",
+    "rare": true,
     "members": [
       {
         "name": "Farfetch'd",
@@ -536,6 +557,7 @@
     "dex": 84,
     "type": "flying",
     "addedAt": "2023-07-17",
+    "rare": false,
     "members": [
       {
         "name": "Doduo",
@@ -557,6 +579,7 @@
     "dex": 92,
     "type": "ghost",
     "addedAt": "2023-07-17",
+    "rare": false,
     "members": [
       {
         "name": "Gastly",
@@ -584,6 +607,7 @@
     "dex": 95,
     "type": "rock",
     "addedAt": "2023-11-14",
+    "rare": true,
     "members": [
       {
         "name": "Onix",
@@ -605,6 +629,7 @@
     "dex": 104,
     "type": "ground",
     "addedAt": "2023-07-17",
+    "rare": false,
     "members": [
       {
         "name": "Cubone",
@@ -626,6 +651,7 @@
     "dex": 113,
     "type": "normal",
     "addedAt": "2025-05-05",
+    "rare": false,
     "members": [
       {
         "name": "Happiny",
@@ -653,6 +679,7 @@
     "dex": 115,
     "type": "normal",
     "addedAt": "2023-07-17",
+    "rare": true,
     "members": [
       {
         "name": "Kangaskhan",
@@ -668,6 +695,7 @@
     "dex": 122,
     "type": "psychic",
     "addedAt": "2023-09-12",
+    "rare": false,
     "members": [
       {
         "name": "Mime Jr.",
@@ -689,6 +717,7 @@
     "dex": 127,
     "type": "bug",
     "addedAt": "2023-07-17",
+    "rare": true,
     "members": [
       {
         "name": "Pinsir",
@@ -704,6 +733,7 @@
     "dex": 132,
     "type": "normal",
     "addedAt": "2023-07-17",
+    "rare": true,
     "members": [
       {
         "name": "Ditto",
@@ -719,6 +749,7 @@
     "dex": 133,
     "type": "normal",
     "addedAt": "2023-07-17",
+    "rare": false,
     "members": [
       {
         "name": "Eevee",
@@ -794,6 +825,7 @@
     "dex": 147,
     "type": "dragon",
     "addedAt": "2024-01-24",
+    "rare": true,
     "members": [
       {
         "name": "Dratini",
@@ -821,6 +853,7 @@
     "dex": 150,
     "type": "psychic",
     "addedAt": "2026-09-14",
+    "rare": true,
     "members": [
       {
         "name": "Mewtwo",
@@ -836,6 +869,7 @@
     "dex": 151,
     "type": "psychic",
     "addedAt": "2026-03-05",
+    "rare": true,
     "members": [
       {
         "name": "Mew",
@@ -851,6 +885,7 @@
     "dex": 152,
     "type": "grass",
     "addedAt": "2023-07-17",
+    "rare": false,
     "members": [
       {
         "name": "Chikorita",
@@ -878,6 +913,7 @@
     "dex": 155,
     "type": "fire",
     "addedAt": "2023-07-17",
+    "rare": false,
     "members": [
       {
         "name": "Cyndaquil",
@@ -905,6 +941,7 @@
     "dex": 158,
     "type": "water",
     "addedAt": "2023-07-17",
+    "rare": false,
     "members": [
       {
         "name": "Totodile",
@@ -932,6 +969,7 @@
     "dex": 175,
     "type": "fairy",
     "addedAt": "2023-07-17",
+    "rare": false,
     "members": [
       {
         "name": "Togepi",
@@ -959,6 +997,7 @@
     "dex": 177,
     "type": "psychic",
     "addedAt": "2025-09-29",
+    "rare": false,
     "members": [
       {
         "name": "Natu",
@@ -980,6 +1019,7 @@
     "dex": 179,
     "type": "electric",
     "addedAt": "2023-07-17",
+    "rare": false,
     "members": [
       {
         "name": "Mareep",
@@ -1007,6 +1047,7 @@
     "dex": 185,
     "type": "rock",
     "addedAt": "2023-07-17",
+    "rare": false,
     "members": [
       {
         "name": "Bonsly",
@@ -1028,6 +1069,7 @@
     "dex": 194,
     "type": "water",
     "addedAt": "2024-08-19",
+    "rare": false,
     "members": [
       {
         "name": "Wooper",
@@ -1061,6 +1103,7 @@
     "dex": 198,
     "type": "dark",
     "addedAt": "2025-05-26",
+    "rare": true,
     "members": [
       {
         "name": "Murkrow",
@@ -1082,6 +1125,7 @@
     "dex": 202,
     "type": "psychic",
     "addedAt": "2023-07-17",
+    "rare": false,
     "members": [
       {
         "name": "Wynaut",
@@ -1103,6 +1147,7 @@
     "dex": 213,
     "type": "bug",
     "addedAt": "2026-01-19",
+    "rare": true,
     "members": [
       {
         "name": "Shuckle",
@@ -1118,6 +1163,7 @@
     "dex": 214,
     "type": "bug",
     "addedAt": "2023-07-17",
+    "rare": true,
     "members": [
       {
         "name": "Heracross",
@@ -1133,6 +1179,7 @@
     "dex": 215,
     "type": "dark",
     "addedAt": "2024-12-03",
+    "rare": true,
     "members": [
       {
         "name": "Sneasel",
@@ -1154,6 +1201,7 @@
     "dex": 225,
     "type": "flying",
     "addedAt": "2023-12-18",
+    "rare": true,
     "members": [
       {
         "name": "Delibird",
@@ -1169,6 +1217,7 @@
     "dex": 228,
     "type": "dark",
     "addedAt": "2023-07-17",
+    "rare": false,
     "members": [
       {
         "name": "Houndour",
@@ -1190,6 +1239,7 @@
     "dex": 243,
     "type": "electric",
     "addedAt": "2024-03-24",
+    "rare": true,
     "members": [
       {
         "name": "Raikou",
@@ -1205,6 +1255,7 @@
     "dex": 244,
     "type": "fire",
     "addedAt": "2024-05-20",
+    "rare": true,
     "members": [
       {
         "name": "Entei",
@@ -1220,6 +1271,7 @@
     "dex": 245,
     "type": "water",
     "addedAt": "2024-09-02",
+    "rare": true,
     "members": [
       {
         "name": "Suicune",
@@ -1235,6 +1287,7 @@
     "dex": 246,
     "type": "rock",
     "addedAt": "2023-07-17",
+    "rare": true,
     "members": [
       {
         "name": "Larvitar",
@@ -1262,6 +1315,7 @@
     "dex": 252,
     "type": "grass",
     "addedAt": "2025-07-14",
+    "rare": false,
     "members": [
       {
         "name": "Treecko",
@@ -1289,6 +1343,7 @@
     "dex": 255,
     "type": "fire",
     "addedAt": "2025-07-14",
+    "rare": false,
     "members": [
       {
         "name": "Torchic",
@@ -1316,6 +1371,7 @@
     "dex": 258,
     "type": "water",
     "addedAt": "2025-07-14",
+    "rare": false,
     "members": [
       {
         "name": "Mudkip",
@@ -1343,6 +1399,7 @@
     "dex": 280,
     "type": "psychic",
     "addedAt": "2024-01-24",
+    "rare": false,
     "members": [
       {
         "name": "Ralts",
@@ -1376,6 +1433,7 @@
     "dex": 287,
     "type": "normal",
     "addedAt": "2023-07-17",
+    "rare": false,
     "members": [
       {
         "name": "Slakoth",
@@ -1403,6 +1461,7 @@
     "dex": 302,
     "type": "dark",
     "addedAt": "2023-07-17",
+    "rare": true,
     "members": [
       {
         "name": "Sableye",
@@ -1418,6 +1477,7 @@
     "dex": 303,
     "type": "steel",
     "addedAt": "2025-06-09",
+    "rare": true,
     "members": [
       {
         "name": "Mawile",
@@ -1433,6 +1493,7 @@
     "dex": 304,
     "type": "steel",
     "addedAt": "2024-10-02",
+    "rare": false,
     "members": [
       {
         "name": "Aron",
@@ -1460,6 +1521,7 @@
     "dex": 311,
     "type": "electric",
     "addedAt": "2025-07-14",
+    "rare": false,
     "members": [
       {
         "name": "Plusle",
@@ -1475,6 +1537,7 @@
     "dex": 312,
     "type": "electric",
     "addedAt": "2025-07-14",
+    "rare": false,
     "members": [
       {
         "name": "Minun",
@@ -1490,6 +1553,7 @@
     "dex": 316,
     "type": "poison",
     "addedAt": "2023-07-17",
+    "rare": false,
     "members": [
       {
         "name": "Gulpin",
@@ -1511,6 +1575,7 @@
     "dex": 328,
     "type": "ground",
     "addedAt": "2025-11-06",
+    "rare": false,
     "members": [
       {
         "name": "Trapinch",
@@ -1538,6 +1603,7 @@
     "dex": 333,
     "type": "flying",
     "addedAt": "2023-07-17",
+    "rare": false,
     "members": [
       {
         "name": "Swablu",
@@ -1559,6 +1625,7 @@
     "dex": 353,
     "type": "ghost",
     "addedAt": "2023-10-30",
+    "rare": false,
     "members": [
       {
         "name": "Shuppet",
@@ -1580,6 +1647,7 @@
     "dex": 359,
     "type": "dark",
     "addedAt": "2023-07-17",
+    "rare": true,
     "members": [
       {
         "name": "Absol",
@@ -1595,6 +1663,7 @@
     "dex": 363,
     "type": "ice",
     "addedAt": "2023-07-17",
+    "rare": false,
     "members": [
       {
         "name": "Spheal",
@@ -1628,6 +1697,7 @@
     "dex": 371,
     "type": "dragon",
     "addedAt": "2025-11-06",
+    "rare": true,
     "members": [
       {
         "name": "Bagon",
@@ -1655,6 +1725,7 @@
     "dex": 380,
     "type": "dragon",
     "addedAt": "2026-04-06",
+    "rare": true,
     "members": [
       {
         "name": "Latias",
@@ -1670,6 +1741,7 @@
     "dex": 381,
     "type": "dragon",
     "addedAt": "2026-06-08",
+    "rare": true,
     "members": [
       {
         "name": "Latios",
@@ -1685,6 +1757,7 @@
     "dex": 387,
     "type": "grass",
     "addedAt": "2026-07-13",
+    "rare": false,
     "members": [
       {
         "name": "Turtwig",
@@ -1712,6 +1785,7 @@
     "dex": 390,
     "type": "fire",
     "addedAt": "2026-07-13",
+    "rare": false,
     "members": [
       {
         "name": "Chimchar",
@@ -1739,6 +1813,7 @@
     "dex": 393,
     "type": "water",
     "addedAt": "2026-07-13",
+    "rare": false,
     "members": [
       {
         "name": "Piplup",
@@ -1766,6 +1841,7 @@
     "dex": 403,
     "type": "electric",
     "addedAt": "2024-10-02",
+    "rare": false,
     "members": [
       {
         "name": "Shinx",
@@ -1793,6 +1869,7 @@
     "dex": 425,
     "type": "ghost",
     "addedAt": "2024-10-11",
+    "rare": false,
     "members": [
       {
         "name": "Drifloon",
@@ -1814,6 +1891,7 @@
     "dex": 442,
     "type": "dark",
     "addedAt": "2025-12-01",
+    "rare": true,
     "members": [
       {
         "name": "Spiritomb",
@@ -1829,6 +1907,7 @@
     "dex": 447,
     "type": "fighting",
     "addedAt": "2023-07-17",
+    "rare": false,
     "members": [
       {
         "name": "Riolu",
@@ -1850,6 +1929,7 @@
     "dex": 453,
     "type": "poison",
     "addedAt": "2023-07-17",
+    "rare": false,
     "members": [
       {
         "name": "Croagunk",
@@ -1871,6 +1951,7 @@
     "dex": 459,
     "type": "ice",
     "addedAt": "2023-12-18",
+    "rare": false,
     "members": [
       {
         "name": "Snover",
@@ -1892,6 +1973,7 @@
     "dex": 488,
     "type": "psychic",
     "addedAt": "2025-03-31",
+    "rare": true,
     "members": [
       {
         "name": "Cresselia",
@@ -1907,6 +1989,7 @@
     "dex": 491,
     "type": "dark",
     "addedAt": "2025-04-07",
+    "rare": true,
     "members": [
       {
         "name": "Darkrai",
@@ -1922,6 +2005,7 @@
     "dex": 517,
     "type": "psychic",
     "addedAt": "2025-03-17",
+    "rare": false,
     "members": [
       {
         "name": "Munna",
@@ -1943,6 +2027,7 @@
     "dex": 557,
     "type": "bug",
     "addedAt": "2025-11-06",
+    "rare": false,
     "members": [
       {
         "name": "Dwebble",
@@ -1964,6 +2049,7 @@
     "dex": 590,
     "type": "poison",
     "addedAt": "2026-10-05",
+    "rare": false,
     "members": [
       {
         "name": "Foongus",
@@ -1985,6 +2071,7 @@
     "dex": 627,
     "type": "flying",
     "addedAt": "2025-01-20",
+    "rare": false,
     "members": [
       {
         "name": "Rufflet",
@@ -2006,6 +2093,7 @@
     "dex": 696,
     "type": "rock",
     "addedAt": "2026-05-11",
+    "rare": false,
     "members": [
       {
         "name": "Tyrunt",
@@ -2027,6 +2115,7 @@
     "dex": 701,
     "type": "flying",
     "addedAt": "2026-08-10",
+    "rare": true,
     "members": [
       {
         "name": "Hawlucha",
@@ -2042,6 +2131,7 @@
     "dex": 702,
     "type": "electric",
     "addedAt": "2024-03-11",
+    "rare": true,
     "members": [
       {
         "name": "Dedenne",
@@ -2057,6 +2147,7 @@
     "dex": 710,
     "type": "ghost",
     "addedAt": "2025-10-22",
+    "rare": false,
     "members": [
       {
         "name": "Pumpkaboo",
@@ -2078,6 +2169,7 @@
     "dex": 714,
     "type": "dragon",
     "addedAt": "2026-03-23",
+    "rare": false,
     "members": [
       {
         "name": "Noibat",
@@ -2099,6 +2191,7 @@
     "dex": 736,
     "type": "bug",
     "addedAt": "2024-10-02",
+    "rare": false,
     "members": [
       {
         "name": "Grubbin",
@@ -2126,6 +2219,7 @@
     "dex": 742,
     "type": "fairy",
     "addedAt": "2026-02-09",
+    "rare": false,
     "members": [
       {
         "name": "Cutiefly",
@@ -2147,6 +2241,7 @@
     "dex": 759,
     "type": "fighting",
     "addedAt": "2024-01-24",
+    "rare": false,
     "members": [
       {
         "name": "Stufful",
@@ -2168,6 +2263,7 @@
     "dex": 764,
     "type": "fairy",
     "addedAt": "2024-04-22",
+    "rare": true,
     "members": [
       {
         "name": "Comfey",
@@ -2183,6 +2279,7 @@
     "dex": 777,
     "type": "steel",
     "addedAt": "2025-12-22",
+    "rare": true,
     "members": [
       {
         "name": "Togedemaru",
@@ -2198,6 +2295,7 @@
     "dex": 778,
     "type": "ghost",
     "addedAt": "2024-10-28",
+    "rare": true,
     "members": [
       {
         "name": "Mimikyu",
@@ -2213,6 +2311,7 @@
     "dex": 780,
     "type": "dragon",
     "addedAt": "2026-05-25",
+    "rare": true,
     "members": [
       {
         "name": "Drampa",
@@ -2228,6 +2327,7 @@
     "dex": 845,
     "type": "flying",
     "addedAt": "2024-06-17",
+    "rare": true,
     "members": [
       {
         "name": "Cramorant",
@@ -2243,6 +2343,7 @@
     "dex": 848,
     "type": "poison",
     "addedAt": "2025-08-11",
+    "rare": false,
     "members": [
       {
         "name": "Toxel",
@@ -2264,6 +2365,7 @@
     "dex": 906,
     "type": "grass",
     "addedAt": "2024-07-15",
+    "rare": false,
     "members": [
       {
         "name": "Sprigatito",
@@ -2291,6 +2393,7 @@
     "dex": 909,
     "type": "fire",
     "addedAt": "2024-07-15",
+    "rare": false,
     "members": [
       {
         "name": "Fuecoco",
@@ -2318,6 +2421,7 @@
     "dex": 912,
     "type": "water",
     "addedAt": "2024-07-15",
+    "rare": false,
     "members": [
       {
         "name": "Quaxly",
@@ -2345,6 +2449,7 @@
     "dex": 921,
     "type": "electric",
     "addedAt": "2024-12-23",
+    "rare": false,
     "members": [
       {
         "name": "Pawmi",
@@ -2372,6 +2477,7 @@
     "dex": 957,
     "type": "fairy",
     "addedAt": "2026-08-17",
+    "rare": false,
     "members": [
       {
         "name": "Tinkatink",
@@ -2399,6 +2505,7 @@
     "dex": 974,
     "type": "ice",
     "addedAt": "2025-12-22",
+    "rare": false,
     "members": [
       {
         "name": "Cetoddle",

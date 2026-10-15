@@ -13,7 +13,7 @@ describe("Tier List rules shared with the database", () => {
     q1: [4, 0], q2: [3, 0], q3: [2, 1], q4: [1, 0], q5: [0, 2], q6: [2, 0], q7: [1, 1], q8: [0, 1],
   };
   const tiersFor = (lineCount: number) => {
-    const lines = Array.from({ length: lineCount }, (_, i) => ({ id: i < 8 ? `q${i + 1}` : `u${i - 7}`, name: "x", dex: i + 1 }));
+    const lines = Array.from({ length: lineCount }, (_, i) => ({ id: i < 8 ? `q${i + 1}` : `u${i - 7}`, name: "x", dex: i + 1, rare: false }));
     const counts = new Map(Object.entries(votes).map(([id, [w, d]]) => [id, { wants: w, dontWants: d, tops: 0 }]));
     const out: Record<string, string> = {};
     for (const [tier, rows] of buildTiers(counts, 4, lines as unknown as CandyLine[]))

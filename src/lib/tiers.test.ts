@@ -97,7 +97,7 @@ describe("relative tiers by score", () => {
   });
 
   it("breaks score ties by Top 3 stars before anything else", () => {
-    // mewtwo has the lower dex and eevee the most don't-wants, but eevee's star puts it first among the lines tied on score 9.
+    // mewtwo is legendary and eevee has the most don't-wants, but eevee's star puts it first among the lines tied on score 9.
     const [mewtwo, eevee] = ["mewtwo", "eevee"].map((id) => LINES_BY_ID.get(id)!);
     const votes = new Map([
       [mewtwo.id, { wants: 2, dontWants: 0, tops: 0 }], // 6 + 3 = 9
@@ -145,7 +145,7 @@ describe("buildTiers", () => {
     expect(tiers.get("top")![0].tops).toBe(2);
   });
 
-  it("breaks score ties by fewer don't-wants, then dex, ignoring rarity", () => {
+  it("breaks score ties by rarity (all rare kinds equal), then fewer don't-wants, then dex", () => {
     const lines = ["pikachu", "ditto", "larvitar", "mewtwo", "eevee"].map((id) => LINES_BY_ID.get(id)!);
     const votes = countVotes([
       { wants: ["pikachu", "ditto", "larvitar", "mewtwo", "eevee"], dont_wants: [] },
@@ -153,9 +153,10 @@ describe("buildTiers", () => {
       { wants: ["pikachu"], dont_wants: [] },
       { wants: [], dont_wants: ["pikachu"] },
     ]);
-    // All score 6 (one want + 3 neutral; pikachu 9 - 3). Legendary, pseudo-legendary
-    // and 16-pip lines get no edge: dex order, with pikachu's don't-want last.
-    expect(ids(buildTiers(votes, 4, lines), "S")).toEqual(["ditto", "eevee", "mewtwo", "larvitar", "pikachu"]);
+    // All score 6 (one want + 3 neutral; pikachu 9 - 3). Ditto (16-pip), mewtwo
+    // (legendary) and larvitar (pseudo) come first in dex order, not by kind;
+    // then eevee, then pikachu with its don't-want.
+    expect(ids(buildTiers(votes, 4, lines), "S")).toEqual(["ditto", "mewtwo", "larvitar", "eevee", "pikachu"]);
   });
 
   it("counts votes per line, ignoring duplicate ids", () => {

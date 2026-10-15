@@ -51,7 +51,7 @@ Lines that tie share a tier, placed by the tie's middle rank, so with few voters
 
 Above S, set apart in a dashed gold frame because it isn't a tier, the **Top 3** row repeats the 9 lines that show up most often in players' Top 3, with **Show all** to expand to every starred line, including ones in Avoid so nobody's pick is left out (ties broken like the rest of the list). They stay in their regular tier too, so nothing shifts. Every card shows its star count.
 
-Inside a tier, lines sort by score, then Top 3 stars, then fewer don't-wants, then dex. Lines tied on score share a tier whatever their stars, so stars only order them. Rarity (legendary, mythical, pseudo-legendary, 16-pip) gives no edge.
+Inside a tier, lines sort by score, then Top 3 stars, then rarity, then fewer don't-wants, then dex. Lines tied on score share a tier whatever their stars, so stars only order them. Rarity only breaks ties and never moves a line between tiers: legendary, mythical, pseudo-legendary and 16-pip lines all rank equally ahead of other lines. `scripts/build_lines.py` derives it from each line's first stage (EXP curve and friendship points).
 
 ## Privacy
 

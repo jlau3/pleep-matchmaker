@@ -40,6 +40,8 @@ export interface CandyLine {
   dex: number;
   type: string;
   addedAt: string;
+  /** Legendary, mythical, pseudo-legendary or 16-pip: wins score ties over other lines, all four equally. */
+  rare: boolean;
   members: LineMember[];
 }
 
