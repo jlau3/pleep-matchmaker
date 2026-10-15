@@ -71,8 +71,9 @@ begin
     select 1 from public.browse_players('fit', true, 50, 0)
     where discord_username in ('br_stale', 'br_closed', 'br_blocked', 'br_viewer')
   ), 'never listed';
-  assert (select top_wants from public.browse_players('fit', true, 50, 0) where discord_username = 'br_good') = '{bra}',
-    'top 3 returned';
+  -- Votes are friends-only (20261020000800_private_votes.sql): a stranger's Top 3 stays hidden.
+  assert (select top_wants from public.browse_players('fit', true, 50, 0) where discord_username = 'br_good') = '{}',
+    'stranger top 3 hidden';
 end $$;
 
 -- Paging: pages don't overlap and total_count covers everything.

@@ -119,7 +119,8 @@ begin
   assert exists (select 1 from public.lookup_players('  ign_cara  ')), 'surrounding spaces';
   assert exists (select 1 from public.lookup_players('ＩＧＮ＿ＣＡＲＡ')), 'full-width';
   select * into r from public.lookup_players('ign_bob');
-  assert cardinality(r.wants) = 10 and cardinality(r.dont_wants) = 3, 'lookup returns prefs';
+  -- Votes are friends-only (20261020000800_private_votes.sql): found by search, but no prefs.
+  assert r.user_id is not null and cardinality(r.wants) = 0 and cardinality(r.dont_wants) = 0, 'lookup hides a stranger''s prefs';
 end $$;
 reset role;
 update public.profiles set friend_code = '123412341234' where discord_username = 'dan';

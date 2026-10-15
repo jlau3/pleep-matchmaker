@@ -14,11 +14,11 @@ export function PlayerLists({
   wants: string[];
   dontWants: string[];
   topWants: string[];
-  /** Friends-only votes kept from you: say so instead of showing empty lists. */
+  /** Not friends yet (votes are friends-only): say so instead of showing empty lists. */
   hidden?: boolean;
 }) {
   if (hidden)
-    return <p className="mt-3 text-sm text-slate-500">Their votes are shared with friends only. You&apos;ll see them once you&apos;re friends.</p>;
+    return <p className="mt-3 text-sm text-slate-500">Their votes show once you&apos;re friends.</p>;
   const tops = new Set(topWants);
   const otherWants = wants.filter((id) => !tops.has(id));
   return (

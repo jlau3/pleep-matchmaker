@@ -83,7 +83,8 @@ set role authenticated;
 -- Friends, lookup and community stats expose the stars.
 reset role;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0003-000000000002', false);
-insert into public.friends (user_id, friend_id) values ('00000000-0000-0000-0003-000000000002', '00000000-0000-0000-0003-000000000001');
+-- Friends both ways: votes are friends-only (20261020000800_private_votes.sql).
+select public.test_befriend('00000000-0000-0000-0003-000000000002', '00000000-0000-0000-0003-000000000001');
 set role authenticated;
 do $$ begin
   assert (select top_wants from public.get_friends() where discord_username = 'tara') = '{ta,tb,te}', 'get_friends top_wants';

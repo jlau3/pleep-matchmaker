@@ -184,6 +184,19 @@ export async function enableLookup(): Promise<{ error?: string }> {
   return {};
 }
 
+/**
+ * "Who can find you" -> the two settings behind it: everyone (search and Find
+ * New), people who know me (search only), only my friends (neither).
+ * Older forms sent the two checkboxes.
+ */
+function visibilityFields(form: FormData): { open_to_friends: boolean; allow_lookup: boolean } {
+  const visibility = form.get("visibility");
+  if (visibility === "everyone") return { open_to_friends: true, allow_lookup: true };
+  if (visibility === "known") return { open_to_friends: false, allow_lookup: true };
+  if (visibility === "friends") return { open_to_friends: false, allow_lookup: false };
+  return { open_to_friends: form.get("open_to_friends") === "on", allow_lookup: form.get("allow_lookup") === "on" };
+}
+
 export async function updateProfile(_prev: ProfileFormState, form: FormData): Promise<ProfileFormState> {
   const { supabase, user } = await requireUser();
   const ign = String(form.get("ign") ?? "").trim();
@@ -196,13 +209,12 @@ export async function updateProfile(_prev: ProfileFormState, form: FormData): Pr
   const update: Record<string, unknown> = {
     ign: ign || null,
     friend_code: friendCode,
-    open_to_friends: form.get("open_to_friends") === "on",
-    allow_lookup: form.get("allow_lookup") === "on",
+    ...visibilityFields(form),
   };
   // Only Discord accounts get the checkbox (an unchecked box isn't submitted, hence the marker).
   if (form.has("has_show_discord")) update.show_discord = form.get("show_discord") === "on";
 
-  // Icon, Reddit name and friends-only votes (profile_extras migration).
+  // Icon and Reddit name (profile_extras migration).
   const extras: Record<string, unknown> = {};
   if (form.has("has_extras")) {
     const reddit = String(form.get("reddit_username") ?? "").trim().replace(/^\/?u\//i, "");
@@ -211,7 +223,6 @@ export async function updateProfile(_prev: ProfileFormState, form: FormData): Pr
     if (avatar && !parseAvatar(avatar)) return { error: "Pick an icon from the list" };
     extras.reddit_username = reddit || null;
     extras.game_avatar = avatar || null;
-    extras.votes_private = form.get("votes_private") === "on";
   }
   let { error } = await supabase.from("profiles").update({ ...update, ...extras }).eq("id", user.id);
   // Before that migration runs, save the rest.

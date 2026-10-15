@@ -41,6 +41,19 @@ function Toggle({
 
 const card = "card space-y-4 p-5";
 
+type Visibility = "everyone" | "known" | "friends";
+
+/** "Who can find you": each option sets search (allow_lookup) and Find New (open_to_friends) together. */
+const VISIBILITY: { value: Visibility; title: string; text: string }[] = [
+  { value: "everyone", title: "Everyone", text: "Suggested to good matches in Find New, and findable by your exact IGN or friend code." },
+  { value: "known", title: "People who know me", text: "Only found by searching your exact IGN or friend code." },
+  {
+    value: "friends",
+    title: "Only my friends",
+    text: "Hidden from everyone who isn't already a friend. People you send a request to still see your card.",
+  },
+];
+
 /**
  * Your details and privacy, as two cards side by side on wide screens. No Save
  * button: switches save on click, text fields when you leave them (or press
@@ -54,6 +67,7 @@ export function ProfileForm({ profile, friendListFull }: { profile: OwnProfile; 
     if (e.currentTarget.value !== e.currentTarget.defaultValue) save();
   };
   const hint = "block text-xs text-slate-500";
+  const visibility: Visibility = !profile.allow_lookup ? "friends" : profile.open_to_friends ? "everyone" : "known";
   const status = (
     <span className="text-xs" aria-live="polite">
       {pending ? (
@@ -108,52 +122,55 @@ export function ProfileForm({ profile, friendListFull }: { profile: OwnProfile; 
       </section>
 
       <section className={card} aria-labelledby="profile-privacy">
-        <h2 id="profile-privacy" className="text-lg font-bold">Privacy</h2>
-        <div className="divide-y divide-slate-200 dark:divide-slate-700">
-          <Toggle
-            name="open_to_friends"
-            defaultChecked={profile.open_to_friends}
-            onChange={save}
-            title="Show me in Find New"
-            detail={
-              friendListFull
-                ? "Your friend list is full, so you're hidden until you remove someone. Off also hides your friend code from name searches."
-                : "Hidden automatically while your friend list is full. Off also hides your friend code from name searches."
-            }
-          >
-            Other players can see you as a suggested match.
-          </Toggle>
-          <Toggle
-            name="allow_lookup"
-            defaultChecked={profile.allow_lookup}
-            onChange={save}
-            title="Findable by search"
-            detail="Off only stops searches: friends still see everything, and Find New still shows you if that's on."
-          >
-            People can find you by searching your exact IGN or friend code
-            {profile.discord_username && profile.show_discord ? " (or Discord name)" : ""}.
-          </Toggle>
-          <Toggle name="votes_private" defaultChecked={profile.votes_private ?? false} onChange={save} title="Friends-only votes">
-            Only friends see your wants and Top 3. Others still see your match %s.
-          </Toggle>
-          {profile.discord_username && (
-            <>
-              <input type="hidden" name="has_show_discord" value="1" />
-              <Toggle
-                name="show_discord"
-                defaultChecked={profile.show_discord}
-                onChange={save}
-                title={
-                  <>
-                    <DiscordIcon /> Show Discord name
-                  </>
-                }
-              >
-                Show @{profile.discord_username} and your Discord picture. Off: you&apos;re shown by IGN only.
-              </Toggle>
-            </>
-          )}
+        <div>
+          <h2 id="profile-privacy" className="text-lg font-bold">Privacy</h2>
+          <p className="text-sm text-slate-600 dark:text-slate-300">
+            <b>Your votes are only shown to friends.</b> Everyone else sees match %s.
+          </p>
         </div>
+        <fieldset className="space-y-2">
+          <legend className="mb-2 text-sm font-semibold">Who can find you</legend>
+          {VISIBILITY.map((option) => (
+            <label
+              key={option.value}
+              className="flex cursor-pointer items-start gap-3 rounded-2xl border-2 border-transparent bg-white px-3 py-2 has-[:checked]:border-night dark:bg-night-deep dark:has-[:checked]:border-sun"
+            >
+              <input
+                type="radio"
+                name="visibility"
+                value={option.value}
+                defaultChecked={visibility === option.value}
+                onChange={save}
+                className="mt-1 h-4 w-4 accent-[var(--color-night)]"
+              />
+              <span>
+                <span className="block text-sm font-semibold">{option.title}</span>
+                <span className="block text-sm text-slate-600 dark:text-slate-300">{option.text}</span>
+                {option.value === "everyone" && friendListFull && (
+                  <span className="block text-xs text-slate-500">Your friend list is full, so you&apos;re not suggested until you remove someone.</span>
+                )}
+              </span>
+            </label>
+          ))}
+        </fieldset>
+        {profile.discord_username && (
+          <div className="border-t border-slate-200 dark:border-slate-700">
+            <input type="hidden" name="has_show_discord" value="1" />
+            <Toggle
+              name="show_discord"
+              defaultChecked={profile.show_discord}
+              onChange={save}
+              title={
+                <>
+                  <DiscordIcon /> Show Discord name
+                </>
+              }
+              detail="Off: you're shown by IGN only, and people can't find you by your Discord name."
+            >
+              Show @{profile.discord_username} and your Discord picture on your card.
+            </Toggle>
+          </div>
+        )}
       </section>
     </form>
   );

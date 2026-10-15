@@ -270,7 +270,7 @@ function FitLists({ match }: { match: MatchRow }) {
   const chips = (ids: string[] | undefined) => (ids ?? []).flatMap((id) => LINES_BY_ID.get(id) ?? []);
   const toYou = { want: match.you_fit_wants ?? [], dont: match.you_fit_dont_wants ?? [] };
   const toThem = { want: match.fit_wants, dont: match.fit_dont_wants };
-  // Friends-only votes: their side comes back empty, so don't present it as "0 they want".
+  // Votes are friends-only: a stranger's side comes back empty, so don't present it as "0 they want".
   const hidden = Boolean(match.votes_hidden);
   const any = hidden || toYou.want.length + toYou.dont.length + toThem.want.length + toThem.dont.length > 0;
   if (tops.length === 0 && !any) return null;
@@ -293,7 +293,7 @@ function FitLists({ match }: { match: MatchRow }) {
         <details>
           <summary className="cursor-pointer text-sm font-semibold">
             They&apos;d send you {toYou.want.length} you want ·{" "}
-            {hidden ? "Their votes are friends-only" : <>You&apos;d send them {toThem.want.length} they want</>}
+            {hidden ? "Their votes show once you're friends" : <>You&apos;d send them {toThem.want.length} they want</>}
           </summary>
           <div className="mt-3 space-y-5">
             <div className="space-y-3">
@@ -308,8 +308,8 @@ function FitLists({ match }: { match: MatchRow }) {
               <h4 className="font-bold">You&apos;d send them</h4>
               {hidden && (
                 <p className="text-sm text-slate-500">
-                  They share their votes with friends only, so this shows once you&apos;re friends. Their % for them still
-                  counts them.
+                  Votes are only shown between friends, so this shows once you&apos;re friends. Their % for them still counts
+                  them.
                 </p>
               )}
               {group("Their wants matching your friends' wants", "text-want", toThem.want)}
