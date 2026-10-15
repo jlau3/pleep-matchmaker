@@ -230,9 +230,7 @@ export function VoteBoard({
               <strong>{counts.undecided}</strong> neutral
             </span>
           </span>
-          <Link href="/matches" className="btn-primary shrink-0 px-4 py-1.5">
-            Matchmake
-          </Link>
+          <ExportVotes choices={choices} tops={tops} />
         </div>
         {error && (
           <div role="alert" className="mt-2 flex items-center justify-between gap-3 text-sm text-dont">
@@ -287,8 +285,6 @@ export function VoteBoard({
           })}
         </ul>
       </section>
-
-      <ExportVotes choices={choices} tops={tops} />
 
       <div className="mb-4 space-y-3">
         <div className="flex gap-2">

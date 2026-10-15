@@ -2,7 +2,7 @@ import Link from "next/link";
 import { LineChips } from "@/components/LineChips";
 import { BrowseLayout } from "@/components/BrowseLayout";
 import { MatchTile } from "@/components/MatchTile";
-import { Top3Tiers } from "@/components/Top3Tiers";
+import { FitWithTop3 } from "@/components/Top3Tiers";
 import { loadTop3Tiers } from "@/lib/top3Tiers";
 import { FriendAction } from "@/components/FriendAction";
 import { PlayerHeader, playerName } from "@/components/PlayerHeader";
@@ -12,7 +12,6 @@ import { FriendPostCard } from "@/components/FriendPostCard";
 import { friendPostProps } from "@/lib/friendPost";
 import { FriendshipLevel5 } from "@/components/FriendshipLevel5";
 import { FitLegend } from "@/components/FitLegend";
-import { FitPair } from "@/components/FitPair";
 import { LOW_FIT_PCT } from "@/lib/fit";
 import { loadOwnProfile, loadOwnVotes, loadRelations, MAX_FRIENDS } from "@/lib/data";
 import { relationOf } from "@/lib/relations";
@@ -159,8 +158,17 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
             <ul className="space-y-4">
               {matches.map((match) => (
                 <li key={match.user_id} className="card p-4">
-                  <PlayerHeader player={match} aside={<FitPair they={match.match_pct} you={match.you_fit_pct} />} />
-                {top3 && <Top3Tiers tops={tops} tiers={top3[match.user_id]} />}
+                  <PlayerHeader
+                    player={match}
+                    aside={
+                      <FitWithTop3
+                        they={match.match_pct}
+                        you={match.you_fit_pct}
+                        tops={top3 ? tops : undefined}
+                        tiers={top3?.[match.user_id]}
+                      />
+                    }
+                  />
                   <FitLists match={match} />
                   <NewPlayerNote match={match} name={playerName(match)} />
                   <div className="mt-4">

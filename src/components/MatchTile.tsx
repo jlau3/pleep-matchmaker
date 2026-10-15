@@ -38,7 +38,7 @@ export function MatchTile({
       </span>
       <FitPair they={match.match_pct} you={match.you_fit_pct} compact />
       {top3 ? (
-        <Top3Tiers tops={top3.tops} tiers={top3.tiers} compact />
+        <Top3Tiers tops={top3.tops} tiers={top3.tiers} />
       ) : match.votes_hidden ? (
         <span className="text-xs text-slate-500">🔒 Votes friends-only</span>
       ) : (

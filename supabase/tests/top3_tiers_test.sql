@@ -37,7 +37,9 @@ begin
   assert not exists (select 1 from public.list_tiers('00000000-0000-0000-0023-000000000006', 20)), 'no friends voting: no list';
 end $$;
 
--- The viewer stars q6, q8 and an unvoted line; the card RPC gives each its tier.
+-- The viewer stars q6, q8 and an unvoted line. Only q6 is wanted by the
+-- player's friends (4 of whom want something): it gets its tier, the others
+-- a dash (no row), as "for you" would have nothing for them.
 insert into public.preferences (user_id, line_id, choice, top) values
   ('00000000-0000-0000-0023-000000000006', 'q6', 'want', true),
   ('00000000-0000-0000-0023-000000000006', 'q8', 'want', true),
@@ -49,7 +51,18 @@ declare got jsonb;
 begin
   select jsonb_object_agg(line_id, tier) into got
   from public.top3_tiers(array['00000000-0000-0000-0023-000000000001'::uuid], 10);
-  assert got = '{"q6":"A","q8":"C","u9":"B"}', format('card tiers: %s', got);
+  assert got = '{"q6":"A"}', format('card tiers: %s', got);
+end $$;
+reset role;
+
+-- Fewer than 3 friends wanting anything: no tiers at all (all dashes).
+reset role;
+delete from public.friends where user_id = '00000000-0000-0000-0023-000000000001'
+  and friend_id in ('00000000-0000-0000-0023-000000000004', '00000000-0000-0000-0023-000000000005');
+set role authenticated;
+do $$ begin
+  assert not exists (select 1 from public.top3_tiers(array['00000000-0000-0000-0023-000000000001'::uuid], 10)),
+    'two voting friends: no list for your Top 3';
 end $$;
 reset role;
 
