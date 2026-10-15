@@ -1,40 +1,41 @@
 import { LINES_BY_ID, lineSpriteUrl } from "@/lib/lines";
 import { TIER_STYLE } from "@/lib/tiers";
+import { FitPair } from "./FitPair";
 
 /**
  * Your Top 3 on another player's Tier List: each starred candy with the tier
  * it sits in there (same letters and colours as the Tier List), so you can
- * see who's likeliest to send your favorites. Nothing if you haven't starred any.
+ * see who's likeliest to send your favorites. No label: it sits under the
+ * fits on cards (FitWithTop3) and on grid tiles. Nothing if you haven't starred any.
  */
 export function Top3Tiers({
   tops,
   tiers,
-  compact = false,
+  align = "center",
 }: {
   /** Your starred line ids. */
   tops: string[];
   /** Line → tier on their list; a missing line (or no map) shows "–". */
   tiers: Record<string, string> | undefined;
-  /** Grid tiles: no label, smaller. */
-  compact?: boolean;
+  /** "end" under the fits at a card's top right; "center" on grid tiles. */
+  align?: "center" | "end";
 }) {
   const lines = tops.flatMap((id) => LINES_BY_ID.get(id) ?? []);
   if (lines.length === 0) return null;
   return (
-    <div className={`flex flex-wrap items-center gap-x-2 gap-y-1 ${compact ? "justify-center text-xs" : "mt-3 text-sm"}`}>
-      {!compact && <span className="text-slate-500">Your Top 3 on their list:</span>}
+    <div className={`flex items-center gap-x-1.5 text-xs ${align === "end" ? "justify-end" : "flex-wrap justify-center"}`}>
       {lines.map((line) => {
         // No tier, like "for you" showing nothing: none of their friends want it, or too few of them vote.
         const tier = tiers?.[line.id];
         return (
           <span
             key={line.id}
-            className="inline-flex items-center gap-0.5"
+            className="inline-flex items-center"
             title={tier ? `${line.name}: ${tier} on their Tier List` : `${line.name}: not on their list yet`}
           >
-            <img src={lineSpriteUrl(line)} alt={line.name} className={compact ? "h-6 w-6" : "h-7 w-7"} />
+            <img src={lineSpriteUrl(line)} alt={line.name} className="h-5 w-5" />
             <span
-              className={`rounded-md px-1.5 text-xs font-extrabold leading-5 ${
+              className={`rounded px-1 text-[11px] font-extrabold leading-4 ${
                 tier ? TIER_STYLE[tier === "Avoid" ? "avoid" : tier] : "text-slate-500"
               }`}
             >
@@ -43,6 +44,16 @@ export function Top3Tiers({
           </span>
         );
       })}
+    </div>
+  );
+}
+
+/** A card's top right: both fits, with your Top 3's tiers underneath when given. */
+export function FitWithTop3({ they, you, tops, tiers }: { they: number | null; you: number | null | undefined; tops?: string[]; tiers?: Record<string, string> }) {
+  return (
+    <div className="flex shrink-0 flex-col items-end gap-1.5">
+      <FitPair they={they} you={you} />
+      {tops && <Top3Tiers tops={tops} tiers={tiers} align="end" />}
     </div>
   );
 }

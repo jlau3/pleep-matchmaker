@@ -16,7 +16,7 @@ import { type FriendItem, FriendsBoard } from "@/components/FriendsBoard";
 import { FRIEND_SORTS, friendRank, parseFriendSort } from "@/lib/friendSort";
 import { withExtras } from "@/lib/extras";
 import { nameMatch } from "@/lib/names";
-import { Top3Tiers } from "@/components/Top3Tiers";
+import { FitWithTop3 } from "@/components/Top3Tiers";
 import { loadTop3Tiers } from "@/lib/top3Tiers";
 
 const card = "card p-4";
@@ -168,9 +168,10 @@ export default async function FriendsPage({ searchParams }: { searchParams: Prom
                     <PlayerHeader
                       player={friend}
                       relation="friend"
-                      aside={<FitPair they={friend.match_pct} you={friend.you_fit_pct} />}
+                      aside={
+                        <FitWithTop3 they={friend.match_pct} you={friend.you_fit_pct} tops={tops} tiers={top3[friend.user_id]} />
+                      }
                     />
-                    <Top3Tiers tops={tops} tiers={top3[friend.user_id]} />
                     <PlayerLists wants={friend.wants} dontWants={friend.dont_wants} topWants={friend.top_wants} />
                   </>
                 ) : (
