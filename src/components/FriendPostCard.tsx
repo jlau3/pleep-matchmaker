@@ -64,8 +64,9 @@ export function FriendPostCard({
   const link = `${origin}/friends?q=${friendCode}`;
   const message = [
     "🍬 Looking for Pokémon Sleep friends! 🍬",
-    ign ? `IGN: ${ign}` : null,
+    // Code before IGN: pasted into the game's friend search, the first number in the post wins, and an IGN can have digits.
     `Friend code: ${formatFriendCode(friendCode)}`,
+    ign ? `IGN: ${ign}` : null,
     favorites,
     allowLookup ? `See how my candy wishlist matches your friends' on Pleep Matchmaker: ${link}` : null,
   ]

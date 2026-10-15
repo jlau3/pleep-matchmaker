@@ -125,7 +125,8 @@ export async function sendMagicLink(_prev: MagicLinkState, form: FormData): Prom
 
 export async function signOut() {
   const supabase = await createClient();
-  await supabase.auth.signOut();
+  // This device only: the default ("global") ends every session, e.g. your phone too.
+  await supabase.auth.signOut({ scope: "local" });
   redirect("/");
 }
 

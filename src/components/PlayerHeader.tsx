@@ -51,36 +51,39 @@ export function PlayerHeader({
     <div className="space-y-2">
       {/* Avatar, name and the aside (fits) on top; everything else full width below, flush left. */}
       <div className="flex items-start gap-3">
-        {avatar ? (
-          <img
-            src={avatar}
-            alt=""
-            title={game ? "Their Pokémon Sleep icon" : undefined}
-            className={`h-12 w-12 shrink-0 rounded-full ${game ? "bg-sky object-contain dark:bg-night-deep" : ""}`}
-          />
-        ) : (
-          <div className="h-12 w-12 shrink-0 rounded-full bg-slate-200 dark:bg-slate-700" />
-        )}
-        <div className="min-w-0 flex-1 self-center">
-          {/* IGN, then Discord and Reddit names on their own lines; long names wrap and the others trim, so none run into the fits. */}
-          <span className="block break-words font-semibold">{name}</span>
-          {discord && (
-            <span className="flex min-w-0 items-center gap-1 text-sm text-slate-500" title={`Discord: ${discord}`}>
-              <DiscordIcon />
-              <span className="truncate">{discord}</span>
-            </span>
+        {/* Name centred on the avatar, not on the aside (which grows with the Top 3 row). */}
+        <div className="flex min-w-0 flex-1 items-center gap-3">
+          {avatar ? (
+            <img
+              src={avatar}
+              alt=""
+              title={game ? "Their Pokémon Sleep icon" : undefined}
+              className={`h-12 w-12 shrink-0 rounded-full ${game ? "bg-sky object-contain dark:bg-night-deep" : ""}`}
+            />
+          ) : (
+            <div className="h-12 w-12 shrink-0 rounded-full bg-slate-200 dark:bg-slate-700" />
           )}
-          {player.reddit_username && (
-            <span className="flex min-w-0 items-center gap-1 text-sm text-slate-500" title="Reddit name (added by the player, not verified)">
-              <RedditIcon />
-              <span className="truncate">u/{player.reddit_username}</span>
-            </span>
-          )}
-          {player.votes_hidden && (
-            <span className="block text-sm text-slate-500" title="Their match %s still count their votes">
-              🔒 Votes shared with friends only
-            </span>
-          )}
+          <div className="min-w-0 flex-1">
+            {/* IGN, then Discord and Reddit names on their own lines; long names wrap and the others trim, so none run into the fits. */}
+            <span className="block break-words font-semibold">{name}</span>
+            {discord && (
+              <span className="flex min-w-0 items-center gap-1 text-sm text-slate-500" title={`Discord: ${discord}`}>
+                <DiscordIcon />
+                <span className="truncate">{discord}</span>
+              </span>
+            )}
+            {player.reddit_username && (
+              <span className="flex min-w-0 items-center gap-1 text-sm text-slate-500" title="Reddit name (added by the player, not verified)">
+                <RedditIcon />
+                <span className="truncate">u/{player.reddit_username}</span>
+              </span>
+            )}
+            {player.votes_hidden && (
+              <span className="block text-sm text-slate-500" title="Their match %s still count their votes">
+                🔒 Votes shared with friends only
+              </span>
+            )}
+          </div>
         </div>
         {aside}
       </div>

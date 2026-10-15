@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { setChoice, setTop, swapTop } from "@/app/actions";
 import { CHOICE_LABEL, type Choice, LINES, LINES_BY_ID, lineSpriteUrl, MAX_TOP } from "@/lib/lines";
 import { type CrowdHint, crowdHint } from "@/lib/crowd";
@@ -16,6 +16,9 @@ import { StarButton } from "./StarButton";
 import { SwapTopDialog } from "./SwapTopDialog";
 
 type Filter = "all" | Choice;
+
+/** How long a re-voted line stays under a filter it no longer matches. */
+const LINGER_MS = 1500;
 type View = "list" | "grid";
 const VIEW_KEY = "pm_vote_view";
 const NEW_DISMISSED_KEY = "pm_new_candy_dismissed";
@@ -100,13 +103,44 @@ export function VoteBoard({
     }
   }
 
+  // Lines just re-voted under a filter they no longer match stay put for a moment, so you see the
+  // change land (and can undo a misclick) before they move to their new pile.
+  const [lingering, setLingering] = useState<ReadonlySet<string>>(() => new Set());
+  const lingerTimers = useRef(new Map<string, ReturnType<typeof setTimeout>>());
+  useEffect(() => {
+    const timers = lingerTimers.current;
+    return () => timers.forEach(clearTimeout);
+  }, []);
+  function linger(lineId: string) {
+    if (filter === "all") return;
+    clearTimeout(lingerTimers.current.get(lineId));
+    setLingering((current) => new Set(current).add(lineId));
+    lingerTimers.current.set(
+      lineId,
+      setTimeout(() => {
+        lingerTimers.current.delete(lineId);
+        setLingering((current) => {
+          const out = new Set(current);
+          out.delete(lineId);
+          return out;
+        });
+      }, LINGER_MS),
+    );
+  }
+  function changeFilter(next: Filter) {
+    lingerTimers.current.forEach(clearTimeout);
+    lingerTimers.current.clear();
+    setLingering(new Set());
+    setFilter(next);
+  }
+
   const visible = useMemo(() => {
     const q = query.trim().toLowerCase();
     return LINES.filter((line) => {
-      if (filter !== "all" && (choices[line.id] ?? "undecided") !== filter) return false;
+      if (filter !== "all" && (choices[line.id] ?? "undecided") !== filter && !lingering.has(line.id)) return false;
       return !q || line.members.some((member) => member.name.toLowerCase().includes(q));
     });
-  }, [choices, query, filter]);
+  }, [choices, query, filter, lingering]);
 
   const counts = { want: 0, dont_want: 0, undecided: 0 };
   for (const line of LINES) counts[choices[line.id] ?? "undecided"]++;
@@ -145,11 +179,13 @@ export function VoteBoard({
   }
 
   function choose(lineId: string, choice: Choice) {
+    linger(lineId);
     // Anything but Want drops the star (the database does the same).
     save(lineId, { choice, top: choice === "want" && tops.has(lineId) }, () => setChoice(lineId, choice));
   }
 
   function toggleTop(lineId: string) {
+    linger(lineId);
     if (tops.has(lineId)) {
       save(lineId, { choice: choices[lineId] ?? "want", top: false }, () => setTop(lineId, false));
       return;
@@ -311,7 +347,7 @@ export function VoteBoard({
         </div>
         <div className="flex flex-wrap gap-2">
           {FILTERS.map((f) => (
-            <button key={f.value} type="button" onClick={() => setFilter(f.value)} className={pill(filter === f.value)}>
+            <button key={f.value} type="button" onClick={() => changeFilter(f.value)} className={pill(filter === f.value)}>
               {f.label}
             </button>
           ))}
