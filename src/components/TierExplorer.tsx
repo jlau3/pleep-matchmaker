@@ -83,9 +83,17 @@ export function TierExplorer({
 
   const [sleepType, setSleepType] = useState<SleepType | null>(initialSleep);
 
-  // Plain /tiers (from the nav): reopen the last view. A link with its own query wins.
+  // Plain /tiers (from the nav): reopen the last view. A link with its own query wins, and
+  // becomes the view to reopen (e.g. the first-friend note's link to My Friends).
   useEffect(() => {
-    if (window.location.search) return;
+    if (window.location.search) {
+      try {
+        localStorage.setItem(VIEW_KEY, JSON.stringify({ pool, island: islandId, sleep: sleepType }));
+      } catch {
+        /* Not remembered; fine. */
+      }
+      return;
+    }
     try {
       const saved = JSON.parse(localStorage.getItem(VIEW_KEY) ?? "null");
       if (!saved || typeof saved !== "object") return;
