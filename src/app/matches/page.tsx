@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { LineChips } from "@/components/LineChips";
+import { BrowseLayout } from "@/components/BrowseLayout";
+import { MatchTile } from "@/components/MatchTile";
 import { FriendAction } from "@/components/FriendAction";
 import { PlayerHeader, playerName } from "@/components/PlayerHeader";
 import { PlayerSearch, searchQuery } from "@/components/PlayerSearch";
@@ -146,23 +148,34 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
             )}
           </p>
         ) : (
-          <ul className="space-y-4">
-            {matches.map((match) => (
-              <li key={match.user_id} className="card p-4">
-                <PlayerHeader player={match} aside={<FitPair they={match.match_pct} you={match.you_fit_pct} />} />
-                <FitLists match={match} />
-                <NewPlayerNote match={match} name={playerName(match)} />
-                <div className="mt-4">
-                  <FriendAction
-                    userId={match.user_id}
-                    name={playerName(match)}
-                    relation={relationOf(relations, match.user_id)}
-                    showsCode={Boolean(match.friend_code)}
-                  />
-                </div>
-              </li>
-            ))}
-          </ul>
+          <BrowseLayout
+            list={
+            <ul className="space-y-4">
+              {matches.map((match) => (
+                <li key={match.user_id} className="card p-4">
+                  <PlayerHeader player={match} aside={<FitPair they={match.match_pct} you={match.you_fit_pct} />} />
+                  <FitLists match={match} />
+                  <NewPlayerNote match={match} name={playerName(match)} />
+                  <div className="mt-4">
+                    <FriendAction
+                      userId={match.user_id}
+                      name={playerName(match)}
+                      relation={relationOf(relations, match.user_id)}
+                      showsCode={Boolean(match.friend_code)}
+                    />
+                  </div>
+                </li>
+              ))}
+            </ul>
+            }
+            grid={
+              <ul className="grid grid-cols-2 items-start gap-3 sm:grid-cols-3 lg:grid-cols-4">
+                {matches.map((match) => (
+                  <MatchTile key={match.user_id} match={match} relation={relationOf(relations, match.user_id)} />
+                ))}
+              </ul>
+            }
+          />
         )}
 
         {pages > 1 && (
