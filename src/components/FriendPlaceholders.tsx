@@ -83,7 +83,8 @@ export function FriendPlaceholders({
       </summary>
       <div className="mt-3 space-y-3">
         <p className="text-sm text-slate-500">
-          Add their IGN as a reminder and search now and then. Once they join, add them and they drop off this list.
+          Add their IGN <b>exactly as it shows in their Pokémon Sleep profile</b> (spelling, symbols and spaces) so we can
+          tell you when they join. Once they do, add them and they drop off this list.
         </p>
         <form
           className="flex flex-wrap items-center gap-2"
@@ -96,7 +97,7 @@ export function FriendPlaceholders({
             value={name}
             onChange={(e) => setName(e.target.value)}
             maxLength={40}
-            placeholder="Their in-game name"
+            placeholder="Their exact in-game name"
             aria-label="In-game name"
             className="min-w-0 flex-1 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm dark:border-slate-600 dark:bg-night-deep"
           />
