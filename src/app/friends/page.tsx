@@ -62,8 +62,11 @@ export default async function FriendsPage({ searchParams }: { searchParams: Prom
     return m ? (m.strong ? 2 : 1) : 0;
   };
   const requestsSorted = [...requests].sort((a, b) => rank(b.ign) - rank(a.ign));
-  // Declines first: they need an OK from you.
-  const sentSorted = [...sent].sort((a, b) => Number(b.status === "declined") - Number(a.status === "declined"));
+  // Declined, then expired, then open: the first two need a tap from you.
+  const sentOrder = { declined: 0, expired: 1, open: 2 };
+  const sentSorted = [...sent].sort((a, b) => sentOrder[a.status] - sentOrder[b.status]);
+  const declined = sent.filter((r) => r.status === "declined").length;
+  const expired = sent.filter((r) => r.status === "expired").length;
 
   return (
     <div className="space-y-8">
@@ -113,22 +116,30 @@ export default async function FriendsPage({ searchParams }: { searchParams: Prom
       )}
 
       {sent.length > 0 && (
-        <section id="sent" className="scroll-mt-20">
-          <h2 className="mb-1 text-lg font-semibold">
-            Sent requests <span className="text-sm font-normal text-slate-500">{sent.length}</span>
-          </h2>
-          <p className="mb-3 text-sm text-slate-500">
-            Waiting for these players to accept. Send them a request in Pokémon Sleep too. Requests not answered in 30
-            days lapse; you can send another.
+        // Folded like Not here yet: each card is tall, and setting up can mean dozens of requests.
+        <details id="sent" className="card group scroll-mt-20 p-4">
+          <summary className="flex cursor-pointer list-none items-center justify-between gap-3">
+            <span>
+              <span className="font-semibold">Sent requests</span> <span className="text-sm text-slate-500">{sent.length}</span>
+              {declined > 0 && <span className="ml-2 text-xs font-semibold text-dont">{declined} declined</span>}
+              {expired > 0 && <span className="ml-2 text-xs font-semibold text-slate-500">{expired} expired</span>}
+              <span className="block text-sm text-slate-500">Waiting for these players to accept.</span>
+            </span>
+            <span className="shrink-0 text-xs font-semibold underline group-open:hidden">Show</span>
+            <span className="hidden shrink-0 text-xs font-semibold underline group-open:inline">Hide</span>
+          </summary>
+          <p className="mb-3 mt-3 text-sm text-slate-500">
+            Send them a request in Pokémon Sleep too. A request not answered in 30 days expires and stays here until you
+            send it again or clear it.
           </p>
           <ul className="space-y-3">
             {sentSorted.map((player) => (
-              <li key={player.user_id} className={card}>
-                <PlayerHeader player={player} relation={player.status === "declined" ? "declined" : "sent"} />
+              <li key={player.user_id} className="rounded-2xl border border-slate-200 p-3 dark:border-slate-700">
+                <PlayerHeader player={player} relation={player.status === "open" ? "sent" : player.status} />
               </li>
             ))}
           </ul>
-        </section>
+        </details>
       )}
 
       <section>

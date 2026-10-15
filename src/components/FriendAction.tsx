@@ -19,7 +19,8 @@ const link = "font-semibold underline disabled:opacity-50";
 /**
  * The friend button on every player card, for each step of the handshake:
  * Send request → Request sent (Cancel) → they Accept or Decline (you see a
- * decline and can clear it) → Remove friend. Sending also means sending a
+ * decline and can clear it; one left unanswered for 30 days shows as expired,
+ * to send again or clear) → Remove friend. Sending also means sending a
  * request in Pokémon Sleep, so when their code is showing it says so; a
  * closed player's code stays hidden, and they usually know you already.
  * Removing asks inline first (native confirm() is suppressed in some in-app
@@ -130,6 +131,25 @@ export function FriendAction({
             <span className="text-sm text-slate-500">{name} declined your request.</span>
             <button type="button" disabled={busy} onClick={() => run(() => cancelFriendRequest(userId), () => "none")} className={outline}>
               OK
+            </button>
+          </>
+        )}
+
+        {relation === "expired" && (
+          <>
+            <span className="rounded-lg border-2 border-dashed border-slate-400 px-3 py-0.5 text-sm font-semibold text-slate-600 dark:text-slate-300">
+              ⌛ Request expired
+            </span>
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => run(() => sendFriendRequest(userId, placeholder), (status) => (status === "friends" ? "friend" : "sent"))}
+              className={solid}
+            >
+              {busy ? "Sending…" : "Send again"}
+            </button>
+            <button type="button" disabled={busy} onClick={() => run(() => cancelFriendRequest(userId), () => "none")} className={outline}>
+              Clear
             </button>
           </>
         )}
