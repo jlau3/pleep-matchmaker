@@ -38,6 +38,10 @@ export interface MatchRow extends PlayerContact {
   list_voters?: number;
   /** browse_players only: whether they've voted on anything ("for them" is a dash until they do). */
   voted?: boolean;
+  /** browse_all only: "for them" + "for you", a dash counting 0; null when both are dashes (Best match order). */
+  both_pct?: number | null;
+  /** browse_all only: listed under Good matches (both fits high enough, 3+ of your wants on their list). */
+  good?: boolean;
   /** browse_players only: your Top 3 line -> its tier on their Tier List; null or missing line = a dash. */
   top3_tiers?: Record<string, string> | null;
 }
@@ -58,6 +62,8 @@ export interface LineStatRow {
   wants: number;
   dont_wants: number;
   tops: number;
+  /** Active voters with any vote on it, Neutral included (20261020000200_line_seen.sql); missing before. */
+  seen?: number;
 }
 
 export interface BlockedRow {
@@ -78,7 +84,7 @@ export interface OwnProfile {
   friend_code: string | null;
   open_to_friends: boolean;
   allow_lookup: boolean;
-  /** Whether other players see (and can search) their Discord name and avatar. */
+  /** Whether their friends see (and can search) their Discord name and avatar. Other players never do. */
   show_discord: boolean;
   /** Wants, don't-wants and Top 3 show only to people on your friend list. */
   votes_private?: boolean;
@@ -127,4 +133,6 @@ export interface PlaceholderRow {
   created_at: string;
   /** A player with exactly this IGN can be found here now (maybe not them: IGNs aren't unique). */
   signed_up: boolean;
+  /** One of your friends has this IGN (20261020000600_keep_placeholders.sql; missing before). */
+  friend?: boolean;
 }

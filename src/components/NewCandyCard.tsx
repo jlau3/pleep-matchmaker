@@ -1,6 +1,7 @@
 "use client";
 
 import { type CandyLine, type Choice, ISLANDS } from "@/lib/lines";
+import { seenBy } from "@/lib/crowd";
 import type { LineVotes } from "@/lib/tiers";
 import { LineCard } from "./LineCard";
 
@@ -32,6 +33,8 @@ export function NewCandyCard({
   const wants = votes?.wants ?? 0;
   const dontWants = votes?.dontWants ?? 0;
   const tops = votes?.tops ?? 0;
+  // Out of the players who've opened My Votes since it arrived (it grows as they come back), not everyone.
+  const seen = seenBy(votes, voters);
   const released = new Date(`${line.addedAt}T00:00:00Z`).toLocaleDateString(undefined, { month: "short", day: "numeric", timeZone: "UTC" });
 
   return (
@@ -45,7 +48,8 @@ export function NewCandyCard({
               <>
                 So far: <span className="font-semibold text-want">{wants} want</span>,{" "}
                 <span className="font-semibold text-dont">{dontWants} don&apos;t</span>
-                {tops > 0 && <span className="font-semibold text-sun-deep">, ★ {tops}</span>} out of {voters} players.
+                {tops > 0 && <span className="font-semibold text-sun-deep">, ★ {tops}</span>} out of {seen} who&apos;ve
+                seen it.
               </>
             ) : (
               "Be one of the first to vote."

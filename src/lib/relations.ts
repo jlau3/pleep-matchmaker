@@ -3,7 +3,7 @@
  * (20261019000000_friend_requests.sql): friends both ways, a request either
  * way (open, or one of yours they declined or let lapse), or nothing yet.
  */
-export type Relation = "friend" | "sent" | "declined" | "expired" | "incoming" | "none";
+export type Relation = "friend" | "sent" | "declined" | "expired" | "incoming" | "none" | "setup";
 
 /** Your request's state: open, declined, or open but unanswered past REQUEST_TTL_DAYS. */
 export type SentStatus = "open" | "declined" | "expired";
@@ -15,12 +15,17 @@ export interface Relations {
   sent: Record<string, SentStatus>;
   /** Players whose request to you is open. */
   incoming: string[];
+  /** You have an IGN and friend code, which sending a request needs (else "setup" in place of "none"). */
+  profileReady: boolean;
 }
 
 /** How long an unanswered request stays open (public.request_ttl()). */
 export const REQUEST_TTL_DAYS = 30;
 
-export const NO_RELATIONS: Relations = { friendIds: [], sent: {}, incoming: [] };
+export const NO_RELATIONS: Relations = { friendIds: [], sent: {}, incoming: [], profileReady: true };
+
+/** send_friend_request's error when your IGN or friend code is missing (20261020000300_request_needs_profile.sql). */
+export const PROFILE_INCOMPLETE = "Add your in-game name and friend code in Profile first, so they know who's asking.";
 
 export function relationOf(relations: Relations, userId: string): Relation {
   if (relations.friendIds.includes(userId)) return "friend";
@@ -30,7 +35,7 @@ export function relationOf(relations: Relations, userId: string): Relation {
   if (relations.incoming.includes(userId)) return "incoming";
   if (sent === "expired") return "expired";
   if (sent === "open") return "sent";
-  return "none";
+  return relations.profileReady ? "none" : "setup";
 }
 
 type RequestRow = { from_id: string; to_id: string; status: "open" | "declined"; created_at: string };

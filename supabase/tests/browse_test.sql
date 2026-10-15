@@ -36,6 +36,8 @@ from unnest(array['bra', 'bx1', 'bx2', 'bx3', 'bx4', 'bx5', 'bx6', 'bx7', 'bx8',
 insert into public.blocks (blocker_id, blocked_id) values ('00000000-0000-0000-000d-000000000001', '00000000-0000-0000-000d-000000000007');
 update public.preferences set top = true where user_id = '00000000-0000-0000-000d-000000000002' and line_id = 'bra';
 
+-- Strangers see IGNs, not Discord names (20261020001100_discord_friends_only.sql): IGN = Discord name here.
+update public.profiles set ign = coalesce(ign, discord_username) where id::text like '00000000-0000-0000-000d-%';
 set role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-000d-000000000001', false);
 
@@ -43,36 +45,37 @@ do $$
 declare names text[]; n bigint;
 begin
   -- Other test files leave players around; look only at this file's.
-  select array_agg(discord_username order by ord), max(total_count) into names, n
-  from (select *, row_number() over () as ord from public.browse_players()) t where discord_username like 'br_%';
+  select array_agg(public.test_name(user_id) order by ord), max(total_count) into names, n
+  from (select *, row_number() over () as ord from public.browse_players()) t where public.test_name(user_id) like 'br_%';
   -- Nobody here has 3 friends voting and the viewer has no friends yet, so
   -- every number is a dash and no one is a good fit (yet).
   assert names is null, format('good fits: %s', names);
 
-  select array_agg(discord_username order by ord) into names
-  from (select *, row_number() over () as ord from public.browse_players('fit', true, 50, 0)) t where discord_username like 'br_%';
+  select array_agg(public.test_name(user_id) order by ord) into names
+  from (select *, row_number() over () as ord from public.browse_players('fit', true, 50, 0)) t where public.test_name(user_id) like 'br_%';
   -- Everyone still lists them, newest first while there's no fit to sort by.
   assert names = '{br_fresh,br_low,br_good}', format('everyone by fit: %s', names);
 
-  select array_agg(discord_username order by ord) into names
-  from (select *, row_number() over () as ord from public.browse_players('active', true, 50, 0)) t where discord_username like 'br_%';
+  select array_agg(public.test_name(user_id) order by ord) into names
+  from (select *, row_number() over () as ord from public.browse_players('active', true, 50, 0)) t where public.test_name(user_id) like 'br_%';
   assert names = '{br_fresh,br_low,br_good}', format('everyone by activity: %s', names);
 
-  assert (select you_fit_pct from public.browse_players('fit', true, 50, 0) where discord_username = 'br_fresh') is null, 'no votes, no fit';
+  assert (select you_fit_pct from public.browse_players('fit', true, 50, 0) where user_id = public.test_uid('br_fresh')) is null, 'no votes, no fit';
   -- Their own wants don't stand in for a friends list.
-  assert (select you_fit_pct from public.browse_players('fit', true, 50, 0) where discord_username = 'br_low') is null, 'no friends voting, no "for you"';
-  assert (select not voted from public.browse_players('fit', true, 50, 0) where discord_username = 'br_fresh'), 'fresh hasn''t voted';
-  assert (select voted and list_voters = 0 from public.browse_players('fit', true, 50, 0) where discord_username = 'br_low'), 'low voted, no list';
+  assert (select you_fit_pct from public.browse_players('fit', true, 50, 0) where user_id = public.test_uid('br_low')) is null, 'no friends voting, no "for you"';
+  assert (select not voted from public.browse_players('fit', true, 50, 0) where user_id = public.test_uid('br_fresh')), 'fresh hasn''t voted';
+  assert (select voted and list_voters = 0 from public.browse_players('fit', true, 50, 0) where user_id = public.test_uid('br_low')), 'low voted, no list';
   -- "For them" needs your friends' votes: the viewer has none yet, so it's unknown,
   -- and good fits go by "for you" alone (br_good is still listed above).
-  assert (select match_pct from public.browse_players('fit', true, 50, 0) where discord_username = 'br_low') is null, 'no friends, no "for them"';
+  assert (select match_pct from public.browse_players('fit', true, 50, 0) where user_id = public.test_uid('br_low')) is null, 'no friends, no "for them"';
   assert not public.my_friends_voted(), 'no friends voted';
   assert not exists (
     select 1 from public.browse_players('fit', true, 50, 0)
-    where discord_username in ('br_stale', 'br_closed', 'br_blocked', 'br_viewer')
+    where public.test_name(user_id) in ('br_stale', 'br_closed', 'br_blocked', 'br_viewer')
   ), 'never listed';
-  assert (select top_wants from public.browse_players('fit', true, 50, 0) where discord_username = 'br_good') = '{bra}',
-    'top 3 returned';
+  -- Votes are friends-only (20261020000800_private_votes.sql): a stranger's Top 3 stays hidden.
+  assert (select top_wants from public.browse_players('fit', true, 50, 0) where user_id = public.test_uid('br_good')) = '{}',
+    'stranger top 3 hidden';
 end $$;
 
 -- Paging: pages don't overlap and total_count covers everything.
@@ -100,6 +103,7 @@ insert into auth.users (id, raw_user_meta_data) values
 update public.profiles set friend_code = '6666' || right(id::text, 8), open_to_friends = false
 where id::text like '00000000-0000-0000-0010-%';
 update public.profiles set open_to_friends = true where discord_username = 'br_hub';
+update public.profiles set ign = discord_username where id::text like '00000000-0000-0000-0010-%';
 insert into public.preferences (user_id, line_id, choice) values ('00000000-0000-0000-0010-000000000001', 'bx1', 'want');
 insert into public.preferences (user_id, line_id, choice)
 select u::uuid, l, 'want'::public.choice
@@ -115,11 +119,11 @@ insert into public.friends (user_id, friend_id) values
 set role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-000d-000000000001', false);
 do $$ begin
-  assert (select you_fit_pct from public.browse_players('fit', true, 50, 0) where discord_username = 'br_hub') = 100,
+  assert (select you_fit_pct from public.browse_players('fit', true, 50, 0) where user_id = public.test_uid('br_hub')) = 100,
     'scored on their friends'' wants, not their own';
-  assert (select you_fit_wants from public.browse_players('fit', true, 50, 0) where discord_username = 'br_hub') = '{bra,brb,brc}',
+  assert (select you_fit_wants from public.browse_players('fit', true, 50, 0) where user_id = public.test_uid('br_hub')) = '{bra,brb,brc}',
     'your wants their list covers';
-  assert (select match_pct from public.browse_players('fit', true, 50, 0) where discord_username = 'br_hub') is null,
+  assert (select match_pct from public.browse_players('fit', true, 50, 0) where user_id = public.test_uid('br_hub')) is null,
     'no friends of yours voted, so no "for them"';
   -- Search shows the same two numbers.
   assert (select you_fit_pct from public.lookup_players('br_hub')) = 100, 'search: you fit theirs';
@@ -144,7 +148,7 @@ delete from public.friends where user_id = '00000000-0000-0000-0010-000000000001
 set role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-000d-000000000001', false);
 do $$ begin
-  assert (select you_fit_pct from public.browse_players('fit', true, 50, 0) where discord_username = 'br_hub') is null,
+  assert (select you_fit_pct from public.browse_players('fit', true, 50, 0) where user_id = public.test_uid('br_hub')) is null,
     'under 3 friends with votes: a dash';
   assert (select you_fit_pct from public.lookup_players('br_hub')) is null, 'search agrees';
 end $$;

@@ -22,6 +22,14 @@ ROOT = Path(__file__).resolve().parent.parent
 LINES_JSON = ROOT / "src" / "data" / "candy-lines.json"
 ISLANDS_JSON = ROOT / "src" / "data" / "islands.json"
 SPRITES = ROOT / "public" / "sprites"
+AVATARS_JSON = ROOT / "src" / "data" / "avatars.json"
+AVATARS = ROOT / "public" / "avatars"
+
+
+def avatar_file(name: str, variant: str) -> Path:
+    """Where an icon variant lives (as avatarSrc in src/lib/avatars.ts)."""
+    folder = "happy" if variant.startswith("happy") else "portrait"
+    return AVATARS / folder / f"{name}{'_shiny' if variant.endswith('shiny') else ''}.webp"
 
 
 def committed(path: Path) -> list:
@@ -52,6 +60,14 @@ def main() -> int:
         if unknown:
             errors.append(f"{island['id']}: unknown line ids {unknown}")
 
+    avatars = json.loads(AVATARS_JSON.read_text())
+    for name, variants in avatars.items():
+        if "normal" not in variants:
+            errors.append(f"profile icon {name}: no normal variant")
+        for variant in variants:
+            if not avatar_file(name, variant).exists():
+                errors.append(f"profile icon {name}: missing {avatar_file(name, variant).relative_to(ROOT)}")
+
     if errors:
         print("Data check failed:", *errors, sep="\n- ", file=sys.stderr)
         return 1
@@ -72,6 +88,9 @@ def main() -> int:
         if added:
             island_changes.append(f"{island['name']}: " + ", ".join(names[i] for i in added))
 
+    old_avatars = committed(AVATARS_JSON) or {}
+    new_avatars = [name for name in avatars if name not in old_avatars]
+
     parts = []
     if new_lines:
         parts.append("**New candy lines:** " + ", ".join(f"{l['name']} (#{l['dex']}, {l['addedAt']})" for l in new_lines))
@@ -79,6 +98,8 @@ def main() -> int:
         parts.append("**New members of existing lines:** " + ", ".join(new_members))
     if island_changes:
         parts.append("**New spawns:**\n" + "\n".join(f"- {c}" for c in island_changes))
+    if new_avatars:
+        parts.append("**New profile icons (Neroli's Lab):** " + ", ".join(new_avatars))
     summary = "\n\n".join(parts) or "Sprite or data refresh only (no new lines, members or spawns)."
 
     if len(sys.argv) > 1:

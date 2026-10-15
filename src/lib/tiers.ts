@@ -62,6 +62,8 @@ export interface LineVotes {
   dontWants: number;
   /** Players who starred it as one of their Top 3 (a subset of wants). */
   tops?: number;
+  /** Everyone pool only: active voters who've seen the line (any vote, Neutral included; get_line_stats). */
+  seen?: number;
 }
 
 export interface RankedLine {

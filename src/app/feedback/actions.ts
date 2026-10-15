@@ -2,6 +2,7 @@
 
 import { cookies } from "next/headers";
 import { loadOwnProfile } from "@/lib/data";
+import { feedbackPost } from "@/lib/feedback";
 import { requireUser } from "@/lib/supabase/server";
 
 export interface FeedbackState {
@@ -15,8 +16,10 @@ const COOLDOWN_SECONDS = 60;
 
 /**
  * Posts feedback to the Discord channel behind DISCORD_FEEDBACK_WEBHOOK_URL
- * (server-only env var). Signed-in players only, so every message carries an
- * account to trace (Discord name if they have one, IGN, user id). Mentions are disabled so nobody can ping @everyone.
+ * (server-only env var). Signed-in players only, so every message carries who
+ * sent it and how to reach them (feedbackPost). Mentions are disabled, so the
+ * sender's Discord mention is a clickable name, not a ping, and nobody can ping
+ * @everyone. The channel shows emails: keep it private to the site's owner.
  */
 export async function sendFeedback(_prev: FeedbackState, form: FormData): Promise<FeedbackState> {
   const webhook = process.env.DISCORD_FEEDBACK_WEBHOOK_URL;
@@ -38,13 +41,22 @@ export async function sendFeedback(_prev: FeedbackState, form: FormData): Promis
   const slot = await supabase.rpc("claim_feedback_slot");
   if (!slot.error && slot.data === false) return { error: "Thanks! Give it a minute (or until tomorrow if you've sent a lot today)." };
 
-  const profile = await loadOwnProfile(supabase, user.id);
-  const who = profile.discord_username ? `@${profile.discord_username}` : user.id;
-  const header = `**${kind}** from ${who}${profile.ign ? ` (IGN ${profile.ign})` : ""}`;
-  const content = [header, page ? `Page: ${page}` : null, "", message]
-    .filter((line) => line !== null)
-    .join("\n")
-    .slice(0, 1990);
+  const [profile, discordId, auth] = await Promise.all([
+    loadOwnProfile(supabase, user.id),
+    supabase.from("profiles").select("discord_id").eq("id", user.id).maybeSingle().then(({ data }) => (data?.discord_id as string | null) ?? null),
+    // Email and sign-in methods live on the auth user.
+    supabase.auth.getUser().then(({ data }) => data.user),
+  ]);
+  const content = feedbackPost({
+    kind,
+    page,
+    message,
+    userId: user.id,
+    email: auth?.email ?? null,
+    providers: (auth?.app_metadata?.providers as string[] | undefined) ?? [],
+    discordId,
+    profile,
+  });
 
   let ok = false;
   try {

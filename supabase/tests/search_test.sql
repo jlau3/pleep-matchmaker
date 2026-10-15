@@ -5,6 +5,17 @@ insert into auth.users (id, raw_user_meta_data) values
   ('00000000-0000-0000-0009-000000000001', '{"name":"MixedCase_User#0","custom_claims":{"global_name":"Jäcky Ünicode"}}'),
   ('00000000-0000-0000-0009-000000000002', '{"name":"searcher#0"}');
 update public.profiles set ign = 'SnorLAX  Fan' where id = '00000000-0000-0000-0009-000000000001';
+-- Discord names are friends-only (20261020001100_discord_friends_only.sql): a
+-- stranger finds MixedCase_User by IGN only; a friend by Discord name too.
+set role authenticated;
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-0009-000000000002', false);
+do $$ begin
+  assert (select count(*) from public.lookup_players('snorlax fan')) = 1, 'stranger: by IGN';
+  assert not exists (select 1 from public.lookup_players('mixedcase_user')), 'stranger: not by Discord name';
+  assert (select discord_username from public.lookup_players('snorlax fan')) is null, 'stranger: no Discord name shown';
+end $$;
+reset role;
+select public.test_befriend('00000000-0000-0000-0009-000000000001', '00000000-0000-0000-0009-000000000002');
 
 set role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0009-000000000002', false);
@@ -28,6 +39,7 @@ reset role;
 insert into auth.users (id, raw_user_meta_data)
 select ('00000000-0000-0000-0009-' || lpad(to_hex(10 + g), 12, '0'))::uuid, format('{"name":"fz_sleeper_%s#0"}', g)::jsonb
 from generate_series(1, 12) g;
+update public.profiles set ign = discord_username where id::text like '00000000-0000-0000-0009-0000000000%' and discord_username like 'fz_sleeper_%';
 insert into auth.users (id, raw_user_meta_data) values
   ('00000000-0000-0000-0009-000000000003', '{"name":"hidden_dragonite#0"}');
 update public.profiles set show_discord = false, ign = 'Quiet One' where discord_username = 'hidden_dragonite';

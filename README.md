@@ -107,6 +107,19 @@ npm install
 npm run dev
 ```
 
+### 3b. Dev database for previews
+
+Vercel previews should use their own Supabase project, so new migrations are tried there before production.
+
+1. Create a second Supabase project (free tier allows two), set up like step 1.
+2. Load the schema: `scripts/bundle-migrations.sh > all.sql` and run it in the dev project's SQL editor. It also logs each migration as applied (`public.dev_applied_migrations`, dev only).
+3. Fake players: `python3 scripts/dev_seed.py > seed.sql` and run it there. It refuses to run on a database with real players, and running it again replaces them. After signing in on a preview and setting your IGN in Profile, `select public.dev_befriend('YOUR_IGN', 15);` gives you friends and `select public.dev_requests_to('YOUR_IGN', 3);` some friend requests.
+4. Sign-in: in the Discord developer portal add the dev project's `https://<dev-project>.supabase.co/auth/v1/callback` redirect, then enable Discord in the dev project with the same client ID and secret. Under **Authentication → URL Configuration** set the Site URL to the branch preview URL and add `https://<project>-*-<team>.vercel.app/**` and `http://localhost:3000/**` as redirect URLs.
+5. In Vercel, set `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` to the dev project's values for the **Preview** environment only (Production keeps the real ones), then redeploy the preview: `NEXT_PUBLIC_` values are built in.
+6. Automatic dev migrations: add the dev project's **Session pooler** connection string (Connect → Session pooler, with the database password filled in) as the GitHub Actions secret `DEV_DATABASE_URL`. Every push to a branch other than main that adds a migration then applies it to the dev database (the **Dev database migrations** workflow, `scripts/dev-migrate.sh`). It refuses any database without the dev seed and the migration log, so a production connection string can't be migrated by mistake. Production migrations stay manual: run a PR's new files there after checking its preview.
+
+The dev project pauses after a week without traffic (the keepalive cron only runs in production); restore it from the Supabase dashboard.
+
 ### 4. Deploy to Vercel
 
 Import the repo in Vercel and set `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` and `CRON_SECRET`. Optional:
@@ -123,6 +136,7 @@ Import the repo in Vercel and set `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPAB
 
 - Roster from [nitoyon/pokesleep-tool](https://github.com/nitoyon/pokesleep-tool) (MIT).
 - Sprites are the in-game Pokémon Sleep icons from Serebii (`scripts/build_icons.py`, run after `build_lines.py`), downscaled to 128px webp. Anything Serebii lacks keeps the PokeAPI official artwork that `build_lines.py` downloads.
+- Profile icons (`public/avatars`, `src/data/avatars.json`) are the in-game icons from [Neroli's Lab](https://github.com/nerolis-lab/nerolis-lab) (Apache-2.0). `scripts/build_avatars.py` adds any Pokémon Neroli's has art for that we don't, as 96px webp in Pokédex order; the data refresh runs it too.
 - All forms (event costumes, regional variants, sizes) share candy with their base species, so a line is one evolution family. Regional forms and event costumes (Holiday Pikachu's Santa hat, Halloween Eevee's witch hat, Captain Pikachu, Holiday Spheal) get their own icon inside the line; costumes are listed last, use the Serebii icon (`025-holiday.png` → `public/sprites/25-holiday.webp`), and new ones in the roster are picked up automatically.
 
 When the game adds Pokémon, re-run it and commit the result:

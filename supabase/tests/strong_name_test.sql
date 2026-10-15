@@ -21,6 +21,9 @@ insert into auth.users (id, raw_user_meta_data) values
 update public.profiles set ign = 'Mr Time' where id = '00000000-0000-0000-0018-000000000002';
 update public.profiles set ign = '★' where id = '00000000-0000-0000-0018-000000000003';
 
+-- Senders need an IGN and friend code (20261020000300).
+select public.test_complete_profiles('00000000-0000-0000-0018-');
+
 set role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0018-000000000001', false);
 insert into public.friend_placeholders (user_id, name) values (auth.uid(), '★mr_time'), (auth.uid(), 'Mr Tme'), (auth.uid(), '☆');
@@ -36,7 +39,9 @@ select set_config('request.jwt.claim.sub', '00000000-0000-0000-0018-000000000002
 select public.accept_friend_request('00000000-0000-0000-0018-000000000001');
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0018-000000000001', false);
 do $$ begin
-  assert (select array_agg(name order by name) from public.get_friend_placeholders()) = '{"Mr Tme",☆}', 'becoming friends cleared only the strong match';
+  -- Kept since 20261020000600_keep_placeholders.sql; only the strong match is flagged as a friend's name.
+  assert (select array_agg(name order by name) from public.get_friend_placeholders() where friend) = '{★mr_time}', 'only the strong match is a friend';
+  assert (select count(*) from public.get_friend_placeholders()) = 3, 'nothing removed';
 end $$;
 reset role;
 

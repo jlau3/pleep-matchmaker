@@ -31,26 +31,25 @@ declare
 begin
   select array_agg(t.user_id || ':' || t.line_id || ':' || t.tier order by t.user_id, t.line_id) into got
   from public.top3_tiers_set(everyone, viewer, 15) t;
-  -- Reference: each player's list_tiers, a tier only when 3+ friends besides
-  -- the viewer want something and one of them wants that line (20261019000300).
+  -- Reference: for players with 3+ friends besides the viewer wanting
+  -- something, each starred line's list_tiers tier, or Avoid.
   select array_agg(x order by x) into want from (
-    select pl.id || ':' || p.line_id || ':' || lt.tier as x
+    select pl.id || ':' || p.line_id || ':' ||
+      -- Its tier if a friend besides the viewer wants it and it isn't Avoid; else Avoid (20261020001000).
+      case when exists (
+        select 1 from public.friends f
+        join public.preferences w on w.user_id = f.friend_id and w.line_id = p.line_id and w.choice = 'want'
+        where f.user_id = pl.id and f.friend_id <> viewer
+      ) then coalesce((select lt.tier from public.list_tiers(pl.id, 15) lt where lt.line_id = p.line_id), 'Avoid')
+      else 'Avoid' end as x
     from unnest(everyone) pl(id)
     cross join public.preferences p
-    cross join lateral public.list_tiers(pl.id, 15) lt
-    where p.user_id = viewer and p.top and lt.line_id = p.line_id
+    where p.user_id = viewer and p.top
       and (
         select count(*) from public.friends f
-        join public.profiles fp on fp.id = f.friend_id and fp.allow_lookup
         where f.user_id = pl.id and f.friend_id <> viewer
           and exists (select 1 from public.preferences w where w.user_id = f.friend_id and w.choice = 'want')
       ) >= 3
-      and exists (
-        select 1 from public.friends f
-        join public.profiles fp on fp.id = f.friend_id and fp.allow_lookup
-        join public.preferences w on w.user_id = f.friend_id and w.line_id = p.line_id and w.choice = 'want'
-        where f.user_id = pl.id and f.friend_id <> viewer
-      )
   ) r;
   assert cardinality(want) > 20, format('enough cases to compare: %s', cardinality(want));
   assert got = want, format('set and per-player agree: %s', (select array_agg(e) from unnest(got) e where e <> all(want)));

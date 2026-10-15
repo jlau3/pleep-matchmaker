@@ -61,7 +61,7 @@ export function PlayerSearchBox({
           name="q"
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder="Discord name, IGN or friend code"
+          placeholder="IGN or friend code"
           className="min-w-0 flex-1 field"
         />
         <button type="submit" disabled={pending} className="btn-primary px-5 py-2 disabled:opacity-60">

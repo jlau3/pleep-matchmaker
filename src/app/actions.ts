@@ -8,8 +8,11 @@ import { normalizeFriendCode } from "@/lib/format";
 import { MAX_FRIENDS } from "@/lib/friendship";
 import { parseAvatar } from "@/lib/avatars";
 import type { LookupRow } from "@/lib/types";
+import { PROFILE_INCOMPLETE } from "@/lib/relations";
+import { nameMatch } from "@/lib/names";
+import { loadTop3Tiers, type Top3Tiers } from "@/lib/top3Tiers";
 import { META_COOKIE, META_POSTS, metaCookieValue } from "@/content/meta";
-import { HELP_COOKIE, HELP_VERSION, helpCookieValue } from "@/lib/help";
+import { FIRST_FRIEND_COOKIE, HELP_COOKIE, HELP_VERSION, helpCookieValue } from "@/lib/help";
 import { LINKING_COOKIE, NEXT_COOKIE, safeNextPath } from "@/lib/nextPath";
 import { isChoice, LINES_BY_ID, MAX_TOP } from "@/lib/lines";
 import { createClient, requireUser } from "@/lib/supabase/server";
@@ -181,6 +184,19 @@ export async function enableLookup(): Promise<{ error?: string }> {
   return {};
 }
 
+/**
+ * "Who can find you" -> the two settings behind it: everyone (search and Find
+ * New), people who know me (search only), only my friends (neither).
+ * Older forms sent the two checkboxes.
+ */
+function visibilityFields(form: FormData): { open_to_friends: boolean; allow_lookup: boolean } {
+  const visibility = form.get("visibility");
+  if (visibility === "everyone") return { open_to_friends: true, allow_lookup: true };
+  if (visibility === "known") return { open_to_friends: false, allow_lookup: true };
+  if (visibility === "friends") return { open_to_friends: false, allow_lookup: false };
+  return { open_to_friends: form.get("open_to_friends") === "on", allow_lookup: form.get("allow_lookup") === "on" };
+}
+
 export async function updateProfile(_prev: ProfileFormState, form: FormData): Promise<ProfileFormState> {
   const { supabase, user } = await requireUser();
   const ign = String(form.get("ign") ?? "").trim();
@@ -193,13 +209,12 @@ export async function updateProfile(_prev: ProfileFormState, form: FormData): Pr
   const update: Record<string, unknown> = {
     ign: ign || null,
     friend_code: friendCode,
-    open_to_friends: form.get("open_to_friends") === "on",
-    allow_lookup: form.get("allow_lookup") === "on",
+    ...visibilityFields(form),
   };
   // Only Discord accounts get the checkbox (an unchecked box isn't submitted, hence the marker).
   if (form.has("has_show_discord")) update.show_discord = form.get("show_discord") === "on";
 
-  // Icon, Reddit name and friends-only votes (profile_extras migration).
+  // Icon and Reddit name (profile_extras migration).
   const extras: Record<string, unknown> = {};
   if (form.has("has_extras")) {
     const reddit = String(form.get("reddit_username") ?? "").trim().replace(/^\/?u\//i, "");
@@ -208,7 +223,6 @@ export async function updateProfile(_prev: ProfileFormState, form: FormData): Pr
     if (avatar && !parseAvatar(avatar)) return { error: "Pick an icon from the list" };
     extras.reddit_username = reddit || null;
     extras.game_avatar = avatar || null;
-    extras.votes_private = form.get("votes_private") === "on";
   }
   let { error } = await supabase.from("profiles").update({ ...update, ...extras }).eq("id", user.id);
   // Before that migration runs, save the rest.
@@ -234,38 +248,33 @@ const FRIEND_ERRORS: Record<string, string> = {
   their_list_full: "Their friend list is full (50).",
   friend_unavailable: "This player can't be added.",
   request_limit: "You have 50 requests waiting. Cancel some first.",
+  profile_incomplete: PROFILE_INCOMPLETE,
   request_gone: "That request isn't open anymore.",
 };
 
 /** Clears the Not here yet name a player was found from (it may not be exactly their IGN). */
-async function clearPlaceholder(supabase: SupabaseClient, userId: string, placeholder?: string) {
-  if (placeholder) await supabase.from("friend_placeholders").delete().eq("user_id", userId).eq("name", placeholder);
-}
-
 /**
  * Sends a friend request (which also means "I'll send you one in Pokémon
  * Sleep"). "friends" when they had already asked you: both of you said yes.
- * `placeholder` is the Not here yet name they were found from; it's cleared.
  */
 export async function sendFriendRequest(
   targetId: string,
-  placeholder?: string,
+  /** Leave the page as is (the card is asking about a Not here yet name); the client refreshes after. */
+  deferRefresh = false,
 ): Promise<{ status?: "sent" | "friends"; error?: string }> {
-  const { supabase, user } = await requireUser();
+  const { supabase } = await requireUser();
   const { data, error } = await supabase.rpc("send_friend_request", { target: targetId });
   if (error) return { error: FRIEND_ERRORS[error.message] ?? "Couldn't send the request, try again" };
-  await clearPlaceholder(supabase, user.id, placeholder);
   // Whole layout: the requests banner and every Add friend button may change.
-  revalidatePath("/", "layout");
+  if (!deferRefresh) revalidatePath("/", "layout");
   return { status: data === "friends" ? "friends" : "sent" };
 }
 
-export async function acceptFriendRequest(requesterId: string, placeholder?: string): Promise<{ error?: string }> {
-  const { supabase, user } = await requireUser();
+export async function acceptFriendRequest(requesterId: string, deferRefresh = false): Promise<{ error?: string }> {
+  const { supabase } = await requireUser();
   const { error } = await supabase.rpc("accept_friend_request", { requester: requesterId });
   if (error) return { error: FRIEND_ERRORS[error.message] ?? "Couldn't accept, try again" };
-  await clearPlaceholder(supabase, user.id, placeholder);
-  revalidatePath("/", "layout");
+  if (!deferRefresh) revalidatePath("/", "layout");
   return {};
 }
 
@@ -314,7 +323,9 @@ export async function lookupPlayers(q: string): Promise<{ rows?: LookupRow[]; er
 
 /**
  * Not here yet's single search: looks up every saved name at once and returns the
- * names that turned someone up, in A-Z order. Names with no one found are left out.
+ * names that turned someone up, in A-Z order, with only the players whose IGN is
+ * that name (strongNameKey: case, spaces and symbols aside). Names with no one
+ * found are left out.
  */
 export async function searchPlaceholders(): Promise<{ hits?: { name: string; rows: LookupRow[] }[]; searched?: number; error?: string }> {
   const { supabase, user } = await requireUser();
@@ -324,7 +335,9 @@ export async function searchPlaceholders(): Promise<{ hits?: { name: string; row
   const results = await Promise.all(
     names.map(async (name) => {
       const found = await supabase.rpc("lookup_players", { q: name });
-      const rows = await withExtras(supabase, ((found.data ?? []) as LookupRow[]).filter((row) => row.user_id !== user.id));
+      // Exact IGN only (as the "may have joined" flag): no lookalikes, friend codes or Discord names.
+      const same = ((found.data ?? []) as LookupRow[]).filter((row) => row.user_id !== user.id && nameMatch(row.ign, name) === "strong");
+      const rows = await withExtras(supabase, same);
       return { name, rows };
     }),
   );
@@ -335,8 +348,8 @@ export async function searchPlaceholders(): Promise<{ hits?: { name: string; row
 }
 
 /**
- * Placeholder for an in-game friend who hasn't signed up yet, by IGN. Adding
- * a friend with that IGN clears it (friends_upkeep migration).
+ * Placeholder for an in-game friend who hasn't signed up yet, by IGN. It stays
+ * until removed (20261020000600_keep_placeholders.sql).
  */
 export async function addPlaceholder(name: string): Promise<{ error?: string }> {
   const { supabase, user } = await requireUser();
@@ -380,6 +393,19 @@ export async function markHelpSeen(): Promise<void> {
   const { supabase, user } = await requireUser();
   const { error } = await supabase.from("profiles").update({ help_seen_version: HELP_VERSION }).eq("id", user.id);
   if (!error) (await cookies()).set(HELP_COOKIE, helpCookieValue(user.id), { path: "/", maxAge: 31536000, sameSite: "lax" });
+}
+
+/** Your Top 3's tiers on these players' Tier Lists, for Find New's Top 3 sort (FindNewBoard). */
+export async function loadTop3TiersFor(ids: string[]): Promise<Top3Tiers> {
+  const { supabase } = await requireUser();
+  return loadTop3Tiers(supabase, ids.filter((id) => typeof id === "string").slice(0, 1000));
+}
+
+/** Records that the player has seen the "You have your first friend!" note (FirstFriendBanner). */
+export async function markFirstFriendNoted(): Promise<void> {
+  const { supabase, user } = await requireUser();
+  const { error } = await supabase.from("profiles").update({ first_friend_noted: true }).eq("id", user.id);
+  if (!error) (await cookies()).set(FIRST_FRIEND_COOKIE, user.id, { path: "/", maxAge: 31536000, sameSite: "lax" });
 }
 
 /** Records that the player closed the new-Pokémon note `postId` (see src/content/meta.tsx). */

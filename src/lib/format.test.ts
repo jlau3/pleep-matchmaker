@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatFriendCode, normalizeFriendCode, relativeTime } from "./format";
+import { activityLabel, formatFriendCode, normalizeFriendCode, relativeTime } from "./format";
 
 describe("friend codes", () => {
   it("accepts any separators", () => {
@@ -30,5 +30,23 @@ describe("relativeTime", () => {
   });
   it("handles null", () => {
     expect(relativeTime(null)).toBe("never");
+  });
+});
+
+describe("activityLabel", () => {
+  const now = Date.parse("2026-10-09T12:00:00Z");
+  it.each([
+    ["2026-10-09T11:59:30Z", "Active today"],
+    ["2026-10-08T13:00:00Z", "Active today"],
+    ["2026-10-08T11:00:00Z", "Active this week"],
+    ["2026-10-02T13:00:00Z", "Active this week"],
+    ["2026-10-02T11:00:00Z", "Seen 1w ago"],
+    ["2026-09-18T12:00:00Z", "Seen 3w ago"],
+    ["2026-06-01T12:00:00Z", "Seen 4mo ago"],
+  ])("%s -> %s", (iso, expected) => {
+    expect(activityLabel(iso, now)).toBe(expected);
+  });
+  it("handles null", () => {
+    expect(activityLabel(null)).toBe("Not seen yet");
   });
 });

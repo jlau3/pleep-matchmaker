@@ -32,7 +32,7 @@ const STEPS: { title: string; body: React.ReactNode; href: string; cta: string }
     body: (
       <>
         This list should match your in-game one, since it decides whose wants your Tier List follows. Look them up
-        by Discord name, IGN or friend code and send a friend request; once they accept, you&apos;re on each
+        by IGN or friend code and send a friend request; once they accept, you&apos;re on each
         other&apos;s lists (up to {MAX_FRIENDS}). Each player shows two match %s:
         <b>for you</b> (your wants match what their friends want, so the candy they send suits you) and{" "}
         <b>for them</b> (their wants match what your friends want, so the candy you send suits them).

@@ -1,14 +1,17 @@
 "use client";
 
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import {
   acceptFriendRequest,
   cancelFriendRequest,
   declineFriendRequest,
   removeFriend,
+  removePlaceholder,
   sendFriendRequest,
 } from "@/app/actions";
-import type { Relation } from "@/lib/relations";
+import { PROFILE_INCOMPLETE, type Relation } from "@/lib/relations";
 import { rethrowIfNavigation, SAVE_FAILED } from "@/lib/saveError";
 
 const solid = "rounded-lg bg-want px-3 py-1 text-sm font-semibold text-white disabled:opacity-50";
@@ -39,15 +42,18 @@ export function FriendAction({
   relation: Relation;
   /** Their friend code is on the card, so "also send a request in Pokémon Sleep" makes sense. */
   showsCode?: boolean;
-  /** Not here yet name this player was found from: sending or accepting clears it. */
+  /** Not here yet name this player was found from: after sending or accepting, asks whether to remove it. */
   placeholder?: string;
 }) {
   // "declined-them": you just declined their request; nothing more to offer on this card.
   const [relation, setRelation] = useState<Relation | "declined-them">(initial);
   const [note, setNote] = useState<string | null>(null);
   const [confirming, setConfirming] = useState(false);
+  // The Not here yet name to offer removing, once a request or accept to them went through.
+  const [askRemove, setAskRemove] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, startTransition] = useTransition();
+  const router = useRouter();
 
   function run(
     action: () => Promise<{ error?: string; status?: string }>,
@@ -63,6 +69,8 @@ export function FriendAction({
         setRelation(to);
         setNote(to === "friend" && result.status === "friends" ? `They'd asked you too: you're friends now.` : (done ?? null));
         setConfirming(false);
+        // The page refresh waits for the answer (deferRefresh), so this card stays to ask it.
+        if (placeholder && (to === "sent" || to === "friend")) setAskRemove(placeholder);
       } catch (e) {
         rethrowIfNavigation(e);
         setError(SAVE_FAILED);
@@ -73,6 +81,14 @@ export function FriendAction({
   const errorLine = error && (
     <span role="alert" className="text-xs text-dont">
       {error}
+      {error === PROFILE_INCOMPLETE && (
+        <>
+          {" "}
+          <Link href="/profile" className="font-semibold underline">
+            Go to Profile
+          </Link>
+        </>
+      )}
     </span>
   );
 
@@ -104,7 +120,7 @@ export function FriendAction({
             disabled={busy}
             onClick={() =>
               run(
-                () => sendFriendRequest(userId, placeholder),
+                () => sendFriendRequest(userId, Boolean(placeholder)),
                 (status) => (status === "friends" ? "friend" : "sent"),
                 showsCode ? `Also send ${name} a friend request in Pokémon Sleep with the code above.` : undefined,
               )
@@ -135,6 +151,16 @@ export function FriendAction({
           </>
         )}
 
+        {relation === "setup" && (
+          <span className="text-sm text-slate-600 dark:text-slate-300">
+            To send friend requests,{" "}
+            <Link href="/profile" className="font-semibold underline">
+              add your in-game name and friend code
+            </Link>{" "}
+            so they know who&apos;s asking.
+          </span>
+        )}
+
         {relation === "expired" && (
           <>
             <span className="rounded-lg border-2 border-dashed border-slate-400 px-3 py-0.5 text-sm font-semibold text-slate-600 dark:text-slate-300">
@@ -143,7 +169,7 @@ export function FriendAction({
             <button
               type="button"
               disabled={busy}
-              onClick={() => run(() => sendFriendRequest(userId, placeholder), (status) => (status === "friends" ? "friend" : "sent"))}
+              onClick={() => run(() => sendFriendRequest(userId, Boolean(placeholder)), (status) => (status === "friends" ? "friend" : "sent"))}
               className={solid}
             >
               {busy ? "Sending…" : "Send again"}
@@ -161,7 +187,7 @@ export function FriendAction({
               disabled={busy}
               onClick={() =>
                 run(
-                  () => acceptFriendRequest(userId, placeholder),
+                  () => acceptFriendRequest(userId, Boolean(placeholder)),
                   () => "friend",
                   `You're friends now. Accept ${name}'s request in Pokémon Sleep too.`,
                 )
@@ -186,6 +212,37 @@ export function FriendAction({
         {errorLine}
       </span>
       {note && <span className="text-xs font-semibold text-want">{note}</span>}
+      {askRemove && (
+        <span className="inline-flex flex-wrap items-center gap-2 rounded-lg bg-sun/30 px-2 py-1 text-xs dark:bg-sun/15">
+          <span>
+            Take <b>{askRemove}</b> off your Not here yet list?
+          </span>
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => {
+              const name = askRemove;
+              startTransition(async () => {
+                try {
+                  const result = await removePlaceholder(name);
+                  if (result.error) return setError(result.error);
+                  setAskRemove(null);
+                  router.refresh();
+                } catch (e) {
+                  rethrowIfNavigation(e);
+                  setError(SAVE_FAILED);
+                }
+              });
+            }}
+            className="font-semibold underline disabled:opacity-50"
+          >
+            Remove
+          </button>
+          <button type="button" disabled={busy} onClick={() => (setAskRemove(null), router.refresh())} className="font-semibold underline disabled:opacity-50">
+            Keep it
+          </button>
+        </span>
+      )}
     </span>
   );
 }

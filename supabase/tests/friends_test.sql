@@ -10,6 +10,8 @@ insert into public.preferences (user_id, line_id, choice) values
   ('00000000-0000-0000-0001-000000000002', 'eevee', 'dont_want'),
   ('00000000-0000-0000-0001-000000000003', 'pikachu', 'want');
 
+-- Strangers see IGNs, not Discord names (20261020001100_discord_friends_only.sql): IGN = Discord name here.
+update public.profiles set ign = coalesce(ign, discord_username) where id::text like '00000000-0000-0000-0001-%';
 set role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0001-000000000001', false);
 
@@ -33,29 +35,26 @@ begin
   assert r.visible and r.wants = '{pikachu}' and r.dont_wants = '{eevee}', 'friend prefs';
 end $$;
 
--- Friend turns lookup off: names only.
+-- Friend turns search off: still a full friend (20261020000700_lookup_only_search.sql).
 reset role;
-update public.profiles set allow_lookup = false where discord_username = 'f3';
+update public.profiles set allow_lookup = false, ign = 'F3Ign' where discord_username = 'f3';
 set role authenticated;
 do $$
 declare r record;
 begin
   select * into r from public.get_friends() where discord_username = 'f3';
-  assert not r.visible and r.wants = '{}' and r.ign is null, 'hidden friend';
+  assert r.visible and r.ign = 'F3Ign', 'unsearchable friend still shown in full';
+  assert not exists (select 1 from public.lookup_players('F3Ign')), 'but not found by search';
 end $$;
 select public.test_befriend(auth.uid(), '00000000-0000-0000-0001-000000000004');
 
--- Can't send a request to someone with lookup off.
+-- Search off doesn't block requests (e.g. from Find New).
 reset role;
 update public.profiles set allow_lookup = false where discord_username = 'f5';
+select public.test_complete_profiles('00000000-0000-0000-0001-000000000001');
 set role authenticated;
 do $$ begin
-  begin
-    perform public.send_friend_request('00000000-0000-0000-0001-000000000005');
-    assert false, 'should reject lookup-off request';
-  exception when raise_exception then
-    assert sqlerrm = 'friend_unavailable', sqlerrm;
-  end;
+  assert public.send_friend_request('00000000-0000-0000-0001-000000000005') = 'sent', 'request to a search-off player';
 end $$;
 
 -- Cap at 50: currently 3 (f2, f3, f4). Add f6..f52 = 47 more -> 50, then one more fails.
@@ -102,14 +101,14 @@ from unnest(array['00000000-0000-0000-0001-000000000001', '00000000-0000-0000-00
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0001-000000000100', false);
 set role authenticated;
 do $$ begin
-  assert not exists (select 1 from public.browse_players('fit', true, 50, 0) where discord_username = 'f1'), 'full list hidden from matches';
+  assert not exists (select 1 from public.browse_players('fit', true, 50, 0) where user_id = public.test_uid('f1')), 'full list hidden from matches';
   assert exists (select 1 from public.lookup_players('f1')), 'full list still found by lookup';
 end $$;
 reset role;
 delete from public.friends where user_id = '00000000-0000-0000-0001-000000000001' and friend_id = '00000000-0000-0000-0001-000000000052';
 set role authenticated;
 do $$ begin
-  assert exists (select 1 from public.browse_players('fit', true, 50, 0) where discord_username = 'f1'), 'back in matches below cap';
+  assert exists (select 1 from public.browse_players('fit', true, 50, 0) where user_id = public.test_uid('f1')), 'back in matches below cap';
 end $$;
 reset role;
 do $$ begin
