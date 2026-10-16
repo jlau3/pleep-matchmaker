@@ -79,10 +79,11 @@ export const TIER_STYLE: Record<string, string> = {
 
 export const TIERS: Tier[] = [
   { id: "top", label: "Top 3\nSpotlight", hint: "Candy players most want friends to send" },
-  { id: "S", label: "S", hint: `Top ${pct(TIER_SHARES.S)}% of scores above 0` },
-  { id: "A", label: "A", hint: `Next ${pct(TIER_SHARES.A)}%` },
-  { id: "B", label: "B", hint: `Next ${pct(TIER_SHARES.B)}%` },
-  { id: "C", label: "C", hint: `Last ${pct(1 - TIER_SHARES.S - TIER_SHARES.A - TIER_SHARES.B)}%, and scores of 0` },
+  // Same shape as Fixed Scores' "Score 75–100" hints; Avoid's "Score below 0" is shared by both.
+  { id: "S", label: "S", hint: `Top ${pct(TIER_SHARES.S)}% of scores 0+` },
+  { id: "A", label: "A", hint: `Next ${pct(TIER_SHARES.A)}% of scores 0+` },
+  { id: "B", label: "B", hint: `Next ${pct(TIER_SHARES.B)}% of scores 0+` },
+  { id: "C", label: "C", hint: `Last ${pct(1 - TIER_SHARES.S - TIER_SHARES.A - TIER_SHARES.B)}% of scores 0+` },
   { id: "avoid", label: "Avoid", hint: "Score below 0" },
 ];
 
