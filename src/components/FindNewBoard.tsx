@@ -20,7 +20,7 @@ type Tiers = Record<string, Record<string, string>>;
 
 /**
  * Find New's suggested players. Every player comes down once (browse_all), so
- * Good matches / Everyone, the sorts and the pages all switch here, with no
+ * Good matches / All players, the sorts and the pages all switch here, with no
  * trip to the server; the URL follows along so a reload or a shared link
  * shows the same view. Your Top 3 Spotlight's tiers arrive for the first page with the
  * page, and for everyone else in the background (the Top 3 Spotlight sort waits for
@@ -151,7 +151,7 @@ export function FindNewBoard({
             Good matches
           </Pill>
           <Pill active={opts.everyone} onClick={() => change({ everyone: true })}>
-            Everyone
+            All players
           </Pill>
         </div>
       </div>

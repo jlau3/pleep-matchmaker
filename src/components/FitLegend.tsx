@@ -43,6 +43,11 @@ export function FitLegend({ friendsVoted = true, youVoted = true, autoOpen = fal
           <b className="text-slate-700 dark:text-slate-200">For them</b>: Their wants compared with what your friends want.
         </p>
         <p>
+          <b>How the % is found:</b> each candy gets a demand level from what that side&apos;s friends want, with the most-wanted candy at 100%.
+          We add up the demand on the candy the player Wants and divide by the best they could get. Candy they Don&apos;t Want that would still
+          get sent counts against it. 100% means the candy they&apos;d receive is exactly what they want.
+        </p>
+        <p>
           <b>Few friends voting yet?</b> Scores lean on global votes until more friends vote.
         </p>
         <p><b>For you needs your votes. For them needs theirs.</b> A dash means there isn&apos;t enough voting data to calculate that score; it doesn&apos;t mean a bad match.</p>
