@@ -220,9 +220,9 @@ export function ProfileForm({ profile, friendListFull, guideRequested = false, c
                     <DiscordIcon /> Show my Discord name to friends
                   </>
                 }
-                detail="Other players never see it or find you by it, except you and someone with a friend request between you."
+                detail="Your chosen Pokémon picture stays the same."
               >
-                Friends see @{profile.discord_username} and your Discord picture on your card.
+                Show @{profile.discord_username} under your name to friends and people you have a friend request with.
               </Toggle>
             </div>
           )}
