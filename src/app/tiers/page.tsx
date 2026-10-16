@@ -2,8 +2,8 @@ import Link from "next/link";
 import { TierExplorer, type PoolVotes } from "@/components/TierExplorer";
 import { LINES, isSleepType } from "@/lib/lines";
 import { countOwnVotes } from "@/lib/data";
-import { requireUser } from "@/lib/supabase/server";
-import { loadCommunityStats } from "@/lib/communityStats";
+import { getAuth } from "@/lib/supabase/server";
+import { loadPublicCommunityStats } from "@/lib/communityStats";
 import { countVotes } from "@/lib/tiers";
 import type { FriendRow } from "@/lib/types";
 
@@ -14,31 +14,32 @@ import type { FriendRow } from "@/lib/types";
  * server; the query string only picks the view shown first.
  */
 export default async function TiersPage({ searchParams }: { searchParams: Promise<{ pool?: string; island?: string; sleep?: string }> }) {
-  const { supabase, user } = await requireUser();
+  const { supabase, userId } = await getAuth();
   const params = await searchParams;
 
   // All three lookups at once: the page waits on the slowest only. Everyone's
   // totals come from a shared 5-minute cache, so they rarely cost a round trip.
   const [votedCount, friends, everyone] = await Promise.all([
-    countOwnVotes(supabase, user.id),
+    userId ? countOwnVotes(supabase, userId) : Promise.resolve(LINES.length),
     // Votes only: skip the per-friend fit %, which only My Friends shows.
-    supabase.rpc("get_friends", { with_match: false }).then(({ data, error }): PoolVotes => {
+    userId ? supabase.rpc("get_friends", { with_match: false }).then(({ data, error }): PoolVotes => {
       if (error) throw error;
       const rows = data as FriendRow[];
       const players = rows.filter((f) => f.visible && f.wants.length + f.dont_wants.length > 0);
       return { votes: Object.fromEntries(countVotes(players)), voters: players.length, friendCount: rows.length };
-    }),
-    loadCommunityStats(supabase).then(
-      (community): PoolVotes => ({ votes: community.votes, voters: community.voters, friendCount: 0 }),
+    }) : Promise.resolve({ votes: {}, voters: 0, friendCount: 0 }),
+    loadPublicCommunityStats().then(
+      (community): PoolVotes => ({ votes: community.votes, voters: community.voters, friendCount: 0, thresholded: true }),
     ),
   ]);
   const unvoted = Math.max(0, LINES.length - votedCount);
 
   return (
     <TierExplorer
+      signedIn={Boolean(userId)}
       friends={friends}
       everyone={everyone}
-      initialPool={params.pool === "everyone" ? "everyone" : "friends"}
+      initialPool={!userId || params.pool !== "friends" ? "everyone" : "friends"}
       initialIsland={params.island ?? null}
       initialSleep={isSleepType(params.sleep) ? params.sleep : null}
       loadedAt={new Date().toISOString()}

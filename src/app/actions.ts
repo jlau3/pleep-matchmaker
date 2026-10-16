@@ -14,7 +14,7 @@ import { nameMatch } from "@/lib/names";
 import { loadTop3Tiers, type Top3Tiers } from "@/lib/top3Tiers";
 import { META_COOKIE, META_POSTS, metaCookieValue } from "@/content/meta";
 import { FIRST_FRIEND_COOKIE, HELP_COOKIE, HELP_VERSION, helpCookieValue, SETUP_COOKIE } from "@/lib/help";
-import { LINKING_COOKIE, NEXT_COOKIE, safeNextPath } from "@/lib/nextPath";
+import { LINKING_COOKIE, NEXT_COOKIE, SETUP_NEXT_COOKIE, safeNextPath } from "@/lib/nextPath";
 import { isChoice, LINES_BY_ID, MAX_TOP } from "@/lib/lines";
 import { createClient, requireUser } from "@/lib/supabase/server";
 import { signInLanding } from "@/lib/signInLanding";
@@ -25,7 +25,9 @@ const OAUTH_PROVIDERS = { discord: "Discord", google: "Google" } as const;
 /** Remembers where the player was headed (a shared /friends?q= link, say) for after sign-in. */
 async function rememberNext(form?: FormData) {
   const next = safeNextPath(form?.get("next"));
-  if (next) (await cookies()).set(NEXT_COOKIE, next, { maxAge: 600, httpOnly: true, sameSite: "lax", path: "/" });
+  const store = await cookies();
+  if (next) store.set(NEXT_COOKIE, next, { maxAge: 600, httpOnly: true, sameSite: "lax", path: "/" });
+  else store.delete(NEXT_COOKIE);
 }
 
 async function siteOrigin() {
@@ -58,7 +60,13 @@ export async function signInWithGoogleToken(credential: string, nonce: string, n
   const supabase = await createClient();
   const { data, error } = await supabase.auth.signInWithIdToken({ provider: "google", token: credential, nonce });
   if (error) return { error: error.message };
-  redirect(await signInLanding(supabase, data.user?.id, next));
+  const destination = await signInLanding(supabase, data.user?.id, next);
+  const store = await cookies();
+  const safe = safeNextPath(next);
+  if (safe && destination.startsWith("/profile?setup=profile")) store.set(SETUP_NEXT_COOKIE, safe, { maxAge: 604800, httpOnly: true, sameSite: "lax", path: "/" });
+  else store.delete(SETUP_NEXT_COOKIE);
+  store.delete(NEXT_COOKIE);
+  redirect(destination);
 }
 
 type Provider = keyof typeof OAUTH_PROVIDERS;
@@ -132,6 +140,9 @@ export async function signOut() {
   const supabase = await createClient();
   // This device only: the default ("global") ends every session, e.g. your phone too.
   await supabase.auth.signOut({ scope: "local" });
+  const store = await cookies();
+  store.delete(SETUP_NEXT_COOKIE);
+  store.delete(NEXT_COOKIE);
   redirect("/");
 }
 
@@ -437,7 +448,7 @@ export async function markHelpSeen(): Promise<void> {
  * Records that the player finished or skipped the setup checklist (SetupChecklist).
  * Finishing it on the Tier List with a friend already covers the first-friend note.
  */
-export async function markSetupDone(finished = false): Promise<{ error?: string }> {
+export async function markSetupDone(finished = false): Promise<{ error?: string; next?: string }> {
   const { supabase, user } = await requireUser();
   let friends = 0;
   if (finished) {
@@ -450,8 +461,25 @@ export async function markSetupDone(finished = false): Promise<{ error?: string 
     .update(friends ? { setup_done: true, first_friend_noted: true } : { setup_done: true })
     .eq("id", user.id);
   if (error) return { error: "Couldn't save your setup progress. Please try again." };
-  (await cookies()).set(SETUP_COOKIE, user.id, { path: "/", maxAge: 31536000, sameSite: "lax" });
-  return {};
+  const store = await cookies();
+  store.set(SETUP_COOKIE, user.id, { path: "/", maxAge: 31536000, sameSite: "lax" });
+  const next = safeNextPath(store.get(SETUP_NEXT_COOKIE)?.value);
+  store.delete(SETUP_NEXT_COOKIE);
+  return next ? { next } : {};
+}
+
+/** Consume the shared destination only after the essential profile fields are saved. */
+export async function finishProfileSetup(next?: string | null): Promise<{ error?: string; next?: string }> {
+  const { supabase, user } = await requireUser();
+  const { data, error } = await supabase.from("profiles").select("ign, friend_code, game_avatar").eq("id", user.id).maybeSingle();
+  if (error) return { error: "Couldn't check your saved profile. Please try again." };
+  if (!data?.ign?.trim() || !normalizeFriendCode(data.friend_code ?? "") || !parseAvatar(data.game_avatar ?? "")) {
+    return { error: "Save your in-game name, friend code, and Pokémon picture before continuing." };
+  }
+  const store = await cookies();
+  const destination = safeNextPath(store.get(SETUP_NEXT_COOKIE)?.value) ?? safeNextPath(next) ?? "/vote";
+  store.delete(SETUP_NEXT_COOKIE);
+  return { next: destination };
 }
 
 /** Records that the player opened the detailed voting guide (VoteGuide). */

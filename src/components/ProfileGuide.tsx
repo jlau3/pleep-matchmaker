@@ -1,9 +1,11 @@
 "use client";
 
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useLayoutEffect, useRef, useState, type RefObject } from "react";
 import { profileGuideError, type ProfileGuideStep } from "@/lib/profileGuide";
 import { profileGuideScroll } from "@/lib/profileGuideScroll";
+import { finishProfileSetup } from "@/app/actions";
+import { rethrowIfNavigation, SAVE_FAILED } from "@/lib/saveError";
 
 const FOCUSABLE =
   'a[href], button:not(:disabled), input:not([type="hidden"]):not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex="0"]';
@@ -16,6 +18,7 @@ export function ProfileGuide({
   pending,
   result,
   onClose,
+  continueTo,
 }: {
   form: RefObject<HTMLFormElement | null>;
   steps: ProfileGuideStep[];
@@ -23,7 +26,10 @@ export function ProfileGuide({
   pending: boolean;
   result: { submission: number; saved?: boolean; error?: string };
   onClose: () => void;
+  continueTo?: string | null;
 }) {
+  const router = useRouter();
+  const [continuing, setContinuing] = useState(false);
   const [index, setIndex] = useState(initialStep);
   const [ready, setReady] = useState(false);
   const [complete, setComplete] = useState(false);
@@ -185,6 +191,20 @@ export function ProfileGuide({
     form.current.requestSubmit(submitter);
   };
 
+  const continueAfterProfile = async () => {
+    setContinuing(true);
+    setError(null);
+    try {
+      const result = await finishProfileSetup(continueTo);
+      if (result.error) { setError(result.error); return; }
+      onClose();
+      router.push(result.next ?? "/vote");
+    } catch (error) {
+      rethrowIfNavigation(error);
+      setError(SAVE_FAILED);
+    } finally { setContinuing(false); }
+  };
+
   if (!ready) return null;
   return (
     <div ref={layer}>
@@ -216,7 +236,7 @@ export function ProfileGuide({
                 tabIndex={-1}
                 className={`mt-1 font-extrabold outline-none ${position.compact ? "text-base leading-tight" : "text-lg"}`}
               >
-                {complete ? "You're ready to vote" : step.title}
+                {complete ? (continueTo ? "Your profile is ready" : "You're ready to vote") : step.title}
               </h2>
             </div>
             <button type="button" onClick={onClose} aria-label="Close profile guide" className="rounded-full px-2 text-xl text-slate-500">
@@ -228,7 +248,7 @@ export function ProfileGuide({
             className={position.compact && !complete ? "sr-only" : "mt-2 text-sm text-slate-600 dark:text-slate-300"}
           >
             {complete
-              ? "Your profile is saved. Next, pick the candy you want your friends to send. You can change any profile option later."
+              ? continueTo ? "Your profile is saved. Continue to the page you opened. You can choose your candy wishlist from Profile later." : "Your profile is saved. Next, pick the candy you want your friends to send. You can change any profile option later."
               : step.description}
           </p>
           {(error || result.error) && (
@@ -243,9 +263,9 @@ export function ProfileGuide({
               </button>
             )}
             {complete ? (
-              <Link href="/vote" onClick={onClose} className="btn-primary px-4 py-2">
-                Choose my candy →
-              </Link>
+              <button type="button" disabled={continuing} onClick={() => void continueAfterProfile()} className="btn-primary px-4 py-2 disabled:opacity-50">
+                {continuing ? "Continuing…" : continueTo ? "Continue →" : "Choose my candy →"}
+              </button>
             ) : (
               <div className="flex items-center gap-3">
                 {index > 0 && (

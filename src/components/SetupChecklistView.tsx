@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { markSetupDone } from "@/app/actions";
 import { SETUP_COOKIE, SETUP_SNOOZE_KEY } from "@/lib/help";
@@ -16,6 +16,7 @@ import { currentStep, SETUP_VOTE_EVENT, type SetupStep } from "@/lib/setup";
  */
 export function SetupChecklistView({ userId, done, steps }: { userId: string; done: boolean; steps: SetupStep[] }) {
   const pathname = usePathname();
+  const router = useRouter();
   // Hidden until sessionStorage is read, so a snoozed card never flashes on load.
   const [snoozed, setSnoozed] = useState(true);
   const [finished, setFinished] = useState(false);
@@ -30,15 +31,18 @@ export function SetupChecklistView({ userId, done, steps }: { userId: string; do
     try {
       const result = await markSetupDone(finishing);
       if (result.error) setFailure({ message: result.error, finishing });
-      else if (finishing) setFinished(true);
-      else setClosed(true);
+      else {
+        if (finishing) setFinished(true);
+        else setClosed(true);
+        if (result.next) router.push(result.next);
+      }
     } catch (error) {
       rethrowIfNavigation(error);
       setFailure({ message: SAVE_FAILED, finishing });
     } finally {
       setSaving(false);
     }
-  }, []);
+  }, [router]);
 
   useEffect(() => {
     if (done) {

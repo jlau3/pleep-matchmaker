@@ -7,6 +7,7 @@ export interface ExportSection {
   /** Island name when exporting By Island; none for a single list. */
   heading?: string;
   tiers: Map<TierId, RankedLine[]>;
+  unranked?: Pick<RankedLine, "line" | "sprite">[];
 }
 
 /** One labelled row of sprites in an exported image (a tier, or a vote). */
@@ -74,7 +75,7 @@ async function renderPng(heading: string, subtitle: string, sections: ImageSecti
   const rowHeight = (n: number) => Math.ceil(n / COLS) * (ICON + GAP) - GAP + ROW_PAD * 2;
   const HEADER = 58;
   const SECTION_HEAD = 30;
-  const FOOTER = 26;
+  const FOOTER = 54;
   let height = PAD + HEADER;
   sections.forEach((section, i) => {
     if (section.heading) height += SECTION_HEAD;
@@ -148,10 +149,13 @@ async function renderPng(heading: string, subtitle: string, sections: ImageSecti
     y += 6;
   });
 
-  ctx.fillStyle = "#8a97ab";
-  ctx.font = `400 11px ${font}`;
-  ctx.textAlign = "right";
-  ctx.fillText(`Made with Pleep Matchmaker · ${window.location.host}`, WIDTH - PAD, height - 10);
+  ctx.fillStyle = "#2d3354";
+  ctx.font = `800 16px ${font}`;
+  ctx.textAlign = "center";
+  ctx.fillText("pleep-matchmaker.vercel.app", WIDTH / 2, height - 30);
+  ctx.fillStyle = "#5a6385";
+  ctx.font = `400 12px ${font}`;
+  ctx.fillText("what Pokémon Sleep players want", WIDTH / 2, height - 12);
 
   return new Promise((resolve, reject) =>
     canvas.toBlob((blob) => (blob ? resolve(blob) : reject(new Error("Couldn't draw the image"))), "image/png"),
@@ -180,15 +184,18 @@ function drawStarCount(ctx: CanvasRenderingContext2D, font: string, tops: number
 const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 
 /** The tier list currently shown, as image rows (the Top 3 row stays on the site: it isn't a tier). */
-function tierSections(sections: ExportSection[]): ImageSection[] {
-  return sections.map((section) => ({
+export function tierSections(sections: ExportSection[]): ImageSection[] {
+  return sections.flatMap((section) => [{
     heading: section.heading,
     rows: TIERS.filter((tier) => tier.id !== "top").map((tier) => ({
       label: tier.label,
       color: TIER_COLOR[tier.id],
       items: (section.tiers.get(tier.id) ?? []).map((r) => ({ sprite: rankedSpriteUrl(r), tops: r.tops })),
     })),
-  }));
+  }, ...(section.unranked?.length ? [{
+    heading: "Not enough votes yet",
+    rows: [{ label: "—", color: { bg: "#e2e8f0", fg: "#5a6385" }, items: section.unranked.map((row) => ({ sprite: rankedSpriteUrl(row) })) }],
+  }] : [])]);
 }
 
 /** Tier List export: "Candy Tier List", the pool and filters, voters and date. */
@@ -199,7 +206,7 @@ export function TierExport({
   label = "Export image",
 }: {
   title: string;
-  voters: number;
+  voters: number | null;
   sections: ExportSection[];
   label?: string;
 }) {
@@ -207,7 +214,7 @@ export function TierExport({
     <ImageExport
       title={title}
       heading="Candy Tier List"
-      subtitle={() => `${title} · ${voters} ${voters === 1 ? "player" : "players"} · ${today()}`}
+      subtitle={() => [title, voters !== null && `${voters} ${voters === 1 ? "player" : "players"}`, today()].filter(Boolean).join(" · ")}
       sections={() => tierSections(sections)}
       file={`tier-list-${slug(title)}.png`}
       label={label}

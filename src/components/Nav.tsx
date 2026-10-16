@@ -3,6 +3,7 @@ import Link from "next/link";
 import { HelpModal } from "./HelpModal";
 import { MetaNoteModal } from "./MetaNoteModal";
 import { NavExtras } from "./NavExtras";
+import { SignInButton } from "./SignInSheet";
 import { NavLinks } from "./NavLinks";
 import { NavStars } from "./NavStars";
 import { activeMetaPost, META_COOKIE, metaCookieValue } from "@/content/meta";
@@ -50,14 +51,16 @@ export async function Nav() {
 
   return (
     <header className="sticky top-0 z-20 header-night text-white shadow-md">
-      <nav className="mx-auto flex max-w-5xl items-center gap-1 overflow-x-auto px-4 py-2 text-sm sm:gap-4">
+      <nav className="mx-auto flex max-w-5xl items-center gap-1 px-4 py-2 text-sm sm:gap-4">
         <Link href="/" className="shrink-0" aria-label="Pleep Matchmaker home">
           <img src="/logo.png" alt="Pleep Matchmaker" className="h-8 w-8" />
         </Link>
-        {user && <NavLinks />}
+        <div className="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto sm:gap-4">
+          <NavLinks signedIn={user} />
+        </div>
         <HelpModal signedIn={user} autoOpen={popups.help.autoOpen} rememberSeen={popups.help.rememberSeen} />
-        <NavStars />
-        <NavExtras donateUrl={process.env.NEXT_PUBLIC_DONATION_URL} />
+        {user && <NavStars />}
+        {user ? <NavExtras donateUrl={process.env.NEXT_PUBLIC_DONATION_URL} /> : <SignInButton />}
       </nav>
       {note && (popups.meta.autoOpen || popups.meta.rememberSeen) && (
         <MetaNoteModal

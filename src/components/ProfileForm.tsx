@@ -62,7 +62,7 @@ const VISIBILITY: { value: Visibility; title: string; text: string }[] = [
  * button: switches save on click, text fields when you leave them (or press
  * Enter), the icon from its popup.
  */
-export function ProfileForm({ profile, friendListFull, guideRequested = false }: { profile: OwnProfile; friendListFull: boolean; guideRequested?: boolean }) {
+export function ProfileForm({ profile, friendListFull, guideRequested = false, continueTo = null }: { profile: OwnProfile; friendListFull: boolean; guideRequested?: boolean; continueTo?: string | null }) {
   const [state, action, pending] = useActionState<ProfileFormState & { submission: number }, FormData>(async (previous, values) => {
     try {
       return { ...await updateProfile(previous, values), submission: previous.submission + 1 };
@@ -254,6 +254,7 @@ export function ProfileForm({ profile, friendListFull, guideRequested = false }:
           pending={pending}
           result={state}
           onClose={closeGuide}
+          continueTo={continueTo}
         />
       )}
     </form>

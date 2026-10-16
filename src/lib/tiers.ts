@@ -181,7 +181,17 @@ export function buildTiers(
 }
 
 /** The sprite a tier list shows for a line: the filtered form when there is one, else the namesake. */
-export const rankedSpriteUrl = (ranked: RankedLine) => ranked.sprite ?? lineSpriteUrl(ranked.line);
+export const rankedSpriteUrl = (ranked: Pick<RankedLine, "line" | "sprite">) => ranked.sprite ?? lineSpriteUrl(ranked.line);
+
+/** Public lines below the database threshold stay out of every ranking and star row. */
+export function buildPublicTiers(votes: Map<string, LineVotes>, voters: number, lines: CandyLine[] = LINES) {
+  const eligible = lines.filter((line) => (votes.get(line.id)?.seen ?? 0) >= 10);
+  const ids = new Set(eligible.map((line) => line.id));
+  return {
+    tiers: buildTiers(votes, voters, eligible),
+    unranked: lines.filter((line) => !ids.has(line.id)).map((line): Pick<RankedLine, "line" | "sprite"> => ({ line })),
+  };
+}
 
 /** Vote counts per line from a set of players' want / don't-want / starred lists. */
 export function countVotes(players: { wants: string[]; dont_wants: string[]; top_wants?: string[] }[]): Map<string, LineVotes> {

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { useSignIn } from "./SignInSheet";
 import { useEffect } from "react";
 
 const LINKS = [
@@ -14,7 +15,8 @@ const LINKS = [
 /** Every tab and sub-tab, loaded in the background so the first tap on each is instant. */
 const PREFETCH = ["/tiers", "/friends", "/matches", "/vote", "/profile", "/guides"];
 
-export function NavLinks() {
+export function NavLinks({ signedIn = true }: { signedIn?: boolean }) {
+  const openSignIn = useSignIn();
   const pathname = usePathname();
   const router = useRouter();
 
@@ -24,17 +26,21 @@ export function NavLinks() {
   // recomputed when you switch back and forth. Only on the first page of the
   // visit; later pages are already cached.
   useEffect(() => {
+    if (!signedIn) return;
     for (const href of PREFETCH) if (!pathname.startsWith(href)) router.prefetch(href);
-  }, []);
+  }, [signedIn]);
 
   return (
     <>
       {LINKS.map((link) => {
-        const active = link.match.some((m) => pathname.startsWith(m));
+        const active = link.match.some((m) => pathname.startsWith(m)) || (pathname === "/" && link.href === "/tiers");
+        const locked = !signedIn && link.href !== "/tiers";
         return (
           <Link
             key={link.href}
             href={link.href}
+            prefetch={signedIn}
+            onClick={(event) => { if (locked) { event.preventDefault(); openSignIn(link.href); } }}
             aria-current={active ? "page" : undefined}
             className={`shrink-0 ${
               active
@@ -42,7 +48,7 @@ export function NavLinks() {
                 : "px-2 py-1 text-white/75 hover:text-white sm:px-3"
             }`}
           >
-            {link.label}
+            {link.label}{locked && <span aria-hidden="true" className="ml-1 text-[10px]">🔒</span>}
           </Link>
         );
       })}

@@ -74,6 +74,10 @@ export default function PrivacyPage() {
             <b>Nobody else ever sees your email.</b> It&apos;s only used to sign you in.
           </li>
           <li>
+            <b>The public Everyone Tier List</b> shows combined candy totals, never individual players&apos; votes or identities.
+            A candy&apos;s totals, stars, and tier stay hidden until it has saved choices from at least 10 active players.
+          </li>
+          <li>
             <b>You control it</b> in Profile under Privacy: <b>Who can find you</b> (everyone, people who know your IGN or
             code, or only your friends), whether friends see your Discord name, and who you block.
           </li>

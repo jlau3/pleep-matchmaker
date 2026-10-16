@@ -8,9 +8,11 @@ const auth = vi.hoisted(() => ({
 }));
 vi.mock("@/components/HowItWorks", () => ({ HowItWorks: () => null }));
 vi.mock("@/components/SignInOptions", () => ({ SignInOptions: () => null }));
+vi.mock("../tiers/page", () => ({ default: () => null }));
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
 vi.mock("next/headers", () => ({
   cookies: async () => ({
+    set: vi.fn(), delete: vi.fn(),
     get: (name: string) => {
       const value = name === "pm_next" ? auth.next : name === "pm_linking" ? auth.linking : undefined;
       return value ? { value } : undefined;
@@ -53,8 +55,9 @@ describe("sign-in landing pages", () => {
   ])("starts first-time %s sign-ins at guided Profile, even from a shared link", async (_name, route) => {
     auth.next = "/friends?q=Sleepy";
     const response = await route();
-    expect(response.headers.get("location")).toBe(`${origin}/profile?setup=profile`);
+    expect(response.headers.get("location")).toBe(`${origin}/profile?setup=profile&next=${encodeURIComponent(auth.next)}`);
     expect(response.headers.get("set-cookie")).toContain("pm_next=");
+    expect(response.cookies.get("pm_setup_next")?.value).toBe(auth.next);
   });
 
   it.each([
@@ -72,13 +75,13 @@ describe("sign-in landing pages", () => {
   });
 
   it("uses the same rule for Google's sign-in button", async () => {
-    await expect(signInWithGoogleToken("test-token", "test-nonce", "/friends")).rejects.toThrow("redirect:/profile?setup=profile");
+    await expect(signInWithGoogleToken("test-token", "test-nonce", "/friends")).rejects.toThrow("redirect:/profile?setup=profile&next=%2Ffriends");
     auth.profile.help_seen_version = 1;
     await expect(signInWithGoogleToken("test-token", "test-nonce", null)).rejects.toThrow("redirect:/tiers");
   });
 
   it("uses the same rule when Supabase redirects to the home page", async () => {
-    await expect(Home({ searchParams: Promise.resolve({ next: "/friends" }) })).rejects.toThrow("redirect:/profile?setup=profile");
+    await expect(Home({ searchParams: Promise.resolve({ next: "/friends" }) })).rejects.toThrow("redirect:/profile?setup=profile&next=%2Ffriends");
     auth.profile.help_seen_version = 1;
     await expect(Home({ searchParams: Promise.resolve({}) })).rejects.toThrow("redirect:/tiers");
   });

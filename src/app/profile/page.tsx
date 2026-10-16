@@ -12,10 +12,11 @@ import { loadFriendIds, loadOwnProfile, MAX_FRIENDS } from "@/lib/data";
 import { relativeTime } from "@/lib/format";
 import { requireUser } from "@/lib/supabase/server";
 import type { BlockedRow } from "@/lib/types";
+import { SETUP_NEXT_COOKIE, safeNextPath } from "@/lib/nextPath";
 
 const card = "card p-5";
 
-export default async function ProfilePage({ searchParams }: { searchParams: Promise<{ error?: string; linked?: string; setup?: string }> }) {
+export default async function ProfilePage({ searchParams }: { searchParams: Promise<{ error?: string; linked?: string; setup?: string; next?: string }> }) {
   const { supabase, user } = await requireUser();
   const [profile, friendIds, blockedResult, identitiesResult] = await Promise.all([
     loadOwnProfile(supabase, user.id),
@@ -26,7 +27,8 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
   if (blockedResult.error) throw blockedResult.error;
   const blocked = blockedResult.data as BlockedRow[];
   const linkedProviders = (identitiesResult.data?.identities ?? []).map((i) => i.provider);
-  const { error, linked, setup } = await searchParams;
+  const { error, linked, setup, next } = await searchParams;
+  const continueTo = safeNextPath((await cookies()).get(SETUP_NEXT_COOKIE)?.value) ?? safeNextPath(next);
   const errorText = error ? linkErrorText(error) : null;
   const linkNotice = errorText
     ? { tone: "error" as const, text: errorText }
@@ -52,7 +54,7 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
           </div>
         </section>
 
-        <ProfileForm profile={profile} friendListFull={friendIds.size >= MAX_FRIENDS} guideRequested={setup === "profile"} />
+        <ProfileForm profile={profile} friendListFull={friendIds.size >= MAX_FRIENDS} guideRequested={setup === "profile"} continueTo={continueTo} />
 
         <div className="grid items-start gap-6 md:grid-cols-2">
           <div className={card}>

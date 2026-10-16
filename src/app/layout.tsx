@@ -4,6 +4,8 @@ import { M_PLUS_Rounded_1c } from "next/font/google";
 import { RequestsBanner } from "@/components/RequestsBanner";
 import { FirstFriendBanner } from "@/components/FirstFriendBanner";
 import { SetupChecklist } from "@/components/SetupChecklist";
+import { getAuth } from "@/lib/supabase/server";
+import { SignInProvider } from "@/components/SignInSheet";
 import { Nav } from "@/components/Nav";
 import { SupportFooter } from "@/components/SupportFooter";
 import { VotesChangedRefresh } from "@/components/VotesChangedRefresh";
@@ -48,16 +50,19 @@ export const viewport: Viewport = { width: "device-width", initialScale: 1, them
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   // A theme picked in Settings; "system" adds no class, so CSS follows the device.
   const theme = parseTheme((await cookies()).get(THEME_COOKIE)?.value);
+  const { userId } = await getAuth();
   return (
     <html lang="en" className={theme === "system" ? rounded.variable : `${rounded.variable} ${theme}`}>
       <body className="min-h-dvh antialiased">
-        <Nav />
-        <RequestsBanner />
-        <FirstFriendBanner />
-        <SetupChecklist />
-        <main className="mx-auto max-w-5xl px-4 pb-16 pt-4">{children}</main>
-        <SupportFooter />
-        <VotesChangedRefresh />
+        <SignInProvider signedIn={userId !== null}>
+          <Nav />
+          <RequestsBanner />
+          <FirstFriendBanner />
+          <SetupChecklist />
+          <main className="mx-auto max-w-5xl px-4 pb-16 pt-4">{children}</main>
+          <SupportFooter />
+          <VotesChangedRefresh />
+        </SignInProvider>
       </body>
     </html>
   );

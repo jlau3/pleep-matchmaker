@@ -1,7 +1,7 @@
 import type { EmailOtpType } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import { NEXT_COOKIE, safeNextPath } from "@/lib/nextPath";
+import { NEXT_COOKIE, SETUP_NEXT_COOKIE, safeNextPath } from "@/lib/nextPath";
 import { createClient } from "@/lib/supabase/server";
 import { signInLanding } from "@/lib/signInLanding";
 
@@ -25,6 +25,8 @@ export async function GET(request: Request) {
       const next = safeNextPath(store.get(NEXT_COOKIE)?.value);
       const destination = await signInLanding(supabase, data.user?.id, next);
       const res = NextResponse.redirect(`${origin}${destination}`);
+      if (next && destination.startsWith("/profile?setup=profile")) res.cookies.set(SETUP_NEXT_COOKIE, next, { path: "/", maxAge: 604800, httpOnly: true, sameSite: "lax", secure: origin.startsWith("https:") });
+      else res.cookies.delete(SETUP_NEXT_COOKIE);
       if (next) res.cookies.delete(NEXT_COOKIE);
       return res;
     }

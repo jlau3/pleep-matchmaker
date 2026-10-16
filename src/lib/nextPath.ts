@@ -1,5 +1,7 @@
 /** Cookie holding where to land after Discord sign-in (e.g. a shared "look me up" link). */
 export const NEXT_COOKIE = "pm_next";
+/** Shared destination retained while a new player fills in their profile. */
+export const SETUP_NEXT_COOKIE = "pm_setup_next";
 
 /** Set while linking another sign-in method from Settings, so the callback returns there, errors included. */
 export const LINKING_COOKIE = "pm_linking";
