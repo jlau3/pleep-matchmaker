@@ -31,7 +31,7 @@ function VoteCard({ ranked, consensus }: { ranked: RankedLine; consensus: boolea
           <span className="text-want" title={consensus ? `${ranked.wants} of ${total} players` : undefined}>{voteLabel(ranked.wants)} Want</span>
           <span className="text-meh" title={consensus ? `${ranked.neutral} of ${total} players` : undefined}>{voteLabel(ranked.neutral)} Neutral</span>
           <span className="text-dont" title={consensus ? `${ranked.dontWants} of ${total} players` : undefined}>{voteLabel(ranked.dontWants)} Don&apos;t Want</span>
-          {consensus && ranked.consensusNote && <span className="rounded px-1 font-semibold" style={{ backgroundColor: CONSENSUS_COLORS[ranked.consensusNote === "Divisive" ? "C" : "B"].bg, color: CONSENSUS_COLORS[ranked.consensusNote === "Divisive" ? "C" : "B"].fg }}>{ranked.consensusNote}</span>}
+          {consensus && ranked.consensusNote && <span title={ranked.consensusNote === "Divisive" ? "At least one-third Want and one-third Don't Want. Rounded percentages may hide small differences." : "At least half are Neutral, without a clear Want or Don't Want lead."} className="rounded px-1 font-semibold" style={{ backgroundColor: CONSENSUS_COLORS[ranked.consensusNote === "Divisive" ? "C" : "B"].bg, color: CONSENSUS_COLORS[ranked.consensusNote === "Divisive" ? "C" : "B"].fg }}>{ranked.consensusNote}</span>}
           {ranked.tops > 0 && <span className="font-semibold text-sun-deep">★ {ranked.tops}</span>}
         </div>
       </div>

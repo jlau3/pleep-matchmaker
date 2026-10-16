@@ -93,6 +93,18 @@ describe("comparison ranking styles", () => {
     expect(tierOf(groups, lines[2].id)).toBe("S");
     expect(tierDefinitions("consensus").map((tier) => tier.id)).toEqual(["top", "S", "A", "avoid"]);
   });
+  it("reserves Divisive for two substantial opposing groups, not the Quaxly/Snover near-tie", () => {
+    const votes = new Map([
+      [lines[0].id, { wants: 53, dontWants: 60 }], // Quaxly
+      [lines[1].id, { wants: 47, dontWants: 62 }], // Snover
+      [lines[2].id, { wants: 67, dontWants: 67 }], // one-third on each side
+      [lines[3].id, { wants: 66, dontWants: 67 }], // below the exact cutoff
+    ]);
+    const mixed = buildTiers(votes, 201, lines.slice(0, 4), "consensus").get("A")!;
+    for (const line of lines.slice(0, 2)) expect(mixed.find((row) => row.line.id === line.id)?.consensusNote).toBeUndefined();
+    expect(mixed.find((row) => row.line.id === lines[2].id)?.consensusNote).toBe("Divisive");
+    expect(mixed.find((row) => row.line.id === lines[3].id)?.consensusNote).toBeUndefined();
+  });
   it.each(["standard", "fixed", "consensus"] as const)("%s never loses or duplicates a ranked candy or exposes low-count totals", (style) => {
     const votes = new Map(lines.map((line, i) => [line.id, { wants: i, dontWants: 0, tops: i === 0 ? 0 : 1, seen: i === 0 ? 9 : 20 }]));
     const publicView = buildPublicTiers(votes, 20, lines, style);

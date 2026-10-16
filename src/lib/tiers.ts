@@ -8,7 +8,7 @@ export const TIER_STYLE_LABEL: Record<TierStyle, string> = {
 export const TIER_STYLE_DESCRIPTION: Record<TierStyle, string> = {
   standard: "Recommended shared ranking. Negative totals go to Avoid; the rest split by percentile.",
   fixed: "Compare support across lists using the same score cutoffs. Tiers depend on each candy's votes, not how other candy scores.",
-  consensus: "Groups candy as Mostly Wanted, Mixed, or Mostly Unwanted. Mixed cards flag Divisive or Mostly Neutral vote patterns.",
+  consensus: "Groups candy as Mostly Wanted, Mixed, or Mostly Unwanted. Divisive requires at least one-third Want and one-third Don't Want.",
 };
 export const parseTierStyle = (value: unknown): TierStyle =>
   TIER_STYLES.includes(value as TierStyle) ? value as TierStyle : "standard";
@@ -189,7 +189,8 @@ export function buildTiers(
   if (style === "consensus") {
     for (const row of all.sort(byRank)) {
       const want = row.wants / voters, dont = row.dontWants / voters, neutral = row.neutral / voters;
-      const divisive = want >= 0.25 && dont >= 0.25;
+      // Both opposing groups must each cover at least one-third of the pool.
+      const divisive = row.wants * 3 >= voters && row.dontWants * 3 >= voters;
       const bucket: TierId = divisive ? "A"
         : want > neutral && want > dont && want >= 2 * dont ? "S"
         : dont > neutral && dont > want && dont >= 2 * want ? "avoid" : "A";

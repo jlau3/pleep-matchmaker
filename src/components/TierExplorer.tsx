@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { isSleepType, ISLANDS, LINES, SLEEP_TYPE_LABEL, SLEEP_TYPES, lineSpriteUrl, sleepTypeMember, spriteUrl, type SleepType } from "@/lib/lines";
 import { buildTiers, buildPublicTiers, TIER_STYLE_LABEL, TIER_STYLES, TIER_STYLE_DESCRIPTION, FIXED_SCORE_CUTOFFS, type TierStyle, type LineVotes } from "@/lib/tiers";
 import { InviteButton } from "./InviteButton";
@@ -88,6 +88,27 @@ export function TierExplorer({
   viewerId?: string | null;
   everyoneSnapshot?: { exportedAt: string; candies: number };
 }) {
+  const styleMenu = useRef<HTMLDetailsElement>(null);
+  const [menuPlacement, setMenuPlacement] = useState({ above: false, maxHeight: 480 });
+  const placeStyleMenu = useCallback(() => {
+    const menu = styleMenu.current;
+    if (!menu?.open) return;
+    const rect = menu.querySelector("summary")!.getBoundingClientRect();
+    const height = window.innerHeight;
+    const below = Math.max(0, height - rect.bottom - 24);
+    const headerBottom = document.querySelector("header")?.getBoundingClientRect().bottom ?? 0;
+    const above = Math.max(0, rect.top - Math.max(24, headerBottom + 24));
+    const openAbove = below < Math.min(360, height * 0.7) && above > below;
+    setMenuPlacement({ above: openAbove, maxHeight: Math.max(80, Math.min(480, height * 0.7, openAbove ? above : below)) });
+  }, []);
+  useEffect(() => {
+    window.addEventListener("resize", placeStyleMenu);
+    window.addEventListener("scroll", placeStyleMenu, true);
+    return () => {
+      window.removeEventListener("resize", placeStyleMenu);
+      window.removeEventListener("scroll", placeStyleMenu, true);
+    };
+  }, [placeStyleMenu]);
   const tourRoot = useRef<HTMLDivElement>(null);
   const openSignIn = useSignIn();
   const viewKey = signedIn ? VIEW_KEY : `${VIEW_KEY}_public`;
@@ -299,18 +320,20 @@ export function TierExplorer({
             );
           })}
         </div>
-        <details data-tier-tour="style" className="relative ml-auto max-w-full text-sm">
+        <details ref={styleMenu} onToggle={placeStyleMenu} data-tier-tour="style" className="relative ml-auto max-w-full text-sm">
           <summary className="w-fit cursor-pointer py-1 font-semibold">Ranking Style: {TIER_STYLE_LABEL[style]}</summary>
-          <fieldset className="absolute right-0 z-20 mt-2 w-[min(24rem,calc(100vw-2rem))] space-y-3 rounded-xl border border-slate-300 bg-cream p-3 shadow-lg dark:border-slate-700 dark:bg-night">
-            <legend className="px-1 font-semibold">Choose a ranking style</legend>
-            <p className="text-xs text-slate-600 dark:text-slate-300">Net support is Want % minus Don't Want %. Neutral adds no points. Negative scores go to Avoid in Standard and Fixed Scores. Numbers are rounded for display; tiers use exact scores.</p>
-            {TIER_STYLES.map((option) => <label key={option} className="flex cursor-pointer items-start gap-2">
-              <input type="radio" name="tier-style" value={option} checked={style === option}
-                onChange={() => show({ style: option })} className="mt-1 accent-want" />
-              <span><b>{TIER_STYLE_LABEL[option]}{option === "standard" && " (Recommended)"}</b>
-                <span className="block text-xs text-slate-500">{TIER_STYLE_DESCRIPTION[option]}{option === "fixed" && ` S ${FIXED_SCORE_CUTOFFS.S}, A ${FIXED_SCORE_CUTOFFS.A}, B ${FIXED_SCORE_CUTOFFS.B}, C 0 to below ${FIXED_SCORE_CUTOFFS.B}.`}</span></span>
-            </label>)}
-          </fieldset>
+          <div style={{ maxHeight: menuPlacement.maxHeight }} className={`absolute right-0 z-20 ${menuPlacement.above ? "bottom-full mb-2" : "top-full mt-2"} w-[min(24rem,calc(100vw-2rem))] overflow-y-auto rounded-xl border border-slate-300 bg-cream p-3 shadow-lg dark:border-slate-700 dark:bg-night`}>
+            <fieldset className="min-w-0 space-y-3 border-0 p-0">
+              <legend className="mb-2 w-full p-0 font-semibold">Choose a ranking style</legend>
+              <p className="text-xs text-slate-600 dark:text-slate-300">Net support is Want % minus Don't Want %. Neutral adds no points. Negative scores go to Avoid in Standard and Fixed Scores. Numbers are rounded for display; tiers use exact scores.</p>
+              {TIER_STYLES.map((option) => <label key={option} className="flex cursor-pointer items-start gap-2">
+                <input type="radio" name="tier-style" value={option} checked={style === option}
+                  onChange={() => show({ style: option })} className="mt-1 shrink-0 accent-want" />
+                <span className="min-w-0"><b>{TIER_STYLE_LABEL[option]}{option === "standard" && " (Recommended)"}</b>
+                  <span className="block text-xs text-slate-500">{TIER_STYLE_DESCRIPTION[option]}{option === "fixed" && ` S ${FIXED_SCORE_CUTOFFS.S}, A ${FIXED_SCORE_CUTOFFS.A}, B ${FIXED_SCORE_CUTOFFS.B}, C 0 to below ${FIXED_SCORE_CUTOFFS.B}.`}</span></span>
+              </label>)}
+            </fieldset>
+          </div>
         </details>
       </div>
       {style !== "standard" && <p className="text-sm text-slate-600 dark:text-slate-300">
