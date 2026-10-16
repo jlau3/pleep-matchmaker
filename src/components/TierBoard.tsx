@@ -1,22 +1,15 @@
-import { type RankedLine, rankedSpriteUrl, type TierId, TIER_STYLE, tierDefinitions, type TierStyle, CONSENSUS_COLORS, TOP_ROW_SIZE } from "@/lib/tiers";
+import { type RankedLine, formatSupport, rankedSpriteUrl, type TierId, TIER_STYLE, tierDefinitions, type TierStyle, CONSENSUS_COLORS, TOP_ROW_SIZE } from "@/lib/tiers";
 
 
 const panel = "card p-3";
 /** The Top 3 Spotlight row isn't a tier: a dashed gold frame and a gap set it apart from S. */
 const topPanel = "card mb-6 border-2 border-dashed border-sun-deep/60 bg-[#fff3c9] p-3 dark:bg-night";
 
-/**
- * Rating color in five 20-point bands, red (nobody wants it) through yellow
- * (around 50, the Avoid line) to green (everyone wants it; all Neutral is 67).
- */
-const RATING_BANDS: [number, string][] = [
-  [80, "text-emerald-600 dark:text-emerald-400"],
-  [60, "text-lime-600 dark:text-lime-400"],
-  [40, "text-yellow-600 dark:text-yellow-400"],
-  [20, "text-orange-600 dark:text-orange-400"],
-  [0, "text-red-600 dark:text-red-400"],
-];
-const ratingColor = (rating: number) => RATING_BANDS.find(([min]) => rating >= min)![1];
+/** Sign reflects support; 0 is Neutral rather than a positive rating. */
+const supportColor = (support: number) => support < 0 ? "text-dont"
+  : support === 0 ? "text-slate-500"
+  : support >= 80 ? "text-emerald-600 dark:text-emerald-400"
+  : support >= 50 ? "text-lime-600 dark:text-lime-400" : "text-amber-700 dark:text-amber-300";
 
 function VoteCard({ ranked }: { ranked: RankedLine }) {
   return (
@@ -25,10 +18,10 @@ function VoteCard({ ranked }: { ranked: RankedLine }) {
       <div className="min-w-0 flex-1">
         <div className="flex items-baseline justify-between gap-2">
           <span className="truncate font-semibold">{ranked.line.name}</span>
-          {ranked.rating !== null && (
-            <span className="shrink-0 whitespace-nowrap">
-              <span className={`text-lg font-extrabold ${ratingColor(ranked.rating)}`}>{ranked.rating}</span>
-              <span className="text-xs text-slate-400">/100</span>
+          {ranked.support !== null && (
+            <span className="shrink-0 whitespace-nowrap" title="Net support per 100 players: Want +1, Neutral 0, Don't Want −2." aria-label={`Net support ${formatSupport(ranked.support)}`}>
+              <span className={`text-lg font-extrabold ${supportColor(ranked.support)}`}>{formatSupport(ranked.support)}</span>
+              <span className="ml-1 text-xs text-slate-500">support</span>
             </span>
           )}
         </div>

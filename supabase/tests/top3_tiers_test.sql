@@ -29,11 +29,11 @@ declare
   p constant uuid := '00000000-0000-0000-0023-000000000001';
 begin
   select jsonb_object_agg(line_id, tier) into got from public.list_tiers(p, 20);
-  assert got = '{"q1":"S","q2":"S","q6":"S","q4":"S","":"B","q3":"B","q7":"C","q8":"C","q5":"Avoid"}', format('20 lines: %s', got);
+  assert got = '{"q1":"S","q2":"A","q6":"B","q4":"C","":"C","q3":"C","q7":"Avoid","q8":"Avoid","q5":"Avoid"}', format('20 lines: %s', got);
   select jsonb_object_agg(line_id, tier) into got from public.list_tiers(p, 10);
-  assert got = '{"q1":"S","q2":"S","q6":"A","q4":"A","":"B","q3":"B","q7":"C","q8":"C","q5":"Avoid"}', format('10 lines: %s', got);
+  assert got = '{"q1":"S","q2":"A","q6":"B","q4":"C","":"C","q3":"C","q7":"Avoid","q8":"Avoid","q5":"Avoid"}', format('10 lines: %s', got);
   select jsonb_object_agg(line_id, tier) into got from public.list_tiers(p, 8);
-  assert got = '{"q1":"S","q2":"S","q6":"A","q4":"A","q3":"B","q7":"B","q8":"C","q5":"Avoid"}', format('8 lines: %s', got);
+  assert got = '{"q1":"S","q2":"A","q6":"B","q4":"C","q3":"C","q7":"Avoid","q8":"Avoid","q5":"Avoid"}', format('8 lines: %s', got);
   assert not exists (select 1 from public.list_tiers('00000000-0000-0000-0023-000000000006', 20)), 'no friends voting: no list';
 end $$;
 
@@ -51,7 +51,7 @@ declare got jsonb;
 begin
   select jsonb_object_agg(line_id, tier) into got
   from public.top3_tiers(array['00000000-0000-0000-0023-000000000001'::uuid], 10);
-  assert got = '{"q6":"A","q8":"Avoid","u9":"Avoid"}', format('card tiers: %s', got);
+  assert got = '{"q6":"B","q8":"Avoid","u9":"Avoid"}', format('card tiers: %s', got);
 end $$;
 reset role;
 

@@ -18,8 +18,8 @@ export const CONSENSUS_COLORS: Record<string, { bg: string; fg: string; shadow: 
   avoid: { bg: "#ec6b6b", fg: "#ffffff", shadow: "#ba4848" },
 };
 
-/** Cutoffs use the displayed 0–100 rating. All-Neutral (67) belongs in B. */
-export const FIXED_SCORE_CUTOFFS = { S: 90, A: 80, B: 67 } as const;
+/** Trial benchmarks on net support per 100 players; all-Neutral is 0 in C. */
+export const FIXED_SCORE_CUTOFFS = { S: 80, A: 50, B: 20 } as const;
 
 export type TierId = "top" | "S" | "A" | "B" | "C" | "avoid";
 
@@ -31,15 +31,13 @@ export interface Tier {
 
 /**
  * The tier list answers "which candy should I send my friends?". Each voter
- * scores a line (POINTS): Want +3, Neutral +1 (players use it for "don't
- * mind", so it's mild support; it also covers lines they haven't voted on),
- * Don't Want -3. Since Neutral is everyone else, that ranks the same as wants
- * minus 2 x don't-wants: one Don't Want cancels two Wants. Top 3 Spotlight stars don't
- * change the score; they're the first tie-breaker.
+ * scores a candy (POINTS): Want +1, Neutral 0, Don't Want -2.
+ * This preserves the previous ordering: one Don't Want offsets two Wants.
+ * Top 3 Spotlight stars don't change the score; they're the first tie-breaker.
  *
- * Below 0 is Avoid: the Don't Wants outweigh the Wants plus a third of the
- * Neutrals. Every other line is ranked, and the top TIER_SHARES.S go to S, the
- * next TIER_SHARES.A to A, the next TIER_SHARES.B to B, the rest to C. Lines
+ * Negative net support is Avoid; zero support stays in C. Positive scores are
+ * ranked, and the top
+ * TIER_SHARES.S go to S, the next TIER_SHARES.A to A, the next TIER_SHARES.B to B, the rest to C. Lines
  * that tie share a tier, placed by the tie's middle rank (the best-ranked tie
  * is always S). With no voters at all, everything is C.
  *
@@ -54,7 +52,7 @@ export const TIER_SHARES = { S: 0.2, A: 0.25, B: 0.3 } as const;
 export const TOP_ROW_SIZE = 9;
 
 /** What each voter's choice adds to a line's score. Tier List only; match %s use public.dont_want_weight(). */
-export const POINTS = { want: 3, neutral: 1, dontWant: -3 } as const;
+export const POINTS = { want: 1, neutral: 0, dontWant: -2 } as const;
 
 const pct = (x: number) => Math.round(x * 100);
 
@@ -74,11 +72,11 @@ export const TIERS: Tier[] = [
   { id: "S", label: "S", hint: `Top ${pct(TIER_SHARES.S)}% most wanted` },
   { id: "A", label: "A", hint: `Next ${pct(TIER_SHARES.A)}%` },
   { id: "B", label: "B", hint: `Next ${pct(TIER_SHARES.B)}%` },
-  { id: "C", label: "C", hint: "The rest" },
-  { id: "avoid", label: "Avoid", hint: "Don't Want votes outweigh support from Want and Neutral" },
+  { id: "C", label: "C", hint: "Lower priority" },
+  { id: "avoid", label: "Avoid", hint: "Negative net support" },
 ];
 
-/** Labels follow the selected presentation; the shared default stays unchanged. */
+/** Labels follow the selected presentation and its score boundaries. */
 export function tierDefinitions(style: TierStyle): Tier[] {
   if (style === "consensus") return [
     TIERS[0],
@@ -90,10 +88,10 @@ export function tierDefinitions(style: TierStyle): Tier[] {
   ];
   if (style === "standard") return TIERS;
   return TIERS.map((tier) => ({ ...tier, hint: ({
-    S: `${FIXED_SCORE_CUTOFFS.S}–100/100`,
-    A: `${FIXED_SCORE_CUTOFFS.A}–${FIXED_SCORE_CUTOFFS.S - 1}/100`,
-    B: `${FIXED_SCORE_CUTOFFS.B}–${FIXED_SCORE_CUTOFFS.A - 1}/100 · All-Neutral scores ${FIXED_SCORE_CUTOFFS.B}`,
-    C: `Below ${FIXED_SCORE_CUTOFFS.B}/100, with a nonnegative vote total`,
+    S: `Net support +${FIXED_SCORE_CUTOFFS.S} or higher`,
+    A: `Net support +${FIXED_SCORE_CUTOFFS.A} to below +${FIXED_SCORE_CUTOFFS.S}`,
+    B: `Net support +${FIXED_SCORE_CUTOFFS.B} to below +${FIXED_SCORE_CUTOFFS.A}`,
+    C: `Lower priority · Net support 0 to below +${FIXED_SCORE_CUTOFFS.B}`,
   } as Record<string, string>)[tier.id] ?? tier.hint }));
 }
 
@@ -116,12 +114,8 @@ export interface RankedLine {
   neutral: number;
   /** Score (see scoreOf); what tiers rank on. */
   score: number;
-  /**
-   * The score shown out of 100 (see ratingOf): 0 when the whole pool doesn't
-   * want it, 50 at the Avoid line, 67 when everyone's neutral, 100 when
-   * everyone wants it. Null with no voters.
-   */
-  rating: number | null;
+  /** Net support per 100 players: Neutral 0, all Want +100, all Don't Want -200. */
+  support: number | null;
   tops: number;
   /**
    * Share of the pool who want it, 0 to 1, stars not weighted. Null with no
@@ -138,16 +132,17 @@ export function scoreOf(votes: LineVotes, voters: number): number {
   return POINTS.want * votes.wants + POINTS.neutral * neutral + POINTS.dontWant * votes.dontWants;
 }
 
-/**
- * Score as a 0-100 rating, from everyone's Don't Want (0) to everyone's Want
- * (100); 50 is the Avoid line. Same order as the score within a pool, so it
- * never changes the ranking.
- */
-export function ratingOf(score: number, voters: number): number | null {
-  if (voters <= 0) return null;
-  const span = POINTS.want - POINTS.dontWant;
-  const floor = POINTS.dontWant * voters;
-  return Math.min(100, Math.max(0, Math.round((100 * (score - floor)) / (span * voters))));
+/** Normalize net support to pool size without rounding tier boundaries. */
+export function supportOf(score: number, voters: number): number | null {
+  return voters > 0 ? 100 * score / voters : null;
+}
+
+/** Keep nearby scores distinguishable, and never display negative support as zero. */
+export function formatSupport(support: number): string {
+  if (support === 0) return "0";
+  const sign = support > 0 ? "+" : "−";
+  const magnitude = Math.abs(support);
+  return sign + (magnitude < 0.05 ? "<0.1" : magnitude.toFixed(1).replace(/\.0$/, ""));
 }
 
 const byRank = (a: RankedLine, b: RankedLine) =>
@@ -176,7 +171,7 @@ export function buildTiers(
       dontWants: v.dontWants,
       neutral: Math.max(0, voters - v.wants - v.dontWants),
       score: scoreOf(v, voters),
-      rating: ratingOf(scoreOf(v, voters), voters),
+      support: supportOf(scoreOf(v, voters), voters),
       tops: v.tops ?? 0,
       wantShare: voters > 0 ? v.wants / voters : null,
       dontShare: voters > 0 ? v.dontWants / voters : null,
@@ -207,20 +202,21 @@ export function buildTiers(
 
   if (style === "fixed") {
     for (const row of all.filter((r) => r.score >= 0).sort(byRank)) {
-      const rating = row.rating!;
-      const tier = rating >= FIXED_SCORE_CUTOFFS.S ? "S"
-        : rating >= FIXED_SCORE_CUTOFFS.A ? "A"
-        : rating >= FIXED_SCORE_CUTOFFS.B ? "B" : "C";
+      const support = row.support!;
+      const tier = support >= FIXED_SCORE_CUTOFFS.S ? "S"
+        : support >= FIXED_SCORE_CUTOFFS.A ? "A"
+        : support >= FIXED_SCORE_CUTOFFS.B ? "B" : "C";
       out.get(tier)!.push(row);
     }
     out.get("avoid")!.sort(byRank);
     return out;
   }
 
-  // Lines at 0 or above fill S/A/B/C by rank. A run of lines tied on score all go to
+  // Positive scores fill S/A/B/C by rank; zero support stays in C. A run of lines tied on score all go to
   // the tier of the run's middle position, so with few voters (lots of ties)
   // tier sizes stay near their targets instead of one tie swallowing S.
-  const ranked = all.filter((r) => r.score >= 0).sort(byRank);
+  out.get("C")!.push(...all.filter((r) => r.score === 0));
+  const ranked = all.filter((r) => r.score > 0).sort(byRank);
   const n = ranked.length;
   const ends: [Exclude<TierId, "top" | "avoid">, number][] = [
     ["S", Math.ceil(TIER_SHARES.S * n)],

@@ -15,20 +15,21 @@ describe("Tier List ranking styles", () => {
     expect(buildTiers(votes, 10, lines)).toEqual(buildTiers(votes, 10, lines, "standard"));
   });
 
-  it("uses fixed cutoffs, keeps Neutral in B, and preserves the negative-total Avoid rule", () => {
+  it("uses fixed cutoffs, keeps Neutral in C, and preserves the negative-total Avoid rule", () => {
     const counts: [number, number, TierId][] = [
-      [70, 0, "S"], // 90
-      [67, 0, "A"], // 89
-      [40, 0, "A"], // 80
-      [37, 0, "B"], // 79
-      [0, 0, "B"], // 67, all Neutral
-      [0, 1, "C"], // 66
-      [0, 25, "C"], // zero total, 50
-      [0, 26, "avoid"],
+      [80, 0, "S"], [79, 0, "A"], [50, 0, "A"], [49, 0, "B"],
+      [20, 0, "B"], [19, 0, "C"], [0, 0, "C"], [0, 1, "avoid"],
     ];
     const votes = new Map(counts.map(([wants, dontWants], index) => [lines[index].id, { wants, dontWants }]));
     const tiers = buildTiers(votes, 100, lines.slice(0, counts.length), "fixed");
     counts.forEach(([, , expected], index) => expect(tierOf(tiers, lines[index].id)).toBe(expected));
+  });
+
+  it("uses exact support for boundaries even when the displayed number rounds up", () => {
+    const votes = new Map([[lines[0].id, { wants: 7996, dontWants: 0 }], [lines[1].id, { wants: 0, dontWants: 1 }]]);
+    const tiers = buildTiers(votes, 10000, lines.slice(0, 2), "fixed");
+    expect(tierOf(tiers, lines[0].id)).toBe("A");
+    expect(tierOf(tiers, lines[1].id)).toBe("avoid");
   });
 
   it("keeps a candy in the same fixed tier when filtering or the electorate scales", () => {
@@ -61,7 +62,7 @@ describe("Tier List ranking styles", () => {
     const tiers = buildTiers(new Map(), 0, lines, "fixed");
     expect(tiers.get("C")).toHaveLength(lines.length);
     expect(tiers.get("S")).toHaveLength(0);
-    expect(tierDefinitions("fixed").find((tier) => tier.id === "S")?.hint).toBe("90–100/100");
+    expect(tierDefinitions("fixed").find((tier) => tier.id === "S")?.hint).toBe("Net support +80 or higher");
   });
 });
 

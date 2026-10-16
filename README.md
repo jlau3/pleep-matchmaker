@@ -35,23 +35,25 @@ Anywhere else, a fit under 25% shows as an amber **low fit** (`LOW_FIT_PCT` in `
 
 ## Tier list rules
 
-The tier list answers "which candy should I send my friends?". Getting candy you don't want annoys people as much as missing one you do, so it ranks by **net score**: wants minus don't-wants (`DONT_WANT_WEIGHT` = 1, the same weight fit uses). Top 3 stars don't change the score; they're the first tie-breaker. The pool is your friends who have voted, or every player active in the last 4 months. Your own votes don't count. Example with 50 players: 39 want + 11 neutral scores 39, 30 want + 20 neutral scores 30, and 39 want + 11 don't-want scores 28, below both.
+The Tier List answers "which candy should I send my friends?". It uses **net support**: Want +1, Neutral 0, Don't Want −2. One Don't Want offsets two Wants. Top 3 Spotlight stars do not change the score; they break ordering ties only. The signed score shown on each card is `100 × (wants − 2 × dont_wants) / voters`, rounded to one decimal for display. All-Neutral is 0, all-Want is +100, and all-Don't-Want is −200. This is support per 100 players, not a percentage or a rating out of 100.
 
-Tiers are relative. Lines scoring above 0 are ranked and split by position:
+Standard ranks positive scores by position; zero support stays in C and every negative score goes to Avoid:
 
-| Tier | Which lines |
+| Tier | Which candies |
 |---|---|
-| S | top 15% |
-| A | next 20% |
+| S | top 20% of positive scores |
+| A | next 25% |
 | B | next 30% |
-| C | the rest, plus lines at exactly 0 (nobody voted, or a split room) |
-| Avoid | below 0: more people don't want it than want it |
+| C | lower priority: remaining positive scores plus all zero scores |
+| Avoid | negative net support |
 
-Lines that tie share a tier, placed by the tie's middle rank, so with few voters (lots of ties) the sizes stay close to the targets. Fixed % cutoffs crowded S and Avoid with a small, decisive player base, and would keep drifting as the pool grows. The shares live in `TIER_SHARES` in `src/lib/tiers.ts`. Every card shows the net score as a **rating out of 100**: `50 + 50 x net / voters`, so with 50 players 50 don't-wants is 0, a split room is 50 and 50 wants is 100. It's colored in five 20-point bands (red, orange, yellow, lime, green) with a gray "/100" and sits next to the want / neutral / don't-want counts. It's the same order as the net score, so it never changes the ranking. In By Island view the ranking is within each island.
+Equal raw scores share a tier, placed by their middle rank; the best-scoring positive tie is always S. With no voters, all candies are C and no support score appears. Filters change the candies used for Standard's percentile boundaries. Public candies need at least 10 active players' saved votes before any counts, scores or tiers are shown; Neutral counts toward that minimum.
 
-Above S, set apart in a dashed gold frame because it isn't a tier, the **Top 3** row repeats the 9 lines that show up most often in players' Top 3, with **Show all** to expand to every starred line, including ones in Avoid so nobody's pick is left out (ties broken like the rest of the list). They stay in their regular tier too, so nothing shifts. Every card shows its star count.
+Fixed Scores uses the same signed support: S ≥ +80, A ≥ +50, B ≥ +20, C from 0 to below +20, and Avoid below 0. Boundaries use the exact score before display rounding. These are dev trial benchmarks. Consensus keeps its percentage-based categories and does not use these tier cutoffs.
 
-Inside a tier, lines sort by score, then Top 3 stars, then rarity, then fewer don't-wants, then dex. Lines tied on score share a tier whatever their stars, so stars only order them. Rarity only breaks ties and never moves a line between tiers: legendary, mythical, pseudo-legendary and 16-pip lines all rank equally ahead of other lines. `scripts/build_lines.py` derives it from each line's first stage (EXP curve and friendship points).
+The **Top 3 Spotlight** row sits apart in a dashed gold frame to give personal favorites visibility even when they rank low overall. It repeats the 9 most-starred candies, with **Show all** to expand to every spotlighted candy, including Avoid. Candies also stay in their regular tier. Within a tier, ordering uses score, then Spotlight count, rarity, fewer Don't Wants, and Pokédex order.
+
+The SQL functions `list_tiers` and `top3_tiers_set` mirror Standard for friend-card tiers and sorting. `20261025000000_net_support_tiers.sql` moves their Avoid boundary to the Neutral baseline without changing match percentages or privacy checks.
 
 ## Privacy
 
@@ -186,12 +188,12 @@ Find New supports account-persisted Hide controls in both layouts, with Undo and
 
 The Add a friend setup step completes after a successful nonempty lookup (including no results), sending a request, or saving a Not here yet name. It stays complete while people have yet to accept; existing requests, friends, and saved names are backfilled by `20261023000100_friend_setup_started.sql`.
 
-Setup opens `/tiers?pool=everyone`, overriding a previously saved My Friends view. Everyone is listed first. Tier List help opens once per signed-in account in each browser, remains available from its button, and is manual for public visitors. Tapping a selected Island or Sleep Type filter again clears it; exports preserve the selected pool and filters.
+Setup opens `/tiers?pool=everyone`, overriding a previously saved My Friends view. Everyone is listed first. The Tier List tour opens once per browser for guests and signed-in players, and remains available from its replay button. Tapping a selected Island or Sleep Type filter again clears it; exports preserve the selected pool and filters.
 
-Tier List ranking styles: Standard (recommended) preserves the existing negative-total Avoid plus percentile ranking and stays the default on new visits. Fixed Scores is an explicit `?style=fixed` presentation choice; it uses the displayed 0–100 rating (S 90+, A 80+, B 67+, C below 67 with a nonnegative total). Negative totals remain Avoid. Styles do not change votes, match scores, or Top 3 sorting elsewhere. The style travels with filters in URLs and appears in export titles; it is deliberately not saved as a browser default.
+Tier List ranking styles: Standard (recommended), Fixed Scores, and Consensus. The style travels with filters in URLs and appears in export titles; it is deliberately not saved as a browser default. A first-visit tour highlights pool selection, filters, ranking style, and export, with a replay button and browser memory shared across guest and signed-in visits.
 
 Social identity now requires an IGN, friend code, and chosen Pokémon icon in both app controls and database search/browse/request functions (`20261024000100_require_profile_icon.sql`). The setup notice lives only on the two friend pages. Duplicate names are grouped using the same strong name key as search and prompt players to check the icon. `20261024000000_clear_unknown_sent_requests.sql` clears only sent requests whose recipients have no visible name; it preserves accounts, votes and friendships, and archives removed request rows in an RLS-enabled table with API access revoked. The dev workflow applies these migrations to the dev database only; production migrations remain separate.
 
 The approved wording pass uses Me → My Votes / Profile, icon, Friends to Find, Only by search, and Show community votes. Permanent setup dismissal is Don't show again; temporary dismissal is Hide for this session. Navigation/section titles use title case; action sentences and retryable errors use sentence case. Existing URLs, anchors, privacy behavior, ranking styles, and database identifiers are preserved.
 
-Tier List comparison fixture: `src/data/dev-tier-snapshot.json` is a copy of the supplied aggregate export (107 candies, 201 voters), not player records. A server-only loader enables it only for this dev branch on Vercel previews or local development/test. Production and unrecognized environments always use the live aggregate function. The Everyone view and exports identify the snapshot; My Friends and voting data remain live dev data. All styles preserve the public 10-player threshold. Comparison options: Standard (hybrid, recommended), Fixed Scores, Percentile Only, Consensus, and Natural Breaks (optimal one-dimensional groups with ties kept together). Style labels accompany shared URLs and exports.
+Tier List comparison fixture: `src/data/dev-tier-snapshot.json` is a copy of the supplied aggregate export (107 candies, 201 voters), not player records. A server-only loader enables it only for this dev branch on Vercel previews or local development/test. Production and unrecognized environments always use the live aggregate function. The Everyone view and exports identify the snapshot; My Friends and voting data remain live dev data. All styles preserve the public 10-player threshold. Comparison options: Standard (recommended), Fixed Scores, and Consensus. Style labels accompany shared URLs and exports.
