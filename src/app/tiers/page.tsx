@@ -3,6 +3,7 @@ import { TierExplorer, type PoolVotes } from "@/components/TierExplorer";
 import { LINES, isSleepType } from "@/lib/lines";
 import { countOwnVotes } from "@/lib/data";
 import { getAuth } from "@/lib/supabase/server";
+import { loadDevTierSnapshot } from "@/lib/devTierSnapshot";
 import { loadPublicCommunityStats } from "@/lib/communityStats";
 import { countVotes, parseTierStyle } from "@/lib/tiers";
 import type { FriendRow } from "@/lib/types";
@@ -16,6 +17,7 @@ import type { FriendRow } from "@/lib/types";
 export default async function TiersPage({ searchParams }: { searchParams: Promise<{ pool?: string; island?: string; sleep?: string; style?: string }> }) {
   const { supabase, userId } = await getAuth();
   const params = await searchParams;
+  const snapshot = await loadDevTierSnapshot();
 
   // All three lookups at once: the page waits on the slowest only. Everyone's
   // totals come from a shared 5-minute cache, so they rarely cost a round trip.
@@ -28,7 +30,7 @@ export default async function TiersPage({ searchParams }: { searchParams: Promis
       const players = rows.filter((f) => f.visible && f.wants.length + f.dont_wants.length > 0);
       return { votes: Object.fromEntries(countVotes(players)), voters: players.length, friendCount: rows.length };
     }) : Promise.resolve({ votes: {}, voters: 0, friendCount: 0 }),
-    loadPublicCommunityStats().then(
+    snapshot ? Promise.resolve({ votes: snapshot.votes, voters: snapshot.voters, friendCount: 0, thresholded: true }) : loadPublicCommunityStats().then(
       (community): PoolVotes => ({ votes: community.votes, voters: community.voters, friendCount: 0, thresholded: true }),
     ),
   ]);
@@ -40,6 +42,7 @@ export default async function TiersPage({ searchParams }: { searchParams: Promis
       viewerId={userId}
       friends={friends}
       everyone={everyone}
+      everyoneSnapshot={snapshot ? { exportedAt: snapshot.exportedAt, candies: snapshot.candies } : undefined}
       initialPool={!userId || params.pool !== "friends" ? "everyone" : "friends"}
       initialStyle={parseTierStyle(params.style)}
       initialIsland={params.island ?? null}

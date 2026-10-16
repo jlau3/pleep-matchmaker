@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { type RankedLine, rankedSpriteUrl, type TierId, TIERS } from "@/lib/tiers";
+import { type RankedLine, rankedSpriteUrl, type TierId, type TierStyle, tierDefinitions, CONSENSUS_COLORS } from "@/lib/tiers";
 
 export interface ExportSection {
   /** Island name when exporting By Island; none for a single list. */
@@ -73,7 +73,20 @@ async function renderPng(heading: string, subtitle: string, sections: ImageSecti
 
   const rows = sections.map((section) => section.rows.filter((row) => row.items.length > 0));
   const rowHeight = (n: number) => Math.ceil(n / COLS) * (ICON + GAP) - GAP + ROW_PAD * 2;
-  const HEADER = 58;
+  const canvas = document.createElement("canvas");
+  const ctx = canvas.getContext("2d")!;
+  ctx.font = `400 13px ${font}`;
+  const subtitleLines: string[] = [];
+  let current = "";
+  for (const word of subtitle.split(/\s+/)) {
+    const next = current ? `${current} ${word}` : word;
+    if (current && ctx.measureText(next).width > WIDTH - PAD * 2) {
+      subtitleLines.push(current);
+      current = word;
+    } else current = next;
+  }
+  if (current) subtitleLines.push(current);
+  const HEADER = 41 + Math.max(1, subtitleLines.length) * 17;
   const SECTION_HEAD = 30;
   const FOOTER = 54;
   let height = PAD + HEADER;
@@ -88,10 +101,8 @@ async function renderPng(heading: string, subtitle: string, sections: ImageSecti
   const urls = new Set(rows.flat().flatMap((row) => row.items.map((item) => item.sprite)));
   await Promise.all([...urls].map(async (url) => sprites.set(url, await loadImage(url))));
 
-  const canvas = document.createElement("canvas");
   canvas.width = WIDTH * SCALE;
   canvas.height = height * SCALE;
-  const ctx = canvas.getContext("2d")!;
   ctx.scale(SCALE, SCALE);
   ctx.fillStyle = "#e4f2ff";
   ctx.fillRect(0, 0, WIDTH, height);
@@ -103,7 +114,7 @@ async function renderPng(heading: string, subtitle: string, sections: ImageSecti
   ctx.fillText(heading, PAD, PAD + 22);
   ctx.font = `400 13px ${font}`;
   ctx.fillStyle = "#5a6385";
-  ctx.fillText(subtitle, PAD, PAD + 44);
+  subtitleLines.forEach((line, index) => ctx.fillText(line, PAD, PAD + 44 + index * 17));
 
   let y = PAD + HEADER;
   sections.forEach((section, i) => {
@@ -184,12 +195,12 @@ function drawStarCount(ctx: CanvasRenderingContext2D, font: string, tops: number
 const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 
 /** The tier list currently shown, as image rows (the Top 3 row stays on the site: it isn't a tier). */
-export function tierSections(sections: ExportSection[]): ImageSection[] {
+export function tierSections(sections: ExportSection[], style: TierStyle = "standard"): ImageSection[] {
   return sections.flatMap((section) => [{
     heading: section.heading,
-    rows: TIERS.filter((tier) => tier.id !== "top").map((tier) => ({
+    rows: tierDefinitions(style).filter((tier) => tier.id !== "top").map((tier) => ({
       label: tier.label,
-      color: TIER_COLOR[tier.id],
+      color: (style === "consensus" ? CONSENSUS_COLORS[tier.id] : undefined) ?? TIER_COLOR[tier.id],
       items: (section.tiers.get(tier.id) ?? []).map((r) => ({ sprite: rankedSpriteUrl(r), tops: r.tops })),
     })),
   }, ...(section.unranked?.length ? [{
@@ -204,18 +215,20 @@ export function TierExport({
   voters,
   sections,
   label = "Export image",
+  style = "standard",
 }: {
   title: string;
   voters: number | null;
   sections: ExportSection[];
   label?: string;
+  style?: TierStyle;
 }) {
   return (
     <ImageExport
       title={title}
       heading="Candy Tier List"
       subtitle={() => [title, voters !== null && `${voters} ${voters === 1 ? "player" : "players"}`, today()].filter(Boolean).join(" · ")}
-      sections={() => tierSections(sections)}
+      sections={() => tierSections(sections, style)}
       file={`tier-list-${slug(title)}.png`}
       label={label}
     />

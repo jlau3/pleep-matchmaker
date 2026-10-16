@@ -1,4 +1,4 @@
-import { type RankedLine, rankedSpriteUrl, type TierId, TIER_STYLE, tierDefinitions, type TierStyle, TOP_ROW_SIZE } from "@/lib/tiers";
+import { type RankedLine, rankedSpriteUrl, type TierId, TIER_STYLE, tierDefinitions, type TierStyle, CONSENSUS_COLORS, TOP_ROW_SIZE } from "@/lib/tiers";
 
 
 const panel = "card p-3";
@@ -56,7 +56,8 @@ export function TierBoard({ tiers, pool = "friends", style = "standard" }: { tie
         const header = (
           <>
             <span
-              className={`inline-flex h-9 w-14 shrink-0 items-center justify-center rounded-lg text-center font-black leading-none ${
+              style={style === "consensus" ? { backgroundColor: CONSENSUS_COLORS[tier.id]?.bg, color: CONSENSUS_COLORS[tier.id]?.fg } : undefined}
+              className={`inline-flex ${style === "consensus" && tier.id !== "top" ? "min-h-12 w-24 whitespace-pre-line py-2" : "h-9 w-14"} shrink-0 items-center justify-center rounded-lg text-center font-black leading-none ${
                 tier.label.length > 2 ? "text-xs" : "text-lg"
               } ${TIER_STYLE[tier.id]}`}
             >

@@ -1,8 +1,25 @@
 import { type CandyLine, LINES, lineSpriteUrl } from "./lines";
 
-export type TierStyle = "standard" | "fixed";
-export const TIER_STYLE_LABEL: Record<TierStyle, string> = { standard: "Standard", fixed: "Fixed Scores" };
-export const parseTierStyle = (value: unknown): TierStyle => value === "fixed" ? "fixed" : "standard";
+export const TIER_STYLES = ["standard", "fixed", "percentile", "consensus", "natural"] as const;
+export type TierStyle = typeof TIER_STYLES[number];
+export const TIER_STYLE_LABEL: Record<TierStyle, string> = {
+  standard: "Standard", fixed: "Fixed Scores", percentile: "Percentile Only", consensus: "Consensus", natural: "Natural Breaks",
+};
+export const TIER_STYLE_DESCRIPTION: Record<TierStyle, string> = {
+  standard: "Recommended shared ranking. Negative totals go to Avoid; the rest split by percentile within your filters.",
+  fixed: "Uses fixed score cutoffs. A candy keeps its tier when filters change. Some tiers may be empty.",
+  percentile: "Ranks all candy by percentile, including negative scores. Shows relative priorities without an Avoid cutoff.",
+  consensus: "Groups candy by Want, Neutral, and Don't Want percentages, including a Divisive group. These are categories, not S–C ranks.",
+  natural: "Finds four groups of similar scores using natural gaps in this selection. Negative totals still go to Avoid; filters can move the group boundaries.",
+};
+export const parseTierStyle = (value: unknown): TierStyle =>
+  TIER_STYLES.includes(value as TierStyle) ? value as TierStyle : "standard";
+export const CONSENSUS_COLORS: Record<string, { bg: string; fg: string }> = {
+  S: { bg: "#3fb86b", fg: "#ffffff" }, A: { bg: "#ffd24d", fg: "#5b3e00" },
+  B: { bg: "#8a97ab", fg: "#ffffff" }, C: { bg: "#ffb36b", fg: "#5b3e00" },
+  avoid: { bg: "#ec6b6b", fg: "#ffffff" },
+};
+
 /** Cutoffs use the displayed 0–100 rating. All-Neutral (67) belongs in B. */
 export const FIXED_SCORE_CUTOFFS = { S: 90, A: 80, B: 67 } as const;
 
@@ -65,6 +82,18 @@ export const TIERS: Tier[] = [
 
 /** Labels follow the selected presentation; the shared default stays unchanged. */
 export function tierDefinitions(style: TierStyle): Tier[] {
+  if (style === "consensus") return [
+    TIERS[0],
+    { id: "S", label: "Mostly\nWanted", hint: "At least 50% Want and fewer than 25% Don't Want" },
+    { id: "B", label: "Mostly\nNeutral", hint: "At least 50% Neutral, after checking the stronger preference groups" },
+    { id: "A", label: "Mixed", hint: "No majority and fewer than 25% on at least one opposing side" },
+    { id: "C", label: "Divisive", hint: "At least 25% Want and at least 25% Don't Want" },
+    { id: "avoid", label: "Mostly\nUnwanted", hint: "At least 50% Don't Want and fewer than 25% Want" },
+  ];
+  if (style === "natural") return TIERS.map((tier) => ({ ...tier, hint: ({
+    S: "Highest-score group", A: "Second-highest score group", B: "Third-highest score group", C: "Lowest score group",
+  } as Record<string, string>)[tier.id] ?? tier.hint }));
+  if (style === "percentile") return TIERS.filter((tier) => tier.id !== "avoid");
   if (style === "standard") return TIERS;
   return TIERS.map((tier) => ({ ...tier, hint: ({
     S: `${FIXED_SCORE_CUTOFFS.S}–100/100`,
@@ -169,7 +198,18 @@ export function buildTiers(
     out.get("C")!.push(...all.sort(byRank));
     return out;
   }
-  for (const r of all) if (r.score < 0) out.get("avoid")!.push(r);
+  if (style === "consensus") {
+    for (const row of all.sort(byRank)) {
+      const want = row.wants / voters, dont = row.dontWants / voters, neutral = row.neutral / voters;
+      const bucket: TierId = want >= 0.25 && dont >= 0.25 ? "C"
+        : want >= 0.5 && dont < 0.25 ? "S"
+        : dont >= 0.5 && want < 0.25 ? "avoid"
+        : neutral >= 0.5 ? "B" : "A";
+      out.get(bucket)!.push(row);
+    }
+    return out;
+  }
+  if (style !== "percentile") for (const r of all) if (r.score < 0) out.get("avoid")!.push(r);
 
   if (style === "fixed") {
     for (const row of all.filter((r) => r.score >= 0).sort(byRank)) {
@@ -186,7 +226,14 @@ export function buildTiers(
   // Lines at 0 or above fill S/A/B/C by rank. A run of lines tied on score all go to
   // the tier of the run's middle position, so with few voters (lots of ties)
   // tier sizes stay near their targets instead of one tie swallowing S.
-  const ranked = all.filter((r) => r.score >= 0).sort(byRank);
+  const ranked = all.filter((r) => style === "percentile" || r.score >= 0).sort(byRank);
+  if (style === "natural") {
+    const groups = naturalBreakGroups(ranked);
+    const ids = ["S", "A", "B", "C"] as const;
+    groups.forEach((group, index) => out.get(ids[index])!.push(...group));
+    out.get("avoid")!.sort(byRank);
+    return out;
+  }
   const n = ranked.length;
   const ends: [Exclude<TierId, "top" | "avoid">, number][] = [
     ["S", Math.ceil(TIER_SHARES.S * n)],
@@ -208,6 +255,43 @@ export function buildTiers(
     if (id !== "top") rows.sort(byRank);
   }
   return out;
+}
+
+/** Jenks-style optimal contiguous groups, highest first; equal scores never split. */
+function naturalBreakGroups(rows: RankedLine[]): RankedLine[][] {
+  const distinct: RankedLine[][] = [];
+  for (const row of [...rows].reverse()) {
+    const last = distinct[distinct.length - 1];
+    if (last?.[0].score === row.score) last.push(row); else distinct.push([row]);
+  }
+  const n = distinct.length, count = Math.min(4, n);
+  if (!n) return [];
+  const weights = [0], sums = [0], squares = [0];
+  distinct.forEach((group, i) => {
+    weights.push(weights[i] + group.length);
+    sums.push(sums[i] + group[0].score * group.length);
+    squares.push(squares[i] + group[0].score ** 2 * group.length);
+  });
+  const cost = (start: number, end: number) => {
+    const weight = weights[end] - weights[start], sum = sums[end] - sums[start];
+    return Math.max(0, squares[end] - squares[start] - sum * sum / weight);
+  };
+  const best = Array.from({ length: count + 1 }, () => Array(n + 1).fill(Infinity) as number[]);
+  const cuts = Array.from({ length: count + 1 }, () => Array(n + 1).fill(0) as number[]);
+  best[0][0] = 0;
+  for (let k = 1; k <= count; k++) for (let end = k; end <= n; end++) {
+    for (let start = k - 1; start < end; start++) {
+      const value = best[k - 1][start] + cost(start, end);
+      if (value < best[k][end]) { best[k][end] = value; cuts[k][end] = start; }
+    }
+  }
+  const groups: RankedLine[][] = [];
+  for (let k = count, end = n; k > 0; k--) {
+    const start = cuts[k][end];
+    groups.push(distinct.slice(start, end).flat().sort(byRank));
+    end = start;
+  }
+  return groups;
 }
 
 /** The sprite a tier list shows for a line: the filtered form when there is one, else the namesake. */

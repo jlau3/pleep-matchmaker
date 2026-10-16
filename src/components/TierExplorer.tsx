@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { isSleepType, ISLANDS, LINES, SLEEP_TYPE_LABEL, SLEEP_TYPES, lineSpriteUrl, sleepTypeMember, spriteUrl, type SleepType } from "@/lib/lines";
-import { buildTiers, buildPublicTiers, TIER_STYLE_LABEL, type TierStyle, type LineVotes } from "@/lib/tiers";
+import { buildTiers, buildPublicTiers, TIER_STYLE_LABEL, TIER_STYLES, TIER_STYLE_DESCRIPTION, type TierStyle, type LineVotes } from "@/lib/tiers";
 import { InviteButton } from "./InviteButton";
 import { InviteReminder } from "./InviteReminder";
 import { RefreshStamp } from "./RefreshStamp";
@@ -70,6 +70,7 @@ export function TierExplorer({
   notice,
   signedIn = true,
   viewerId = null,
+  everyoneSnapshot,
 }: {
   friends: PoolVotes;
   everyone: PoolVotes;
@@ -85,6 +86,7 @@ export function TierExplorer({
   notice?: React.ReactNode;
   signedIn?: boolean;
   viewerId?: string | null;
+  everyoneSnapshot?: { exportedAt: string; candies: number };
 }) {
   const openSignIn = useSignIn();
   const viewKey = signedIn ? VIEW_KEY : `${VIEW_KEY}_public`;
@@ -129,7 +131,7 @@ export function TierExplorer({
       const query = new URLSearchParams({ pool: "friends" });
       if (islandId) query.set("island", islandId);
       if (sleepType) query.set("sleep", sleepType);
-      if (style === "fixed") query.set("style", style);
+      if (style !== "standard") query.set("style", style);
       openSignIn(`/tiers?${query}`);
       return;
     }
@@ -143,7 +145,7 @@ export function TierExplorer({
     setSleepType(sleep);
     const qs = new URLSearchParams();
     qs.set("pool", p);
-    if (rankingStyle === "fixed") qs.set("style", rankingStyle);
+    if (rankingStyle !== "standard") qs.set("style", rankingStyle);
     if (id) qs.set("island", id);
     if (sleep) qs.set("sleep", sleep);
     const query = qs.toString();
@@ -190,7 +192,9 @@ export function TierExplorer({
       <div>
         <div className="flex flex-wrap items-baseline justify-between gap-x-3">
           <h1 className="text-2xl font-bold">Tier List</h1>
-          <RefreshStamp loadedAt={loadedAt} />
+          {pool === "everyone" && everyoneSnapshot
+            ? <span className="text-xs text-slate-500">Snapshot: {everyoneSnapshot.exportedAt.slice(0, 10)}</span>
+            : <RefreshStamp loadedAt={loadedAt} />}
         </div>
         <p className="text-sm text-slate-600 dark:text-slate-300">
           Which candy to prioritize, ranked by what {pool === "friends" ? "your friends" : "active players"}{" "}
@@ -199,26 +203,25 @@ export function TierExplorer({
         {!signedIn && <button type="button" onClick={() => show({ pool: "friends" })} className="mt-2 text-sm font-semibold underline">See what your friends want → Sign in</button>}
       </div>
 
+      {pool === "everyone" && everyoneSnapshot && <p role="status" className="rounded-xl bg-sky/60 px-3 py-2 text-sm dark:bg-night-deep">
+        Dev snapshot: {everyone.voters} players · {everyoneSnapshot.candies} candies. Imported totals for comparing styles; My Friends uses your dev friends.
+      </p>}
       <TierGuide userId={signedIn ? viewerId : null} />
 
       <details className="text-sm">
         <summary className="w-fit cursor-pointer font-semibold">Ranking Style: {TIER_STYLE_LABEL[style]}{style === "standard" && " (Recommended)"}</summary>
         <fieldset className="mt-3 space-y-3 rounded-xl border border-slate-300 p-3 dark:border-slate-700">
           <legend className="px-1 font-semibold">Choose a ranking style</legend>
-          <label className="flex cursor-pointer items-start gap-2">
-            <input type="radio" name="tier-style" value="standard" checked={style === "standard"}
-              onChange={() => show({ style: "standard" })} className="mt-1 accent-want" />
-            <span><b>Standard (Recommended)</b><span className="block text-xs text-slate-500">Our shared default. Negative totals go to Avoid; the rest rank by percentile within your filters. Use this when comparing lists with other players.</span></span>
-          </label>
-          <label className="flex cursor-pointer items-start gap-2">
-            <input type="radio" name="tier-style" value="fixed" checked={style === "fixed"}
-              onChange={() => show({ style: "fixed" })} className="mt-1 accent-want" />
-            <span><b>Fixed Scores</b><span className="block text-xs text-slate-500">Uses fixed 0–100 score cutoffs. A candy keeps its tier when filters change. Some tiers may be empty.</span></span>
-          </label>
+          {TIER_STYLES.map((option) => <label key={option} className="flex cursor-pointer items-start gap-2">
+            <input type="radio" name="tier-style" value={option} checked={style === option}
+              onChange={() => show({ style: option })} className="mt-1 accent-want" />
+            <span><b>{TIER_STYLE_LABEL[option]}{option === "standard" && " (Recommended)"}</b>
+              <span className="block text-xs text-slate-500">{TIER_STYLE_DESCRIPTION[option]}</span></span>
+          </label>)}
         </fieldset>
       </details>
-      {style === "fixed" && <p className="text-sm text-slate-600 dark:text-slate-300">
-        You&apos;re viewing Fixed Scores. For the shared default, <button type="button" onClick={() => show({ style: "standard" })} className="font-semibold underline">use Standard</button>.
+      {style !== "standard" && <p className="text-sm text-slate-600 dark:text-slate-300">
+        You're viewing {TIER_STYLE_LABEL[style]}. For the shared default, <button type="button" onClick={() => show({ style: "standard" })} className="font-semibold underline">use Standard</button>.
       </p>}
 
       {notice}
@@ -234,11 +237,12 @@ export function TierExplorer({
         {(data.voters > 0 || data.thresholded) && (
           <div className="ml-auto">
             <TierExport
-              title={[poolLabel, TIER_STYLE_LABEL[style], selected ? selected.name : "All Islands", sleepType && SLEEP_TYPE_LABEL[sleepType]]
+              title={[everyoneSnapshot && pool === "everyone" && `Dev Snapshot ${everyoneSnapshot.exportedAt.slice(0, 10)}`, poolLabel, TIER_STYLE_LABEL[style], selected ? selected.name : "All Islands", sleepType && SLEEP_TYPE_LABEL[sleepType]]
                 .filter(Boolean)
                 .join(" · ")}
               voters={data.voters || null}
               sections={[{ tiers, unranked }]}
+              style={style}
             />
           </div>
         )}
