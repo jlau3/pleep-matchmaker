@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { LINKING_COOKIE, NEXT_COOKIE, safeNextPath } from "@/lib/nextPath";
 import { createClient } from "@/lib/supabase/server";
+import { signInLanding } from "@/lib/signInLanding";
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
@@ -28,11 +29,12 @@ export async function GET(request: Request) {
   }
   if (code) {
     const supabase = await createClient();
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
+    const { data, error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
-      // Back to where they were headed before signing in, if anywhere.
+      // First-time players start setup; returning players resume their destination.
       const next = safeNextPath(store.get(NEXT_COOKIE)?.value);
-      const res = NextResponse.redirect(`${origin}${next ?? "/"}`);
+      const destination = await signInLanding(supabase, data.user?.id, next);
+      const res = NextResponse.redirect(`${origin}${destination}`);
       if (next) res.cookies.delete(NEXT_COOKIE);
       return res;
     }

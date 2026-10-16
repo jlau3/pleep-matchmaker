@@ -17,6 +17,7 @@ import { FIRST_FRIEND_COOKIE, HELP_COOKIE, HELP_VERSION, helpCookieValue, SETUP_
 import { LINKING_COOKIE, NEXT_COOKIE, safeNextPath } from "@/lib/nextPath";
 import { isChoice, LINES_BY_ID, MAX_TOP } from "@/lib/lines";
 import { createClient, requireUser } from "@/lib/supabase/server";
+import { signInLanding } from "@/lib/signInLanding";
 import { withExtras } from "@/lib/extras";
 
 const OAUTH_PROVIDERS = { discord: "Discord", google: "Google" } as const;
@@ -55,9 +56,9 @@ export async function signInWithOAuth(form?: FormData) {
  */
 export async function signInWithGoogleToken(credential: string, nonce: string, next: string | null): Promise<{ error?: string }> {
   const supabase = await createClient();
-  const { error } = await supabase.auth.signInWithIdToken({ provider: "google", token: credential, nonce });
+  const { data, error } = await supabase.auth.signInWithIdToken({ provider: "google", token: credential, nonce });
   if (error) return { error: error.message };
-  redirect(safeNextPath(next) ?? "/");
+  redirect(await signInLanding(supabase, data.user?.id, next));
 }
 
 type Provider = keyof typeof OAUTH_PROVIDERS;

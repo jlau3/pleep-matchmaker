@@ -2,9 +2,9 @@ import { redirect } from "next/navigation";
 import { HowItWorks } from "@/components/HowItWorks";
 import { SignInOptions } from "@/components/SignInOptions";
 import { safeNextPath } from "@/lib/nextPath";
-import { loadOwnChoices } from "@/lib/data";
 import { LINES, lineSpriteUrl } from "@/lib/lines";
 import { getAuth } from "@/lib/supabase/server";
+import { signInLanding } from "@/lib/signInLanding";
 
 const SHOWCASE = ["pikachu", "eevee", "dratini", "larvitar", "bulbasaur", "charmander", "squirtle"];
 
@@ -17,11 +17,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ e
   if (params.code) redirect(`/auth/callback?code=${encodeURIComponent(params.code)}`);
 
   const next = safeNextPath(params.next);
-  if (userId) {
-    if (next) redirect(next);
-    const choices = await loadOwnChoices(supabase, userId);
-    redirect(Object.keys(choices).length < LINES.length ? "/vote" : "/tiers");
-  }
+  if (userId) redirect(await signInLanding(supabase, userId, next));
 
   const signInError = params.error_description ?? params.error;
   const donateUrl = process.env.NEXT_PUBLIC_DONATION_URL;
