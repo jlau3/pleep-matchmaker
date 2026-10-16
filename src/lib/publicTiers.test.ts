@@ -13,7 +13,7 @@ describe("public tiers and exports", () => {
     expect(Array.from(view.tiers.values()).flat().every((row) => row.line.id === enough.id)).toBe(true);
     expect(view.unranked).toEqual([{ line: early }, { line: absent }]);
     const sections = tierSections([view]);
-    expect(sections.at(-1)?.heading).toBe("Not enough votes yet");
+    expect(sections.at(-1)?.heading).toBe("Not Enough Votes Yet");
     expect(sections.at(-1)?.rows[0].items).toHaveLength(2);
     expect(sections.at(-1)?.rows[0].items.every((item) => !("tops" in item))).toBe(true);
   });
