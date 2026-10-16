@@ -40,11 +40,11 @@ export function TierGuide({ userId }: { userId: string | null }) {
       <div className="space-y-3 text-sm">
         <p><b>Everyone</b> shows the candy active players want most. You can use it before any friends join.</p>
         <p><b>My Friends</b> uses your accepted friends&apos; votes. Your own votes shape their Tier Lists.</p>
-        <p><b>Scoring:</b> Want adds {POINTS.want} points, Neutral adds {POINTS.neutral}, and Don&apos;t Want subtracts {Math.abs(POINTS.dontWant)}. Standard, Fixed Scores, and Natural Breaks put negative totals in Avoid.</p>
+        <p><b>Scoring:</b> Want adds {POINTS.want} points, Neutral adds {POINTS.neutral}, and Don&apos;t Want subtracts {Math.abs(POINTS.dontWant)}. Standard and Fixed Scores put negative totals in Avoid.</p>
         <p><b>Standard (Recommended)</b> is the shared ranking: negative totals go to Avoid, then the rest split into percentile tiers. Choose it when comparing lists with other players. Friend comparisons elsewhere also use Standard.</p>
         <p><b>Fixed Scores</b> is an optional view: S starts at {FIXED_SCORE_CUTOFFS.S}/100, A at {FIXED_SCORE_CUTOFFS.A}, B at {FIXED_SCORE_CUTOFFS.B}, and C covers lower scores with nonnegative totals. All-Neutral scores {FIXED_SCORE_CUTOFFS.B}, so it lands in B. Negative totals still go to Avoid.</p>
         {TIER_STYLES.filter((style) => style !== "standard" && style !== "fixed").map((style) => <p key={style}><b>{TIER_STYLE_LABEL[style]}:</b> {TIER_STYLE_DESCRIPTION[style]}</p>)}
-        <p><b>Filters:</b> Pick an Island or Sleep Type to narrow the Pokémon shown. Standard, Percentile Only, and Natural Breaks can change tiers with the selection. Fixed Scores and Consensus keep the same rules. Tap a selected filter again to clear it.</p>
+        <p><b>Filters:</b> Pick an Island or Sleep Type to narrow the Pokémon shown. Standard and Percentile Only can change tiers with the selection. Fixed Scores and Consensus keep the same rules. Tap a selected filter again to clear it.</p>
         <p><b>Export Image:</b> Make a shareable image of the current list with your selected filters and ranking style. Preview it, then download, copy, or share using your browser&apos;s available options.</p>
         <p><b>Top 3</b> shows the candies players marked as their Top 3 above the ranked tiers. Candy stays unranked in Everyone until 10 active players have saved a vote for it. Neutral counts too.</p>
       </div>

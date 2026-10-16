@@ -9,7 +9,7 @@ const tierOf = (tiers: ReturnType<typeof buildTiers>, id: string): TierId | unde
 
 describe("Tier List ranking styles", () => {
   it("defaults to the shared Standard rules, including unknown URL values", () => {
-    for (const value of [undefined, null, "custom", "STANDARD", {}]) expect(parseTierStyle(value)).toBe("standard");
+    for (const value of [undefined, null, "custom", "STANDARD", "natural", {}]) expect(parseTierStyle(value)).toBe("standard");
     expect(parseTierStyle("fixed")).toBe("fixed");
     const votes = new Map([[lines[0].id, { wants: 2, dontWants: 0 }]]);
     expect(buildTiers(votes, 10, lines)).toEqual(buildTiers(votes, 10, lines, "standard"));
@@ -88,16 +88,7 @@ describe("comparison ranking styles", () => {
     expect(tierOf(consensus, lines[3].id)).toBe("S"); // mostly Wanted
     expect(tierOf(consensus, lines[4].id)).toBe("avoid"); // mostly Unwanted
   });
-  it("Natural Breaks finds clear gaps and keeps tied values together", () => {
-    const wants = [0, 1, 20, 21, 40, 41, 80, 81, 81];
-    const votes = new Map(wants.map((want, i) => [lines[i].id, { wants: want, dontWants: 0 }]));
-    const natural = buildTiers(votes, 100, lines.slice(0, wants.length), "natural");
-    expect(natural.get("S")!.map((r) => r.wants)).toEqual([81, 81, 80]);
-    expect(natural.get("A")!.map((r) => r.wants)).toEqual([41, 40]);
-    expect(natural.get("B")!.map((r) => r.wants)).toEqual([21, 20]);
-    expect(natural.get("C")!.map((r) => r.wants)).toEqual([1, 0]);
-  });
-  it.each(["standard", "fixed", "percentile", "consensus", "natural"] as const)("%s never loses or duplicates a ranked candy or exposes low-count totals", (style) => {
+  it.each(["standard", "fixed", "percentile", "consensus"] as const)("%s never loses or duplicates a ranked candy or exposes low-count totals", (style) => {
     const votes = new Map(lines.map((line, i) => [line.id, { wants: i, dontWants: 0, tops: i === 0 ? 0 : 1, seen: i === 0 ? 9 : 20 }]));
     const publicView = buildPublicTiers(votes, 20, lines, style);
     const ranked = [...publicView.tiers].filter(([id]) => id !== "top").flatMap(([, rows]) => rows.map((r) => r.line.id));
