@@ -1,5 +1,5 @@
 import { DEFAULT_AVATAR, gameAvatarUrl } from "@/lib/avatars";
-import { activityLabel, formatFriendCode } from "@/lib/format";
+import { activityLabel, formatFriendCode, staleFriend } from "@/lib/format";
 import type { PlayerContact } from "@/lib/types";
 import { BlockButton } from "./BlockButton";
 import { DiscordIcon, RedditIcon } from "./BrandIcons";
@@ -35,8 +35,10 @@ export function PlayerHeader({
   relation,
   placeholder,
   actions,
+  warnStale = false,
 }: {
   player: PlayerContact;
+  warnStale?: boolean;
   aside?: React.ReactNode;
   /** Shows the friend button (send request, accept, remove…) for where you stand with them. */
   relation?: Relation;
@@ -91,7 +93,7 @@ export function PlayerHeader({
         )}
       </div>
       <div className="flex flex-wrap items-center gap-x-3 text-[13px] text-slate-500">
-        <span>{activityLabel(player.last_seen_at)}</span>
+        <span>{warnStale && staleFriend(player.last_seen_at) ? "Last here over 2 months ago. Their votes may be stale." : activityLabel(player.last_seen_at)}</span>
         <BlockButton userId={player.user_id} name={name} />
       </div>
       {(relation !== undefined || actions) && (

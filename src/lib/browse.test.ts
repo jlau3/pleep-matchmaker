@@ -48,3 +48,12 @@ describe("sortPlayers", () => {
     expect(top3Score(undefined)).toBeNull();
   });
 });
+
+describe("Spotlight specialty filter", () => {
+  it("round-trips through shared URLs without losing the pool, sort or search", () => {
+    const opts = parseBrowse({ sort: "top3", show: "all", spotlight: "safe", page: "2" });
+    expect(opts.spotlight).toBe(true);
+    expect(browseQuery(opts, "Snack")).toBe("?q=Snack&sort=top3&show=all&spotlight=safe&page=2");
+    expect(parseBrowse({ spotlight: "other" }).spotlight).toBeUndefined();
+  });
+});

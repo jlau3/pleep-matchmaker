@@ -3,12 +3,13 @@
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { hideSuggestedPlayer, restoreSuggestedPlayer, loadTop3TiersFor } from "@/app/actions";
-import { BROWSE_PAGE_SIZE, BROWSE_SORT_HINTS, BROWSE_SORTS, type BrowseOptions, browseQuery, sortPlayers } from "@/lib/browse";
+import { BROWSE_PAGE_SIZE, BROWSE_SORT_HINTS, BROWSE_SORTS, type BrowseOptions, browseQuery, sortPlayers, spotlightOutsideF } from "@/lib/browse";
 import { LOW_FIT_PCT } from "@/lib/fit";
 import { LINES_BY_ID, linesFromIds } from "@/lib/lines";
 import { type Relations, relationOf } from "@/lib/relations";
 import type { MatchRow } from "@/lib/types";
-import { BrowseLayout } from "./BrowseLayout";
+import { ViewToggle } from "./ViewToggle";
+import { SortMenu } from "./SortMenu";
 import { FitLegend } from "./FitLegend";
 import { FriendAction } from "./FriendAction";
 import { LineChips } from "./LineChips";
@@ -20,7 +21,7 @@ type Tiers = Record<string, Record<string, string>>;
 
 /**
  * Find New's suggested players. Every player comes down once (browse_all), so
- * Good matches / All players, the sorts and the pages all switch here, with no
+ * Recommended / All players, the sorts and the pages all switch here, with no
  * trip to the server; the URL follows along so a reload or a shared link
  * shows the same view. Your Top 3 Spotlight's tiers arrive for the first page with the
  * page, and for everyone else in the background (the Top 3 Spotlight sort waits for
@@ -56,10 +57,12 @@ export function FindNewBoard({
   picked: number;
   friendsVoted: boolean;
 }) {
-  const [opts, setOpts] = useState<BrowseOptions>(initial);
+  const [opts, setOpts] = useState<BrowseOptions>({ ...initial, spotlight: Boolean(initial.spotlight && tops.length) });
   const [tiers, setTiers] = useState<Tiers>(initialTiers);
   // Players whose tiers are known (no entry for one of them = all dashes).
   const [known, setKnown] = useState<ReadonlySet<string> | "all">(allTiersLoaded ? "all" : new Set(Object.keys(initialTiers)));
+  const [view, setView] = useState<"list" | "grid">("list");
+  const [tierRetry, setTierRetry] = useState(0);
   const [tierError, setTierError] = useState(false);
   const [hidden, setHidden] = useState(() => new Set(initialHiddenIds));
   const [pending, setPending] = useState<Set<string>>(new Set());
@@ -67,10 +70,19 @@ export function FindNewBoard({
   const [lastHidden, setLastHidden] = useState<MatchRow | null>(null);
   const top = useRef<HTMLElement>(null);
 
+  useEffect(() => {
+    try { if (localStorage.getItem("pleep.findNewView") === "grid") setView("grid"); } catch {}
+  }, []);
+  function changeView(next: "list" | "grid") {
+    setView(next);
+    try { localStorage.setItem("pleep.findNewView", next); } catch {}
+  }
+
   // Everyone's tiers, once, in the background.
   useEffect(() => {
     if (allTiersLoaded || tops.length === 0 || rows.length === 0) return;
     let live = true;
+    setTierError(false);
     loadTop3TiersFor(rows.map((r) => r.user_id))
       .then((all) => {
         if (!live) return;
@@ -81,16 +93,17 @@ export function FindNewBoard({
     return () => {
       live = false;
     };
-  }, [allTiersLoaded, tops.length, rows]);
+  }, [allTiersLoaded, tops.length, rows, tierRetry]);
 
   const tiersReady = known === "all";
   // Sorting by Top 3 Spotlight before the tiers are in: keep Best match order until they are.
   const effectiveSort = opts.sort === "top3" && !tiersReady ? "fit" : opts.sort;
   const listed = useMemo(() => {
-    const pool = rows.filter((r) => !hidden.has(r.user_id) && (opts.everyone || r.good));
+    const pool = rows.filter((r) => !hidden.has(r.user_id) && (opts.everyone || r.good) && (!opts.spotlight || (tiersReady && spotlightOutsideF(tops, tiers[r.user_id]))));
     return sortPlayers(pool, effectiveSort, tiers);
-  }, [rows, hidden, opts.everyone, effectiveSort, tiers]);
+  }, [rows, hidden, opts.everyone, opts.spotlight, effectiveSort, tiers, tiersReady, tops]);
 
+  const filterWaiting = Boolean(opts.spotlight && !tiersReady);
   const total = listed.length;
   const pages = Math.max(1, Math.ceil(total / BROWSE_PAGE_SIZE));
   const page = Math.min(opts.page, pages);
@@ -104,11 +117,11 @@ export function FindNewBoard({
   }
 
   useEffect(() => {
-    if (opts.page <= pages) return;
+    if (filterWaiting || opts.page <= pages) return;
     const merged = { ...opts, page: pages };
     setOpts(merged);
     window.history.replaceState(window.history.state, "", `/matches${browseQuery(merged, q)}`);
-  }, [opts, pages, q]);
+  }, [opts, pages, q, filterWaiting]);
 
   async function setPlayerHidden(id: string, hide: boolean) {
     if (pending.has(id)) return;
@@ -144,33 +157,40 @@ export function FindNewBoard({
     <section ref={top} className="scroll-mt-20 space-y-3">
       <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2">
         <h2 className="text-lg font-semibold">
-          Suggested Players {total > 0 && <span className="text-sm font-normal text-slate-500">{total}</span>}
+          Suggested Players <span className="text-sm font-normal text-slate-500">{filterWaiting ? "…" : total}</span>
         </h2>
-        <div className="flex flex-wrap gap-2 text-sm">
-          <Pill active={!opts.everyone} onClick={() => change({ everyone: false })}>
-            Good matches
-          </Pill>
-          <Pill active={opts.everyone} onClick={() => change({ everyone: true })}>
-            All players
-          </Pill>
-        </div>
+        <FitLegend compact friendsVoted={friendsVoted} youVoted={picked > 0} autoOpen={autoOpenGuide} />
       </div>
-      <div className="space-y-1">
-        <div className="flex flex-wrap items-center gap-2 text-sm">
-          <span className="text-slate-500">Sort</span>
-          {BROWSE_SORTS.map(([id, label]) => (
-            <Pill key={id} active={opts.sort === id} hint={BROWSE_SORT_HINTS[id]} onClick={() => change({ sort: id })}>
-              {label}
-            </Pill>
-          ))}
+      <div className="space-y-2">
+        <div className="inline-flex overflow-hidden rounded-xl border border-slate-300 text-sm dark:border-slate-700" role="group" aria-label="Suggested player pool">
+          <Pill active={!opts.everyone} onClick={() => change({ everyone: false })}>Recommended</Pill>
+          <Pill active={opts.everyone} onClick={() => change({ everyone: true })}>All players</Pill>
         </div>
-        {opts.sort === "top3" && !tiersReady && tops.length > 0 && (
-          <p className="text-xs font-semibold text-slate-500" role="status">
-            {tierError ? "Couldn't load Top 3 Spotlight tiers. Try again." : "Ranking by your Top 3 Spotlight…"}
-          </p>
-        )}
-        <FitLegend friendsVoted={friendsVoted} youVoted={picked > 0} autoOpen={autoOpenGuide} />
+        <p className="text-xs text-slate-500">
+          {opts.everyone ? "All eligible players active here in the last 2 months, including those without match scores yet."
+            : `Recommended: at least ${LOW_FIT_PCT}% both ways, with at least 3 of your Want candies among what they are likely to send. Scores can include global votes.`}
+        </p>
       </div>
+      <div className="flex items-center justify-between gap-3">
+        <SortMenu value={opts.sort} options={BROWSE_SORTS} hints={BROWSE_SORT_HINTS} onChange={(sort) => change({ sort })} />
+        <ViewToggle view={view} onChange={changeView} />
+      </div>
+      <div className="space-y-1 text-sm">
+        <label className="flex w-fit cursor-pointer items-center gap-2">
+          <input type="checkbox" checked={Boolean(opts.spotlight)} disabled={tops.length === 0}
+            onChange={(e) => change({ spotlight: e.target.checked })} className="h-4 w-4 accent-want" />
+          Keep my Spotlight out of F
+        </label>
+        <p className="text-xs text-slate-500">{tops.length === 0
+          ? <><Link href="/vote" className="underline">Set your Top 3 Spotlight</Link> to use this filter.</>
+          : "Every spotlighted candy must have a known S–C tier on their friends' Tier List. Unknown tiers do not qualify."}</p>
+      </div>
+      {(opts.sort === "top3" || opts.spotlight) && !tiersReady && tops.length > 0 && (
+        <p className="text-xs font-semibold text-slate-500" role={tierError ? "alert" : "status"}>
+          {tierError ? <>Couldn&apos;t load Spotlight tiers. <button type="button" onClick={() => setTierRetry((n) => n + 1)} className="underline">Try again</button>.</>
+            : "Loading Spotlight tiers…"}
+        </p>
+      )}
 
       {hideError && <p role="alert" className="text-sm text-red-600 dark:text-red-300">{hideError}</p>}
       {lastHidden && hidden.has(lastHidden.user_id) && (
@@ -200,7 +220,9 @@ export function FindNewBoard({
         </details>
       )}
 
-      {picked === 0 && relations.friendIds.length === 0 && !opts.everyone ? (
+      {filterWaiting ? (
+        <p className="py-8 text-center text-slate-500">{tierError ? "Spotlight results are unavailable until tiers load." : "Checking players against your Spotlight…"}</p>
+      ) : picked === 0 && relations.friendIds.length === 0 && !opts.everyone ? (
         <p className="py-8 text-center text-slate-500">
           Add your friends (or <Link href="/vote" className="underline">vote</Link> on some candies) so we know what your
           group wants, or{" "}
@@ -211,11 +233,13 @@ export function FindNewBoard({
         </p>
       ) : shown.length === 0 ? (
         <p className="py-8 text-center text-slate-500">
-          {opts.everyone ? (
+          {opts.spotlight ? (
+            <>No players meet these filters. <button type="button" className="underline" onClick={() => change({ spotlight: false })}>Clear the Spotlight filter</button> to see more players.</>
+          ) : opts.everyone ? (
             "No one to suggest right now. Check back as more players join."
           ) : (
             <>
-              No good matches yet (at least {LOW_FIT_PCT}% both ways and 3 of your wants on their Tier List).{" "}
+              No recommended players yet (at least {LOW_FIT_PCT}% both ways and 3 of your wants on their Tier List).{" "}
               <button type="button" onClick={() => change({ everyone: true })} className="underline">
                 See everyone
               </button>{" "}
@@ -224,8 +248,8 @@ export function FindNewBoard({
           )}
         </p>
       ) : (
-        <BrowseLayout
-          list={
+        <>
+          {view === "list" ? (
             <ul className="space-y-4">
               {shown.map((match) => {
                 const t = tiersOf(match.user_id);
@@ -250,8 +274,7 @@ export function FindNewBoard({
                 );
               })}
             </ul>
-          }
-          grid={
+          ) : (
             <ul className="grid grid-cols-2 items-start gap-3 sm:grid-cols-3 lg:grid-cols-4">
               {shown.map((match) => (
                 <MatchTile
@@ -263,8 +286,8 @@ export function FindNewBoard({
                 />
               ))}
             </ul>
-          }
-        />
+          )}
+        </>
       )}
 
       {pages > 1 && (
@@ -300,10 +323,10 @@ function Pill({ active, onClick, hint, children }: { active: boolean; onClick: (
       onClick={onClick}
       title={hint}
       aria-pressed={active}
-      className={`rounded-full border px-3 py-1 ${
+      className={`px-3 py-2 font-semibold ${
         active
-          ? "border-transparent bg-night text-white dark:bg-sun dark:text-[#5b3e00]"
-          : "border-slate-300 hover:bg-white/60 dark:border-slate-700 dark:hover:bg-night"
+          ? "bg-night text-white dark:bg-sun dark:text-[#5b3e00]"
+          : "hover:bg-white/60 dark:hover:bg-night"
       }`}
     >
       {children}

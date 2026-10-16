@@ -5,7 +5,7 @@ import { useCallback, useEffect, useId, useRef } from "react";
 import { markMatchGuideSeen } from "@/app/actions";
 
 /** Shared guide: opens once per account, then stays available from either friend tab. */
-export function FitLegend({ friendsVoted = true, youVoted = true, autoOpen = false }: { friendsVoted?: boolean; youVoted?: boolean; autoOpen?: boolean }) {
+export function FitLegend({ friendsVoted = true, youVoted = true, autoOpen = false, compact = false }: { friendsVoted?: boolean; youVoted?: boolean; autoOpen?: boolean; compact?: boolean }) {
   const dialog = useRef<HTMLDialogElement>(null);
   const opened = useRef(false);
   const titleId = useId();
@@ -27,7 +27,7 @@ export function FitLegend({ friendsVoted = true, youVoted = true, autoOpen = fal
   const close = () => dialog.current?.close();
   return (
     <>
-      <button type="button" onClick={open} className="text-sm font-semibold underline">How match scores work</button>
+      <button type="button" onClick={open} aria-label="How match scores work" title="How match scores work" className={compact ? "flex h-8 w-8 items-center justify-center rounded-full border border-slate-300 text-sm font-bold dark:border-slate-700" : "text-sm font-semibold underline"}>{compact ? "?" : "How match scores work"}</button>
       <dialog ref={dialog} aria-labelledby={titleId}
         onClick={(e) => { if (e.target === e.currentTarget) close(); }}
         className="m-auto max-h-[88dvh] w-[calc(100%-2rem)] max-w-xl overflow-y-auto rounded-3xl bg-cream p-6 text-ink shadow-2xl backdrop:bg-black/60 dark:bg-night dark:text-[#eef1ff]">

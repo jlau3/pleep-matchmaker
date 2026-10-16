@@ -5,6 +5,7 @@ import { PlayerHeader, playerName } from "@/components/PlayerHeader";
 import { PlayerLists } from "@/components/PlayerLists";
 import { FriendPostCard } from "@/components/FriendPostCard";
 import { friendPostProps } from "@/lib/friendPost";
+import { staleFriend } from "@/lib/format";
 import { FitPair } from "@/components/FitPair";
 import { PlayerSearch, searchQuery } from "@/components/PlayerSearch";
 import { FRIENDS_TABS, SubTabs } from "@/components/SubTabs";
@@ -174,6 +175,7 @@ export default async function FriendsPage({ searchParams }: { searchParams: Prom
                   <>
                     <PlayerHeader
                       player={friend}
+                      warnStale
                       relation="friend"
                       aside={
                         <FitWithTop3 they={friend.match_pct} you={friend.you_fit_pct} context={friend} tops={tops} tiers={top3[friend.user_id]} />
@@ -186,6 +188,7 @@ export default async function FriendsPage({ searchParams }: { searchParams: Prom
                     <span>
                       <strong>{playerName(friend)}</strong>
                       <span className="ml-2 text-slate-500">has made their list private</span>
+                      {staleFriend(friend.last_seen_at) && <span className="mt-1 block text-xs text-slate-500">Last here over 2 months ago. Their votes may be stale.</span>}
                     </span>
                     <FriendAction userId={friend.user_id} name={playerName(friend)} relation="friend" />
                   </div>

@@ -19,16 +19,18 @@ export const BROWSE_PAGE_SIZE = 20;
 
 export interface BrowseOptions {
   sort: BrowseSort;
-  /** false: good matches only; true: everyone you could add. */
+  /** false: recommended players only; true: everyone you could add. */
   everyone: boolean;
+  /** Every spotlighted candy has a known S–C tier on their friend list. */
+  spotlight?: boolean;
   /** 1-based. */
   page: number;
 }
 
-export function parseBrowse(params: { sort?: string; show?: string; page?: string }): BrowseOptions {
+export function parseBrowse(params: { sort?: string; show?: string; page?: string; spotlight?: string }): BrowseOptions {
   const sort = BROWSE_SORTS.some(([id]) => id === params.sort) ? (params.sort as BrowseSort) : "fit";
   const page = Math.max(1, Math.min(1000, Number.parseInt(params.page ?? "1", 10) || 1));
-  return { sort, everyone: params.show === "all", page };
+  return { sort, everyone: params.show === "all", page, ...(params.spotlight === "safe" ? { spotlight: true } : {}) };
 }
 
 /** Query string for these options, dropping defaults; `q` (the search box) is kept. */
@@ -37,6 +39,7 @@ export function browseQuery(opts: BrowseOptions, q?: string): string {
   if (q) p.set("q", q);
   if (opts.sort !== "fit") p.set("sort", opts.sort);
   if (opts.everyone) p.set("show", "all");
+  if (opts.spotlight) p.set("spotlight", "safe");
   if (opts.page > 1) p.set("page", String(opts.page));
   const s = p.toString();
   return s ? `?${s}` : "";
@@ -95,4 +98,9 @@ export function sortPlayers<T extends SortablePlayer>(
       Date.parse(b.last_seen_at) - Date.parse(a.last_seen_at) ||
       (a.user_id < b.user_id ? -1 : a.user_id > b.user_id ? 1 : 0),
   );
+}
+
+/** An unknown/missing tier never passes the specialty filter. */
+export function spotlightOutsideF(tops: string[], tiers: Record<string, string> | undefined): boolean {
+  return tops.length > 0 && tops.every((id) => ["S", "A", "B", "C"].includes(tiers?.[id] ?? ""));
 }

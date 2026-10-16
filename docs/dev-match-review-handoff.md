@@ -43,3 +43,11 @@ These are local SQL measurements, not a hosted latency promise. Other validation
 ## Production-agent checks after user approval
 
 Review the migration against production's actual schema and missing prerequisites. Verify authenticated My Friends, incoming requests, search and both suggestion layouts after the database/app rollout. Check the two source labels with zero and some voting friends, plus a private-vote player. Verify a shared Percentile URL against a browser that last selected Fixed Scores. Recheck the full friend-list query on the hosted database if its plan differs materially from the local fixture.
+
+## Follow-up: friend toolbar and Spotlight filter
+
+- Suggested Players keeps its filtered count and a compact help button in the heading. Recommended/All players remain pool controls. Recommended now visibly explains the existing rule: at least 25% both directions and at least three Want candies in what the candidate is likely to send; scores may include global votes.
+- Both friend pages use a shared sort dropdown with option explanations. Recently Active remains a sort. Find New Friends puts the shared List/Grid switch on the right of the sort row; My Votes uses the same switch styling. Existing per-page layout preferences are preserved.
+- The optional “Keep my Spotlight out of F” filter requires a known S/A/B/C tier for every selected Spotlight candy. F/Avoid and missing tiers are excluded; no selected Spotlight disables the filter and links to My Votes. The filter is applied before counts and pagination, survives URL reloads (`spotlight=safe`), and handles loading failures with retry instead of treating unknown data as qualifying.
+- My Friends retains inactive friends and their votes. After two calendar months, cards say “Last here over 2 months ago. Their votes may be stale.” No new removal prompt or automatic cleanup is added. The existing matchmaking inactivity cutoff is unchanged.
+- This follow-up needs no new database migration. Validation includes unit tests for filter eligibility, URL state and calendar-month cutoff, plus mobile/desktop component checks for toolbar alignment, pool count, filtering, layout, error/retry and the stale notice.

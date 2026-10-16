@@ -15,7 +15,7 @@ import { requireUser } from "@/lib/supabase/server";
 import type { MatchRow } from "@/lib/types";
 import { withExtras } from "@/lib/extras";
 
-type Params = { q?: string; sort?: string; show?: string; page?: string };
+type Params = { q?: string; sort?: string; show?: string; page?: string; spotlight?: string };
 
 export default async function MatchesPage({ searchParams }: { searchParams: Promise<Params> }) {
   const { supabase, user } = await requireUser();
@@ -38,9 +38,13 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
   let tiers: Top3Tiers = {};
   let allTiers = tops.length === 0;
   if (tops.length > 0 && rows.length > 0) {
-    if (opts.sort === "top3") {
-      tiers = await loadTop3Tiers(supabase, rows.map((r) => r.user_id));
-      allTiers = true;
+    if (opts.sort === "top3" || opts.spotlight) {
+      try {
+        tiers = await loadTop3Tiers(supabase, rows.map((r) => r.user_id), true);
+        allTiers = true;
+      } catch {
+        // The client retries and explains a failed filter load instead of treating unknown tiers as matches.
+      }
     } else {
       const pool = rows.filter((r) => !hidden.has(r.user_id) && (opts.everyone || r.good));
       const first = sortPlayers(pool, opts.sort).slice((opts.page - 1) * BROWSE_PAGE_SIZE, opts.page * BROWSE_PAGE_SIZE);
@@ -109,7 +113,7 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
 /**
  * Everyone Find New could suggest, with their numbers (browse_all, up to 1000,
  * Best match first). Before 20261020000500_browse_all.sql: the first 50 of
- * Everyone and of Good matches from browse_players instead.
+ * Everyone and of Recommended from browse_players instead.
  */
 async function loadCandidates(supabase: SupabaseClient): Promise<MatchRow[]> {
   const all = await supabase.rpc("browse_all");

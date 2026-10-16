@@ -1,5 +1,7 @@
 "use client";
 
+import { ViewToggle } from "./ViewToggle";
+
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { setChoice, setTop, swapTop } from "@/app/actions";
@@ -339,19 +341,7 @@ export function VoteBoard({
             placeholder="Search Pokémon"
             className="field min-w-0 flex-1"
           />
-          <div className="inline-flex shrink-0 rounded-full bg-white p-1 shadow-sm dark:bg-night" role="group" aria-label="Layout">
-            {(["list", "grid"] as const).map((v) => (
-              <button
-                key={v}
-                type="button"
-                aria-pressed={view === v}
-                onClick={() => changeView(v)}
-                className={`rounded-full px-3 py-1 text-sm font-semibold ${view === v ? "pill-active" : "text-slate-600 dark:text-slate-300"}`}
-              >
-                {v === "list" ? "List" : "Grid"}
-              </button>
-            ))}
-          </div>
+          <ViewToggle view={view} onChange={changeView} />
         </div>
         <div className="flex flex-wrap gap-2">
           {FILTERS.map((f) => (
