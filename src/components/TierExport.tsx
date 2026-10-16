@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { NEW_LINE_DAYS } from "@/lib/lines";
 import { type RankedLine, rankedSpriteUrl, type TierId, type TierStyle, tierDefinitions, CONSENSUS_COLORS, type UnrankedLine } from "@/lib/tiers";
 
 export interface ExportSection {
@@ -94,13 +95,16 @@ async function renderPng(heading: string, subtitle: string, sections: ImageSecti
   const HEADER = 41 + Math.max(1, subtitleLines.length) * 17;
   const SECTION_HEAD = 30;
   const FOOTER = 54;
+  // A key for the blue border, only when the image has a new release in it.
+  const hasNew = rows.flat().some((row) => row.items.some((item) => item.isNew));
+  const LEGEND = hasNew ? 26 : 0;
   let height = PAD + HEADER;
   sections.forEach((section, i) => {
     if (section.heading) height += SECTION_HEAD;
     for (const row of rows[i]) height += rowHeight(row.items.length) + 4;
     height += 6;
   });
-  height += FOOTER;
+  height += LEGEND + FOOTER;
 
   const sprites = new Map<string, HTMLImageElement | null>();
   const urls = new Set(rows.flat().flatMap((row) => row.items.map((item) => item.sprite)));
@@ -170,6 +174,18 @@ async function renderPng(heading: string, subtitle: string, sections: ImageSecti
     }
     y += 6;
   });
+
+  if (hasNew) {
+    ctx.strokeStyle = NEW_BORDER;
+    ctx.lineWidth = 2.5;
+    roundRect(ctx, PAD + 2, y + 4, 16, 16, 4);
+    ctx.stroke();
+    ctx.fillStyle = "#2d3354";
+    ctx.font = `600 12px ${font}`;
+    ctx.textBaseline = "middle";
+    ctx.fillText(`Blue border: new Pokémon, released in the last ${NEW_LINE_DAYS} days`, PAD + 26, y + 12.5);
+    ctx.textBaseline = "alphabetic";
+  }
 
   ctx.fillStyle = "#2d3354";
   ctx.font = `800 16px ${font}`;
