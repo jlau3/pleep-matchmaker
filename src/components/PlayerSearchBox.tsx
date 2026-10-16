@@ -58,6 +58,8 @@ export function PlayerSearchBox({
     <div className="space-y-3">
       <form className="flex gap-2" onSubmit={search}>
         <input
+          id="player-search"
+          aria-label="Search players by IGN or friend code"
           name="q"
           value={input}
           onChange={(e) => setInput(e.target.value)}

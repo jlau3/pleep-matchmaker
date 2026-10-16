@@ -49,7 +49,7 @@ type Visibility = "everyone" | "known" | "friends";
 /** "Who can find you": each option sets search (allow_lookup) and Find New (open_to_friends) together. */
 const VISIBILITY: { value: Visibility; title: string; text: string }[] = [
   { value: "everyone", title: "Everyone", text: "Suggested to good matches in Find New, and findable by your exact IGN or friend code." },
-  { value: "known", title: "People who know me", text: "Only found by searching your exact IGN or friend code." },
+  { value: "known", title: "People who know me", text: "Hidden from Find New. People can still find you by your exact IGN or friend code." },
   {
     value: "friends",
     title: "Only my friends",

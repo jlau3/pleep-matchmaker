@@ -162,6 +162,7 @@ export default async function FriendsPage({ searchParams }: { searchParams: Prom
         {friends.length > 0 && (
           <FriendsBoard
             initialSort={sort}
+            autoOpenGuide={profile.match_guide_seen === false}
             // "For them" scores against your friends' votes (group_demand: visible friends' wants).
             friendsVoted={friends.some((f) => f.visible && f.wants.length > 0)}
             items={friends.map(

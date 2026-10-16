@@ -6,7 +6,7 @@ vi.mock("@/lib/supabase/server", () => ({
   createClient: vi.fn(),
   requireUser: async () => ({ user: { id: "voter" }, supabase: { from: () => ({ update: db.update }) } }),
 }));
-import { markVoteGuideSeen } from "./actions";
+import { markMatchGuideSeen, markVoteGuideSeen } from "./actions";
 beforeEach(() => {
   vi.clearAllMocks();db.error = null;
   db.eq.mockImplementation(async () => ({ error: db.error }));db.update.mockReturnValue({ eq: db.eq });
@@ -23,4 +23,11 @@ describe("voting guide first visit", () => {
     await markVoteGuideSeen();
     expect(db.revalidate).not.toHaveBeenCalled();
   });
+});
+
+it("remembers the shared match guide across both friend tabs", async () => {
+  await markMatchGuideSeen();
+  expect(db.update).toHaveBeenCalledExactlyOnceWith({ match_guide_seen: true });
+  expect(db.eq).toHaveBeenCalledExactlyOnceWith("id", "voter");
+  expect(db.revalidate.mock.calls).toEqual([["/friends"], ["/matches"]]);
 });

@@ -500,3 +500,30 @@ export async function markMetaSeen(postId: string): Promise<void> {
   const { error } = await supabase.from("profiles").update({ meta_seen_id: postId }).eq("id", user.id);
   if (!error) (await cookies()).set(META_COOKIE, metaCookieValue(postId, user.id), { path: "/", maxAge: 31536000, sameSite: "lax" });
 }
+
+/** Personal Find New preferences, independent of blocks and friend requests. */
+export async function hideSuggestedPlayer(targetId: string): Promise<{ error?: string }> {
+  const { supabase, user } = await requireUser();
+  if (targetId === user.id) return { error: "You can't hide yourself." };
+  const { error } = await supabase.from("hidden_suggestions").insert({ user_id: user.id, hidden_user_id: targetId });
+  if (error && error.code !== "23505") return { error: "Couldn't hide this player. Please try again." };
+  revalidatePath("/matches");
+  return {};
+}
+
+export async function restoreSuggestedPlayer(targetId: string): Promise<{ error?: string }> {
+  const { supabase, user } = await requireUser();
+  const { error } = await supabase.from("hidden_suggestions").delete().eq("user_id", user.id).eq("hidden_user_id", targetId);
+  if (error) return { error: "Couldn't restore this player. Please try again." };
+  revalidatePath("/matches");
+  return {};
+}
+
+export async function markMatchGuideSeen(): Promise<void> {
+  const { supabase, user } = await requireUser();
+  const { error } = await supabase.from("profiles").update({ match_guide_seen: true }).eq("id", user.id);
+  if (!error) {
+    revalidatePath("/friends");
+    revalidatePath("/matches");
+  }
+}

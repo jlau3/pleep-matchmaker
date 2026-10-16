@@ -148,7 +148,17 @@ export function SetupChecklistView({ userId, done, steps }: { userId: string; do
           <strong>Step {index + 1} of {visibleSteps.length}</strong> · {step.next}
         </p>
         <div className="mt-2 flex flex-wrap items-center gap-3">
-          {!here ? (
+          {step.id === "friends" ? (
+            <button type="button" className="btn-primary px-3 py-1 text-sm" onClick={() => {
+              const search = document.getElementById("player-search");
+              if (search) {
+                search.focus({ preventScroll: true });
+                search.scrollIntoView({ block: "nearest" });
+              } else router.push(step.href);
+            }}>
+              {step.cta} →
+            </button>
+          ) : !here ? (
             <Link href={step.href} className="btn-primary px-3 py-1 text-sm">
               {step.cta} →
             </Link>

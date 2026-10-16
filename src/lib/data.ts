@@ -78,8 +78,10 @@ export async function loadOwnProfile(supabase: SupabaseClient, userId: string): 
   const base = "id, discord_username, discord_display_name, avatar_url, ign, friend_code, open_to_friends, allow_lookup, show_discord, last_seen_at, prefs_updated_at";
   const extras = `${base}, votes_private, game_avatar, reddit_username`;
   // show_reddit: 20261021000200_reddit_friends_only.sql.
-  const newest = await supabase.from("profiles").select(`${extras}, show_reddit`).eq("id", userId).single();
+  const newest = await supabase.from("profiles").select(`${extras}, show_reddit, match_guide_seen`).eq("id", userId).single();
   if (!newest.error) return newest.data as OwnProfile;
+  const previous = await supabase.from("profiles").select(`${extras}, show_reddit`).eq("id", userId).single();
+  if (!previous.error) return previous.data as OwnProfile;
   const full = await supabase.from("profiles").select(extras).eq("id", userId).single();
   if (!full.error) return full.data as OwnProfile;
   // Before the profile_extras migration runs those columns don't exist yet.

@@ -9,7 +9,7 @@ const color = (pct: number | null | undefined) =>
  * want, so the candy they send suits you. "For them" (smaller, below): how
  * well their wants match your friends', so the candy you send suits them.
  * Either turns amber below LOW_FIT_PCT, so a lopsided friendship stands out.
- * A missing one shows a dash (not enough votes yet; see FitLegend).
+ * A missing one shows a dash with a reason; FitLegend provides on-demand help.
  */
 export function FitPair({
   they,
@@ -26,20 +26,20 @@ export function FitPair({
   if (compact)
     return (
       <span className="whitespace-nowrap text-xs font-semibold text-slate-500">
-        <b className={`text-sm ${color(you)}`} title="For you">{pct(you)}</b> you ·{" "}
-        <b className={`text-sm ${color(they)}`} title="For them">{pct(they)}</b> them
+        <b className={`text-sm ${color(you)}`} title={you == null ? "For you: not enough votes yet" : "For you"} aria-label={you == null ? "For you: not enough votes yet" : undefined}>{pct(you)}</b> you ·{" "}
+        <b className={`text-sm ${color(they)}`} title={they == null ? "For them: not enough votes yet" : "For them"} aria-label={they == null ? "For them: not enough votes yet" : undefined}>{pct(they)}</b> them
       </span>
     );
   return (
     <div className="shrink-0 whitespace-nowrap text-right leading-none">
-      <div title="For you: how much of what you want their friends want, so the candy they send suits you">
-        <span className={`text-2xl font-extrabold ${color(you)}`}>{you == null ? "–" : `${you}%`}</span>{" "}
+      <div title={you == null ? "For you: not enough votes yet" : "For you: how much of what you want their friends want, so the candy they send suits you"}>
+        <span className={`text-2xl font-extrabold ${color(you)}`} aria-label={you == null ? "For you: not enough votes yet" : undefined}>{you == null ? "–" : `${you}%`}</span>{" "}
         <span className={`text-sm font-semibold ${low(you) ? "text-amber-700 dark:text-amber-300" : "text-slate-500"}`}>
           for you
         </span>
       </div>
-      <div className="mt-1" title="For them: how well their wants match what your friends want, so the candy you send suits them">
-        <span className={`text-base font-bold ${color(they)}`}>{they == null ? "–" : `${they}%`}</span>{" "}
+      <div className="mt-1" title={they == null ? "For them: not enough votes yet" : "For them: how well their wants match what your friends want, so the candy you send suits them"}>
+        <span className={`text-base font-bold ${color(they)}`} aria-label={they == null ? "For them: not enough votes yet" : undefined}>{they == null ? "–" : `${they}%`}</span>{" "}
         <span className={`text-xs font-semibold ${low(they) ? "text-amber-700 dark:text-amber-300" : "text-slate-500"}`}>
           for them
         </span>

@@ -17,7 +17,9 @@ export function MatchTile({
   match,
   relation,
   top3,
+  hideControl,
 }: {
+  hideControl?: React.ReactNode;
   match: MatchRow;
   relation: Relation;
   /** Sorting by your Top 3: your starred lines and their tiers on this player's list (instead of their own Top 3). */
@@ -54,6 +56,7 @@ export function MatchTile({
       <div className="flex w-full justify-center [&>span]:items-center [&>span>span]:justify-center">
         <FriendAction userId={match.user_id} name={name} relation={relation} showsCode={Boolean(match.friend_code)} />
       </div>
+      {hideControl}
     </li>
   );
 }

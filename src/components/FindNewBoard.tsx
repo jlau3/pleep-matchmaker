@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { loadTop3TiersFor } from "@/app/actions";
+import { hideSuggestedPlayer, restoreSuggestedPlayer, loadTop3TiersFor } from "@/app/actions";
 import { BROWSE_PAGE_SIZE, BROWSE_SORT_HINTS, BROWSE_SORTS, type BrowseOptions, browseQuery, sortPlayers } from "@/lib/browse";
 import { LOW_FIT_PCT } from "@/lib/fit";
 import { LINES_BY_ID, linesFromIds } from "@/lib/lines";
@@ -28,6 +28,8 @@ type Tiers = Record<string, Record<string, string>>;
  */
 export function FindNewBoard({
   rows,
+  initialHiddenIds = [],
+  autoOpenGuide = false,
   relations,
   tops,
   initial,
@@ -39,6 +41,8 @@ export function FindNewBoard({
 }: {
   /** browse_all, Best match order. */
   rows: MatchRow[];
+  initialHiddenIds?: string[];
+  autoOpenGuide?: boolean;
   relations: Relations;
   /** Your starred lines. */
   tops: string[];
@@ -57,6 +61,10 @@ export function FindNewBoard({
   // Players whose tiers are known (no entry for one of them = all dashes).
   const [known, setKnown] = useState<ReadonlySet<string> | "all">(allTiersLoaded ? "all" : new Set(Object.keys(initialTiers)));
   const [tierError, setTierError] = useState(false);
+  const [hidden, setHidden] = useState(() => new Set(initialHiddenIds));
+  const [pending, setPending] = useState<Set<string>>(new Set());
+  const [hideError, setHideError] = useState("");
+  const [lastHidden, setLastHidden] = useState<MatchRow | null>(null);
   const top = useRef<HTMLElement>(null);
 
   // Everyone's tiers, once, in the background.
@@ -79,9 +87,9 @@ export function FindNewBoard({
   // Sorting by Top 3 before the tiers are in: keep Best match order until they are.
   const effectiveSort = opts.sort === "top3" && !tiersReady ? "fit" : opts.sort;
   const listed = useMemo(() => {
-    const pool = opts.everyone ? rows : rows.filter((r) => r.good);
+    const pool = rows.filter((r) => !hidden.has(r.user_id) && (opts.everyone || r.good));
     return sortPlayers(pool, effectiveSort, tiers);
-  }, [rows, opts.everyone, effectiveSort, tiers]);
+  }, [rows, hidden, opts.everyone, effectiveSort, tiers]);
 
   const total = listed.length;
   const pages = Math.max(1, Math.ceil(total / BROWSE_PAGE_SIZE));
@@ -94,6 +102,41 @@ export function FindNewBoard({
     window.history.replaceState(window.history.state, "", `/matches${browseQuery(merged, q)}`);
     if (scroll) top.current?.scrollIntoView({ block: "start" });
   }
+
+  useEffect(() => {
+    if (opts.page <= pages) return;
+    const merged = { ...opts, page: pages };
+    setOpts(merged);
+    window.history.replaceState(window.history.state, "", `/matches${browseQuery(merged, q)}`);
+  }, [opts, pages, q]);
+
+  async function setPlayerHidden(id: string, hide: boolean) {
+    if (pending.has(id)) return;
+    setPending((prev) => new Set(prev).add(id));
+    setHideError("");
+    try {
+      const result = await (hide ? hideSuggestedPlayer(id) : restoreSuggestedPlayer(id));
+      if (result.error) { setHideError(result.error); return; }
+      setHidden((prev) => {
+        const next = new Set(prev);
+        if (hide) next.add(id); else next.delete(id);
+        return next;
+      });
+      setLastHidden(hide ? rows.find((r) => r.user_id === id) ?? null : null);
+    } catch {
+      setHideError(`Couldn't ${hide ? "hide" : "restore"} this player. Please try again.`);
+    } finally {
+      setPending((prev) => { const next = new Set(prev); next.delete(id); return next; });
+    }
+  }
+
+  const hideControl = (match: MatchRow) => (
+    <button type="button" className="text-xs font-semibold text-slate-500 underline disabled:opacity-50"
+      aria-label={`Hide ${playerName(match)} from suggestions`} disabled={pending.has(match.user_id)}
+      onClick={() => void setPlayerHidden(match.user_id, true)}>
+      {pending.has(match.user_id) ? "Hiding…" : "Hide"}
+    </button>
+  );
 
   const tiersOf = (id: string) => (known === "all" || known.has(id) ? { tops, tiers: tiers[id] } : null);
 
@@ -126,8 +169,36 @@ export function FindNewBoard({
             {tierError ? "Couldn't load Top 3 tiers. Reload to try again." : "Ranking by your Top 3…"}
           </p>
         )}
-        <FitLegend friendsVoted={friendsVoted} youVoted={picked > 0} />
+        <FitLegend friendsVoted={friendsVoted} youVoted={picked > 0} autoOpen={autoOpenGuide} />
       </div>
+
+      {hideError && <p role="alert" className="text-sm text-red-600 dark:text-red-300">{hideError}</p>}
+      {lastHidden && hidden.has(lastHidden.user_id) && (
+        <p role="status" className="text-sm text-slate-500">
+          {playerName(lastHidden)} hidden. {" "}
+          <button type="button" className="font-semibold underline" disabled={pending.has(lastHidden.user_id)}
+            onClick={() => void setPlayerHidden(lastHidden.user_id, false)}>Undo</button>
+        </p>
+      )}
+      {hidden.size > 0 && (
+        <details className="rounded-xl border border-slate-300 p-3 text-sm dark:border-slate-700">
+          <summary className="w-fit cursor-pointer font-semibold">Hidden players ({hidden.size})</summary>
+          <p className="mt-2 text-xs text-slate-500">Hidden players stay out of your suggestions until you restore them.</p>
+          <ul className="mt-3 max-h-64 space-y-2 overflow-y-auto">
+            {[...hidden].map((id) => {
+              const row = rows.find((r) => r.user_id === id);
+              const name = row ? playerName(row) : "Player no longer suggested";
+              return <li key={id} className="flex items-center justify-between gap-3">
+                <span className="min-w-0 truncate">{name}</span>
+                <button type="button" className="shrink-0 font-semibold underline disabled:opacity-50"
+                  aria-label={`Restore ${name}`} disabled={pending.has(id)} onClick={() => void setPlayerHidden(id, false)}>
+                  {pending.has(id) ? "Restoring…" : "Restore"}
+                </button>
+              </li>;
+            })}
+          </ul>
+        </details>
+      )}
 
       {picked === 0 && relations.friendIds.length === 0 && !opts.everyone ? (
         <p className="py-8 text-center text-slate-500">
@@ -166,13 +237,14 @@ export function FindNewBoard({
                     />
                     <FitLists match={match} />
                     <NewPlayerNote match={match} name={playerName(match)} />
-                    <div className="mt-4">
+                    <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
                       <FriendAction
                         userId={match.user_id}
                         name={playerName(match)}
                         relation={relationOf(relations, match.user_id)}
                         showsCode={Boolean(match.friend_code)}
                       />
+                      {hideControl(match)}
                     </div>
                   </li>
                 );
@@ -187,6 +259,7 @@ export function FindNewBoard({
                   match={match}
                   relation={relationOf(relations, match.user_id)}
                   top3={tiersOf(match.user_id) ?? undefined}
+                  hideControl={hideControl(match)}
                 />
               ))}
             </ul>

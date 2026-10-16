@@ -63,10 +63,13 @@ export function FriendPostCard({
   }, [allowLookup]);
 
   if (!allowLookup) return (
-    <p className="text-sm text-slate-500">
-      To share a friend post, change who can find you in{" "}
-      <Link href="/profile#profile-privacy" className="font-semibold underline">Privacy settings</Link>
-    </p>
+    <details className="text-sm text-slate-500">
+      <summary className="w-fit cursor-pointer list-none font-semibold underline">Share a friend post</summary>
+      <p className="mt-2">
+        To share a friend post, change who can find you in{" "}
+        <Link href="/profile#profile-privacy" className="font-semibold underline">Privacy settings</Link>
+      </p>
+    </details>
   );
   if (hidden === null) return null;
   if (hidden) return (

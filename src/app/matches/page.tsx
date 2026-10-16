@@ -21,13 +21,17 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
   const params = await searchParams;
   const q = await searchQuery(Promise.resolve(params));
   const opts = parseBrowse(params);
-  const [{ choices, tops }, profile, relations, votedResult, rows] = await Promise.all([
+  const [{ choices, tops }, profile, relations, votedResult, rows, hiddenResult] = await Promise.all([
     loadOwnVotes(supabase, user.id),
     loadOwnProfile(supabase, user.id),
     loadRelations(supabase, user.id),
     supabase.rpc("my_friends_voted"),
     loadCandidates(supabase),
+    supabase.from("hidden_suggestions").select("hidden_user_id").eq("user_id", user.id),
   ]);
+  if (hiddenResult.error) throw hiddenResult.error;
+  const hiddenIds = (hiddenResult.data ?? []).map((r) => r.hidden_user_id as string);
+  const hidden = new Set(hiddenIds);
   // Your Top 3's tiers: everyone's when the page opens sorted by them, else the first page's
   // (FindNewBoard fetches the rest in the background).
   let tiers: Top3Tiers = {};
@@ -37,7 +41,7 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
       tiers = await loadTop3Tiers(supabase, rows.map((r) => r.user_id));
       allTiers = true;
     } else {
-      const pool = opts.everyone ? rows : rows.filter((r) => r.good);
+      const pool = rows.filter((r) => !hidden.has(r.user_id) && (opts.everyone || r.good));
       const first = sortPlayers(pool, opts.sort).slice((opts.page - 1) * BROWSE_PAGE_SIZE, opts.page * BROWSE_PAGE_SIZE);
       const loaded = await loadTop3Tiers(supabase, first.map((r) => r.user_id));
       // Known for every first-page player: no entry means all dashes.
@@ -72,13 +76,6 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
         <Link href="/friends" className="underline">Remove someone</Link> to show up again.
       </>,
     );
-  else if (!profile.open_to_friends)
-    notices.push(
-      <>
-        You're hidden from other people's matches. Turn on "Open to new friends" in{" "}
-        <Link href="/profile" className="underline">Profile</Link> when you have room.
-      </>,
-    );
   if (unsorted > 0 && picked > 0)
     notices.push(
       <>
@@ -106,6 +103,8 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
 
       <FindNewBoard
         rows={rows}
+        initialHiddenIds={hiddenIds}
+        autoOpenGuide={profile.match_guide_seen === false}
         relations={relations}
         tops={tops}
         initial={opts}

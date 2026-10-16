@@ -76,6 +76,7 @@ export interface BlockedRow {
 }
 
 export interface OwnProfile {
+  match_guide_seen?: boolean;
   id: string;
   discord_username: string | null;
   discord_display_name: string | null;
