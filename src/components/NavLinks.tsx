@@ -11,15 +11,19 @@ const LINKS = [
   { href: "/guides", label: "Guides", match: ["/guides"] },
 ];
 
-/** Every tab and sub-tab, loaded in the background so the first tap on each is instant. */
-const PREFETCH = ["/tiers", "/friends", "/matches", "/vote", "/profile", "/guides"];
+/**
+ * The most-used tabs, loaded in the background so the first tap on each is
+ * instant. The rest (Find New is the heaviest page) load when tapped: loading
+ * every tab on every visit multiplied server work for pages most visits never open.
+ */
+const PREFETCH = ["/tiers", "/friends"];
 
 export function NavLinks() {
   const pathname = usePathname();
   const router = useRouter();
 
   // As soon as the page you landed on is interactive (effects run after
-  // hydration), fetch every other tab fully, data included. The browser keeps
+  // hydration), fetch those tabs fully, data included. The browser keeps
   // them for the visit (staleTimes in next.config.ts), so they aren't
   // recomputed when you switch back and forth. Only on the first page of the
   // visit; later pages are already cached.
