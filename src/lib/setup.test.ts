@@ -34,6 +34,7 @@ describe("setupSteps", () => {
   it("ends on the Tier List after the first three main steps are done", () => {
     const steps = setupSteps({ name: true, code: true, picture: true, voted: true, friends: true });
     expect(currentStep(steps).id).toBe("tiers");
+    expect(currentStep(steps).href).toBe("/tiers?pool=everyone");
     expect(steps.filter((step) => step.done)).toHaveLength(3);
   });
 });

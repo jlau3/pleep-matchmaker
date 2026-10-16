@@ -8,6 +8,7 @@ import { InviteButton } from "./InviteButton";
 import { InviteReminder } from "./InviteReminder";
 import { RefreshStamp } from "./RefreshStamp";
 import { TierBoard } from "./TierBoard";
+import { TierGuide } from "./TierGuide";
 import { TierExport } from "./TierExport";
 import { useSignIn } from "./SignInSheet";
 
@@ -67,6 +68,7 @@ export function TierExplorer({
   loadedAt,
   notice,
   signedIn = true,
+  viewerId = null,
 }: {
   friends: PoolVotes;
   everyone: PoolVotes;
@@ -80,6 +82,7 @@ export function TierExplorer({
   /** Shown under the heading (e.g. "3 new candies to vote on"). */
   notice?: React.ReactNode;
   signedIn?: boolean;
+  viewerId?: string | null;
 }) {
   const openSignIn = useSignIn();
   const viewKey = signedIn ? VIEW_KEY : `${VIEW_KEY}_public`;
@@ -133,7 +136,7 @@ export function TierExplorer({
     setIslandId(id);
     setSleepType(sleep);
     const qs = new URLSearchParams();
-    if (p === "everyone") qs.set("pool", "everyone");
+    qs.set("pool", p);
     if (id) qs.set("island", id);
     if (sleep) qs.set("sleep", sleep);
     const query = qs.toString();
@@ -184,17 +187,19 @@ export function TierExplorer({
         </div>
         <p className="text-sm text-slate-600 dark:text-slate-300">
           Which candy to prioritize, ranked by what {pool === "friends" ? "your friends" : "active players"}{" "}
-          want and don&apos;t want.
+          choose as Want and Don&apos;t Want.
         </p>
         {!signedIn && <button type="button" onClick={() => show({ pool: "friends" })} className="mt-2 text-sm font-semibold underline">See what your friends want → Sign in</button>}
       </div>
+
+      <TierGuide userId={signedIn ? viewerId : null} />
 
       {notice}
 
       {pool === "friends" && data.voters > 0 && <InviteReminder friendCount={data.friendCount} />}
 
       <div className="flex flex-wrap items-center gap-2">
-        {(["friends", "everyone"] as const).map((p) => (
+        {(["everyone", "friends"] as const).map((p) => (
           <button key={p} type="button" onClick={() => show({ pool: p })} aria-pressed={pool === p} className={pill(pool === p)}>
             {POOL_LABEL[p]}{!signedIn && p === "friends" && <span aria-hidden="true" className="ml-1">🔒</span>}
           </button>
@@ -212,6 +217,11 @@ export function TierExplorer({
         )}
       </div>
 
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="text-sm font-semibold">Island</span>
+        <button type="button" className={pill(islandId === null)} aria-pressed={islandId === null}
+          onClick={() => show({ island: null })}>All Islands</button>
+      </div>
       {/* One tap picks an island; tapping it again (or another) goes back / switches. None picked: all islands. */}
       {MAPPED_ISLANDS.length > 0 && (
         <div role="group" aria-label="Island" className="grid grid-cols-5 gap-1 sm:grid-cols-9">
@@ -253,7 +263,10 @@ export function TierExplorer({
       )}
 
       {/* Same one-tap toggle as the islands: a line shows if any of its forms sleeps that way. */}
-      <div role="group" aria-label="Sleep type" className="flex flex-wrap items-center gap-2">
+      <div role="group" aria-label="Sleep Type" className="flex flex-wrap items-center gap-2">
+        <span className="text-sm font-semibold">Sleep Type</span>
+        <button type="button" className={pill(sleepType === null)} aria-pressed={sleepType === null}
+          onClick={() => show({ sleep: null })}>All Sleep Types</button>
         {SLEEP_TYPES.map((type) => {
           const active = type === sleepType;
           return (
@@ -277,7 +290,7 @@ export function TierExplorer({
           {pool === "friends" ? (
             <>
               No votes from friends yet. <Link href="/friends" className="underline">Add friends</Link> or invite them to
-              build your tier list.
+              build your Tier List.
               <span className="mt-4 block">
                 <InviteButton />
               </span>

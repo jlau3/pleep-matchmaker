@@ -203,7 +203,7 @@ export function TierExport({
   title,
   voters,
   sections,
-  label = "Export image",
+  label = "Export Image",
 }: {
   title: string;
   voters: number | null;
@@ -234,7 +234,7 @@ export function ImageExport({
   subtitle,
   sections,
   file: fileName,
-  label = "Export image",
+  label = "Export Image",
 }: {
   /** Popup title and image alt text. */
   title: string;
@@ -317,7 +317,7 @@ export function ImageExport({
           <div className="flex flex-wrap gap-2">
             {image && typeof ClipboardItem !== "undefined" && (
               <button type="button" onClick={copy} className="btn-primary px-4 py-2">
-                Copy image
+                Copy Image
               </button>
             )}
             {image && (

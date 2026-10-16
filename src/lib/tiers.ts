@@ -49,11 +49,11 @@ export const TIER_STYLE: Record<string, string> = {
 
 
 export const TIERS: Tier[] = [
-  { id: "top", label: "Top 3", hint: "players' favorites, not part of the ranking" },
-  { id: "S", label: "S", hint: `top ${pct(TIER_SHARES.S)}% most wanted` },
-  { id: "A", label: "A", hint: `next ${pct(TIER_SHARES.A)}%` },
-  { id: "B", label: "B", hint: `next ${pct(TIER_SHARES.B)}%` },
-  { id: "C", label: "C", hint: "the rest" },
+  { id: "top", label: "Top 3", hint: "Players' favorites, separate from the ranking" },
+  { id: "S", label: "S", hint: `Top ${pct(TIER_SHARES.S)}% most wanted` },
+  { id: "A", label: "A", hint: `Next ${pct(TIER_SHARES.A)}%` },
+  { id: "B", label: "B", hint: `Next ${pct(TIER_SHARES.B)}%` },
+  { id: "C", label: "C", hint: "The rest" },
   { id: "avoid", label: "Avoid", hint: "Don't Wants outweigh the Wants and don't-minds" },
 ];
 

@@ -33,9 +33,9 @@ function VoteCard({ ranked }: { ranked: RankedLine }) {
           )}
         </div>
         <div className="flex flex-wrap gap-x-2 text-xs">
-          <span className="text-want">{ranked.wants} want</span>
-          <span className="text-meh">{ranked.neutral} neutral</span>
-          <span className="text-dont">{ranked.dontWants} don&apos;t want</span>
+          <span className="text-want">{ranked.wants} Want</span>
+          <span className="text-meh">{ranked.neutral} Neutral</span>
+          <span className="text-dont">{ranked.dontWants} Don&apos;t Want</span>
           {ranked.tops > 0 && <span className="font-semibold text-sun-deep">★ {ranked.tops}</span>}
         </div>
       </div>
@@ -105,7 +105,7 @@ export function TierBoard({ tiers, pool = "friends" }: { tiers: Map<TierId, Rank
                   </span>
                 </span>
                 <span className="mt-2 block text-sm text-slate-600 dark:text-slate-300">
-                  Candy {who} want most, from their personal Top 3. Some rank low on the tier list below,
+                  Candy {who} want most, from their personal Top 3. Some rank low on the Tier List below,
                   but whoever starred them really wants them.
                 </span>
               </summary>

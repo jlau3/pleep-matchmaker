@@ -37,6 +37,7 @@ export default async function TiersPage({ searchParams }: { searchParams: Promis
   return (
     <TierExplorer
       signedIn={Boolean(userId)}
+      viewerId={userId}
       friends={friends}
       everyone={everyone}
       initialPool={!userId || params.pool !== "friends" ? "everyone" : "friends"}

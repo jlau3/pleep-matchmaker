@@ -53,8 +53,8 @@ export function setupSteps(progress: SetupProgress): SetupStep[] {
     {
       id: "tiers",
       label: "See Tier List",
-      next: "See which candies your friends want most. It fills in as they accept and vote.",
-      href: "/tiers?pool=friends",
+      next: "Start with Everyone to see which candies active players want. My Friends fills in as your friends accept and vote.",
+      href: "/tiers?pool=everyone",
       cta: "See Tier List",
       done: false,
     },
