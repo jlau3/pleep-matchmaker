@@ -22,13 +22,13 @@ describe("scoreOf", () => {
 });
 
 describe("relative tiers by score", () => {
-  it("splits ranked lines into quarters", () => {
+  it("splits ranked lines 10 / 20 / 30 / 40", () => {
     const { lines, votes } = ladder(20);
     const tiers = buildTiers(votes, 20, lines);
-    // ceil(0.25*20)=5 S, ceil(0.5*20)=10 -> 5 A, ceil(0.75*20)=15 -> 5 B, 5 C.
-    expect([tiers.get("S")!.length, tiers.get("A")!.length, tiers.get("B")!.length, tiers.get("C")!.length]).toEqual([5, 5, 5, 5]);
-    // One point per Want: 20 down to 16 wants.
-    expect(tiers.get("S")!.map((r) => r.score)).toEqual([20, 19, 18, 17, 16]);
+    // ceil(0.1*20)=2 S, ceil(0.3*20)=6 -> 4 A, ceil(0.6*20)=12 -> 6 B, 8 C.
+    expect([tiers.get("S")!.length, tiers.get("A")!.length, tiers.get("B")!.length, tiers.get("C")!.length]).toEqual([2, 4, 6, 8]);
+    // One point per Want: 20 and 19 wants.
+    expect(tiers.get("S")!.map((r) => r.score)).toEqual([20, 19]);
   });
 
   it("avoids negative support, while zero support remains ranked", () => {
@@ -43,10 +43,10 @@ describe("relative tiers by score", () => {
 
   it("keeps ties in the same tier", () => {
     const { lines, votes } = ladder(20);
-    // Make the 5th-best line tie the 4th: it joins S instead of leading A.
-    votes.set(lines[15].id, { wants: 17, dontWants: 0 });
+    // Make the 3rd-best line tie the 2nd: it joins S instead of leading A.
+    votes.set(lines[17].id, { wants: 19, dontWants: 0 });
     const tiers = buildTiers(votes, 20, lines);
-    expect(tiers.get("S")!.map((r) => r.score)).toEqual([20, 19, 18, 17, 17]);
+    expect(tiers.get("S")!.map((r) => r.score)).toEqual([20, 19, 19]);
   });
 
   it("places a big tie by its middle rank so it can't swallow S", () => {
@@ -181,10 +181,11 @@ describe("buildTiers", () => {
       ...fillers.map((l, i) => [l.id, { wants: 35 - i, dontWants: 0 }] as [string, { wants: number; dontWants: number }]),
     ]);
     const tiers = buildTiers(votes, 50, [pikachu, eevee, ...fillers]);
-    // 9 ranked lines: S = 3, A = 2, B = 2, C = 2. eevee lands between the 34- and 33-Want fillers.
-    expect(ids(tiers, "S")).toEqual([pikachu.id, fillers[0].id, fillers[1].id]);
-    expect(ids(tiers, "A")).toEqual([eevee.id, fillers[2].id]);
-    expect(tiers.get("A")![0]).toMatchObject({ score: 33.5, neutral: 0, dontShare: 0.22 });
+    // 9 ranked lines: S = 1, A = 2, B = 3, C = 3. eevee lands between the 34- and 33-Want fillers.
+    expect(ids(tiers, "S")).toEqual([pikachu.id]);
+    expect(ids(tiers, "A")).toEqual([fillers[0].id, fillers[1].id]);
+    expect(ids(tiers, "B")).toEqual([eevee.id, fillers[2].id, fillers[3].id]);
+    expect(tiers.get("B")![0]).toMatchObject({ score: 33.5, neutral: 0, dontShare: 0.22 });
   });
 
   it("keeps Avoid lines in the Top 3 row, so nobody's pick is left out", () => {

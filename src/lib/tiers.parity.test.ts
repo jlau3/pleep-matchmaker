@@ -4,7 +4,7 @@ import { buildTiers } from "./tiers";
 
 /**
  * The database grades your Top 3 on other players' Tier Lists with its own copy
- * of these rules (public.list_tiers, latest in 20261026000000_half_dont_want.sql). Its test,
+ * of these rules (public.list_tiers, latest in 20261026000200_pyramid_tiers.sql). Its test,
  * supabase/tests/top3_tiers_test.sql, expects exactly these tiers for the same
  * votes: change the rules here and that copy (and test) must change too.
  */
@@ -21,7 +21,7 @@ describe("Tier List rules shared with the database", () => {
     return out;
   };
   it("matches list_tiers for 20, 10 and 8 lines", () => {
-    for (const count of [20, 10]) expect(tiersFor(count)).toEqual({ q1: "S", q2: "S", q6: "A", q3: "B", q4: "B", "": "C", q7: "C", q8: "Avoid", q5: "Avoid" });
-    expect(tiersFor(8)).toEqual({ q1: "S", q2: "S", q6: "A", q3: "B", q4: "B", q7: "C", q8: "Avoid", q5: "Avoid" });
+    for (const count of [20, 10]) expect(tiersFor(count)).toEqual({ q1: "S", q2: "A", q6: "B", q3: "B", q4: "C", "": "C", q7: "C", q8: "Avoid", q5: "Avoid" });
+    expect(tiersFor(8)).toEqual({ q1: "S", q2: "A", q6: "B", q3: "B", q4: "C", q7: "C", q8: "Avoid", q5: "Avoid" });
   });
 });

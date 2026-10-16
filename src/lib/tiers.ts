@@ -12,7 +12,7 @@ export const TIER_STYLE_LABEL: Record<TierStyle, string> = {
  */
 export const FIXED_SCORE_CUTOFFS = { S: 75, A: 50, B: 25 } as const;
 export const TIER_STYLE_DESCRIPTION: Record<TierStyle, string> = {
-  standard: "Scores below 0 go to Avoid. The rest are ranked against each other and split into four equal groups: S, A, B and C each get 25%.",
+  standard: "Scores below 0 go to Avoid. The rest are ranked against each other: S is the top 10%, A the next 20%, B the next 30%, and C the rest.",
   fixed: `Scores below 0 go to Avoid. The rest are placed by their own score, in ranges of 25: S ${FIXED_SCORE_CUTOFFS.S}–100, A ${FIXED_SCORE_CUTOFFS.A}–${FIXED_SCORE_CUTOFFS.S - 1}, B ${FIXED_SCORE_CUTOFFS.B}–${FIXED_SCORE_CUTOFFS.A - 1}, C 0–${FIXED_SCORE_CUTOFFS.B - 1}. A shared yardstick: an S means the same score for everyone, so tiers mean the same thing when players talk candy anywhere. Less useful for choosing what to send first.`,
   consensus: "Groups candy as Mostly Wanted, Mixed, or Mostly Unwanted. Divisive requires at least one-third Want and one-third Don't Want.",
 };
@@ -47,7 +47,7 @@ export interface Tier {
  *
  * Negative net support is Avoid; zero support stays in C. Positive scores are
  * ranked, and the top
- * TIER_SHARES.S go to S, the next TIER_SHARES.A to A, the next TIER_SHARES.B to B, the rest to C (a quarter each). Lines
+ * TIER_SHARES.S go to S, the next TIER_SHARES.A to A, the next TIER_SHARES.B to B, the rest to C (10 / 20 / 30 / 40%: a short S to send first). Lines
  * that tie share a tier, placed by the tie's middle rank (the best-ranked tie
  * is always S). With no voters at all, everything is C.
  *
@@ -56,7 +56,7 @@ export interface Tier {
  * first TOP_ROW_SIZE and folds the rest behind "Show all". They also stay in their regular tier, so
  * the rest of the list never shifts.
  */
-export const TIER_SHARES = { S: 0.25, A: 0.25, B: 0.25 } as const;
+export const TIER_SHARES = { S: 0.1, A: 0.2, B: 0.3 } as const;
 
 /** How many of the most-starred lines the Top 3 Spotlight row shows before "Show all". */
 export const TOP_ROW_SIZE = 9;
@@ -166,6 +166,8 @@ export function formatSupport(support: number): string {
 }
 
 const supportKey = (r: RankedLine) => r.support ?? -Infinity;
+/** Where a tier's share ends: ceil(share * n), minus float noise (0.1 + 0.2 + 0.3 is 0.6000000000000001). */
+const shareEnd = (share: number, n: number) => Math.ceil(Math.round(share * n * 1e9) / 1e9);
 const byRank = (a: RankedLine, b: RankedLine) =>
   supportKey(b) - supportKey(a) ||
   b.tops - a.tops ||
@@ -247,9 +249,9 @@ export function buildTiers(
   const ranked = all.filter((r) => r.score > 0).sort(byRank);
   const n = ranked.length;
   const ends: [Exclude<TierId, "top" | "avoid">, number][] = [
-    ["S", Math.ceil(TIER_SHARES.S * n)],
-    ["A", Math.ceil((TIER_SHARES.S + TIER_SHARES.A) * n)],
-    ["B", Math.ceil((TIER_SHARES.S + TIER_SHARES.A + TIER_SHARES.B) * n)],
+    ["S", shareEnd(TIER_SHARES.S, n)],
+    ["A", shareEnd(TIER_SHARES.S + TIER_SHARES.A, n)],
+    ["B", shareEnd(TIER_SHARES.S + TIER_SHARES.A + TIER_SHARES.B, n)],
     ["C", n],
   ];
   for (let start = 0; start < n; ) {
