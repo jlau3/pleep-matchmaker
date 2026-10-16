@@ -160,7 +160,7 @@ export default async function FriendsPage({ searchParams }: { searchParams: Prom
             items={friends.map(
               (friend): FriendItem => ({
                 id: friend.user_id,
-                ranks: Object.fromEntries(FRIEND_SORTS.map(([id]) => [id, friendRank(friend, id)])) as FriendItem["ranks"],
+                ranks: Object.fromEntries(FRIEND_SORTS.map(([id]) => [id, friendRank(friend, id, top3[friend.user_id])])) as FriendItem["ranks"],
                 card: friend.visible ? (
                   <>
                     <PlayerHeader

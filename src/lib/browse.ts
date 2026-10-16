@@ -1,4 +1,4 @@
-/** Find New Friends list options, read from the URL (?sort=&show=&page=). */
+/** Sort choices shared by My Friends and Find New Friends. */
 export const BROWSE_SORTS = [
   ["fit", "Best match"],
   ["you_fit", "Best for you"],
@@ -62,6 +62,18 @@ export function top3Score(tiers: Record<string, string> | null | undefined): num
   return values.length === 0 ? null : values.reduce((sum, tier) => sum + (TIER_POINTS[tier] ?? 0), 0);
 }
 
+/** Shared primary score for both friend lists; each supplies its own row fields and tie order. */
+export function playerSortScore(
+  player: Pick<SortablePlayer, "last_seen_at" | "you_fit_pct" | "both_pct">,
+  sort: BrowseSort,
+  tiers?: Record<string, string>,
+): number | null {
+  if (sort === "active") return Date.parse(player.last_seen_at);
+  if (sort === "you_fit") return player.you_fit_pct ?? null;
+  if (sort === "top3") return top3Score(tiers);
+  return player.both_pct ?? null;
+}
+
 /**
  * Find New's order, in the browser: the same keys as browse_players'
  * ORDER BY, so a sort looks the same either way. The chosen sort first
@@ -75,15 +87,9 @@ export function sortPlayers<T extends SortablePlayer>(
 ): T[] {
   const desc = (a: number | null | undefined, b: number | null | undefined) =>
     a == null ? (b == null ? 0 : 1) : b == null ? -1 : b - a;
-  const first = (a: T, b: T): number => {
-    if (sort === "active") return Date.parse(b.last_seen_at) - Date.parse(a.last_seen_at);
-    if (sort === "you_fit") return desc(a.you_fit_pct, b.you_fit_pct);
-    if (sort === "top3") return desc(top3Score(top3[a.user_id]), top3Score(top3[b.user_id]));
-    return 0;
-  };
   return [...rows].sort(
     (a, b) =>
-      first(a, b) ||
+      desc(playerSortScore(a, sort, top3[a.user_id]), playerSortScore(b, sort, top3[b.user_id])) ||
       desc(a.both_pct, b.both_pct) ||
       (b.you_fit_wants?.length ?? 0) - (a.you_fit_wants?.length ?? 0) ||
       Date.parse(b.last_seen_at) - Date.parse(a.last_seen_at) ||
