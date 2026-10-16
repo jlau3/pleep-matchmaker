@@ -4,6 +4,7 @@ import type { OwnProfile } from "./types";
 /** What the "looking for friends" post card needs, from your profile and votes (My Friends and Find New). */
 export function friendPostProps(profile: OwnProfile, choices: Record<string, Choice>, tops: string[]) {
   return {
+    userId: profile.id,
     friendCode: profile.friend_code,
     ign: profile.ign,
     allowLookup: profile.allow_lookup,
