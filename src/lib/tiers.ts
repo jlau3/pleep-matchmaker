@@ -12,8 +12,8 @@ export const TIER_STYLE_LABEL: Record<TierStyle, string> = {
  */
 export const FIXED_SCORE_CUTOFFS = { S: 75, A: 50, B: 25 } as const;
 export const TIER_STYLE_DESCRIPTION: Record<TierStyle, string> = {
-  standard: "Scores below 0 go to Avoid. The rest are ranked against each other: S is the top 10%, A the next 20%, B the next 30%, and C the rest.",
-  fixed: `Scores below 0 go to Avoid. The rest are placed by their own score, in ranges of 25: S ${FIXED_SCORE_CUTOFFS.S}–100, A ${FIXED_SCORE_CUTOFFS.A}–${FIXED_SCORE_CUTOFFS.S - 1}, B ${FIXED_SCORE_CUTOFFS.B}–${FIXED_SCORE_CUTOFFS.A - 1}, C 0–${FIXED_SCORE_CUTOFFS.B - 1}. A shared yardstick: an S means the same score for everyone, so tiers mean the same thing when players talk candy anywhere. Less useful for choosing what to send first.`,
+  standard: "Best for deciding what to send. Scores below 0 go to Avoid; the rest are ranked against each other: S is the top 10%, A the next 20%, B the next 30%, C the rest. S is always a shortlist, even when nothing is wildly popular.",
+  fixed: `Best for talking candy. Scores below 0 go to Avoid; the rest are placed by their own score: S ${FIXED_SCORE_CUTOFFS.S}–100, A ${FIXED_SCORE_CUTOFFS.A}–${FIXED_SCORE_CUTOFFS.S - 1}, B ${FIXED_SCORE_CUTOFFS.B}–${FIXED_SCORE_CUTOFFS.A - 1}, C 0–${FIXED_SCORE_CUTOFFS.B - 1}. An S means the same thing to everyone, wherever players talk candy.`,
   consensus: "Groups candy as Mostly Wanted, Mixed, or Mostly Unwanted. Divisive requires at least one-third Want and one-third Don't Want.",
 };
 export const parseTierStyle = (value: unknown): TierStyle =>
