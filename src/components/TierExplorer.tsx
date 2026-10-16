@@ -3,13 +3,14 @@
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { isSleepType, ISLANDS, LINES, SLEEP_TYPE_LABEL, SLEEP_TYPES, lineSpriteUrl, sleepTypeMember, spriteUrl, type SleepType } from "@/lib/lines";
-import { buildTiers, buildPublicTiers, TIER_STYLE_LABEL, TIER_STYLES, TIER_STYLE_DESCRIPTION, FIXED_SCORE_CUTOFFS, type TierStyle, type LineVotes } from "@/lib/tiers";
+import { buildTiers, buildPublicTiers, TIER_STYLE_LABEL, TIER_STYLES, TIER_STYLE_DESCRIPTION, FIXED_SCORE_CUTOFFS, RANK_MIN_SEEN, type TierStyle, type LineVotes, type UnrankedLine } from "@/lib/tiers";
 import { InviteButton } from "./InviteButton";
 import { InviteReminder } from "./InviteReminder";
 import { RefreshStamp } from "./RefreshStamp";
 import { TierBoard } from "./TierBoard";
 import { TierGuide } from "./TierGuide";
-import { TierExport } from "./TierExport";
+import { RANKING_PENDING, TierExport } from "./TierExport";
+import { NEW_CARD, NewTag } from "./TierBoard";
 import { useSignIn } from "./SignInSheet";
 
 export type Pool = "friends" | "everyone";
@@ -201,7 +202,7 @@ export function TierExplorer({
     const votes = new Map(Object.entries(data.votes));
     const { tiers: built, unranked } = data.thresholded
       ? buildPublicTiers(votes, data.voters, lines, style)
-      : { tiers: buildTiers(votes, data.voters, lines, style), unranked: [] };
+      : { tiers: buildTiers(votes, data.voters, lines, style), unranked: [] as UnrankedLine[] };
     for (const rows of built.values()) for (const r of rows) r.sprite = shown.get(r.line.id);
     for (const row of unranked) row.sprite = shown.get(row.line.id);
     return { tiers: built, unranked };
@@ -325,7 +326,7 @@ export function TierExplorer({
           <div style={{ maxHeight: menuPlacement.maxHeight }} className={`absolute right-0 z-20 ${menuPlacement.above ? "bottom-full mb-2" : "top-full mt-2"} w-[min(24rem,calc(100vw-2rem))] overflow-y-auto rounded-xl border border-slate-300 bg-cream p-3 shadow-lg dark:border-slate-700 dark:bg-night`}>
             <fieldset className="min-w-0 space-y-3 border-0 p-0">
               <legend className="mb-2 w-full p-0 font-semibold">Choose a ranking style</legend>
-              <p className="text-xs text-slate-600 dark:text-slate-300">Net support is Want % minus Don't Want %. Neutral adds no points. Negative scores go to Avoid in Standard and Fixed Scores. Numbers are rounded for display; tiers use exact scores.</p>
+              <p className="text-xs text-slate-600 dark:text-slate-300">Support counts Want +1, Neutral 0 and Don&apos;t Want −½ for each player who&apos;s seen the candy, per 100 players. Negative support goes to Avoid in Standard and Fixed Scores. Numbers are rounded for display; tiers use exact scores.</p>
               {TIER_STYLES.map((option) => <label key={option} className="flex cursor-pointer items-start gap-2">
                 <input type="radio" name="tier-style" value={option} checked={style === option}
                   onChange={() => show({ style: option })} className="mt-1 shrink-0 accent-want" />
@@ -357,13 +358,25 @@ export function TierExplorer({
       ) : (
         <>
           {Array.from(tiers.values()).some((rows) => rows.length > 0) && <TierBoard tiers={tiers} pool={pool} style={style} />}
-          {unranked.length > 0 && <section className="card p-4" aria-label="Not enough votes yet">
-            <h2 className="font-bold">Not Enough Votes Yet</h2>
-            <p className="mt-1 text-sm text-slate-500">These candies need saved votes from at least 10 active players before their tiers and totals are public.</p>
-            <ul className="mt-3 grid grid-cols-3 gap-2 sm:grid-cols-6">
-              {unranked.map(({ line, sprite }) => <li key={line.id} className="flex flex-col items-center text-center text-xs">
-                <img src={sprite ?? lineSpriteUrl(line)} alt="" loading="lazy" className="h-12 w-12 object-contain" />
-                {line.name}
+          {unranked.length > 0 && <section className="card p-4" aria-label={RANKING_PENDING}>
+            <h2 className="font-bold">{RANKING_PENDING}</h2>
+            <p className="mt-1 text-sm text-slate-500">
+              Candy is ranked once {RANK_MIN_SEEN} active players have seen it. Vote counts show from 10.
+            </p>
+            <ul className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+              {unranked.map(({ line, sprite, isNew, counts }) => <li key={line.id} className={`flex items-center gap-3 rounded-2xl bg-white p-2 dark:bg-night-deep ${isNew ? NEW_CARD : ""}`}>
+                <img src={sprite ?? lineSpriteUrl(line)} alt="" loading="lazy" className="h-12 w-12 shrink-0 rounded-full bg-sky object-contain dark:bg-night" />
+                <div className="min-w-0 flex-1">
+                  <span className="flex min-w-0 items-center gap-1.5"><span className="truncate font-semibold">{line.name}</span>{isNew && <NewTag />}</span>
+                  {counts ? (
+                    <span className="flex flex-wrap gap-x-2 text-xs">
+                      <span className="text-want">{counts.wants} Want</span>
+                      <span className="text-meh">{counts.neutral} Neutral</span>
+                      <span className="text-dont">{counts.dontWants} Don&apos;t Want</span>
+                      <span className="text-slate-500">· {counts.seen} of {RANK_MIN_SEEN} so far</span>
+                    </span>
+                  ) : <span className="text-xs text-slate-500">Fewer than 10 votes so far</span>}
+                </div>
               </li>)}
             </ul>
           </section>}

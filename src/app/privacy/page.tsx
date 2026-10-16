@@ -71,7 +71,7 @@ export default function PrivacyPage() {
           </li>
           <li>
             <b>The public Everyone Tier List</b> shows combined candy totals, never individual players&apos; votes or identities.
-            A candy's totals, Top 3 Spotlight count, and tier stay hidden until it has saved votes from at least 10 active players.
+            A candy&apos;s totals and Top 3 Spotlight count stay hidden until at least 10 active players have seen it, and it&apos;s ranked once 50 have.
           </li>
           <li>
             <b>You control it</b> in Profile under Privacy: <b>Who Can Find You</b> (Everyone, Only by search, or Only my friends), whether friends see your Discord name, and who you block.

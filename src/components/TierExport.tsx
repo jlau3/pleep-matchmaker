@@ -1,13 +1,13 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { type RankedLine, rankedSpriteUrl, type TierId, type TierStyle, tierDefinitions, CONSENSUS_COLORS } from "@/lib/tiers";
+import { type RankedLine, rankedSpriteUrl, type TierId, type TierStyle, tierDefinitions, CONSENSUS_COLORS, type UnrankedLine } from "@/lib/tiers";
 
 export interface ExportSection {
   /** Island name when exporting By Island; none for a single list. */
   heading?: string;
   tiers: Map<TierId, RankedLine[]>;
-  unranked?: Pick<RankedLine, "line" | "sprite">[];
+  unranked?: UnrankedLine[];
 }
 
 /** One labelled row of sprites in an exported image (a tier, or a vote). */
@@ -15,14 +15,19 @@ export interface ImageRow {
   /** Badge text; "\n" splits it over two lines. */
   label: string;
   color: { bg: string; fg: string };
-  /** Sprites left to right; `tops` puts a gold ★ count on the corner. */
-  items: { sprite: string; tops?: number }[];
+  /** Sprites left to right; `tops` puts a gold ★ count on the corner, `isNew` the new-release border. */
+  items: { sprite: string; tops?: number; isNew?: boolean }[];
 }
 
 export interface ImageSection {
   heading?: string;
   rows: ImageRow[];
 }
+
+/** Heading for public candies not ranked yet, on the page and in exports. */
+export const RANKING_PENDING = "Ranking Still Being Determined";
+/** The new-release border, same as TierBoard's. */
+const NEW_BORDER = "#3fa7f5";
 
 /** Tier badge colors, same as TierBoard. */
 const TIER_COLOR: Record<TierId, { bg: string; fg: string }> = {
@@ -153,6 +158,12 @@ async function renderPng(heading: string, subtitle: string, sections: ImageSecti
         ctx.fill();
         const img = sprites.get(item.sprite);
         if (img) ctx.drawImage(img, x + 2, top + 2, ICON - 4, ICON - 4);
+        if (item.isNew) {
+          ctx.strokeStyle = NEW_BORDER;
+          ctx.lineWidth = 2.5;
+          roundRect(ctx, x + 1, top + 1, ICON - 2, ICON - 2, 9);
+          ctx.stroke();
+        }
         if (item.tops) drawStarCount(ctx, font, item.tops, x + ICON, top);
       });
       y += h + 4;
@@ -201,11 +212,11 @@ export function tierSections(sections: ExportSection[], style: TierStyle = "stan
     rows: tierDefinitions(style).filter((tier) => tier.id !== "top").map((tier) => ({
       label: tier.label,
       color: (style === "consensus" ? CONSENSUS_COLORS[tier.id] : undefined) ?? TIER_COLOR[tier.id],
-      items: (section.tiers.get(tier.id) ?? []).map((r) => ({ sprite: rankedSpriteUrl(r), tops: r.tops })),
+      items: (section.tiers.get(tier.id) ?? []).map((r) => ({ sprite: rankedSpriteUrl(r), tops: r.tops, isNew: r.isNew })),
     })),
   }, ...(section.unranked?.length ? [{
-    heading: "Not Enough Votes Yet",
-    rows: [{ label: "—", color: { bg: "#e2e8f0", fg: "#5a6385" }, items: section.unranked.map((row) => ({ sprite: rankedSpriteUrl(row) })) }],
+    heading: RANKING_PENDING,
+    rows: [{ label: "—", color: { bg: "#e2e8f0", fg: "#5a6385" }, items: section.unranked.map((row) => ({ sprite: rankedSpriteUrl(row), isNew: row.isNew })) }],
   }] : [])]);
 }
 

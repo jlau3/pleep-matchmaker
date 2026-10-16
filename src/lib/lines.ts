@@ -62,8 +62,12 @@ export const ISLANDS = islandsData as unknown as Island[];
 export const NEW_LINE_DAYS = 14;
 
 export function recentLines(now = new Date(), days = NEW_LINE_DAYS): CandyLine[] {
-  const cutoff = now.getTime() - days * 24 * 3600 * 1000;
-  return LINES.filter((line) => new Date(`${line.addedAt}T00:00:00Z`).getTime() >= cutoff);
+  return LINES.filter((line) => isNewLine(line, now, days));
+}
+
+/** Released in the last `days` days (the new candy card, the Tier List's "new" border). */
+export function isNewLine(line: Pick<CandyLine, "addedAt">, now = new Date(), days = NEW_LINE_DAYS): boolean {
+  return new Date(`${line.addedAt}T00:00:00Z`).getTime() >= now.getTime() - days * 24 * 3600 * 1000;
 }
 
 export function isChoice(value: unknown): value is Choice {

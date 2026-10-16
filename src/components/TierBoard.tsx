@@ -1,4 +1,10 @@
-import { type RankedLine, formatSupport, rankedSpriteUrl, type TierId, TIER_STYLE, tierDefinitions, type TierStyle, CONSENSUS_COLORS, TOP_ROW_SIZE } from "@/lib/tiers";
+import { type RankedLine, formatSupport, rankedSpriteUrl, type TierId, TIER_STYLE, tierDefinitions, type TierStyle, CONSENSUS_COLORS, TOP_ROW_SIZE, FIXED_SCORE_CUTOFFS } from "@/lib/tiers";
+
+/** Candy released in the last two weeks: a blue ring and a "New" tag (export draws the same ring). */
+export const NEW_CARD = "ring-2 ring-[#3fa7f5]";
+export function NewTag() {
+  return <span className="rounded bg-[#3fa7f5] px-1 text-[10px] font-extrabold uppercase leading-4 text-white">New</span>;
+}
 
 
 const panel = "card p-3";
@@ -8,20 +14,20 @@ const topPanel = "card mb-6 border-2 border-dashed border-sun-deep/60 bg-[#fff3c
 /** Sign reflects support; 0 is Neutral rather than a positive rating. */
 const supportColor = (support: number) => support < 0 ? "text-dont"
   : support === 0 ? "text-slate-500"
-  : support >= 80 ? "text-emerald-600 dark:text-emerald-400"
-  : support >= 50 ? "text-lime-600 dark:text-lime-400" : "text-amber-700 dark:text-amber-300";
+  : support >= FIXED_SCORE_CUTOFFS.S ? "text-emerald-600 dark:text-emerald-400"
+  : support >= FIXED_SCORE_CUTOFFS.A ? "text-lime-600 dark:text-lime-400" : "text-amber-700 dark:text-amber-300";
 
 function VoteCard({ ranked, consensus }: { ranked: RankedLine; consensus: boolean }) {
   const total = ranked.wants + ranked.neutral + ranked.dontWants;
   const voteLabel = (count: number) => consensus && total > 0 ? `${Math.round(100 * count / total)}%` : count;
   return (
-    <li className="flex items-center gap-3 rounded-2xl bg-white p-2 dark:bg-night-deep">
+    <li className={`flex items-center gap-3 rounded-2xl bg-white p-2 dark:bg-night-deep ${ranked.isNew ? NEW_CARD : ""}`}>
       <img src={rankedSpriteUrl(ranked)} alt="" loading="lazy" className="h-14 w-14 shrink-0 rounded-full bg-sky object-contain dark:bg-night" />
       <div className="min-w-0 flex-1">
         <div className="flex items-baseline justify-between gap-2">
-          <span className="truncate font-semibold">{ranked.line.name}</span>
+          <span className="flex min-w-0 items-center gap-1.5"><span className="truncate font-semibold">{ranked.line.name}</span>{ranked.isNew && <NewTag />}</span>
           {!consensus && ranked.support !== null && (
-            <span className="shrink-0 whitespace-nowrap" title={`Net support: (${ranked.wants} − ${ranked.dontWants}) ÷ ${ranked.wants + ranked.neutral + ranked.dontWants} × 100. Rounded for display; tiers use exact scores.`} aria-label={`Net support ${formatSupport(ranked.support)}`}>
+            <span className="shrink-0 whitespace-nowrap" title={`Support: (${ranked.wants} Want − ½ × ${ranked.dontWants} Don't Want) ÷ ${total} players who've seen it × 100. Neutral counts 0. Rounded for display; tiers use exact scores.`} aria-label={`Support ${formatSupport(ranked.support)}`}>
               <span className={`text-lg font-extrabold ${supportColor(ranked.support)}`}>{formatSupport(ranked.support)}</span>
               <span className="ml-1 text-xs text-slate-500">support</span>
             </span>

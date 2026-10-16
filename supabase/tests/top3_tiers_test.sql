@@ -1,6 +1,6 @@
 \set ON_ERROR_STOP on
 
--- 20261019000200_top3_sort.sql: list_tiers must match src/lib/tiers.ts
+-- 20261019000200_top3_sort.sql: list_tiers must match src/lib/tiers.ts (Don't Want -1/2 since 20261026000000)
 -- (buildTiers). Expected tiers below were computed with buildTiers for the same
 -- votes: 4 voters; per line (wants, don't-wants) q1 4,0  q2 3,0  q3 2,1  q4 1,0
 -- q5 0,2  q6 2,0  q7 1,1  q8 0,1; the rest unvoted ('' in list_tiers).
@@ -29,11 +29,11 @@ declare
   p constant uuid := '00000000-0000-0000-0023-000000000001';
 begin
   select jsonb_object_agg(line_id, tier) into got from public.list_tiers(p, 20);
-  assert got = '{"q1":"S","q2":"A","q6":"A","q4":"B","":"C","q3":"B","q7":"C","q8":"Avoid","q5":"Avoid"}', format('20 lines: %s', got);
+  assert got = '{"q1":"S","q2":"S","q6":"A","q3":"B","q4":"B","q7":"C","":"C","q8":"Avoid","q5":"Avoid"}', format('20 lines: %s', got);
   select jsonb_object_agg(line_id, tier) into got from public.list_tiers(p, 10);
-  assert got = '{"q1":"S","q2":"A","q6":"A","q4":"B","":"C","q3":"B","q7":"C","q8":"Avoid","q5":"Avoid"}', format('10 lines: %s', got);
+  assert got = '{"q1":"S","q2":"S","q6":"A","q3":"B","q4":"B","q7":"C","":"C","q8":"Avoid","q5":"Avoid"}', format('10 lines: %s', got);
   select jsonb_object_agg(line_id, tier) into got from public.list_tiers(p, 8);
-  assert got = '{"q1":"S","q2":"A","q6":"A","q4":"B","q3":"B","q7":"C","q8":"Avoid","q5":"Avoid"}', format('8 lines: %s', got);
+  assert got = '{"q1":"S","q2":"S","q6":"A","q3":"B","q4":"B","q7":"C","q8":"Avoid","q5":"Avoid"}', format('8 lines: %s', got);
   assert not exists (select 1 from public.list_tiers('00000000-0000-0000-0023-000000000006', 20)), 'no friends voting: no list';
 end $$;
 

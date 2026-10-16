@@ -17,8 +17,8 @@ describe("Tier List ranking styles", () => {
 
   it("uses fixed cutoffs, keeps Neutral in C, and preserves the negative-total Avoid rule", () => {
     const counts: [number, number, TierId][] = [
-      [80, 0, "S"], [79, 0, "A"], [50, 0, "A"], [49, 0, "B"],
-      [20, 0, "B"], [19, 0, "C"], [0, 0, "C"], [0, 1, "avoid"],
+      [60, 0, "S"], [59, 0, "A"], [45, 0, "A"], [44, 0, "B"],
+      [25, 0, "B"], [24, 0, "C"], [0, 0, "C"], [0, 1, "avoid"],
     ];
     const votes = new Map(counts.map(([wants, dontWants], index) => [lines[index].id, { wants, dontWants }]));
     const tiers = buildTiers(votes, 100, lines.slice(0, counts.length), "fixed");
@@ -26,7 +26,7 @@ describe("Tier List ranking styles", () => {
   });
 
   it("uses exact support for boundaries even when the displayed number rounds up", () => {
-    const votes = new Map([[lines[0].id, { wants: 7996, dontWants: 0 }], [lines[1].id, { wants: 0, dontWants: 1 }]]);
+    const votes = new Map([[lines[0].id, { wants: 5996, dontWants: 0 }], [lines[1].id, { wants: 0, dontWants: 1 }]]);
     const tiers = buildTiers(votes, 10000, lines.slice(0, 2), "fixed");
     expect(tierOf(tiers, lines[0].id)).toBe("A");
     expect(tierOf(tiers, lines[1].id)).toBe("avoid");
@@ -52,8 +52,8 @@ describe("Tier List ranking styles", () => {
   });
 
   it.each(["standard", "fixed"] as const)("never ranks or exports low-count public candies in %s", (style) => {
-    const votes = new Map<string, LineVotes>([[lines[0].id, { wants: 9, dontWants: 0, tops: 9, seen: 9 }], [lines[1].id, { wants: 10, dontWants: 0, seen: 10 }]]);
-    const view = buildPublicTiers(votes, 10, lines.slice(0, 2), style);
+    const votes = new Map<string, LineVotes>([[lines[0].id, { wants: 49, dontWants: 0, tops: 9, seen: 49 }], [lines[1].id, { wants: 50, dontWants: 0, seen: 50 }]]);
+    const view = buildPublicTiers(votes, 50, lines.slice(0, 2), style);
     expect(view.unranked.map((r) => r.line.id)).toEqual([lines[0].id]);
     expect([...view.tiers.values()].flat().map((r) => r.line.id)).not.toContain(lines[0].id);
   });
@@ -62,7 +62,7 @@ describe("Tier List ranking styles", () => {
     const tiers = buildTiers(new Map(), 0, lines, "fixed");
     expect(tiers.get("C")).toHaveLength(lines.length);
     expect(tiers.get("S")).toHaveLength(0);
-    expect(tierDefinitions("fixed").find((tier) => tier.id === "S")?.hint).toBe("Net support 80 or higher");
+    expect(tierDefinitions("fixed").find((tier) => tier.id === "S")?.hint).toBe("Support 60 or higher");
   });
 });
 
@@ -106,8 +106,8 @@ describe("comparison ranking styles", () => {
     expect(mixed.find((row) => row.line.id === lines[3].id)?.consensusNote).toBeUndefined();
   });
   it.each(["standard", "fixed", "consensus"] as const)("%s never loses or duplicates a ranked candy or exposes low-count totals", (style) => {
-    const votes = new Map(lines.map((line, i) => [line.id, { wants: i, dontWants: 0, tops: i === 0 ? 0 : 1, seen: i === 0 ? 9 : 20 }]));
-    const publicView = buildPublicTiers(votes, 20, lines, style);
+    const votes = new Map(lines.map((line, i) => [line.id, { wants: i, dontWants: 0, tops: i === 0 ? 0 : 1, seen: i === 0 ? 49 : 50 }]));
+    const publicView = buildPublicTiers(votes, 50, lines, style);
     const ranked = [...publicView.tiers].filter(([id]) => id !== "top").flatMap(([, rows]) => rows.map((r) => r.line.id));
     expect(new Set(ranked).size).toBe(lines.length - 1);
     expect(ranked).toHaveLength(lines.length - 1);

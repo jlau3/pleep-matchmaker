@@ -1,4 +1,4 @@
-import { type CandyLine, LINES, lineSpriteUrl } from "./lines";
+import { type CandyLine, isNewLine, LINES, lineSpriteUrl } from "./lines";
 
 export const TIER_STYLES = ["standard", "fixed", "consensus"] as const;
 export type TierStyle = typeof TIER_STYLES[number];
@@ -6,7 +6,7 @@ export const TIER_STYLE_LABEL: Record<TierStyle, string> = {
   standard: "Standard", fixed: "Fixed Scores", consensus: "Consensus",
 };
 export const TIER_STYLE_DESCRIPTION: Record<TierStyle, string> = {
-  standard: "Recommended shared ranking. Negative totals go to Avoid; the rest split by percentile.",
+  standard: "Recommended shared ranking. Negative support goes to Avoid; the rest split by percentile.",
   fixed: "Compare support across lists using the same score cutoffs. Tiers depend on each candy's votes, not how other candy scores.",
   consensus: "Groups candy as Mostly Wanted, Mixed, or Mostly Unwanted. Divisive requires at least one-third Want and one-third Don't Want.",
 };
@@ -18,8 +18,14 @@ export const CONSENSUS_COLORS: Record<string, { bg: string; fg: string; shadow: 
   avoid: { bg: "#ec6b6b", fg: "#ffffff", shadow: "#ba4848" },
 };
 
-/** Trial benchmarks on net support per 100 players; all-Neutral is 0 in C. */
-export const FIXED_SCORE_CUTOFFS = { S: 80, A: 50, B: 20 } as const;
+/**
+ * Support cutoffs (per 100 players; all-Neutral is 0 in C). Calibrated on the
+ * production snapshot so Fixed Scores' tier sizes stay close to Standard's.
+ */
+export const FIXED_SCORE_CUTOFFS = { S: 60, A: 45, B: 25 } as const;
+
+/** Everyone pool: players who've seen a candy before it's ranked (counts show from the database's 10). */
+export const RANK_MIN_SEEN = 50;
 
 export type TierId = "top" | "S" | "A" | "B" | "C" | "avoid";
 
@@ -30,9 +36,12 @@ export interface Tier {
 }
 
 /**
- * The tier list answers "which candy should I send my friends?". Each voter
- * scores a candy (POINTS): Want +1, Neutral 0, Don't Want -1.
- * One Don't Want offsets one Want; Neutral does not add support.
+ * The tier list answers "which candy should I send my friends?". You send one
+ * candy a day to every friend, so a candy is worth what it's worth to each
+ * of them: Want full value, Neutral a third ("collect it slowly"), Don't Want
+ * nothing. Shifted so Neutral is 0, that's POINTS: Want +1, Neutral 0, Don't
+ * Want -1/2. Support is the score per player who has seen the candy, so a new
+ * release isn't marked down for players who haven't got to it yet.
  * Top 3 Spotlight stars don't change the score; they're the first tie-breaker.
  *
  * Negative net support is Avoid; zero support stays in C. Positive scores are
@@ -52,7 +61,7 @@ export const TIER_SHARES = { S: 0.2, A: 0.25, B: 0.3 } as const;
 export const TOP_ROW_SIZE = 9;
 
 /** What each voter's choice adds to a line's score. Tier List only; match %s use public.dont_want_weight(). */
-export const POINTS = { want: 1, neutral: 0, dontWant: -1 } as const;
+export const POINTS = { want: 1, neutral: 0, dontWant: -0.5 } as const;
 
 const pct = (x: number) => Math.round(x * 100);
 
@@ -73,7 +82,7 @@ export const TIERS: Tier[] = [
   { id: "A", label: "A", hint: `Next ${pct(TIER_SHARES.A)}%` },
   { id: "B", label: "B", hint: `Next ${pct(TIER_SHARES.B)}%` },
   { id: "C", label: "C", hint: "Lower priority" },
-  { id: "avoid", label: "Avoid", hint: "Negative net support" },
+  { id: "avoid", label: "Avoid", hint: "Negative support" },
 ];
 
 /** Labels follow the selected presentation and its score boundaries. */
@@ -86,10 +95,10 @@ export function tierDefinitions(style: TierStyle): Tier[] {
   ];
   if (style === "standard") return TIERS;
   return TIERS.map((tier) => ({ ...tier, hint: ({
-    S: `Net support ${FIXED_SCORE_CUTOFFS.S} or higher`,
-    A: `Net support ${FIXED_SCORE_CUTOFFS.A} to below ${FIXED_SCORE_CUTOFFS.S}`,
-    B: `Net support ${FIXED_SCORE_CUTOFFS.B} to below ${FIXED_SCORE_CUTOFFS.A}`,
-    C: `Lower priority · Net support 0 to below ${FIXED_SCORE_CUTOFFS.B}`,
+    S: `Support ${FIXED_SCORE_CUTOFFS.S} or higher`,
+    A: `Support ${FIXED_SCORE_CUTOFFS.A} to below ${FIXED_SCORE_CUTOFFS.S}`,
+    B: `Support ${FIXED_SCORE_CUTOFFS.B} to below ${FIXED_SCORE_CUTOFFS.A}`,
+    C: `Lower priority · Support 0 to below ${FIXED_SCORE_CUTOFFS.B}`,
   } as Record<string, string>)[tier.id] ?? tier.hint }));
 }
 
@@ -110,10 +119,12 @@ export interface RankedLine {
   dontWants: number;
   /** Voters in the pool who neither want nor don't want it (Neutral, or not voted yet). */
   neutral: number;
-  /** Score (see scoreOf); what tiers rank on. */
+  /** Score (see scoreOf). */
   score: number;
-  /** Net support per 100 players: Neutral 0, all Want +100, all Don't Want -100. */
+  /** Score per 100 players who've seen it: what tiers rank on. All Want +100, all Neutral 0, all Don't Want -50. */
   support: number | null;
+  /** Released within NEW_LINE_DAYS: shown with the "new" border. */
+  isNew: boolean;
   /** Detail preserved within Consensus's shared Mixed group. */
   consensusNote?: "Divisive" | "Mostly Neutral";
   tops: number;
@@ -125,6 +136,9 @@ export interface RankedLine {
   /** Share of the pool who don't want it. Null with no voters. */
   dontShare: number | null;
 }
+
+/** Who a line's score is out of: the players who've seen it (Everyone), else the whole pool (My Friends). */
+export const seenOf = (votes: LineVotes | undefined, voters: number): number => votes?.seen ?? voters;
 
 /** A line's score: POINTS per voter, everyone not voting Want or Don't Want counting as Neutral. */
 export function scoreOf(votes: LineVotes, voters: number): number {
@@ -144,15 +158,16 @@ export function formatSupport(support: number): string {
   return (support < 0 ? "−" : "") + (magnitude === 0 ? "<1" : magnitude.toString());
 }
 
+const supportKey = (r: RankedLine) => r.support ?? -Infinity;
 const byRank = (a: RankedLine, b: RankedLine) =>
-  b.score - a.score ||
+  supportKey(b) - supportKey(a) ||
   b.tops - a.tops ||
   Number(b.line.rare) - Number(a.line.rare) ||
   a.dontWants - b.dontWants ||
   a.line.dex - b.line.dex;
 
 /**
- * Buckets lines into tiers (see TIER_SHARES), best first inside each tier (score,
+ * Buckets lines into tiers (see TIER_SHARES), best first inside each tier (support,
  * then Top 3 Spotlight stars, then rare lines, then fewer don't-wants, then dex). Lines that tie on score share a tier whatever their stars. The Top 3 Spotlight row
  * holds every starred line, ordered by stars and then the same keys.
  */
@@ -161,19 +176,23 @@ export function buildTiers(
   voters: number,
   lines: CandyLine[] = LINES,
   style: TierStyle = "standard",
+  now: Date = new Date(),
 ): Map<TierId, RankedLine[]> {
   const all: RankedLine[] = lines.map((line) => {
     const v = votes.get(line.id) ?? { wants: 0, dontWants: 0 };
+    const seen = seenOf(v, voters);
+    const score = scoreOf(v, seen);
     return {
       line,
       wants: v.wants,
       dontWants: v.dontWants,
-      neutral: Math.max(0, voters - v.wants - v.dontWants),
-      score: scoreOf(v, voters),
-      support: supportOf(scoreOf(v, voters), voters),
+      neutral: Math.max(0, seen - v.wants - v.dontWants),
+      score,
+      support: supportOf(score, seen),
+      isNew: isNewLine(line, now),
       tops: v.tops ?? 0,
-      wantShare: voters > 0 ? v.wants / voters : null,
-      dontShare: voters > 0 ? v.dontWants / voters : null,
+      wantShare: seen > 0 ? v.wants / seen : null,
+      dontShare: seen > 0 ? v.dontWants / seen : null,
     };
   });
   const top = all
@@ -188,9 +207,10 @@ export function buildTiers(
   }
   if (style === "consensus") {
     for (const row of all.sort(byRank)) {
-      const want = row.wants / voters, dont = row.dontWants / voters, neutral = row.neutral / voters;
-      // Both opposing groups must each cover at least one-third of the pool.
-      const divisive = row.wants * 3 >= voters && row.dontWants * 3 >= voters;
+      const seen = Math.max(1, row.wants + row.neutral + row.dontWants);
+      const want = row.wants / seen, dont = row.dontWants / seen, neutral = row.neutral / seen;
+      // Both opposing groups must each cover at least one-third of those who've seen it.
+      const divisive = row.wants * 3 >= seen && row.dontWants * 3 >= seen;
       const bucket: TierId = divisive ? "A"
         : want > neutral && want > dont && want >= 2 * dont ? "S"
         : dont > neutral && dont > want && dont >= 2 * want ? "avoid" : "A";
@@ -213,7 +233,7 @@ export function buildTiers(
     return out;
   }
 
-  // Positive scores fill S/A/B/C by rank; zero support stays in C. A run of lines tied on score all go to
+  // Positive support fills S/A/B/C by rank; zero support stays in C. A run of lines tied on support all go to
   // the tier of the run's middle position, so with few voters (lots of ties)
   // tier sizes stay near their targets instead of one tie swallowing S.
   out.get("C")!.push(...all.filter((r) => r.score === 0));
@@ -227,7 +247,7 @@ export function buildTiers(
   ];
   for (let start = 0; start < n; ) {
     let end = start;
-    while (end + 1 < n && ranked[end + 1].score === ranked[start].score) end++;
+    while (end + 1 < n && ranked[end + 1].support === ranked[start].support) end++;
     const mid = Math.floor((start + end) / 2);
     // The best-ranked run is always S, so S is never empty (e.g. one friend's wants all tie).
     const tier = start === 0 ? "S" : ends.find(([, e]) => mid < e)![0];
@@ -244,13 +264,32 @@ export function buildTiers(
 /** The sprite a tier list shows for a line: the filtered form when there is one, else the namesake. */
 export const rankedSpriteUrl = (ranked: Pick<RankedLine, "line" | "sprite">) => ranked.sprite ?? lineSpriteUrl(ranked.line);
 
-/** Public lines below the database threshold stay out of every ranking and star row. */
-export function buildPublicTiers(votes: Map<string, LineVotes>, voters: number, lines: CandyLine[] = LINES, style: TierStyle = "standard") {
-  const eligible = lines.filter((line) => (votes.get(line.id)?.seen ?? 0) >= 10);
+/** A public line not ranked yet: its counts once the database shows them (10+ players), else none. */
+export interface UnrankedLine {
+  line: CandyLine;
+  sprite?: string;
+  isNew: boolean;
+  counts?: { wants: number; neutral: number; dontWants: number; seen: number };
+}
+
+/**
+ * Everyone pool: only lines seen by RANK_MIN_SEEN players are ranked (and
+ * starred). Below that, ranking is still being determined; the database
+ * already hides counts under 10 players, and those lines carry no numbers.
+ */
+export function buildPublicTiers(votes: Map<string, LineVotes>, voters: number, lines: CandyLine[] = LINES, style: TierStyle = "standard", now: Date = new Date()) {
+  const eligible = lines.filter((line) => (votes.get(line.id)?.seen ?? 0) >= RANK_MIN_SEEN);
   const ids = new Set(eligible.map((line) => line.id));
   return {
-    tiers: buildTiers(votes, voters, eligible, style),
-    unranked: lines.filter((line) => !ids.has(line.id)).map((line): Pick<RankedLine, "line" | "sprite"> => ({ line })),
+    tiers: buildTiers(votes, voters, eligible, style, now),
+    unranked: lines.filter((line) => !ids.has(line.id)).map((line): UnrankedLine => {
+      const v = votes.get(line.id);
+      return {
+        line,
+        isNew: isNewLine(line, now),
+        ...(v?.seen != null && { counts: { wants: v.wants, dontWants: v.dontWants, neutral: Math.max(0, v.seen - v.wants - v.dontWants), seen: v.seen } }),
+      };
+    }),
   };
 }
 

@@ -1,19 +1,21 @@
 import { describe, expect, it } from "vitest";
 import { LINES } from "./lines";
 import { buildPublicTiers } from "./tiers";
-import { tierSections } from "@/components/TierExport";
+import { RANKING_PENDING, tierSections } from "@/components/TierExport";
 
 describe("public tiers and exports", () => {
-  it("never ranks, rates, or stars lines with fewer than ten saved entries", () => {
+  it("never ranks or stars lines seen by fewer than 50 players", () => {
     const [enough, early, absent] = LINES;
     const view = buildPublicTiers(new Map([
-      [enough.id, { wants: 1, dontWants: 0, tops: 1, seen: 10 }],
-      [early.id, { wants: 9, dontWants: 0, tops: 9, seen: 9 }],
-    ]), 10, [enough, early, absent]);
+      [enough.id, { wants: 1, dontWants: 0, tops: 1, seen: 50 }],
+      [early.id, { wants: 9, dontWants: 0, tops: 9, seen: 49 }],
+    ]), 50, [enough, early, absent]);
     expect(Array.from(view.tiers.values()).flat().every((row) => row.line.id === enough.id)).toBe(true);
-    expect(view.unranked).toEqual([{ line: early }, { line: absent }]);
+    expect(view.unranked.map((row) => row.line)).toEqual([early, absent]);
+    expect(view.unranked[0].counts).toEqual({ wants: 9, dontWants: 0, neutral: 40, seen: 49 });
+    expect(view.unranked[1].counts).toBeUndefined();
     const sections = tierSections([view]);
-    expect(sections.at(-1)?.heading).toBe("Not Enough Votes Yet");
+    expect(sections.at(-1)?.heading).toBe(RANKING_PENDING);
     expect(sections.at(-1)?.rows[0].items).toHaveLength(2);
     expect(sections.at(-1)?.rows[0].items.every((item) => !("tops" in item))).toBe(true);
   });
