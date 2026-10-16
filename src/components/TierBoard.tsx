@@ -1,4 +1,4 @@
-import { type RankedLine, formatScore, rankedSpriteUrl, type TierId, TIER_STYLE, tierDefinitions, type TierStyle, CONSENSUS_COLORS, TOP_ROW_SIZE, FIXED_SCORE_CUTOFFS } from "@/lib/tiers";
+import { type RankedLine, formatScore, formatSupport, rankedSpriteUrl, type TierId, TIER_STYLE, tierDefinitions, type TierStyle, CONSENSUS_COLORS, TOP_ROW_SIZE, FIXED_SCORE_CUTOFFS } from "@/lib/tiers";
 
 /** Candy released in the last two weeks: a blue ring and a "New" tag (export draws the same ring). */
 export const NEW_CARD = "ring-2 ring-[#3fa7f5]";
@@ -28,7 +28,8 @@ function VoteCard({ ranked, consensus }: { ranked: RankedLine; consensus: boolea
           <span className="flex min-w-0 items-center gap-1.5"><span className="truncate font-semibold">{ranked.line.name}</span>{ranked.isNew && <NewTag />}</span>
           {!consensus && ranked.support !== null && (
             <span className="shrink-0 whitespace-nowrap" title={`Score: (${ranked.wants} Want − ½ × ${ranked.dontWants} Don't Want) ÷ ${total} players who've seen it × 100. Neutral counts 0. ${ranked.support! < 0 ? "Below 0 is Avoid." : `As good as ${Math.round(ranked.support!)}% of players wanting it and the rest Neutral.`} Rounded for display; tiers use exact scores.`} aria-label={`Score ${formatScore(ranked.support)}`}>
-              <span className={`text-lg font-extrabold ${supportColor(ranked.support)}`}>{formatScore(ranked.support)}</span>
+              <span className={`text-lg font-extrabold ${supportColor(ranked.support)}`}>{formatSupport(ranked.support)}</span>
+              {ranked.support >= 0 && <span className="ml-0.5 text-xs text-slate-500">/100</span>}
             </span>
           )}
         </div>

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { isSleepType, ISLANDS, LINES, SLEEP_TYPE_LABEL, SLEEP_TYPES, lineSpriteUrl, sleepTypeMember, spriteUrl, type SleepType } from "@/lib/lines";
-import { buildTiers, buildPublicTiers, TIER_STYLE_LABEL, TIER_STYLES, TIER_STYLE_DESCRIPTION, RANK_MIN_SEEN, type TierStyle, type LineVotes, type UnrankedLine } from "@/lib/tiers";
+import { buildTiers, buildPublicTiers, parseTierStyle, TIER_STYLE_LABEL, TIER_STYLES, TIER_STYLE_DESCRIPTION, RANK_MIN_SEEN, type TierStyle, type LineVotes, type UnrankedLine } from "@/lib/tiers";
 import { InviteButton } from "./InviteButton";
 import { InviteReminder } from "./InviteReminder";
 import { RefreshStamp } from "./RefreshStamp";
@@ -28,6 +28,11 @@ export interface PoolVotes {
 
 /** Last view (pool, island, sleep type), so leaving the Tier List and coming back keeps it. */
 const VIEW_KEY = "pm_tiers_view";
+/** Last ranking style picked. Kept apart from the view: a link without ?style= doesn't reset it. */
+const STYLE_KEY = "pm_tiers_style";
+const saveStyle = (style: TierStyle) => {
+  try { localStorage.setItem(STYLE_KEY, style); } catch { /* Not remembered; fine. */ }
+};
 
 const POOL_LABEL: Record<Pool, string> = { friends: "My Friends", everyone: "Everyone" };
 const MAPPED_ISLANDS = ISLANDS.filter((island) => island.lines.length > 0);
@@ -124,10 +129,23 @@ export function TierExplorer({
   // Plain /tiers (from the nav): reopen the last view. A link with its own query wins, and
   // becomes the view to reopen (e.g. the first-friend note's link to My Friends).
   useEffect(() => {
-    if (!signedIn && new URLSearchParams(window.location.search).get("pool") === "friends") {
+    const params = new URLSearchParams(window.location.search);
+    if (!signedIn && params.get("pool") === "friends") {
       openSignIn(`/tiers${window.location.search}`);
     }
+    // An explicit ?style= wins and is remembered; otherwise reopen the last style picked.
+    let remembered: TierStyle = style;
+    if (params.has("style")) saveStyle(style);
+    else {
+      try {
+        const saved = localStorage.getItem(STYLE_KEY);
+        if (saved && parseTierStyle(saved) === saved) remembered = saved as TierStyle;
+      } catch {
+        /* Storage unavailable: keep the default style. */
+      }
+    }
     if (window.location.search) {
+      if (remembered !== style) show({ style: remembered });
       try {
         localStorage.setItem(viewKey, JSON.stringify({ pool, island: islandId, sleep: sleepType }));
       } catch {
@@ -137,8 +155,12 @@ export function TierExplorer({
     }
     try {
       const saved = JSON.parse(localStorage.getItem(viewKey) ?? "null");
-      if (!saved || typeof saved !== "object") return;
+      if (!saved || typeof saved !== "object") {
+        if (remembered !== style) show({ style: remembered });
+        return;
+      }
       show({
+        style: remembered,
         pool: !signedIn || saved.pool === "everyone" ? "everyone" : "friends",
         island: MAPPED_ISLANDS.some((island) => island.id === saved.island) ? saved.island : null,
         sleep: isSleepType(saved.sleep) ? saved.sleep : null,
@@ -162,6 +184,7 @@ export function TierExplorer({
     const id = next.island !== undefined ? next.island : islandId;
     const sleep = next.sleep !== undefined ? next.sleep : sleepType;
     const rankingStyle = next.style ?? style;
+    if (next.style) saveStyle(next.style);
     setStyle(rankingStyle);
     setPool(p);
     setIslandId(id);
@@ -326,20 +349,18 @@ export function TierExplorer({
           <div style={{ maxHeight: menuPlacement.maxHeight }} className={`absolute right-0 z-20 ${menuPlacement.above ? "bottom-full mb-2" : "top-full mt-2"} w-[min(24rem,calc(100vw-2rem))] overflow-y-auto rounded-xl border border-slate-300 bg-cream p-3 shadow-lg dark:border-slate-700 dark:bg-night`}>
             <fieldset className="min-w-0 space-y-3 border-0 p-0">
               <legend className="mb-2 w-full p-0 font-semibold">Choose a ranking style</legend>
-              <p className="text-xs text-slate-600 dark:text-slate-300">Each candy scores Want +1, Neutral 0 and Don&apos;t Want −½ per player who&apos;s seen it, out of 100: 60/100 is as good as 60% of players wanting it and the rest Neutral. Below 0 goes to Avoid in Standard and Fixed Scores. Numbers are rounded for display; tiers use exact scores.</p>
+              <p className="text-xs text-slate-600 dark:text-slate-300">Each candy scores Want +1, Neutral 0 and Don&apos;t Want −½ per player who&apos;s seen it, out of 100: 60/100 is as good as 60% of players wanting it and the rest Neutral. Below 0 goes to Avoid in Percentile and Fixed Scores. Numbers are rounded for display; tiers use exact scores.</p>
               {TIER_STYLES.map((option) => <label key={option} className="flex cursor-pointer items-start gap-2">
                 <input type="radio" name="tier-style" value={option} checked={style === option}
                   onChange={() => show({ style: option })} className="mt-1 shrink-0 accent-want" />
-                <span className="min-w-0"><b>{TIER_STYLE_LABEL[option]}{option === "standard" && " (Recommended)"}</b>
+                <span className="min-w-0"><b>{TIER_STYLE_LABEL[option]}</b>
                   <span className="block text-xs text-slate-500">{TIER_STYLE_DESCRIPTION[option]}</span></span>
               </label>)}
             </fieldset>
           </div>
         </details>
       </div>
-      {style !== "standard" && <p className="text-sm text-slate-600 dark:text-slate-300">
-        You're viewing {TIER_STYLE_LABEL[style]}. For the shared default, <button type="button" onClick={() => show({ style: "standard" })} className="font-semibold underline">use Standard</button>.
-      </p>}
+
 
       {data.voters === 0 && !data.thresholded ? (
         <p className="py-8 text-center text-slate-500">

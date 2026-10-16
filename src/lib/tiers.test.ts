@@ -22,13 +22,13 @@ describe("scoreOf", () => {
 });
 
 describe("relative tiers by score", () => {
-  it("splits ranked lines 20 / 25 / 30 / rest", () => {
+  it("splits ranked lines into quarters", () => {
     const { lines, votes } = ladder(20);
     const tiers = buildTiers(votes, 20, lines);
-    // ceil(0.2*20)=4 S, ceil(0.45*20)=9 -> 5 A, ceil(0.75*20)=15 -> 6 B, 5 C.
-    expect([tiers.get("S")!.length, tiers.get("A")!.length, tiers.get("B")!.length, tiers.get("C")!.length]).toEqual([4, 5, 6, 5]);
-    // One point per Want: 20, 19, 18, 17 wants.
-    expect(tiers.get("S")!.map((r) => r.score)).toEqual([20, 19, 18, 17]);
+    // ceil(0.25*20)=5 S, ceil(0.5*20)=10 -> 5 A, ceil(0.75*20)=15 -> 5 B, 5 C.
+    expect([tiers.get("S")!.length, tiers.get("A")!.length, tiers.get("B")!.length, tiers.get("C")!.length]).toEqual([5, 5, 5, 5]);
+    // One point per Want: 20 down to 16 wants.
+    expect(tiers.get("S")!.map((r) => r.score)).toEqual([20, 19, 18, 17, 16]);
   });
 
   it("avoids negative support, while zero support remains ranked", () => {
@@ -181,10 +181,10 @@ describe("buildTiers", () => {
       ...fillers.map((l, i) => [l.id, { wants: 35 - i, dontWants: 0 }] as [string, { wants: number; dontWants: number }]),
     ]);
     const tiers = buildTiers(votes, 50, [pikachu, eevee, ...fillers]);
-    // 9 ranked lines: S = 2, A = 3, B = 2, C = 2. eevee lands between the 34- and 33-Want fillers.
-    expect(ids(tiers, "S")[0]).toBe(pikachu.id);
-    expect(ids(tiers, "A")).toEqual([fillers[1].id, eevee.id, fillers[2].id]);
-    expect(tiers.get("A")![1]).toMatchObject({ score: 33.5, neutral: 0, dontShare: 0.22 });
+    // 9 ranked lines: S = 3, A = 2, B = 2, C = 2. eevee lands between the 34- and 33-Want fillers.
+    expect(ids(tiers, "S")).toEqual([pikachu.id, fillers[0].id, fillers[1].id]);
+    expect(ids(tiers, "A")).toEqual([eevee.id, fillers[2].id]);
+    expect(tiers.get("A")![0]).toMatchObject({ score: 33.5, neutral: 0, dontShare: 0.22 });
   });
 
   it("keeps Avoid lines in the Top 3 row, so nobody's pick is left out", () => {
@@ -211,7 +211,7 @@ describe("net support", () => {
     const bulbasaur = supportOf(scoreOf({ wants: 112, dontWants: 27 }, 201), 201)!;
     const chikorita = supportOf(scoreOf({ wants: 95, dontWants: 18 }, 201), 201)!;
     expect(formatSupport(bulbasaur)).toBe("49");
-    expect(formatSupport(chikorita)).toBe("43");
+    expect(formatSupport(chikorita)).toBe("42"); // 42.8: shown rounded down, like every score
     expect(bulbasaur).toBeGreaterThan(chikorita);
   });
   it("anchors an entirely Neutral list in C in both ranked styles", () => {

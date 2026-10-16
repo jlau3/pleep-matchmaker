@@ -3,7 +3,7 @@ import { type CandyLine, isNewLine, LINES, lineSpriteUrl } from "./lines";
 export const TIER_STYLES = ["standard", "fixed", "consensus"] as const;
 export type TierStyle = typeof TIER_STYLES[number];
 export const TIER_STYLE_LABEL: Record<TierStyle, string> = {
-  standard: "Standard", fixed: "Fixed Scores", consensus: "Consensus",
+  standard: "Percentile", fixed: "Fixed Scores", consensus: "Consensus",
 };
 /**
  * Fixed Scores cutoffs: quarters of the 0-100 score (all-Neutral is 0, in C;
@@ -12,8 +12,8 @@ export const TIER_STYLE_LABEL: Record<TierStyle, string> = {
  */
 export const FIXED_SCORE_CUTOFFS = { S: 75, A: 50, B: 25 } as const;
 export const TIER_STYLE_DESCRIPTION: Record<TierStyle, string> = {
-  standard: "Recommended shared ranking. Scores below 0 go to Avoid; the rest split by percentile.",
-  fixed: `The same cutoffs for every list, in quarters of the score: S ${FIXED_SCORE_CUTOFFS.S}+, A ${FIXED_SCORE_CUTOFFS.A}+, B ${FIXED_SCORE_CUTOFFS.B}+, C 0+ out of 100, Avoid below 0. Tiers depend on each candy's votes, not how other candy scores.`,
+  standard: "Scores below 0 go to Avoid. The rest are ranked against each other and split into four equal groups: the top quarter is S, the next A, then B, then C.",
+  fixed: `Scores below 0 go to Avoid. The rest are placed by their own score, not compared with other candy: S ${FIXED_SCORE_CUTOFFS.S}–100, A ${FIXED_SCORE_CUTOFFS.A}–${FIXED_SCORE_CUTOFFS.S - 1}, B ${FIXED_SCORE_CUTOFFS.B}–${FIXED_SCORE_CUTOFFS.A - 1}, C 0–${FIXED_SCORE_CUTOFFS.B - 1}. Good for comparing lists; less useful for choosing what to send first, since many candies can share a tier.`,
   consensus: "Groups candy as Mostly Wanted, Mixed, or Mostly Unwanted. Divisive requires at least one-third Want and one-third Don't Want.",
 };
 export const parseTierStyle = (value: unknown): TierStyle =>
@@ -47,7 +47,7 @@ export interface Tier {
  *
  * Negative net support is Avoid; zero support stays in C. Positive scores are
  * ranked, and the top
- * TIER_SHARES.S go to S, the next TIER_SHARES.A to A, the next TIER_SHARES.B to B, the rest to C. Lines
+ * TIER_SHARES.S go to S, the next TIER_SHARES.A to A, the next TIER_SHARES.B to B, the rest to C (a quarter each). Lines
  * that tie share a tier, placed by the tie's middle rank (the best-ranked tie
  * is always S). With no voters at all, everything is C.
  *
@@ -56,7 +56,7 @@ export interface Tier {
  * first TOP_ROW_SIZE and folds the rest behind "Show all". They also stay in their regular tier, so
  * the rest of the list never shifts.
  */
-export const TIER_SHARES = { S: 0.2, A: 0.25, B: 0.3 } as const;
+export const TIER_SHARES = { S: 0.25, A: 0.25, B: 0.25 } as const;
 
 /** How many of the most-starred lines the Top 3 Spotlight row shows before "Show all". */
 export const TOP_ROW_SIZE = 9;
@@ -79,10 +79,10 @@ export const TIER_STYLE: Record<string, string> = {
 
 export const TIERS: Tier[] = [
   { id: "top", label: "Top 3\nSpotlight", hint: "Candy players most want friends to send" },
-  { id: "S", label: "S", hint: `Top ${pct(TIER_SHARES.S)}% most wanted` },
+  { id: "S", label: "S", hint: `Top ${pct(TIER_SHARES.S)}% of scores above 0` },
   { id: "A", label: "A", hint: `Next ${pct(TIER_SHARES.A)}%` },
   { id: "B", label: "B", hint: `Next ${pct(TIER_SHARES.B)}%` },
-  { id: "C", label: "C", hint: "Lower priority" },
+  { id: "C", label: "C", hint: `Last ${pct(1 - TIER_SHARES.S - TIER_SHARES.A - TIER_SHARES.B)}%, and scores of 0` },
   { id: "avoid", label: "Avoid", hint: "Score below 0" },
 ];
 
@@ -96,10 +96,10 @@ export function tierDefinitions(style: TierStyle): Tier[] {
   ];
   if (style === "standard") return TIERS;
   return TIERS.map((tier) => ({ ...tier, hint: ({
-    S: `Score ${FIXED_SCORE_CUTOFFS.S}/100 or higher`,
-    A: `Score ${FIXED_SCORE_CUTOFFS.A} to below ${FIXED_SCORE_CUTOFFS.S}`,
-    B: `Score ${FIXED_SCORE_CUTOFFS.B} to below ${FIXED_SCORE_CUTOFFS.A}`,
-    C: `Lower priority · Score 0 to below ${FIXED_SCORE_CUTOFFS.B}`,
+    S: `Score ${FIXED_SCORE_CUTOFFS.S}–100`,
+    A: `Score ${FIXED_SCORE_CUTOFFS.A}–${FIXED_SCORE_CUTOFFS.S - 1}`,
+    B: `Score ${FIXED_SCORE_CUTOFFS.B}–${FIXED_SCORE_CUTOFFS.A - 1}`,
+    C: `Score 0–${FIXED_SCORE_CUTOFFS.B - 1}`,
   } as Record<string, string>)[tier.id] ?? tier.hint }));
 }
 
@@ -155,10 +155,13 @@ export function supportOf(score: number, voters: number): number | null {
 /** "79/100" for ranked scores, a bare "−42" below 0 (Avoid). Sorting and tier boundaries keep exact scores. */
 export const formatScore = (support: number): string => support < 0 ? formatSupport(support) : `${formatSupport(support)}/100`;
 
-/** Whole-number labels only; sorting and tier boundaries retain exact support. */
+/**
+ * Whole-number labels only; sorting and tier boundaries retain exact support.
+ * Rounds toward 0, so a 74.6 in A reads 74 (A is 50–74), never 75.
+ */
 export function formatSupport(support: number): string {
   if (support === 0) return "0";
-  const magnitude = Math.round(Math.abs(support));
+  const magnitude = Math.floor(Math.abs(support));
   return (support < 0 ? "−" : "") + (magnitude === 0 ? "<1" : magnitude.toString());
 }
 

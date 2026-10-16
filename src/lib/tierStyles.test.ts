@@ -62,7 +62,7 @@ describe("Tier List ranking styles", () => {
     const tiers = buildTiers(new Map(), 0, lines, "fixed");
     expect(tiers.get("C")).toHaveLength(lines.length);
     expect(tiers.get("S")).toHaveLength(0);
-    expect(tierDefinitions("fixed").find((tier) => tier.id === "S")?.hint).toBe("Score 75/100 or higher");
+    expect(tierDefinitions("fixed").find((tier) => tier.id === "S")?.hint).toBe("Score 75–100");
   });
 });
 
