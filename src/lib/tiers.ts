@@ -5,9 +5,15 @@ export type TierStyle = typeof TIER_STYLES[number];
 export const TIER_STYLE_LABEL: Record<TierStyle, string> = {
   standard: "Standard", fixed: "Fixed Scores", consensus: "Consensus",
 };
+/**
+ * Fixed Scores cutoffs: quarters of the 0-100 score (all-Neutral is 0, in C;
+ * below 0 is Avoid). A score of 75 is as good as three in four players wanting
+ * it and the rest Neutral.
+ */
+export const FIXED_SCORE_CUTOFFS = { S: 75, A: 50, B: 25 } as const;
 export const TIER_STYLE_DESCRIPTION: Record<TierStyle, string> = {
-  standard: "Recommended shared ranking. Negative support goes to Avoid; the rest split by percentile.",
-  fixed: "Compare support across lists using the same score cutoffs. Tiers depend on each candy's votes, not how other candy scores.",
+  standard: "Recommended shared ranking. Scores below 0 go to Avoid; the rest split by percentile.",
+  fixed: `The same cutoffs for every list, in quarters of the score: S ${FIXED_SCORE_CUTOFFS.S}+, A ${FIXED_SCORE_CUTOFFS.A}+, B ${FIXED_SCORE_CUTOFFS.B}+, C 0+ out of 100, Avoid below 0. Tiers depend on each candy's votes, not how other candy scores.`,
   consensus: "Groups candy as Mostly Wanted, Mixed, or Mostly Unwanted. Divisive requires at least one-third Want and one-third Don't Want.",
 };
 export const parseTierStyle = (value: unknown): TierStyle =>
@@ -18,11 +24,6 @@ export const CONSENSUS_COLORS: Record<string, { bg: string; fg: string; shadow: 
   avoid: { bg: "#ec6b6b", fg: "#ffffff", shadow: "#ba4848" },
 };
 
-/**
- * Support cutoffs (per 100 players; all-Neutral is 0 in C). Calibrated on the
- * production snapshot so Fixed Scores' tier sizes stay close to Standard's.
- */
-export const FIXED_SCORE_CUTOFFS = { S: 60, A: 45, B: 25 } as const;
 
 /** Everyone pool: players who've seen a candy before it's ranked (counts show from the database's 10). */
 export const RANK_MIN_SEEN = 50;
@@ -82,7 +83,7 @@ export const TIERS: Tier[] = [
   { id: "A", label: "A", hint: `Next ${pct(TIER_SHARES.A)}%` },
   { id: "B", label: "B", hint: `Next ${pct(TIER_SHARES.B)}%` },
   { id: "C", label: "C", hint: "Lower priority" },
-  { id: "avoid", label: "Avoid", hint: "Negative support" },
+  { id: "avoid", label: "Avoid", hint: "Score below 0" },
 ];
 
 /** Labels follow the selected presentation and its score boundaries. */
@@ -95,10 +96,10 @@ export function tierDefinitions(style: TierStyle): Tier[] {
   ];
   if (style === "standard") return TIERS;
   return TIERS.map((tier) => ({ ...tier, hint: ({
-    S: `Support ${FIXED_SCORE_CUTOFFS.S} or higher`,
-    A: `Support ${FIXED_SCORE_CUTOFFS.A} to below ${FIXED_SCORE_CUTOFFS.S}`,
-    B: `Support ${FIXED_SCORE_CUTOFFS.B} to below ${FIXED_SCORE_CUTOFFS.A}`,
-    C: `Lower priority · Support 0 to below ${FIXED_SCORE_CUTOFFS.B}`,
+    S: `Score ${FIXED_SCORE_CUTOFFS.S}/100 or higher`,
+    A: `Score ${FIXED_SCORE_CUTOFFS.A} to below ${FIXED_SCORE_CUTOFFS.S}`,
+    B: `Score ${FIXED_SCORE_CUTOFFS.B} to below ${FIXED_SCORE_CUTOFFS.A}`,
+    C: `Lower priority · Score 0 to below ${FIXED_SCORE_CUTOFFS.B}`,
   } as Record<string, string>)[tier.id] ?? tier.hint }));
 }
 
@@ -150,6 +151,9 @@ export function scoreOf(votes: LineVotes, voters: number): number {
 export function supportOf(score: number, voters: number): number | null {
   return voters > 0 ? 100 * score / voters : null;
 }
+
+/** "79/100" for ranked scores, a bare "−42" below 0 (Avoid). Sorting and tier boundaries keep exact scores. */
+export const formatScore = (support: number): string => support < 0 ? formatSupport(support) : `${formatSupport(support)}/100`;
 
 /** Whole-number labels only; sorting and tier boundaries retain exact support. */
 export function formatSupport(support: number): string {

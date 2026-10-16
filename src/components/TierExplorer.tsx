@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { isSleepType, ISLANDS, LINES, SLEEP_TYPE_LABEL, SLEEP_TYPES, lineSpriteUrl, sleepTypeMember, spriteUrl, type SleepType } from "@/lib/lines";
-import { buildTiers, buildPublicTiers, TIER_STYLE_LABEL, TIER_STYLES, TIER_STYLE_DESCRIPTION, FIXED_SCORE_CUTOFFS, RANK_MIN_SEEN, type TierStyle, type LineVotes, type UnrankedLine } from "@/lib/tiers";
+import { buildTiers, buildPublicTiers, TIER_STYLE_LABEL, TIER_STYLES, TIER_STYLE_DESCRIPTION, RANK_MIN_SEEN, type TierStyle, type LineVotes, type UnrankedLine } from "@/lib/tiers";
 import { InviteButton } from "./InviteButton";
 import { InviteReminder } from "./InviteReminder";
 import { RefreshStamp } from "./RefreshStamp";
@@ -326,12 +326,12 @@ export function TierExplorer({
           <div style={{ maxHeight: menuPlacement.maxHeight }} className={`absolute right-0 z-20 ${menuPlacement.above ? "bottom-full mb-2" : "top-full mt-2"} w-[min(24rem,calc(100vw-2rem))] overflow-y-auto rounded-xl border border-slate-300 bg-cream p-3 shadow-lg dark:border-slate-700 dark:bg-night`}>
             <fieldset className="min-w-0 space-y-3 border-0 p-0">
               <legend className="mb-2 w-full p-0 font-semibold">Choose a ranking style</legend>
-              <p className="text-xs text-slate-600 dark:text-slate-300">Support counts Want +1, Neutral 0 and Don&apos;t Want −½ for each player who&apos;s seen the candy, per 100 players. Negative support goes to Avoid in Standard and Fixed Scores. Numbers are rounded for display; tiers use exact scores.</p>
+              <p className="text-xs text-slate-600 dark:text-slate-300">Each candy scores Want +1, Neutral 0 and Don&apos;t Want −½ per player who&apos;s seen it, out of 100: 60/100 is as good as 60% of players wanting it and the rest Neutral. Below 0 goes to Avoid in Standard and Fixed Scores. Numbers are rounded for display; tiers use exact scores.</p>
               {TIER_STYLES.map((option) => <label key={option} className="flex cursor-pointer items-start gap-2">
                 <input type="radio" name="tier-style" value={option} checked={style === option}
                   onChange={() => show({ style: option })} className="mt-1 shrink-0 accent-want" />
                 <span className="min-w-0"><b>{TIER_STYLE_LABEL[option]}{option === "standard" && " (Recommended)"}</b>
-                  <span className="block text-xs text-slate-500">{TIER_STYLE_DESCRIPTION[option]}{option === "fixed" && ` S ${FIXED_SCORE_CUTOFFS.S}, A ${FIXED_SCORE_CUTOFFS.A}, B ${FIXED_SCORE_CUTOFFS.B}, C 0 to below ${FIXED_SCORE_CUTOFFS.B}.`}</span></span>
+                  <span className="block text-xs text-slate-500">{TIER_STYLE_DESCRIPTION[option]}</span></span>
               </label>)}
             </fieldset>
           </div>

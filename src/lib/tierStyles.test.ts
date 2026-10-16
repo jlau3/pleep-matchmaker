@@ -17,7 +17,7 @@ describe("Tier List ranking styles", () => {
 
   it("uses fixed cutoffs, keeps Neutral in C, and preserves the negative-total Avoid rule", () => {
     const counts: [number, number, TierId][] = [
-      [60, 0, "S"], [59, 0, "A"], [45, 0, "A"], [44, 0, "B"],
+      [75, 0, "S"], [74, 0, "A"], [50, 0, "A"], [49, 0, "B"],
       [25, 0, "B"], [24, 0, "C"], [0, 0, "C"], [0, 1, "avoid"],
     ];
     const votes = new Map(counts.map(([wants, dontWants], index) => [lines[index].id, { wants, dontWants }]));
@@ -26,7 +26,7 @@ describe("Tier List ranking styles", () => {
   });
 
   it("uses exact support for boundaries even when the displayed number rounds up", () => {
-    const votes = new Map([[lines[0].id, { wants: 5996, dontWants: 0 }], [lines[1].id, { wants: 0, dontWants: 1 }]]);
+    const votes = new Map([[lines[0].id, { wants: 7496, dontWants: 0 }], [lines[1].id, { wants: 0, dontWants: 1 }]]);
     const tiers = buildTiers(votes, 10000, lines.slice(0, 2), "fixed");
     expect(tierOf(tiers, lines[0].id)).toBe("A");
     expect(tierOf(tiers, lines[1].id)).toBe("avoid");
@@ -62,7 +62,7 @@ describe("Tier List ranking styles", () => {
     const tiers = buildTiers(new Map(), 0, lines, "fixed");
     expect(tiers.get("C")).toHaveLength(lines.length);
     expect(tiers.get("S")).toHaveLength(0);
-    expect(tierDefinitions("fixed").find((tier) => tier.id === "S")?.hint).toBe("Support 60 or higher");
+    expect(tierDefinitions("fixed").find((tier) => tier.id === "S")?.hint).toBe("Score 75/100 or higher");
   });
 });
 

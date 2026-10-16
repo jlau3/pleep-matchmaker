@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { LINES_BY_ID } from "./lines";
 import { buildPublicTiers } from "./tiers";
-import { buildTiers, countVotes, supportOf, formatSupport, scoreOf, TOP_ROW_SIZE } from "./tiers";
+import { buildTiers, countVotes, supportOf, formatScore, formatSupport, scoreOf, TOP_ROW_SIZE } from "./tiers";
 
 /** n lines where line i has i+1 wants from n voters, so every score is distinct. */
 function ladder(n: number) {
@@ -229,6 +229,11 @@ describe("net support", () => {
     expect(formatSupport(0.001)).toBe("<1");
     expect(formatSupport(-100)).toBe("−100");
     expect(formatSupport(100)).toBe("100");
+  });
+  it("shows ranked scores out of 100 and Avoid as a bare negative", () => {
+    expect(formatScore(79.1)).toBe("79/100");
+    expect(formatScore(0)).toBe("0/100");
+    expect(formatScore(-42.04)).toBe("−42");
   });
   it("never places negative support outside Avoid in Standard or Fixed Scores", () => {
     const lines = [...LINES_BY_ID.values()].slice(0, 20);
