@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { FriendAction } from "@/components/FriendAction";
 import { PlayerHeader, playerName } from "@/components/PlayerHeader";
 import { PlayerLists } from "@/components/PlayerLists";
@@ -153,13 +152,7 @@ export default async function FriendsPage({ searchParams }: { searchParams: Prom
             <FriendPlaceholders rows={placeholders} relations={relations} viewerId={user.id} />
           </div>
         )}
-        {friends.length === 0 ? (
-          <p className="text-sm text-slate-500">
-            Search for your Pokémon Sleep friends above and send them a friend request, or find new ones in{" "}
-            <Link href="/matches" className="underline">Find New Friends</Link>. Then check the{" "}
-            <Link href="/tiers" className="underline">Tier List</Link> to see which candy they want most.
-          </p>
-        ) : (
+        {friends.length > 0 && (
           <FriendsBoard
             initialSort={sort}
             // "For them" scores against your friends' votes (group_demand: visible friends' wants).
