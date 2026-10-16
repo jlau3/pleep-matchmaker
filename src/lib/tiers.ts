@@ -12,9 +12,9 @@ export const TIER_STYLE_LABEL: Record<TierStyle, string> = {
  */
 export const FIXED_SCORE_CUTOFFS = { S: 75, A: 50, B: 25 } as const;
 export const TIER_STYLE_DESCRIPTION: Record<TierStyle, string> = {
-  standard: "Best for deciding what to send. Scores below 0 go to F; the rest are ranked against each other: S is the top 10%, A the next 20%, B the next 30%, C the rest. S is always a shortlist, even when nothing is wildly popular.",
-  fixed: `Best for talking candy. Scores below 0 go to F; the rest are placed by their own score: S ${FIXED_SCORE_CUTOFFS.S}–100, A ${FIXED_SCORE_CUTOFFS.A}–${FIXED_SCORE_CUTOFFS.S - 1}, B ${FIXED_SCORE_CUTOFFS.B}–${FIXED_SCORE_CUTOFFS.A - 1}, C 0–${FIXED_SCORE_CUTOFFS.B - 1}. An S means the same thing to everyone, wherever players talk candy.`,
-  consensus: "Groups candy as Mostly Wanted, Mixed, or Mostly Unwanted. Divisive requires at least one-third Want and one-third Don't Want.",
+  standard: "Best for choosing priorities within this group. Positive scores are ranked against each other: S is the top 10%, A the next 20%, B the next 30%, C the rest. Ties stay together, so tier sizes can vary. Zero scores go to C; negative scores go to F.",
+  fixed: `Best for comparing scores across groups and over time. Scores below 0 go to F; the rest are placed by their own score: S ${FIXED_SCORE_CUTOFFS.S}–100, A ${FIXED_SCORE_CUTOFFS.A}–${FIXED_SCORE_CUTOFFS.S - 1}, B ${FIXED_SCORE_CUTOFFS.B}–${FIXED_SCORE_CUTOFFS.A - 1}, C 0–${FIXED_SCORE_CUTOFFS.B - 1}. The same score cutoffs apply to every group.`,
+  consensus: "Best for seeing agreement and disagreement. Groups candy as Mostly Wanted, Mixed, or Mostly Unwanted. Divisive requires at least one-third Want and one-third Don't Want.",
 };
 export const parseTierStyle = (value: unknown): TierStyle =>
   TIER_STYLES.includes(value as TierStyle) ? value as TierStyle : "standard";
@@ -80,11 +80,11 @@ export const TIER_STYLE: Record<string, string> = {
 export const TIERS: Tier[] = [
   { id: "top", label: "Top 3\nSpotlight", hint: "Candy players most want friends to send" },
   // Same shape as Fixed Scores' "Score 75–100" hints; F's hint is shared by both.
-  { id: "S", label: "S", hint: `Top ${pct(TIER_SHARES.S)}% of scores 0+` },
-  { id: "A", label: "A", hint: `Next ${pct(TIER_SHARES.A)}% of scores 0+` },
-  { id: "B", label: "B", hint: `Next ${pct(TIER_SHARES.B)}% of scores 0+` },
-  { id: "C", label: "C", hint: `Last ${pct(1 - TIER_SHARES.S - TIER_SHARES.A - TIER_SHARES.B)}% of scores 0+` },
-  { id: "avoid", label: "F", hint: "Don't Wants outnumber Wants 2 to 1 (score below 0)" },
+  { id: "S", label: "S", hint: `Top ${pct(TIER_SHARES.S)}% of positive scores` },
+  { id: "A", label: "A", hint: `Next ${pct(TIER_SHARES.A)}% of positive scores` },
+  { id: "B", label: "B", hint: `Next ${pct(TIER_SHARES.B)}% of positive scores` },
+  { id: "C", label: "C", hint: "Remaining positive scores and all zero scores" },
+  { id: "avoid", label: "F", hint: "More than twice as many Don't Want votes as Want votes (score below 0)" },
 ];
 
 /** Labels follow the selected presentation and its score boundaries. */

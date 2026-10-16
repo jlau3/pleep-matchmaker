@@ -1,6 +1,8 @@
+import type { MatchContext } from "./matchContext";
+
 // Row shapes returned by the Postgres functions in supabase/migrations.
 
-export interface PlayerContact {
+export interface PlayerContact extends MatchContext {
   user_id: string;
   discord_username: string | null;
   discord_display_name: string | null;
@@ -34,7 +36,7 @@ export interface MatchRow extends PlayerContact {
   top_wants?: string[];
   /** browse_players only: how many players the current filter lists in all. */
   total_count?: number;
-  /** browse_players only: their friends who've voted, 0 under 3 ("for you" is a dash then). */
+  /** browse_players only: their friends who've voted (legacy values below 3 may be reported as 0). */
   list_voters?: number;
   /** browse_players only: whether they've voted on anything ("for them" is a dash until they do). */
   voted?: boolean;

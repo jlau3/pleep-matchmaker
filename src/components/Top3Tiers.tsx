@@ -1,3 +1,4 @@
+import type { MatchContext } from "@/lib/matchContext";
 import { LINES_BY_ID, lineSpriteUrl } from "@/lib/lines";
 import { TIER_STYLE } from "@/lib/tiers";
 import { FitPair } from "./FitPair";
@@ -7,8 +8,7 @@ import { FitPair } from "./FitPair";
  * it sits in there (same letters and colours as the Tier List), so you can
  * see who's likeliest to send your favorites. No label: it sits under the
  * fits on cards (FitWithTop3) and on grid tiles. Nothing if you haven't starred
- * any. A player with no list yet (fewer than 3 friends voting) shows dashes, as
- * "for you" does.
+ * any. A player with no list yet (fewer than 3 friends voting) shows dashes, for the Spotlight badges only.
  */
 export function Top3Tiers({
   tops,
@@ -58,10 +58,10 @@ export function Top3Tiers({
 }
 
 /** A card's top right: both fits, with your Top 3's tiers underneath when given. */
-export function FitWithTop3({ they, you, tops, tiers }: { they: number | null; you: number | null | undefined; tops?: string[]; tiers?: Record<string, string> }) {
+export function FitWithTop3({ they, you, tops, tiers, context }: { context?: MatchContext; they: number | null; you: number | null | undefined; tops?: string[]; tiers?: Record<string, string> }) {
   return (
     <div className="flex shrink-0 flex-col items-end gap-1.5">
-      <FitPair they={they} you={you} />
+      <FitPair they={they} you={you} context={context} />
       {tops && <Top3Tiers tops={tops} tiers={tiers} align="end" />}
     </div>
   );

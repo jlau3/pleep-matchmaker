@@ -1,18 +1,29 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import type { MatchContext } from "./matchContext";
 
-/** Adds each player's in-game icon, Reddit name and whether their votes are hidden from you (player_extras). Rows pass through unchanged if that fails. */
+type Extras = MatchContext & {
+  user_id: string;
+  game_avatar?: string | null;
+  reddit_username?: string | null;
+  votes_hidden?: boolean;
+};
+
+/** Shared identity/privacy and directional match context, in the RPC's 200-player batches. */
 export async function withExtras<T extends { user_id: string }>(
   supabase: SupabaseClient,
   rows: T[],
-): Promise<(T & { game_avatar?: string | null; reddit_username?: string | null; votes_hidden?: boolean })[]> {
+): Promise<(T & Omit<Extras, "user_id">)[]> {
   if (rows.length === 0) return rows;
-  const { data, error } = await supabase.rpc("player_extras", { ids: rows.map((r) => r.user_id) });
-  if (error || !data) return rows;
-  const byId = new Map((data as { user_id: string; game_avatar: string | null; reddit_username: string | null; votes_hidden?: boolean }[]).map((e) => [e.user_id, e]));
+  const batches = [];
+  for (let i = 0; i < rows.length; i += 200) {
+    batches.push(supabase.rpc("player_extras", { ids: rows.slice(i, i + 200).map((r) => r.user_id) }));
+  }
+  const results = await Promise.all(batches);
+  const byId = new Map(results.flatMap(({ data, error }) => error ? [] : (data ?? []) as Extras[]).map((e) => [e.user_id, e]));
   return rows.map((row) => {
     const extra = byId.get(row.user_id);
-    return extra
-      ? { ...row, game_avatar: extra.game_avatar, reddit_username: extra.reddit_username, votes_hidden: extra.votes_hidden ?? false }
-      : row;
+    if (!extra) return row;
+    const { user_id: _id, ...context } = extra;
+    return { ...row, ...context };
   });
 }

@@ -17,7 +17,7 @@ const supportColor = (support: number) => support < 0 ? "text-dont"
   : support >= FIXED_SCORE_CUTOFFS.S ? "text-emerald-600 dark:text-emerald-400"
   : support >= FIXED_SCORE_CUTOFFS.A ? "text-lime-600 dark:text-lime-400" : "text-amber-700 dark:text-amber-300";
 
-function VoteCard({ ranked, consensus }: { ranked: RankedLine; consensus: boolean }) {
+function VoteCard({ ranked, consensus, pool }: { ranked: RankedLine; consensus: boolean; pool: "friends" | "everyone" }) {
   const total = ranked.wants + ranked.neutral + ranked.dontWants;
   const voteLabel = (count: number) => consensus && total > 0 ? `${Math.round(100 * count / total)}%` : count;
   return (
@@ -27,7 +27,7 @@ function VoteCard({ ranked, consensus }: { ranked: RankedLine; consensus: boolea
         <div className="flex items-baseline justify-between gap-2">
           <span className="flex min-w-0 items-center gap-1.5"><span className="truncate font-semibold">{ranked.line.name}</span>{ranked.isNew && <NewTag />}</span>
           {!consensus && ranked.support !== null && (
-            <span className="shrink-0 whitespace-nowrap" title={`Score: (${ranked.wants} Want − ½ × ${ranked.dontWants} Don't Want) ÷ ${total} players who've seen it × 100. Neutral counts 0. ${ranked.support! < 0 ? "Below 0 is F: Don't Wants outnumber Wants 2 to 1." : `As good as ${Math.round(ranked.support!)}% of players wanting it and the rest Neutral.`} Rounded for display; tiers use exact scores.`} aria-label={`Score ${formatScore(ranked.support)}`}>
+            <span className="shrink-0 whitespace-nowrap" title={`Score: (${ranked.wants} Want − ½ × ${ranked.dontWants} Don't Want) ÷ ${total} ${pool === "everyone" ? "players who have seen it" : "voting friends"} × 100. Neutral counts 0. ${ranked.support! < 0 ? "Below 0 is F: more than twice as many Don't Want votes as Want votes. " : ""}Displayed scores omit decimals. Tiers use the full score.`} aria-label={`Score ${formatScore(ranked.support)}`}>
               <span className={`text-lg font-extrabold ${supportColor(ranked.support)}`}>{formatSupport(ranked.support)}</span>
               {ranked.support >= 0 && <span className="ml-0.5 text-xs text-slate-500">/100</span>}
             </span>
@@ -75,7 +75,7 @@ export function TierBoard({ tiers, pool = "friends", style = "standard" }: { tie
         const grid = (rows: RankedLine[]) => (
           <ul className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
             {rows.map((r) => (
-              <VoteCard key={r.line.id} ranked={r} consensus={style === "consensus"} />
+              <VoteCard key={r.line.id} ranked={r} consensus={style === "consensus"} pool={pool} />
             ))}
           </ul>
         );

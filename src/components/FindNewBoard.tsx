@@ -233,7 +233,7 @@ export function FindNewBoard({
                   <li key={match.user_id} className="card p-4">
                     <PlayerHeader
                       player={match}
-                      aside={<FitWithTop3 they={match.match_pct} you={match.you_fit_pct} tops={t?.tops} tiers={t?.tiers} />}
+                      aside={<FitWithTop3 they={match.match_pct} you={match.you_fit_pct} context={match} tops={t?.tops} tiers={t?.tiers} />}
                     />
                     <FitLists match={match} />
                     <NewPlayerNote match={match} name={playerName(match)} />

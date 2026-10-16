@@ -7,6 +7,9 @@
 alter table public.profiles add column if not exists show_reddit boolean not null default true;
 grant update (show_reddit) on public.profiles to authenticated;
 
+-- This revision adds votes_hidden to the original three-column result.
+-- PostgreSQL requires recreation when a function's OUT columns change.
+drop function public.player_extras(uuid[]);
 create or replace function public.player_extras(ids uuid[])
 returns table (user_id uuid, game_avatar text, reddit_username text, votes_hidden boolean)
 language sql
@@ -25,6 +28,9 @@ as $$
          or (b.blocker_id = pr.id and b.blocked_id = auth.uid())
     )
 $$;
+
+revoke execute on function public.player_extras(uuid[]) from public, anon;
+grant execute on function public.player_extras(uuid[]) to authenticated;
 
 create or replace function public.browse_all()
 returns table (

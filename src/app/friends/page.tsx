@@ -106,7 +106,7 @@ export default async function FriendsPage({ searchParams }: { searchParams: Prom
                     player={player}
                     relation={relations.profileReady ? "incoming" : "incoming-setup"}
                     placeholder={maybe?.name}
-                    aside={<FitPair they={player.match_pct} you={player.you_fit_pct} />}
+                    aside={<FitPair they={player.match_pct} you={player.you_fit_pct} context={player} />}
                   />
                 </li>
               );
@@ -176,7 +176,7 @@ export default async function FriendsPage({ searchParams }: { searchParams: Prom
                       player={friend}
                       relation="friend"
                       aside={
-                        <FitWithTop3 they={friend.match_pct} you={friend.you_fit_pct} tops={tops} tiers={top3[friend.user_id]} />
+                        <FitWithTop3 they={friend.match_pct} you={friend.you_fit_pct} context={friend} tops={tops} tiers={top3[friend.user_id]} />
                       }
                     />
                     <PlayerLists wants={friend.wants} dontWants={friend.dont_wants} topWants={friend.top_wants} />

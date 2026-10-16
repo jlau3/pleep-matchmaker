@@ -191,7 +191,7 @@ export function TierExplorer({
     setSleepType(sleep);
     const qs = new URLSearchParams();
     qs.set("pool", p);
-    if (rankingStyle !== "standard") qs.set("style", rankingStyle);
+    qs.set("style", rankingStyle);
     if (id) qs.set("island", id);
     if (sleep) qs.set("sleep", sleep);
     const query = qs.toString();
@@ -349,7 +349,7 @@ export function TierExplorer({
           <div style={{ maxHeight: menuPlacement.maxHeight }} className={`absolute right-0 z-20 ${menuPlacement.above ? "bottom-full mb-2" : "top-full mt-2"} w-[min(24rem,calc(100vw-2rem))] overflow-y-auto rounded-xl border border-slate-300 bg-cream p-3 shadow-lg dark:border-slate-700 dark:bg-night`}>
             <fieldset className="min-w-0 space-y-3 border-0 p-0">
               <legend className="mb-2 w-full p-0 font-semibold">Choose a ranking style</legend>
-              <p className="text-xs text-slate-600 dark:text-slate-300">Each candy scores Want +1, Neutral 0 and Don&apos;t Want −½ per player who&apos;s seen it, out of 100: 60/100 is as good as 60% of players wanting it and the rest Neutral. Below 0 goes to F in Percentile and Fixed Scores. Numbers are rounded for display; tiers use exact scores.</p>
+              <p className="text-xs text-slate-600 dark:text-slate-300">Each candy scores Want +1, Neutral 0 and Don&apos;t Want −½ per {pool === "everyone" ? "player who has seen it" : "voting friend"}, out of 100: 60/100 is as good as 60% of players wanting it and the rest Neutral. Below 0 goes to F in Percentile and Fixed Scores. Displayed scores omit decimals. Tiers use the full score.</p>
               {TIER_STYLES.map((option) => <label key={option} className="flex cursor-pointer items-start gap-2">
                 <input type="radio" name="tier-style" value={option} checked={style === option}
                   onChange={() => show({ style: option })} className="mt-1 shrink-0 accent-want" />

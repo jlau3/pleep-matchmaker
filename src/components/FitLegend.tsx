@@ -43,15 +43,15 @@ export function FitLegend({ friendsVoted = true, youVoted = true, autoOpen = fal
           <b className="text-slate-700 dark:text-slate-200">For them</b>: Their wants compared with what your friends want.
         </p>
         <p>
-          <b>No friends voting yet?</b> Everyone&apos;s votes stand in for a player&apos;s friends, and each friend who
-          votes counts for more until their own friends decide the number.
+          <b>No friends voting yet?</b> Everyone&apos;s votes act as five stand-in friends. Each real friend who votes has the same weight as one stand-in,
+          so Everyone has less influence as more friends vote. Labels beside each score show which data it uses.
         </p>
-        <p><b>&ndash; means they haven&apos;t voted yet.</b> It doesn&apos;t mean a bad match.</p>
+        <p><b>For you needs your votes. For them needs theirs.</b> A dash means there isn&apos;t enough voting data to calculate that score; it doesn&apos;t mean a bad match.</p>
         {!youVoted && (
           <p><Link href="/vote" className="font-semibold underline">Choose the candy you want</Link> to help calculate &ldquo;For you&rdquo;.</p>
         )}
         {!friendsVoted && (
-          <p>&ldquo;For them&rdquo; uses everyone&apos;s votes until yours come in. <Link href="/friends" className="font-semibold underline">Add your Pokémon Sleep friends</Link> and ask them to vote.</p>
+          <p>&ldquo;For them&rdquo; uses an Everyone estimate until your friends vote. <Link href="/friends" className="font-semibold underline">Add your Pokémon Sleep friends</Link> and ask them to vote.</p>
         )}
       </div>
       <button type="button" onClick={close} className="btn-primary mt-6 w-full py-2">Got it</button>

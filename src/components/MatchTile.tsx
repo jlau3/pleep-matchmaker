@@ -34,7 +34,7 @@ export function MatchTile({
       <span className="w-full truncate font-semibold" title={name}>
         {name}
       </span>
-      <FitPair they={match.match_pct} you={match.you_fit_pct} compact />
+      <FitPair they={match.match_pct} you={match.you_fit_pct} context={match} compact />
       {top3 ? (
         <Top3Tiers tops={top3.tops} tiers={top3.tiers} />
       ) : (
