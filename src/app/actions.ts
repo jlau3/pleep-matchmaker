@@ -130,7 +130,7 @@ export async function sendMagicLink(_prev: MagicLinkState, form: FormData): Prom
     return {
       error: /rate|limit|seconds/i.test(error.message)
         ? "Too many sign-in emails just now. Wait a minute and try again."
-        : "Couldn't send the email. Try again in a bit.",
+        : "Couldn't send the email. Try again.",
     };
   }
   return { sentTo: email };
@@ -152,7 +152,7 @@ export async function setChoice(lineId: string, choice: string): Promise<{ error
   const { error } = await supabase
     .from("preferences")
     .upsert({ user_id: user.id, line_id: lineId, choice }, { onConflict: "user_id,line_id" });
-  if (error) return { error: "Couldn't save, try again" };
+  if (error) return { error: "Couldn't save your votes. Try again." };
   return {};
 }
 
@@ -166,7 +166,7 @@ export async function setTop(lineId: string, top: boolean): Promise<{ error?: st
         .upsert({ user_id: user.id, line_id: lineId, choice: "want", top: true }, { onConflict: "user_id,line_id" })
     : await supabase.from("preferences").update({ top: false }).eq("user_id", user.id).eq("line_id", lineId);
   if (error?.message === "top_limit") return { error: `You can star up to ${MAX_TOP}. Unstar one first.` };
-  if (error) return { error: "Couldn't save, try again" };
+  if (error) return { error: "Couldn't save your votes. Try again." };
   return {};
 }
 
@@ -225,7 +225,7 @@ export async function updateProfile(_prev: ProfileFormState, form: FormData): Pr
       if (Object.keys(fields).length === 0) return { error: "No name-sharing options are available." };
     }
     const { error } = await supabase.from("profiles").update(fields).eq("id", user.id);
-    if (error) return { error: "Couldn't save your profile, try again" };
+    if (error) return { error: "Couldn't save your profile. Try again." };
     revalidatePath("/", "layout");
     return { saved: true };
   }
@@ -257,7 +257,7 @@ export async function updateProfile(_prev: ProfileFormState, form: FormData): Pr
   if (form.has("has_show_reddit")) extras.show_reddit = form.get("show_reddit") === "on";
   // A guided step must only advance after every submitted field was saved.
   const { error } = await supabase.from("profiles").update({ ...update, ...extras }).eq("id", user.id);
-  if (error) return { error: "Couldn't save your profile, try again" };
+  if (error) return { error: "Couldn't save your profile. Try again." };
   revalidatePath("/", "layout");
   return { saved: true };
 }
@@ -268,7 +268,7 @@ export async function blockUser(userId: string): Promise<{ error?: string }> {
   const { supabase, user } = await requireUser();
   if (userId === user.id) return { error: "You can't block yourself." };
   const { error } = await supabase.from("blocks").insert({ blocker_id: user.id, blocked_id: userId });
-  if (error && error.code !== "23505") return { error: "Couldn't block, try again" };
+  if (error && error.code !== "23505") return { error: "Couldn't block this player. Try again." };
   revalidatePath("/", "layout");
   return {};
 }
@@ -296,7 +296,7 @@ export async function sendFriendRequest(
 ): Promise<{ status?: "sent" | "friends"; error?: string }> {
   const { supabase, user } = await requireUser();
   const { data, error } = await supabase.rpc("send_friend_request", withCode ? { target: targetId } : { target: targetId, with_code: false });
-  if (error) return { error: FRIEND_ERRORS[error.message] ?? "Couldn't send the request, try again" };
+  if (error) return { error: FRIEND_ERRORS[error.message] ?? "Couldn't send your request. Try again." };
   await recordFriendSetupStarted(supabase, user.id);
   // Whole layout: the requests banner and every Add friend button may change.
   if (!deferRefresh) revalidatePath("/", "layout");
@@ -306,7 +306,7 @@ export async function sendFriendRequest(
 export async function acceptFriendRequest(requesterId: string, deferRefresh = false): Promise<{ error?: string }> {
   const { supabase } = await requireUser();
   const { error } = await supabase.rpc("accept_friend_request", { requester: requesterId });
-  if (error) return { error: FRIEND_ERRORS[error.message] ?? "Couldn't accept, try again" };
+  if (error) return { error: FRIEND_ERRORS[error.message] ?? "Couldn't accept your request. Try again." };
   if (!deferRefresh) revalidatePath("/", "layout");
   return {};
 }
@@ -315,7 +315,7 @@ export async function acceptFriendRequest(requesterId: string, deferRefresh = fa
 export async function declineFriendRequest(requesterId: string): Promise<{ error?: string }> {
   const { supabase } = await requireUser();
   const { error } = await supabase.rpc("decline_friend_request", { requester: requesterId });
-  if (error) return { error: "Couldn't update, try again" };
+  if (error) return { error: "Couldn't update your request. Try again." };
   revalidatePath("/", "layout");
   return {};
 }
@@ -324,7 +324,7 @@ export async function declineFriendRequest(requesterId: string): Promise<{ error
 export async function cancelFriendRequest(targetId: string): Promise<{ error?: string }> {
   const { supabase } = await requireUser();
   const { error } = await supabase.rpc("cancel_friend_request", { target: targetId });
-  if (error) return { error: "Couldn't update, try again" };
+  if (error) return { error: "Couldn't update your request. Try again." };
   revalidatePath("/", "layout");
   return {};
 }
@@ -337,7 +337,7 @@ export async function cancelFriendRequest(targetId: string): Promise<{ error?: s
 export async function removeFriend(friendId: string, inactive = false): Promise<{ error?: string }> {
   const { supabase, user } = await requireUser();
   const { error } = await supabase.from("friends").delete().eq("user_id", user.id).eq("friend_id", friendId);
-  if (error) return { error: "Couldn't remove friend, try again" };
+  if (error) return { error: "Couldn't remove this friend. Try again." };
   if (inactive) await supabase.rpc("report_inactive", { player: friendId });
   revalidatePath("/friends");
   revalidatePath("/tiers");
@@ -357,7 +357,7 @@ export async function lookupPlayers(q: string): Promise<{ rows?: LookupRow[]; er
   if (!query) return { rows: [] };
   if (!(await profileReady(supabase, user.id))) return { error: SEARCH_NEEDS_PROFILE };
   const { data, error } = await supabase.rpc("lookup_players", { q: query });
-  if (error) return { error: "Search failed, try again" };
+  if (error) return { error: "Couldn't search for players. Try again." };
   const rows = await withExtras(supabase, data as LookupRow[]);
   await recordFriendSetupStarted(supabase, user.id);
   revalidatePath("/", "layout");
@@ -374,7 +374,7 @@ export async function searchPlaceholders(): Promise<{ hits?: { name: string; row
   const { supabase, user } = await requireUser();
   if (!(await profileReady(supabase, user.id))) return { error: SEARCH_NEEDS_PROFILE };
   const { data, error } = await supabase.from("friend_placeholders").select("name").eq("user_id", user.id);
-  if (error) return { error: "Search failed, try again" };
+  if (error) return { error: "Couldn't search for players. Try again." };
   const names = (data ?? []).map((r) => r.name as string);
   const results = await Promise.all(
     names.map(async (name) => {
@@ -403,7 +403,7 @@ export async function addPlaceholder(name: string): Promise<{ error?: string }> 
   const { error } = await supabase.from("friend_placeholders").insert({ user_id: user.id, name: clean });
   if (error?.code === "23505") return { error: "Already on your list." };
   if (error?.message === "placeholder_limit") return { error: `That's ${MAX_FRIENDS} already. Remove one first.` };
-  if (error) return { error: "Couldn't save, try again" };
+  if (error) return { error: "Couldn't save this name. Try again." };
   await recordFriendSetupStarted(supabase, user.id);
   revalidatePath("/", "layout");
   return {};
@@ -412,7 +412,7 @@ export async function addPlaceholder(name: string): Promise<{ error?: string }> 
 export async function removePlaceholder(name: string): Promise<{ error?: string }> {
   const { supabase, user } = await requireUser();
   const { error } = await supabase.from("friend_placeholders").delete().eq("user_id", user.id).eq("name", name);
-  if (error) return { error: "Couldn't remove, try again" };
+  if (error) return { error: "Couldn't remove this name. Try again." };
   revalidatePath("/friends");
   return {};
 }
@@ -420,7 +420,7 @@ export async function removePlaceholder(name: string): Promise<{ error?: string 
 export async function unblockUser(userId: string): Promise<{ error?: string }> {
   const { supabase, user } = await requireUser();
   const { error } = await supabase.from("blocks").delete().eq("blocker_id", user.id).eq("blocked_id", userId);
-  if (error) return { error: "Couldn't unblock, try again" };
+  if (error) return { error: "Couldn't unblock this player. Try again." };
   revalidatePath("/", "layout");
   return {};
 }
@@ -449,14 +449,14 @@ export async function markSetupDone(finished = false): Promise<{ error?: string;
   let friends = 0;
   if (finished) {
     const result = await supabase.from("friends").select("friend_id", { count: "exact", head: true }).eq("user_id", user.id);
-    if (result.error) return { error: "Couldn't save your setup progress. Please try again." };
+    if (result.error) return { error: "Couldn't save your setup progress. Try again." };
     friends = result.count ?? 0;
   }
   const { error } = await supabase
     .from("profiles")
     .update(friends ? { setup_done: true, first_friend_noted: true } : { setup_done: true })
     .eq("id", user.id);
-  if (error) return { error: "Couldn't save your setup progress. Please try again." };
+  if (error) return { error: "Couldn't save your setup progress. Try again." };
   const store = await cookies();
   store.set(SETUP_COOKIE, user.id, { path: "/", maxAge: 31536000, sameSite: "lax" });
   const next = safeNextPath(store.get(SETUP_NEXT_COOKIE)?.value);
@@ -468,9 +468,9 @@ export async function markSetupDone(finished = false): Promise<{ error?: string;
 export async function finishProfileSetup(next?: string | null): Promise<{ error?: string; next?: string }> {
   const { supabase, user } = await requireUser();
   const { data, error } = await supabase.from("profiles").select("ign, friend_code, game_avatar").eq("id", user.id).maybeSingle();
-  if (error) return { error: "Couldn't check your saved profile. Please try again." };
+  if (error) return { error: "Couldn't check your saved profile. Try again." };
   if (!data?.ign?.trim() || !normalizeFriendCode(data.friend_code ?? "") || !parseAvatar(data.game_avatar ?? "")) {
-    return { error: "Save your in-game name, friend code, and Pokémon picture before continuing." };
+    return { error: "Save your in-game name, friend code, and Pokémon Sleep icon before continuing." };
   }
   const store = await cookies();
   const destination = safeNextPath(store.get(SETUP_NEXT_COOKIE)?.value) ?? safeNextPath(next) ?? "/vote";
@@ -511,7 +511,7 @@ export async function hideSuggestedPlayer(targetId: string): Promise<{ error?: s
   const { supabase, user } = await requireUser();
   if (targetId === user.id) return { error: "You can't hide yourself." };
   const { error } = await supabase.from("hidden_suggestions").insert({ user_id: user.id, hidden_user_id: targetId });
-  if (error && error.code !== "23505") return { error: "Couldn't hide this player. Please try again." };
+  if (error && error.code !== "23505") return { error: "Couldn't hide this player. Try again." };
   revalidatePath("/matches");
   return {};
 }
@@ -519,7 +519,7 @@ export async function hideSuggestedPlayer(targetId: string): Promise<{ error?: s
 export async function restoreSuggestedPlayer(targetId: string): Promise<{ error?: string }> {
   const { supabase, user } = await requireUser();
   const { error } = await supabase.from("hidden_suggestions").delete().eq("user_id", user.id).eq("hidden_user_id", targetId);
-  if (error) return { error: "Couldn't restore this player. Please try again." };
+  if (error) return { error: "Couldn't restore this player. Try again." };
   revalidatePath("/matches");
   return {};
 }

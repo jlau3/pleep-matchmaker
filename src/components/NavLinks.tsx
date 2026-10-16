@@ -8,7 +8,7 @@ import { useEffect } from "react";
 const LINKS = [
   { href: "/tiers", label: "Tier List", match: ["/tiers"] },
   { href: "/friends", label: "Friends", match: ["/friends", "/matches"] },
-  { href: "/vote", label: "Profile", match: ["/vote", "/profile"] },
+  { href: "/vote", label: "Me", match: ["/vote", "/profile"] },
   { href: "/guides", label: "Guides", match: ["/guides"] },
 ];
 

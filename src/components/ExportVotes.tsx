@@ -28,12 +28,12 @@ export function ExportVotes({ choices, tops }: { choices: Record<string, Choice>
   return (
     <span className="shrink-0">
       <ImageExport
-        title="My votes"
+        title="My Votes"
         heading="My Candy Votes"
         subtitle={() => `Want ${count("want")} · Neutral ${count("undecided")} · Don't Want ${count("dont_want")} · ${today()}`}
         sections={() => [{ rows: rows() }]}
         file="my-candy-votes.png"
-        label="Export"
+        label="Export image"
       />
     </span>
   );

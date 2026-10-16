@@ -124,7 +124,7 @@ export function FindNewBoard({
       });
       setLastHidden(hide ? rows.find((r) => r.user_id === id) ?? null : null);
     } catch {
-      setHideError(`Couldn't ${hide ? "hide" : "restore"} this player. Please try again.`);
+      setHideError(`Couldn't ${hide ? "hide" : "restore"} this player. Try again.`);
     } finally {
       setPending((prev) => { const next = new Set(prev); next.delete(id); return next; });
     }
@@ -144,7 +144,7 @@ export function FindNewBoard({
     <section ref={top} className="scroll-mt-20 space-y-3">
       <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2">
         <h2 className="text-lg font-semibold">
-          Suggested players {total > 0 && <span className="text-sm font-normal text-slate-500">{total}</span>}
+          Suggested Players {total > 0 && <span className="text-sm font-normal text-slate-500">{total}</span>}
         </h2>
         <div className="flex flex-wrap gap-2 text-sm">
           <Pill active={!opts.everyone} onClick={() => change({ everyone: false })}>
@@ -166,7 +166,7 @@ export function FindNewBoard({
         </div>
         {opts.sort === "top3" && !tiersReady && tops.length > 0 && (
           <p className="text-xs font-semibold text-slate-500" role="status">
-            {tierError ? "Couldn't load Top 3 tiers. Reload to try again." : "Ranking by your Top 3…"}
+            {tierError ? "Couldn't load Top 3 tiers. Try again." : "Ranking by your Top 3…"}
           </p>
         )}
         <FitLegend friendsVoted={friendsVoted} youVoted={picked > 0} autoOpen={autoOpenGuide} />
@@ -202,7 +202,7 @@ export function FindNewBoard({
 
       {picked === 0 && relations.friendIds.length === 0 && !opts.everyone ? (
         <p className="py-8 text-center text-slate-500">
-          Add your friends (or <Link href="/vote" className="underline">vote</Link> on some lines) so we know what your
+          Add your friends (or <Link href="/vote" className="underline">vote</Link> on some candies) so we know what your
           group wants, or{" "}
           <button type="button" onClick={() => change({ everyone: true })} className="underline">
             see everyone
@@ -325,7 +325,7 @@ function NewPlayerNote({ match, name }: { match: MatchRow; name: string }) {
       ? `${name} hasn't voted yet and has fewer than 3 friends voting here, so their numbers aren't ready yet.`
       : noVotes
         ? `${name} hasn't voted yet, so "for them" isn't ready yet.`
-        : `This user has fewer than 3 friends voting here, so "for you" isn't ready yet.`;
+        : "This player has fewer than 3 friends voting here, so \"for you\" isn't ready yet.";
   return (
     <p className="mt-3 rounded-xl bg-sky/60 px-3 py-2 text-xs dark:bg-night-deep">
       <b>New here:</b> {text}
@@ -371,7 +371,7 @@ function FitLists({ match }: { match: MatchRow }) {
           </summary>
           <div className="mt-3 space-y-5">
             <div className="space-y-3">
-              <h4 className="font-bold">They&apos;d send you</h4>
+              <h4 className="font-bold">They'd Send You</h4>
               {group("Your wants matching their friends' wants", "text-want", toYou.want)}
               {group("Your don't-wants matching their friends' wants", "text-dont", toYou.dont)}
               {toYou.want.length + toYou.dont.length === 0 && (
@@ -380,7 +380,7 @@ function FitLists({ match }: { match: MatchRow }) {
             </div>
             {!hidden && (
               <div className="space-y-3">
-                <h4 className="font-bold">You&apos;d send them</h4>
+                <h4 className="font-bold">You'd Send Them</h4>
                 {group("Their wants matching your friends' wants", "text-want", toThem.want)}
                 {group("Their don't-wants matching your friends' wants", "text-dont", toThem.dont)}
                 {toThem.want.length + toThem.dont.length === 0 && (

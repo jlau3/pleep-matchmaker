@@ -36,8 +36,8 @@ describe("looking up friends completes the setup attempt", () => {
   });
 });
 
-it("requires a selected Pokémon picture before attempting a lookup", async () => {
+it("requires a selected Pokémon Sleep icon before attempting a lookup", async () => {
   db.icon = null;
-  expect((await lookupPlayers("Sleepy friend")).error).toContain("Pokémon picture");
+  expect((await lookupPlayers("Sleepy friend")).error).toContain("Pokémon Sleep icon");
   expect(db.rpc).not.toHaveBeenCalled();
 });

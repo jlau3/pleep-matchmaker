@@ -68,7 +68,7 @@ export function HelpModal({
         <div className="p-6">
           <div className="mb-1 flex items-start justify-between gap-3">
             <h2 id="help-title" className="text-2xl font-extrabold">
-              {welcome ? "Welcome to Pleep Matchmaker" : "How Pleep Matchmaker works"}
+              {welcome ? "Welcome to Pleep Matchmaker" : "How Pleep Matchmaker Works"}
             </h2>
             <button
               type="button"

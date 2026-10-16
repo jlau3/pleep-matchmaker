@@ -53,7 +53,7 @@ export function PlayerSearchBox({
         else setResult({ q, rows: found.rows ?? [] });
       } catch (err) {
         rethrowIfNavigation(err);
-        setError("Search failed, try again");
+        setError("Couldn't search for players. Try again.");
       }
     });
   }

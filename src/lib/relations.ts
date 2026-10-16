@@ -28,9 +28,9 @@ export const NO_RELATIONS: Relations = { friendIds: [], sent: {}, incoming: [], 
 
 /** send_friend_request's error when your IGN or friend code is missing (20261020000300_request_needs_profile.sql). */
 /** Search's error when your IGN or friend code is missing. */
-export const SEARCH_NEEDS_PROFILE = "Add your in-game name, friend code, and Pokémon picture in Profile to search for players.";
+export const SEARCH_NEEDS_PROFILE = "Add your in-game name, friend code, and Pokémon Sleep icon in Profile to search for players.";
 
-export const PROFILE_INCOMPLETE = "Add your in-game name, friend code, and Pokémon picture in Profile first, so they know who's asking.";
+export const PROFILE_INCOMPLETE = "Add your in-game name, friend code, and Pokémon Sleep icon in Profile first, so they know who's asking.";
 
 export function relationOf(relations: Relations, userId: string): Relation {
   if (relations.friendIds.includes(userId)) return "friend";

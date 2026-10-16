@@ -19,7 +19,7 @@ export default function PrivacyPage() {
   return (
     <article className="card mx-auto max-w-2xl space-y-6 p-6">
       <header>
-        <h1 className="text-2xl font-extrabold">Privacy policy</h1>
+        <h1 className="text-2xl font-extrabold">Privacy Policy</h1>
         <p className="text-sm text-slate-500">Last updated {UPDATED}</p>
       </header>
 
@@ -29,7 +29,7 @@ export default function PrivacyPage() {
         your email to anyone, and we don&apos;t sell data, run ads or use trackers.
       </p>
 
-      <Section title="What we store">
+      <Section title="What We Store">
         <ul className="list-disc space-y-1 pl-5">
           <li>
             <b>Sign-in details.</b> Depending on how you sign in: your Discord ID, username, display name and avatar; or your
@@ -37,7 +37,7 @@ export default function PrivacyPage() {
             name or photo.
           </li>
           <li>
-            <b>What you enter.</b> Your in-game name (IGN), friend code, profile icon, Reddit name if you add one, candy votes
+            <b>What you enter.</b> Your in-game name (IGN), friend code, icon, Reddit name if you add one, candy votes
             and Top 3, friends list, blocked players, and settings.
           </li>
           <li>
@@ -55,31 +55,26 @@ export default function PrivacyPage() {
         </ul>
       </Section>
 
-      <Section title="Who can see what">
+      <Section title="Who Can See What">
         <ul className="list-disc space-y-1 pl-5">
           <li>
-            <b>Other players</b> can see your IGN, profile icon, roughly when you were last active
-            (&quot;active this week&quot;), and match %s, depending on <b>Who can find you</b>: when they search your IGN
-            or friend code, when you appear in their Find New, or when you send them a friend request.
-            Your <b>friend code</b> only goes to players you send a friend request to (unless you tick{" "}
-            <b>Already friends in Pokémon Sleep</b>), so they can add you in the game, and is hidden again once you&apos;re
-            friends.
+            <b>Other players</b> can see your IGN, icon, roughly when you were last active
+            (&quot;active this week&quot;), and match %s, depending on <b>Who Can Find You</b>: when they search your IGN
+            or friend code, when you appear in their Find New Friends, or when you send them a friend request.
+            A request can include your <b>friend code</b> so the other player can add you in Pokémon Sleep. You can also include it in a shared friend post. Players who search your code can see it in the result.
           </li>
           <li>
-            <b>Only your friends</b> see your candy votes and Top 3, your Discord name and picture if{" "}
-            <b>Show my Discord name to friends</b> is on (people you send a friend request to, or who send you one,
-            see them too, so you both know who&apos;s who), and your Reddit name if <b>Show my Reddit name to friends</b> is on (also shown with your friend requests).
+            <b>Only your friends</b> see your candy votes and Top 3. Your name-sharing switches also let friends see your Discord or Reddit name. Enabled Discord names are visible on requests between you; enabled Reddit names are visible to people you send a request to.
           </li>
           <li>
-            <b>Nobody else ever sees your email.</b> It&apos;s only used to sign you in.
+            <b>Other players cannot see your email.</b> It&apos;s only used to sign you in.
           </li>
           <li>
             <b>The public Everyone Tier List</b> shows combined candy totals, never individual players&apos; votes or identities.
-            A candy&apos;s totals, stars, and tier stay hidden until it has saved choices from at least 10 active players.
+            A candy's totals, Top 3 count, and tier stay hidden until it has saved votes from at least 10 active players.
           </li>
           <li>
-            <b>You control it</b> in Profile under Privacy: <b>Who can find you</b> (everyone, people who know your IGN or
-            code, or only your friends), whether friends see your Discord name, and who you block.
+            <b>You control it</b> in Profile under Privacy: <b>Who Can Find You</b> (Everyone, Only by search, or Only my friends), whether friends see your Discord name, and who you block.
           </li>
           <li>
             <b>The developer</b> can see the database, including sign-in emails, to run and fix the app.
@@ -87,7 +82,7 @@ export default function PrivacyPage() {
         </ul>
       </Section>
 
-      <Section title="Services we use">
+      <Section title="Services We Use">
         <p>
           Supabase stores the data and handles sign-in. Vercel hosts the site. Discord and Google handle their own sign-in
           screens under their own privacy policies. Sign-in emails are sent through an email delivery service. Each only
@@ -95,11 +90,11 @@ export default function PrivacyPage() {
         </p>
       </Section>
 
-      <Section title="Keeping and deleting your data">
+      <Section title="Keeping and Deleting Your Data">
         <p>
           We keep your data while you have an account. Delete it any time in{" "}
           <Link href="/profile" className="underline">
-            Profile → Settings → Delete account
+            Me → Profile → Delete account
           </Link>
           : that removes your profile, votes, friends list and blocks right away. Feedback already sent to Discord isn&apos;t
           removed automatically; ask and we&apos;ll delete it.

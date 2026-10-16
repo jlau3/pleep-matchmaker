@@ -48,8 +48,8 @@ type Visibility = "everyone" | "known" | "friends";
 
 /** "Who can find you": each option sets search (allow_lookup) and Find New (open_to_friends) together. */
 const VISIBILITY: { value: Visibility; title: string; text: string }[] = [
-  { value: "everyone", title: "Everyone", text: "Suggested to good matches in Find New, and findable by your exact IGN or friend code." },
-  { value: "known", title: "People who know me", text: "Hidden from Find New. People can still find you by your exact IGN or friend code." },
+  { value: "everyone", title: "Everyone", text: "Suggested to good matches in Find New Friends, and findable by your exact in-game name or friend code." },
+  { value: "known", title: "Only by search", text: "Hidden from Find New Friends. People can still find you by your exact in-game name or friend code." },
   {
     value: "friends",
     title: "Only my friends",
@@ -136,7 +136,7 @@ export function ProfileForm({ profile, friendListFull, guideRequested = false, c
       <input type="hidden" name="has_extras" value="1" />
       <section className={card} aria-labelledby="profile-details">
         <div className="flex items-baseline justify-between gap-3">
-          <h2 id="profile-details" className="text-lg font-bold">Your profile</h2>
+          <h2 id="profile-details" className="text-lg font-bold">Your Profile</h2>
           {status}
         </div>
         <button type="button" onClick={() => setGuideOpen(true)} className="text-sm font-semibold underline">Show me what to fill in</button>
@@ -145,7 +145,7 @@ export function ProfileForm({ profile, friendListFull, guideRequested = false, c
         </div>
         <div className="grid gap-4 sm:grid-cols-2">
           <label data-profile-step="ign" className="block space-y-1">
-            <span className="text-sm font-semibold">In-game name</span>
+            <span className="text-sm font-semibold">In-game name (IGN)</span>
             <input name="ign" onBlur={saveIfChanged} value={ign} onChange={(event) => setIgn(event.currentTarget.value)} maxLength={40} placeholder="Exactly as in Pokémon Sleep" className="field" />
             <span className={hint}>Spelled exactly as in the game, so friends can find you.</span>
           </label>
@@ -183,7 +183,7 @@ export function ProfileForm({ profile, friendListFull, guideRequested = false, c
           </p>
         </div>
         <fieldset data-profile-step="visibility" className="space-y-2">
-          <legend className="mb-2 text-sm font-semibold">Who can find you</legend>
+          <legend className="mb-2 text-sm font-semibold">Who Can Find You</legend>
           {VISIBILITY.map((option) => (
             <label
               key={option.value}
@@ -220,7 +220,7 @@ export function ProfileForm({ profile, friendListFull, guideRequested = false, c
                     <DiscordIcon /> Show my Discord name to friends
                   </>
                 }
-                detail="Your chosen Pokémon picture stays the same."
+                detail="Your chosen Pokémon Sleep icon stays the same."
               >
                 Show @{profile.discord_username} under your name to friends and people you have a friend request with.
               </Toggle>

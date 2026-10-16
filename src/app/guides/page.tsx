@@ -53,7 +53,7 @@ export default function GuidesPage() {
 
       {earlier.length > 0 && (
         <section className="space-y-3">
-          <h2 className="text-lg font-bold">Earlier Pokémon notes</h2>
+          <h2 className="text-lg font-bold">Earlier PokéMon Notes</h2>
           {earlier.map((post) => (
             <details key={post.id} className="card p-4">
               <summary className="font-semibold">{post.title}</summary>

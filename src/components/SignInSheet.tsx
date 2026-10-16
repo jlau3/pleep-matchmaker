@@ -43,9 +43,9 @@ export function SignInProvider({ children, signedIn }: { children: React.ReactNo
         <p className="mt-2 text-sm text-slate-500">New here? This also creates your account.</p>
         <div className="my-5"><SignInOptions next={request.next} /></div>
         {request.error && <p role="alert" className="mb-4 text-sm text-dont">{request.error}</p>}
-        <h3 className="text-sm font-bold">What you get</h3>
+        <h3 className="text-sm font-bold">What You Get</h3>
         <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-slate-600 dark:text-slate-300">
-          <li>A candy wishlist your friends can use.</li><li>A Tier List based on your friends’ choices.</li><li>New friends who want the candy you send.</li>
+          <li>A candy wishlist your friends can use.</li><li>A Tier List based on your friends' votes.</li><li>New friends who want the candy you send.</li>
         </ul>
       </dialog>
     </SignInContext.Provider>

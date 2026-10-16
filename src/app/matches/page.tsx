@@ -66,7 +66,7 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
   if (unsorted > 0 && picked > 0)
     notices.push(
       <>
-        {unsorted} {unsorted === 1 ? "line isn't" : "lines aren't"} sorted yet.{" "}
+        {unsorted} {unsorted === 1 ? "candy isn't" : "candies aren't"} sorted yet.{" "}
         <Link href="/vote" className="underline">Vote on them</Link>
       </>,
     );

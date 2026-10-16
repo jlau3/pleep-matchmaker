@@ -22,15 +22,15 @@ export function profileGuideSteps(hasSocialNames: boolean): ProfileGuideStep[] {
     },
     {
       id: "game_avatar",
-      title: "Choose your Pokémon Sleep profile picture",
+      title: "Choose your Pokémon Sleep icon",
       description:
-        "Tap Choose picture in the highlighted box, select the Pokémon picture you use in Pokémon Sleep, then tap Use this picture. This is required to complete profile setup and helps friends recognize you.",
+        "Choose the icon you use in Pokémon Sleep, then select Use this icon. It's required for search and friend requests.",
     },
     {
       id: "visibility",
       title: "Choose who can find you",
       description:
-        "Everyone includes friend suggestions. People who know me allows exact-name or code searches. Only my friends hides you from both. Existing friend requests are still visible to the people involved.",
+        "Everyone includes friend suggestions. Only by search allows exact-name or code searches. Only my friends hides you from both. Existing friend requests are still visible to the people involved.",
     },
   ];
   if (hasSocialNames)
@@ -57,6 +57,6 @@ export function profileGuideError(step: ProfileGuideStep["id"], form: FormData):
   if (step === "friend_code" && !normalizeFriendCode(String(form.get("friend_code") ?? "")))
     return "Enter your 12-digit friend code above to continue.";
   if (step === "game_avatar" && !parseAvatar(String(form.get("game_avatar") ?? "")))
-    return "Tap Choose picture in the highlighted box, pick a Pokémon, then select Use this picture.";
+    return "Tap Choose icon in the highlighted box, pick a Pokémon, then select Use this icon.";
   return null;
 }

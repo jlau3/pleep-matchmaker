@@ -5,58 +5,49 @@ import { InviteButton } from "./InviteButton";
 
 const STEPS: { title: string; body: React.ReactNode; href: string; cta: string }[] = [
   {
-    title: "Set up your profile",
+    title: "Set Up Your Profile",
     body: (
       <>
-        Add your in-game name and friend code, and pick the profile icon you use in Pokémon Sleep. IGNs aren&apos;t
-        unique, so a matching icon tells friends it&apos;s really you.
+        Add your in-game name (IGN), friend code, and Pokémon Sleep icon so friends can recognize you.
       </>
     ),
     href: "/profile",
     cta: "Profile",
   },
   {
-    title: "Vote on every candy",
+    title: "Vote on the Candy You Care About",
     body: (
       <>
-        Mark each Pokémon Sleep candy line <b>Want</b>, <b>Don&apos;t Want</b> or leave it <b>Neutral</b>. Tap the ★ to
-        pick your Top {MAX_TOP}: your personal favorites. They don&apos;t move the Tier List, so a niche pick never
-        counts against you. Friends can see them and send you that candy anyway, wherever it ranks. Your votes shape
-        your friends&apos; Tier Lists, not your own.
+        Choose <b>Want</b> for candy you need and <b>Don&apos;t Want</b> for candy you don't need. Leave the rest <b>Neutral</b>.
+        Votes save automatically. Mark up to {MAX_TOP} candies as your <b>Top {MAX_TOP}</b>.
       </>
     ),
     href: "/vote",
     cta: "My Votes",
   },
   {
-    title: "Add your in-game friends",
+    title: "Add Your In-game Friends",
     body: (
       <>
-        This list should match your in-game one, since it decides whose wants your Tier List follows. Look them up
-        by IGN or friend code and send a friend request; once they accept, you&apos;re on each
-        other&apos;s lists (up to {MAX_FRIENDS}). Each player shows two match %s:{" "}
-        <b>for you</b> (your wants match what their friends want, so the candy they send suits you) and{" "}
-        <b>for them</b> (their wants match what your friends want, so the candy you send suits them).
+        Look up your Pokémon Sleep friends by IGN or friend code and send a request.
+        Their votes build your Tier List once they accept. You can connect with up to {MAX_FRIENDS} friends.
       </>
     ),
     href: "/friends",
     cta: "My Friends",
   },
   {
-    title: "Find new friends",
+    title: "Find New Friends",
     body: (
       <>
-        Find New Friends suggests players who match both ways, best match first: you&apos;d each send candy the other
-        wants, so they&apos;re likely to say yes. Send a friend request here: it gives them your friend code to add
-        you in Pokémon Sleep. It shows under Sent requests until they accept, then you&apos;re friends on both.
-        Friend codes are never shown anywhere else.
+        Find players who are a good candy match for you both. Send a request to connect here and share your friend code when needed.
       </>
     ),
     href: "/matches",
     cta: "Find New Friends",
   },
   {
-    title: "See what your friends want",
+    title: "See What Your Friends Want",
     body: (
       <>
         The Tier List ranks every candy by what your friends (or all players) want, so you know which candies to send
@@ -95,16 +86,14 @@ export function HowItWorks({ links = true }: { links?: boolean }) {
         ))}
       </ol>
       <div className="mt-5 rounded-2xl bg-sun/25 p-4">
-        <h3 className="font-bold">Bring your friends along</h3>
+        <h3 className="font-bold">Bring Your Friends Along</h3>
         <p className="mb-3 text-sm text-slate-700 dark:text-slate-200">
-          The tier list only knows what your friends have voted. Send your Pokémon Sleep friends an invite and ask them
-          to add their wants and Top 3.
+          Invite your Pokémon Sleep friends and ask them to vote so My Friends reflects the candy they want.
         </p>
         <InviteButton />
       </div>
       <p className="mt-5 text-xs text-slate-500">
-        Your votes are only shown to your friends. Who can find you (by search or in Find New) is up to you in
-        Profile. Players inactive for 2 months drop out of Find New.
+        Manage who can find you in Profile. Players inactive for 2 months stop appearing in Find New Friends.
       </p>
     </div>
   );

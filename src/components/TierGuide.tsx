@@ -34,7 +34,7 @@ export function TierGuide({ userId }: { userId: string | null }) {
       onClick={(event) => { if (event.target === event.currentTarget) close(); }}
       className="m-auto max-h-[88dvh] w-[calc(100%-2rem)] max-w-xl overflow-y-auto rounded-3xl bg-cream p-6 text-ink shadow-2xl backdrop:bg-black/60 dark:bg-night dark:text-[#eef1ff]">
       <div className="mb-4 flex items-start justify-between gap-3">
-        <h2 id={titleId} className="text-2xl font-extrabold">How to use the Tier List</h2>
+        <h2 id={titleId} className="text-2xl font-extrabold">How to Use the Tier List</h2>
         <button type="button" onClick={close} aria-label="Close" className="rounded-full px-2 text-2xl leading-none text-slate-500">×</button>
       </div>
       <div className="space-y-3 text-sm">
@@ -45,7 +45,7 @@ export function TierGuide({ userId }: { userId: string | null }) {
         <p><b>Fixed Scores</b> is an optional view: S starts at {FIXED_SCORE_CUTOFFS.S}/100, A at {FIXED_SCORE_CUTOFFS.A}, B at {FIXED_SCORE_CUTOFFS.B}, and C covers lower scores with nonnegative totals. All-Neutral scores {FIXED_SCORE_CUTOFFS.B}, so it lands in B. Negative totals still go to Avoid.</p>
         <p><b>Filters:</b> Pick an Island or Sleep Type to narrow the Pokémon shown. Standard tiers update for that selection; Fixed Scores keep the same cutoffs. Tap a selected filter again to clear it.</p>
         <p><b>Export Image:</b> Make a shareable image of the current list with your selected filters and ranking style. Preview it, then download, copy, or share using your browser&apos;s available options.</p>
-        <p><b>Top 3</b> shows players&apos; personal favorites above the ranked tiers. Candies with fewer than 10 active players&apos; saved choices stay unranked in Everyone.</p>
+        <p><b>Top 3</b> shows the candies players marked as their Top 3 above the ranked tiers. Candy stays unranked in Everyone until 10 active players have saved a vote for it. Neutral counts too.</p>
       </div>
       <button type="button" onClick={close} className="btn-primary mt-6 w-full py-2">Got it</button>
     </dialog>

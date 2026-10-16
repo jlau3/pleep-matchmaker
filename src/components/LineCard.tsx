@@ -29,7 +29,7 @@ export function LineCard({
   return (
     <div className="card relative p-4">
       {onStar && <StarButton starred={starred} name={line.name} onClick={onStar} className="absolute right-2 top-2" />}
-      <h2 className={`mb-2 pr-10 font-bold ${compact ? "text-sm" : "text-lg"}`}>{line.name} candy</h2>
+      <h2 className={`mb-2 pr-10 font-bold ${compact ? "text-sm" : "text-lg"}`}>{line.name} Candy</h2>
       <ul className="mb-3 flex flex-wrap justify-center gap-x-3 gap-y-2">
         {line.members.map((member) => (
           <li key={`${member.dex}-${member.sprite}`} className="flex flex-col items-center">

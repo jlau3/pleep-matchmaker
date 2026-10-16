@@ -24,21 +24,21 @@ export function PlayerLists({
     <div className="mt-3 space-y-3">
       {topWants.length > 0 && (
         <div>
-          <h4 className="mb-2 text-sm font-semibold text-sun-deep">★ Top {topWants.length}</h4>
+          <h4 className="mb-2 text-sm font-semibold text-sun-deep">★ Top 3</h4>
           <LineChips lines={linesFromIds(topWants)} />
         </div>
       )}
       <details>
         <summary className="text-sm font-semibold">
-          Wants {otherWants.length} · Doesn&apos;t Want {dontWants.length}
+          Want {otherWants.length} · Don&apos;t Want {dontWants.length}
         </summary>
         <div className="mt-3 space-y-4">
           <div>
-            <h4 className="mb-2 text-sm font-semibold text-want">Wants</h4>
+            <h4 className="mb-2 text-sm font-semibold text-want">Want</h4>
             <LineChips lines={linesFromIds(otherWants)} />
           </div>
           <div>
-            <h4 className="mb-2 text-sm font-semibold text-dont">Doesn&apos;t Want</h4>
+            <h4 className="mb-2 text-sm font-semibold text-dont">Don't Want</h4>
             <LineChips lines={linesFromIds(dontWants)} />
           </div>
         </div>

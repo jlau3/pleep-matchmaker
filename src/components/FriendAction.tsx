@@ -138,7 +138,7 @@ export function FriendAction({
         {relation === "none" && (
           <label className="inline-flex cursor-pointer items-center gap-1.5 text-xs text-slate-600 dark:text-slate-300">
             <input type="checkbox" checked={inGame} onChange={(e) => setInGame(e.target.checked)} className="h-3.5 w-3.5 accent-[var(--color-night)]" />
-            Already friends in Pokémon Sleep (don&apos;t send my code)
+            Already friends in Pokémon Sleep (send without my code)
           </label>
         )}
 
@@ -166,7 +166,7 @@ export function FriendAction({
           <span className="text-sm text-slate-600 dark:text-slate-300">
             To send friend requests,{" "}
             <Link href="/profile" className="font-semibold underline">
-              add your in-game name and friend code
+              add your in-game name, friend code, and icon
             </Link>{" "}
             so they know who&apos;s asking.
           </span>
@@ -202,7 +202,7 @@ export function FriendAction({
                   () => acceptFriendRequest(userId, Boolean(placeholder)),
                   () => "friend",
                   showsCode
-                    ? `You're friends now. If you haven't yet, add ${name} in Pokémon Sleep (their code goes away now, as in the game).`
+                    ? `You're friends now. Add ${name} in Pokémon Sleep too if you haven't yet.`
                     : `You're friends now.`,
                 )
               }
@@ -221,7 +221,7 @@ export function FriendAction({
             <span className="text-sm text-slate-600 dark:text-slate-300">
               To accept,{" "}
               <Link href="/profile" className="font-semibold underline">
-                add your in-game name and friend code
+                add your in-game name, friend code, and icon
               </Link>{" "}
               so they can add you in Pokémon Sleep.
             </span>
@@ -244,7 +244,7 @@ export function FriendAction({
       {askRemove && (
         <span className="inline-flex flex-wrap items-center gap-2 rounded-lg bg-sun/30 px-2 py-1 text-xs dark:bg-sun/15">
           <span>
-            Take <b>{askRemove}</b> off your Not here yet list?
+            Take <b>{askRemove}</b> off your Friends to Find list?
           </span>
           <button
             type="button"

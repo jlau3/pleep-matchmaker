@@ -32,16 +32,16 @@ export function FitPair({
     );
   return (
     <div className="shrink-0 whitespace-nowrap text-right leading-none">
-      <div title={you == null ? "For you: not enough votes yet" : "For you: how much of what you want their friends want, so the candy they send suits you"}>
+      <div title={you == null ? "For you: not enough votes yet" : "For you: how well the candy they'd send matches your votes"}>
         <span className={`text-2xl font-extrabold ${color(you)}`} aria-label={you == null ? "For you: not enough votes yet" : undefined}>{you == null ? "–" : `${you}%`}</span>{" "}
         <span className={`text-sm font-semibold ${low(you) ? "text-amber-700 dark:text-amber-300" : "text-slate-500"}`}>
-          for you
+          For you
         </span>
       </div>
-      <div className="mt-1" title={they == null ? "For them: not enough votes yet" : "For them: how well their wants match what your friends want, so the candy you send suits them"}>
+      <div className="mt-1" title={they == null ? "For them: not enough votes yet" : "For them: how well the candy you'd send matches their votes"}>
         <span className={`text-base font-bold ${color(they)}`} aria-label={they == null ? "For them: not enough votes yet" : undefined}>{they == null ? "–" : `${they}%`}</span>{" "}
         <span className={`text-xs font-semibold ${low(they) ? "text-amber-700 dark:text-amber-300" : "text-slate-500"}`}>
-          for them
+          For them
         </span>
       </div>
     </div>

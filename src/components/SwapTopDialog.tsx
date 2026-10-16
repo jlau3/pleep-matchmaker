@@ -37,7 +37,7 @@ export function SwapTopDialog({
           <img src={lineSpriteUrl(incoming)} alt="" className="h-12 w-12 rounded-full bg-sky object-contain dark:bg-night" />
           <div>
             <h2 id="swap-title" className="font-bold">
-              Add {incoming.name} to your Top {MAX_TOP}?
+              Add {incoming.name} To Your Top {MAX_TOP}?
             </h2>
             <p className="text-sm text-slate-500">Your Top {MAX_TOP} is full. Pick one to swap out.</p>
           </div>

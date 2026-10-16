@@ -81,11 +81,10 @@ export default async function FriendsPage({ searchParams }: { searchParams: Prom
       {requests.length > 0 && (
         <section id="requests" className="scroll-mt-20">
           <h2 className="mb-1 text-lg font-semibold">
-            Friend requests <span className="text-sm font-normal text-slate-500">{requests.length}</span>
+            Friend Requests <span className="text-sm font-normal text-slate-500">{requests.length}</span>
           </h2>
           <p className="mb-3 text-sm text-slate-500">
-            These players want to be friends here and in Pokémon Sleep. Add them in the game with the friend code on
-            their card first, then accept: the code goes away once you&apos;re friends, as in the game.
+            Accept to connect here. Add each other in Pokémon Sleep too if you aren't already friends.
           </p>
           <ul className="space-y-3">
             {requestsSorted.map((player) => {
@@ -95,9 +94,9 @@ export default async function FriendsPage({ searchParams }: { searchParams: Prom
                   {maybe && (
                     <p className="-mx-4 -mt-4 mb-3 rounded-t-3xl bg-sun/40 px-4 py-2 text-sm dark:bg-sun/20">
                       {maybe.strong ? (
-                        <b>★ This may be {maybe.name} from your Not here yet list!</b>
+                        <b>★ This may be {maybe.name} from your Friends to Find list!</b>
                       ) : (
-                        <b>★ Could this be {maybe.name} from your Not here yet list?</b>
+                        <b>★ Could this be {maybe.name} from your Friends to Find list?</b>
                       )}{" "}
                       {maybe.strong ? "If it's them" : "The names are close; check their icon. If it's them"}, accept; you
                       can then take the name off that list.
@@ -121,7 +120,7 @@ export default async function FriendsPage({ searchParams }: { searchParams: Prom
         <details id="sent" className="card group scroll-mt-20 p-4">
           <summary className="flex cursor-pointer list-none items-center justify-between gap-3">
             <span>
-              <span className="font-semibold">Sent requests</span> <span className="text-sm text-slate-500">{sent.length}</span>
+              <span className="font-semibold">Sent Requests</span> <span className="text-sm text-slate-500">{sent.length}</span>
               {declined > 0 && <span className="ml-2 text-xs font-semibold text-dont">{declined} declined</span>}
               {expired > 0 && <span className="ml-2 text-xs font-semibold text-slate-500">{expired} expired</span>}
               <span className="block text-sm text-slate-500">Waiting for these players to accept.</span>
@@ -153,7 +152,7 @@ export default async function FriendsPage({ searchParams }: { searchParams: Prom
         {friends.length === 0 && (
           <p className="mb-3 text-sm text-slate-500">
             <strong>No friends yet?</strong> Search above for your Pokémon Sleep friends,{" "}
-            <Link href="/matches" className="font-semibold underline">find new friends</Link>, or share your friend code.
+            <Link href="/matches" className="font-semibold underline">Find New Friends</Link>, or share your friend code.
           </p>
         )}
         {placeholders && (

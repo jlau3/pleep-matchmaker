@@ -298,7 +298,7 @@ export function TierExplorer({
               type="button"
               onClick={() => show({ sleep: active ? null : type })}
               aria-pressed={active}
-              title={active ? `${SLEEP_TYPE_LABEL[type]} (tap again for all sleep types)` : `Lines with a ${SLEEP_TYPE_LABEL[type]} form`}
+              title={active ? `${SLEEP_TYPE_LABEL[type]} (tap again for all sleep types)` : `Pokémon with a ${SLEEP_TYPE_LABEL[type]} form`}
               className={`flex items-center gap-1.5 ${pill(active)} ${sleepType && !active ? "opacity-50 hover:opacity-100" : ""}`}
             >
               <span className={`h-2.5 w-2.5 rounded-full ${SLEEP_DOT[type]}`} aria-hidden />
@@ -326,8 +326,8 @@ export function TierExplorer({
         <>
           {Array.from(tiers.values()).some((rows) => rows.length > 0) && <TierBoard tiers={tiers} pool={pool} style={style} />}
           {unranked.length > 0 && <section className="card p-4" aria-label="Not enough votes yet">
-            <h2 className="font-bold">Not enough votes yet</h2>
-            <p className="mt-1 text-sm text-slate-500">These candies need saved choices from at least 10 active players before their tiers and totals are public.</p>
+            <h2 className="font-bold">Not Enough Votes Yet</h2>
+            <p className="mt-1 text-sm text-slate-500">These candies need saved votes from at least 10 active players before their tiers and totals are public.</p>
             <ul className="mt-3 grid grid-cols-3 gap-2 sm:grid-cols-6">
               {unranked.map(({ line, sprite }) => <li key={line.id} className="flex flex-col items-center text-center text-xs">
                 <img src={sprite ?? lineSpriteUrl(line)} alt="" loading="lazy" className="h-12 w-12 object-contain" />

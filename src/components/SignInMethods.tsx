@@ -31,7 +31,7 @@ export function SignInMethods({
 }) {
   return (
     <section>
-      <h2 className="mb-1 font-semibold">Sign-in methods</h2>
+      <h2 className="mb-1 font-semibold">Sign-in Methods</h2>
       <p className="mb-3 text-sm text-slate-500">
         Link Discord to show your Discord name to friends, or link both to sign in with either.
       </p>

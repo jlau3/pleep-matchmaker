@@ -32,7 +32,7 @@ export function FitLegend({ friendsVoted = true, youVoted = true, autoOpen = fal
         onClick={(e) => { if (e.target === e.currentTarget) close(); }}
         className="m-auto max-h-[88dvh] w-[calc(100%-2rem)] max-w-xl overflow-y-auto rounded-3xl bg-cream p-6 text-ink shadow-2xl backdrop:bg-black/60 dark:bg-night dark:text-[#eef1ff]">
         <div className="mb-4 flex items-start justify-between gap-3">
-          <h2 id={titleId} className="text-2xl font-extrabold">How match scores work</h2>
+          <h2 id={titleId} className="text-2xl font-extrabold">How Match Scores Work</h2>
           <button type="button" onClick={close} aria-label="Close" className="rounded-full px-2 text-2xl leading-none text-slate-500">×</button>
         </div>
       <div className="space-y-3 text-sm">

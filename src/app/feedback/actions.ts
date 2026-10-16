@@ -69,7 +69,7 @@ export async function sendFeedback(_prev: FeedbackState, form: FormData): Promis
   } catch {
     ok = false;
   }
-  if (!ok) return { error: "Couldn't send right now. Try again in a bit." };
+  if (!ok) return { error: "Couldn't send your feedback. Try again." };
 
   cookieStore.set(COOLDOWN_COOKIE, "1", { maxAge: COOLDOWN_SECONDS, httpOnly: true, sameSite: "lax", path: "/" });
   return { sent: true };

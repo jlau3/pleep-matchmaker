@@ -308,7 +308,7 @@ export function VoteBoard({
 
       <section className="card mb-4 p-3" aria-label="Your Top 3">
         <h2 className="font-bold">Your Top {MAX_TOP}</h2>
-        <p className="mb-2 text-xs text-slate-500">Tap ★ on a candy to star it as a top want.</p>
+        <p className="mb-2 text-xs text-slate-500">Tap ★ to add a candy to your Top 3.</p>
         <ul className="grid grid-cols-3 gap-2">
           {Array.from({ length: MAX_TOP }, (_, i) => {
             const line = topLines[i];
@@ -364,7 +364,7 @@ export function VoteBoard({
           <label className="flex cursor-pointer items-center gap-2 text-sm">
             <input type="checkbox" checked={showCrowd} onChange={toggleCrowd} className="h-4 w-4 accent-[var(--color-night)]" />
             <span>
-              Show what others pick{" "}
+              Show community votes{" "}
               <span className="text-slate-500">({crowd.voters} active players)</span>
             </span>
           </label>
@@ -385,7 +385,7 @@ export function VoteBoard({
 
       <div className="mx-auto mt-10 max-w-md text-center">
         <Link href="/matches" className="btn-primary block w-full px-6 py-4 text-lg">
-          Matchmake
+          Find New Friends →
         </Link>
       </div>
     </div>

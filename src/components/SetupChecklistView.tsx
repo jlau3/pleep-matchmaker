@@ -179,7 +179,7 @@ export function SetupChecklistView({ userId, done, steps }: { userId: string; do
             )
           )}
           <button type="button" onClick={snooze} disabled={saving} className="text-xs font-semibold text-slate-500 underline">
-            Hide for now
+            Hide for this session
           </button>
           <button
             type="button"
@@ -187,7 +187,7 @@ export function SetupChecklistView({ userId, done, steps }: { userId: string; do
             disabled={saving}
             className="text-xs font-semibold text-slate-500 underline"
           >
-            Skip setup
+            Don't show again
           </button>
         </div>
         {saving && (

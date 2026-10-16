@@ -29,5 +29,5 @@ export const FRIENDS_TABS = [
 
 export const PROFILE_TABS = [
   { href: "/vote", label: "My Votes" },
-  { href: "/profile", label: "Settings" },
+  { href: "/profile", label: "Profile" },
 ];

@@ -99,7 +99,7 @@ export function FriendPostCard({
         <p className="pr-7 text-slate-700 dark:text-slate-300">
           <b>📣 Your friends here should match your Pokémon Sleep friends!</b> Send them a friend request here too, so your
           Tier List reflects the people you actually send candy to. Looking for more friends? Add your friend code in{" "}
-          <Link href="/profile" className="underline">Profile → Settings</Link> to get a ready-made post.
+          <Link href="/profile" className="underline">Me → Profile</Link> to get a ready-made post.
         </p>
       </section>
     );

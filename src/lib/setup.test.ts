@@ -15,7 +15,7 @@ describe("setupSteps", () => {
     const steps = setupSteps({ ...empty, name: true, code: true });
     expect(steps[0].done).toBe(false);
     expect(currentStep(steps).id).toBe("profile");
-    expect(currentStep(steps).cta).toBe("Choose my picture");
+    expect(currentStep(steps).cta).toBe("Choose my icon");
     expect(currentStep(steps).href).toBe("/profile?setup=profile");
   });
 

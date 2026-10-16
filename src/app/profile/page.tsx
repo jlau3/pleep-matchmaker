@@ -68,7 +68,7 @@ export default async function ProfilePage({ searchParams }: { searchParams: Prom
             </section>
 
             <section className={card}>
-              <h2 className="mb-2 font-semibold">Blocked players</h2>
+              <h2 className="mb-2 font-semibold">Blocked Players</h2>
               {blocked.length === 0 ? (
                 <p className="text-sm text-slate-500">No one.</p>
               ) : (

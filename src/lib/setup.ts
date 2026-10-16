@@ -25,7 +25,7 @@ export function setupSteps(progress: SetupProgress): SetupStep[] {
     ? { next: "Add your name exactly as it appears in Pokémon Sleep, so friends can find you.", cta: "Add my name" }
     : !progress.code
       ? { next: "Add your 12-digit Pokémon Sleep friend code. Find it in Research Community in the game.", cta: "Add my friend code" }
-      : { next: "Choose the Pokémon profile picture you use in the game.", cta: "Choose my picture" };
+      : { next: "Choose the Pokémon icon you use in the game.", cta: "Choose my icon" };
   return [
     {
       id: "profile",
@@ -36,8 +36,8 @@ export function setupSteps(progress: SetupProgress): SetupStep[] {
     },
     {
       id: "vote",
-      label: "Candy choices",
-      next: "Pick Want or Don't Want for the candy you care about. Start with a few; the rest can stay Neutral.",
+      label: "Candy votes",
+      next: "Vote Want or Don't Want for the candy you care about. Start with a few; the rest can stay Neutral.",
       href: "/vote",
       cta: "Choose my candy",
       done: progress.voted,
@@ -45,7 +45,7 @@ export function setupSteps(progress: SetupProgress): SetupStep[] {
     {
       id: "friends",
       label: "Add a friend",
-      next: "Look up your Pokémon Sleep friends, send a request in Find New, or save a name under Not here yet. You can keep going while requests are pending.",
+      next: "Look up your Pokémon Sleep friends, send a request in Find New Friends, or save a name under Friends to Find. You can keep going while requests are pending.",
       href: "/friends",
       cta: "Add friends",
       done: progress.friends,

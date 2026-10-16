@@ -47,7 +47,7 @@ export function PlayerResults({
     <>
       {[...nameGroups.values()].filter((group) => group.count > 1).map((group) => (
         <p key={group.name} className="rounded-xl bg-sky/60 px-3 py-2 text-sm dark:bg-night-deep">
-          {group.count} players named {group.name}. Match the Pokémon picture to find your friend.
+          {group.count} players named {group.name}. Match the Pokémon Sleep icon to find your friend.
         </p>
       ))}
       {foundSelf && (
@@ -108,19 +108,19 @@ function SuggestPlaceholder({ name, notFound = false }: { name: string; /** Resu
   if (state === "saved")
     return (
       <p className="font-semibold text-want">
-        ✓ Added to <Link href="/friends#not-here-yet" className="underline">Not here yet</Link>
+        ✓ Added to <Link href="/friends#not-here-yet" className="underline">Friends to Find</Link>
       </p>
     );
   return (
     <div className="mx-auto max-w-sm rounded-2xl bg-sky/60 p-3 text-slate-700 dark:bg-night-deep dark:text-slate-200">
       {notFound ? (
         <p>
-          Not who you were looking for? Save <b>{name}</b> to your Not here yet list as a reminder while you track them
+          Not who you were looking for? Save <b>{name}</b> to your Friends to Find list as a reminder while you track them
           down or invite them.
         </p>
       ) : (
         <p>
-          Friends with them in Pokémon Sleep? Keep <b>{name}</b> under Not here yet as a reminder while you track them
+          Friends with them in Pokémon Sleep? Keep <b>{name}</b> under Friends to Find as a reminder while you track them
           down or invite them.
         </p>
       )}
@@ -133,13 +133,13 @@ function SuggestPlaceholder({ name, notFound = false }: { name: string; /** Resu
               const result = await addPlaceholder(name);
               setState(result.error ?? "saved");
             } catch {
-              setState("Couldn't save, try again");
+              setState("Couldn't save this name. Try again.");
             }
           })
         }
         className="btn-primary mt-2 px-4 py-1.5 text-sm disabled:opacity-50"
       >
-        {pending ? "Adding…" : "Add to Not here yet"}
+        {pending ? "Adding…" : "Add to Friends to Find"}
       </button>
       {state !== "idle" && (
         <p role="alert" className="mt-1 text-xs text-dont">

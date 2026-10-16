@@ -193,7 +193,7 @@ export function tierSections(sections: ExportSection[]): ImageSection[] {
       items: (section.tiers.get(tier.id) ?? []).map((r) => ({ sprite: rankedSpriteUrl(r), tops: r.tops })),
     })),
   }, ...(section.unranked?.length ? [{
-    heading: "Not enough votes yet",
+    heading: "Not Enough Votes Yet",
     rows: [{ label: "—", color: { bg: "#e2e8f0", fg: "#5a6385" }, items: section.unranked.map((row) => ({ sprite: rankedSpriteUrl(row) })) }],
   }] : [])]);
 }
@@ -203,7 +203,7 @@ export function TierExport({
   title,
   voters,
   sections,
-  label = "Export Image",
+  label = "Export image",
 }: {
   title: string;
   voters: number | null;
@@ -234,7 +234,7 @@ export function ImageExport({
   subtitle,
   sections,
   file: fileName,
-  label = "Export Image",
+  label = "Export image",
 }: {
   /** Popup title and image alt text. */
   title: string;
@@ -262,7 +262,7 @@ export function ImageExport({
       setImage({ blob, url: URL.createObjectURL(blob) });
       dialog.current?.showModal();
     } catch {
-      setStatus("Couldn't make the image. Try again.");
+      setStatus("Couldn't create the image. Try again.");
     } finally {
       setBusy(false);
     }
@@ -317,7 +317,7 @@ export function ImageExport({
           <div className="flex flex-wrap gap-2">
             {image && typeof ClipboardItem !== "undefined" && (
               <button type="button" onClick={copy} className="btn-primary px-4 py-2">
-                Copy Image
+                Copy image
               </button>
             )}
             {image && (

@@ -42,7 +42,7 @@ export function VoteGuide({ autoOpen = false }: { autoOpen?: boolean }) {
         <div className="p-6">
           <div className="mb-4 flex items-start justify-between gap-3">
             <h2 id="vote-guide-title" className="text-2xl font-extrabold">
-              How to vote
+              How to Vote
             </h2>
             <button
               type="button"
@@ -65,8 +65,7 @@ export function VoteGuide({ autoOpen = false }: { autoOpen?: boolean }) {
               <b className="text-dont">Don&apos;t Want:</b> ones you&apos;ll never build, or have finished building.
             </li>
             <li>
-              <b className="text-sun-deep">★ Top {MAX_TOP}:</b> your favorites. They don&apos;t move anyone&apos;s Tier List,
-              but friends see them and can send that candy anyway.
+              <b className="text-sun-deep">★ Top {MAX_TOP}:</b> mark up to {MAX_TOP} candies you want most. Friends see them separately from the Tier List ranking.
             </li>
           </ul>
           <div className="mt-5 space-y-2 rounded-2xl bg-sun/25 p-4 text-sm">
@@ -75,7 +74,10 @@ export function VoteGuide({ autoOpen = false }: { autoOpen?: boolean }) {
               Tier List comes from your friends&apos; votes, not yours.
             </p>
             <p>
-              <b>New Pokémon</b> show up here shortly after they&apos;re released. Check back and vote on them.
+              <b>Show community votes</b> displays Want and Don't Want percentages from active players.
+            </p>
+            <p>
+              <b>New Pokémon</b> appear here after release. Check back to vote.
             </p>
           </div>
           <button type="button" onClick={close} className="btn-primary mt-6 w-full py-2">
