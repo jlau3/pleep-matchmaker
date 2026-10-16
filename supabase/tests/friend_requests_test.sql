@@ -169,6 +169,7 @@ insert into public.friends (user_id, friend_id) values ('00000000-0000-0000-0020
 \ir ../migrations/20261021001000_request_without_code.sql
 \ir ../migrations/20261024000100_require_profile_icon.sql
 \ir ../migrations/20261025000000_net_support_tiers.sql
+\ir ../migrations/20261025000100_equal_vote_support.sql
 do $$ begin
   assert not exists (select 1 from public.friends where user_id = '00000000-0000-0000-0020-000000000004' and friend_id = '00000000-0000-0000-0020-000000000003'), 'one-way add removed';
   assert (select status from public.friend_requests where from_id = '00000000-0000-0000-0020-000000000004' and to_id = '00000000-0000-0000-0020-000000000003') = 'open', 'now a request';

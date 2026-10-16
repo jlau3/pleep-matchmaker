@@ -12,11 +12,11 @@ function ladder(n: number) {
 const ids = (tiers: Map<string, { line: { id: string } }[]>, tier: string) => tiers.get(tier)!.map((r) => r.line.id);
 
 describe("scoreOf", () => {
-  it("counts Want +1, Neutral 0, Don't Want -2", () => {
-    expect(scoreOf({ wants: 10, dontWants: 4 }, 20)).toBe(10 - 8);
+  it("counts Want +1, Neutral 0, Don't Want -1", () => {
+    expect(scoreOf({ wants: 10, dontWants: 4 }, 20)).toBe(10 - 4);
     expect(scoreOf({ wants: 0, dontWants: 0 }, 20)).toBe(0); // all neutral, or nobody voted on it
-    // One Don't Want cancels two Wants: these two tie.
-    expect(scoreOf({ wants: 4, dontWants: 1 }, 10)).toBe(scoreOf({ wants: 2, dontWants: 0 }, 10));
+    // One Don't Want cancels one Want: these two tie.
+    expect(scoreOf({ wants: 4, dontWants: 1 }, 10)).toBe(scoreOf({ wants: 3, dontWants: 0 }, 10));
   });
 });
 
@@ -32,12 +32,12 @@ describe("relative tiers by score", () => {
 
   it("avoids negative support, while zero support remains ranked", () => {
     const [a, b, c] = [...LINES_BY_ID.values()];
-    const votes = new Map([[a.id, { wants: 3, dontWants: 3 }], [b.id, { wants: 1, dontWants: 0 }], [c.id, { wants: 0, dontWants: 0 }]]);
+    const votes = new Map([[a.id, { wants: 1, dontWants: 4 }], [b.id, { wants: 1, dontWants: 0 }], [c.id, { wants: 0, dontWants: 0 }]]);
     const tiers = buildTiers(votes, 6, [a, b, c]);
     expect(ids(tiers, "S")).toEqual([b.id]);
     expect(ids(tiers, "C")).toEqual([c.id]);
     expect(ids(tiers, "avoid")).toEqual([a.id]);
-    expect(tiers.get("avoid")![0]).toMatchObject({ score: -3, support: -50, wantShare: 0.5, dontShare: 0.5 });
+    expect(tiers.get("avoid")![0]).toMatchObject({ score: -3, support: -50, wantShare: 1 / 6, dontShare: 4 / 6 });
   });
 
   it("keeps ties in the same tier", () => {
@@ -68,7 +68,7 @@ describe("relative tiers by score", () => {
 
   it("does not let Neutral votes rescue negative support from Avoid", () => {
     const [a, b, c, d] = [...LINES_BY_ID.values()];
-    const votes = new Map([[a.id, { wants: 1, dontWants: 4 }], [b.id, { wants: 0, dontWants: 1 }], [c.id, { wants: 0, dontWants: 0 }], [d.id, { wants: 2, dontWants: 1 }]]);
+    const votes = new Map([[a.id, { wants: 1, dontWants: 4 }], [b.id, { wants: 0, dontWants: 1 }], [c.id, { wants: 0, dontWants: 0 }], [d.id, { wants: 1, dontWants: 1 }]]);
     const tiers = buildTiers(votes, 5, [a, b, c, d]);
     expect(ids(tiers, "avoid")).toEqual([b.id, a.id]);
     expect(ids(tiers, "C")).toEqual([c.id, d.id]);
@@ -78,12 +78,12 @@ describe("relative tiers by score", () => {
   it("doesn't let stars change the score", () => {
     const [a, b] = [...LINES_BY_ID.values()];
     const votes = new Map([
-      [a.id, { wants: 1, dontWants: 1, tops: 1 }], // starred, but 1 - 2 = -1
+      [a.id, { wants: 1, dontWants: 1, tops: 1 }], // a star does not change zero net support
       [b.id, { wants: 1, dontWants: 0, tops: 0 }], // 1 Want = +1
     ]);
     const tiers = buildTiers(votes, 2, [a, b]);
     expect(ids(tiers, "S")).toEqual([b.id]);
-    expect(ids(tiers, "avoid")).toEqual([a.id]);
+    expect(ids(tiers, "C")).toEqual([a.id]);
   });
 
   it("breaks score ties by Top 3 stars before anything else", () => {
@@ -91,7 +91,7 @@ describe("relative tiers by score", () => {
     const [mewtwo, eevee] = ["mewtwo", "eevee"].map((id) => LINES_BY_ID.get(id)!);
     const votes = new Map([
       [mewtwo.id, { wants: 2, dontWants: 0, tops: 0 }], // 2 Wants = +2
-      [eevee.id, { wants: 4, dontWants: 1, tops: 1 }], // 4 Wants - 2 = +2
+      [eevee.id, { wants: 3, dontWants: 1, tops: 1 }], // 3 Wants - 1 = 2
     ]);
     const tiers = buildTiers(votes, 5, [mewtwo, eevee]);
     expect(ids(tiers, "S")).toEqual([eevee.id, mewtwo.id]);
@@ -126,7 +126,7 @@ describe("buildTiers", () => {
     // other key, so dex order breaks the tie. bulbasaur has no stars.
     expect(ids(tiers, "top")).toEqual(["pikachu", "eevee", "charmander", "squirtle"]);
     // Stars don't score: the four starred lines all score 2 and share S, ordered
-    // by stars; bulbasaur (2 - 2 = 0) falls to C.
+    // by stars; bulbasaur (2 - 1 = 1) falls to C.
     expect(ids(tiers, "S")).toEqual(["pikachu", "eevee", "charmander", "squirtle"]);
     expect(ids(tiers, "C")).toEqual(["bulbasaur"]);
     expect(tiers.get("S")![0].score).toBe(2);
@@ -140,10 +140,10 @@ describe("buildTiers", () => {
     const votes = countVotes([
       { wants: ["pikachu", "ditto", "larvitar", "mewtwo", "eevee"], dont_wants: [] },
       { wants: ["pikachu"], dont_wants: [] },
-      { wants: ["pikachu"], dont_wants: [] },
+      { wants: [], dont_wants: [] },
       { wants: [], dont_wants: ["pikachu"] },
     ]);
-    // All score 1 (one Want; Pikachu 3 Wants - 2). Ditto (16-pip), mewtwo
+    // All score 1 (one Want; Pikachu 2 Wants - 1). Ditto (16-pip), mewtwo
     // (legendary) and larvitar (pseudo) come first in dex order, not by kind;
     // then eevee, then pikachu with its don't-want.
     expect(ids(buildTiers(votes, 4, lines), "S")).toEqual(["ditto", "mewtwo", "larvitar", "eevee", "pikachu"]);
@@ -160,7 +160,7 @@ describe("buildTiers", () => {
     const lines = ["bulbasaur", "charmander", "squirtle", "pikachu"].map((id) => LINES_BY_ID.get(id)!);
     const tiers = buildTiers(votes, 3, lines);
     // pikachu (3) S, squirtle (2) B; nobody voted on bulbasaur (0) so it
-    // lands in C; charmander (1 - 4) is Avoid.
+    // lands in C; charmander (1 - 2) is Avoid.
     expect(ids(tiers, "S")).toEqual(["pikachu"]);
     expect(ids(tiers, "B")).toEqual(["squirtle"]);
     expect(ids(tiers, "C")).toEqual(["bulbasaur"]);
@@ -169,7 +169,7 @@ describe("buildTiers", () => {
   });
 
   it("ranks 39 want + 11 don't tiers below 39 want + 11 neutral", () => {
-    // 50 voters. pikachu: 39 Want, 11 Neutral (+39). eevee: 39 Want, 11 Don't Want (+17).
+    // 50 voters. pikachu: 39 Want, 11 Neutral (+39). eevee: 39 Want, 11 Don't Want (+28).
     // Seven candies in between: 35..29 Wants, the rest Neutral.
     const [pikachu, eevee] = ["pikachu", "eevee"].map((id) => LINES_BY_ID.get(id)!);
     const fillers = [...LINES_BY_ID.values()].filter((l) => l !== pikachu && l !== eevee).slice(0, 7);
@@ -182,13 +182,13 @@ describe("buildTiers", () => {
     // 9 ranked lines: S = 2, A = 3, B = 2, C = 2. eevee ranks last.
     expect(ids(tiers, "S")[0]).toBe(pikachu.id);
     expect(ids(tiers, "C").at(-1)).toBe(eevee.id);
-    expect(tiers.get("C")!.at(-1)).toMatchObject({ score: 17, neutral: 0, dontShare: 0.22 });
+    expect(tiers.get("C")!.at(-1)).toMatchObject({ score: 28, neutral: 0, dontShare: 0.22 });
   });
 
   it("keeps Avoid lines in the Top 3 row, so nobody's pick is left out", () => {
     const [a, b] = [...LINES_BY_ID.values()];
     const votes = new Map([
-      [a.id, { wants: 5, dontWants: 11, tops: 5 }], // 5 - 22 = -17
+      [a.id, { wants: 5, dontWants: 11, tops: 5 }], // 5 - 11 = -6
       [b.id, { wants: 1, dontWants: 0, tops: 1 }],
     ]);
     const tiers = buildTiers(votes, 16, [a, b]);
@@ -198,19 +198,19 @@ describe("buildTiers", () => {
 });
 
 describe("net support", () => {
-  it("centers Neutral on 0 and preserves the asymmetric opposition weight", () => {
-    expect(supportOf(-100, 50)).toBe(-200);
+  it("centers Neutral on 0 and weights Want and Don't Want equally", () => {
+    expect(supportOf(-50, 50)).toBe(-100);
     expect(supportOf(0, 50)).toBe(0);
     expect(supportOf(50, 50)).toBe(100);
-    expect(supportOf(17, 50)).toBe(34);
+    expect(supportOf(28, 50)).toBe(56);
     expect(supportOf(3, 0)).toBeNull();
   });
-  it("distinguishes the reported Bulbasaur and Chikorita examples", () => {
+  it("uses equal weights in the reported Bulbasaur and Chikorita examples", () => {
     const bulbasaur = supportOf(scoreOf({ wants: 112, dontWants: 27 }, 201), 201)!;
     const chikorita = supportOf(scoreOf({ wants: 95, dontWants: 18 }, 201), 201)!;
-    expect(formatSupport(bulbasaur)).toBe("+28.9");
-    expect(formatSupport(chikorita)).toBe("+29.4");
-    expect(chikorita).toBeGreaterThan(bulbasaur);
+    expect(formatSupport(bulbasaur)).toBe("42");
+    expect(formatSupport(chikorita)).toBe("38");
+    expect(bulbasaur).toBeGreaterThan(chikorita);
   });
   it("anchors an entirely Neutral list in C in both ranked styles", () => {
     const lines = [...LINES_BY_ID.values()].slice(0, 10);
@@ -223,10 +223,10 @@ describe("net support", () => {
   });
   it("retains the sign of tiny scores instead of rounding a negative to zero", () => {
     expect(formatSupport(0)).toBe("0");
-    expect(formatSupport(-0.001)).toBe("−<0.1");
-    expect(formatSupport(0.001)).toBe("+<0.1");
-    expect(formatSupport(-200)).toBe("−200");
-    expect(formatSupport(100)).toBe("+100");
+    expect(formatSupport(-0.001)).toBe("−<1");
+    expect(formatSupport(0.001)).toBe("<1");
+    expect(formatSupport(-100)).toBe("−100");
+    expect(formatSupport(100)).toBe("100");
   });
   it("never places negative support outside Avoid in Standard or Fixed Scores", () => {
     const lines = [...LINES_BY_ID.values()].slice(0, 20);

@@ -62,14 +62,14 @@ describe("Tier List ranking styles", () => {
     const tiers = buildTiers(new Map(), 0, lines, "fixed");
     expect(tiers.get("C")).toHaveLength(lines.length);
     expect(tiers.get("S")).toHaveLength(0);
-    expect(tierDefinitions("fixed").find((tier) => tier.id === "S")?.hint).toBe("Net support +80 or higher");
+    expect(tierDefinitions("fixed").find((tier) => tier.id === "S")?.hint).toBe("Net support 80 or higher");
   });
 });
 
 describe("comparison ranking styles", () => {
-  it("Consensus separates disagreement from a mostly Neutral group with the same score", () => {
+  it("Consensus retains vote-pattern details inside the shared Mixed group", () => {
     const votes = new Map([
-      [lines[0].id, { wants: 40, dontWants: 20 }], // same score as all Neutral
+      [lines[0].id, { wants: 40, dontWants: 20 }], // no clear lead: Want and Neutral tie
       [lines[1].id, { wants: 0, dontWants: 0 }],
       [lines[2].id, { wants: 50, dontWants: 50 }],
       [lines[3].id, { wants: 70, dontWants: 10 }],
@@ -77,10 +77,21 @@ describe("comparison ranking styles", () => {
     ]);
     const consensus = buildTiers(votes, 100, lines.slice(0, 5), "consensus");
     expect(tierOf(consensus, lines[0].id)).toBe("A"); // mixed
-    expect(tierOf(consensus, lines[1].id)).toBe("B"); // mostly Neutral
-    expect(tierOf(consensus, lines[2].id)).toBe("C"); // divisive
+    expect(tierOf(consensus, lines[1].id)).toBe("A"); // mostly Neutral, in Mixed
+    expect(consensus.get("A")!.find((row) => row.line.id === lines[1].id)?.consensusNote).toBe("Mostly Neutral");
+    expect(tierOf(consensus, lines[2].id)).toBe("A"); // divisive, in Mixed
+    expect(consensus.get("A")!.find((row) => row.line.id === lines[2].id)?.consensusNote).toBe("Divisive");
     expect(tierOf(consensus, lines[3].id)).toBe("S"); // mostly Wanted
     expect(tierOf(consensus, lines[4].id)).toBe("avoid"); // mostly Unwanted
+  });
+  it("recognizes Drifloon's clear opposition below 50% and groups Doduo inside Mixed", () => {
+    const votes = new Map([[lines[0].id, { wants: 28, dontWants: 100 }], [lines[1].id, { wants: 48, dontWants: 47 }], [lines[2].id, { wants: 98, dontWants: 30 }]]);
+    const groups = buildTiers(votes, 201, lines.slice(0, 3), "consensus");
+    expect(tierOf(groups, lines[0].id)).toBe("avoid");
+    expect(tierOf(groups, lines[1].id)).toBe("A");
+    expect(groups.get("A")!.find((row) => row.line.id === lines[1].id)?.consensusNote).toBe("Mostly Neutral");
+    expect(tierOf(groups, lines[2].id)).toBe("S");
+    expect(tierDefinitions("consensus").map((tier) => tier.id)).toEqual(["top", "S", "A", "avoid"]);
   });
   it.each(["standard", "fixed", "consensus"] as const)("%s never loses or duplicates a ranked candy or exposes low-count totals", (style) => {
     const votes = new Map(lines.map((line, i) => [line.id, { wants: i, dontWants: 0, tops: i === 0 ? 0 : 1, seen: i === 0 ? 9 : 20 }]));

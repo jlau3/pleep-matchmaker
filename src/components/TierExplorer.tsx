@@ -198,8 +198,8 @@ export function TierExplorer({
             : <RefreshStamp loadedAt={loadedAt} />}
         </div>
         <p className="text-sm text-slate-600 dark:text-slate-300">
-          Which candy to prioritize, ranked by what {pool === "friends" ? "your friends" : "active players"}{" "}
-          choose as Want and Don&apos;t Want.
+          {style === "consensus" ? "How preferences differ, grouped by votes from" : "Which candy to prioritize, ranked by votes from"}{" "}
+          {pool === "friends" ? "your friends" : "active players"}.
         </p>
         {!signedIn && <button type="button" onClick={() => show({ pool: "friends" })} className="mt-2 text-sm font-semibold underline">See what your friends want → Sign in</button>}
       </div>
@@ -303,12 +303,12 @@ export function TierExplorer({
           <summary className="w-fit cursor-pointer py-1 font-semibold">Ranking Style: {TIER_STYLE_LABEL[style]}</summary>
           <fieldset className="absolute right-0 z-20 mt-2 w-[min(24rem,calc(100vw-2rem))] space-y-3 rounded-xl border border-slate-300 bg-cream p-3 shadow-lg dark:border-slate-700 dark:bg-night">
             <legend className="px-1 font-semibold">Choose a ranking style</legend>
-            <p className="text-xs text-slate-600 dark:text-slate-300">Net support: Want +1, Neutral 0, Don't Want −2, scaled per 100 players. Negative scores go to Avoid in Standard and Fixed Scores.</p>
+            <p className="text-xs text-slate-600 dark:text-slate-300">Net support is Want % minus Don't Want %. Neutral adds no points. Negative scores go to Avoid in Standard and Fixed Scores. Numbers are rounded for display; tiers use exact scores.</p>
             {TIER_STYLES.map((option) => <label key={option} className="flex cursor-pointer items-start gap-2">
               <input type="radio" name="tier-style" value={option} checked={style === option}
                 onChange={() => show({ style: option })} className="mt-1 accent-want" />
               <span><b>{TIER_STYLE_LABEL[option]}{option === "standard" && " (Recommended)"}</b>
-                <span className="block text-xs text-slate-500">{TIER_STYLE_DESCRIPTION[option]}{option === "fixed" && ` S +${FIXED_SCORE_CUTOFFS.S}, A +${FIXED_SCORE_CUTOFFS.A}, B +${FIXED_SCORE_CUTOFFS.B}, C 0 to below +${FIXED_SCORE_CUTOFFS.B}.`}</span></span>
+                <span className="block text-xs text-slate-500">{TIER_STYLE_DESCRIPTION[option]}{option === "fixed" && ` S ${FIXED_SCORE_CUTOFFS.S}, A ${FIXED_SCORE_CUTOFFS.A}, B ${FIXED_SCORE_CUTOFFS.B}, C 0 to below ${FIXED_SCORE_CUTOFFS.B}.`}</span></span>
             </label>)}
           </fieldset>
         </details>

@@ -8,7 +8,7 @@ export const TIER_STYLE_LABEL: Record<TierStyle, string> = {
 export const TIER_STYLE_DESCRIPTION: Record<TierStyle, string> = {
   standard: "Recommended shared ranking. Negative totals go to Avoid; the rest split by percentile.",
   fixed: "Compare support across lists using the same score cutoffs. Tiers depend on each candy's votes, not how other candy scores.",
-  consensus: "Groups candy by Want, Neutral, and Don't Want percentages, including a Divisive group.",
+  consensus: "Groups candy as Mostly Wanted, Mixed, or Mostly Unwanted. Mixed cards flag Divisive or Mostly Neutral vote patterns.",
 };
 export const parseTierStyle = (value: unknown): TierStyle =>
   TIER_STYLES.includes(value as TierStyle) ? value as TierStyle : "standard";
@@ -31,8 +31,8 @@ export interface Tier {
 
 /**
  * The tier list answers "which candy should I send my friends?". Each voter
- * scores a candy (POINTS): Want +1, Neutral 0, Don't Want -2.
- * This preserves the previous ordering: one Don't Want offsets two Wants.
+ * scores a candy (POINTS): Want +1, Neutral 0, Don't Want -1.
+ * One Don't Want offsets one Want; Neutral does not add support.
  * Top 3 Spotlight stars don't change the score; they're the first tie-breaker.
  *
  * Negative net support is Avoid; zero support stays in C. Positive scores are
@@ -52,7 +52,7 @@ export const TIER_SHARES = { S: 0.2, A: 0.25, B: 0.3 } as const;
 export const TOP_ROW_SIZE = 9;
 
 /** What each voter's choice adds to a line's score. Tier List only; match %s use public.dont_want_weight(). */
-export const POINTS = { want: 1, neutral: 0, dontWant: -2 } as const;
+export const POINTS = { want: 1, neutral: 0, dontWant: -1 } as const;
 
 const pct = (x: number) => Math.round(x * 100);
 
@@ -80,18 +80,16 @@ export const TIERS: Tier[] = [
 export function tierDefinitions(style: TierStyle): Tier[] {
   if (style === "consensus") return [
     TIERS[0],
-    { id: "S", label: "Mostly\nWanted", hint: "At least 50% Want and fewer than 25% Don't Want" },
-    { id: "B", label: "Mostly\nNeutral", hint: "At least 50% Neutral, after checking the stronger preference groups" },
-    { id: "A", label: "Mixed", hint: "No majority and fewer than 25% on at least one opposing side" },
-    { id: "C", label: "Divisive", hint: "At least 25% Want and at least 25% Don't Want" },
-    { id: "avoid", label: "Mostly\nUnwanted", hint: "At least 50% Don't Want and fewer than 25% Want" },
+    { id: "S", label: "Mostly\nWanted", hint: "Want is the largest group, with at least twice as many Want as Don't Want" },
+    { id: "A", label: "Mixed", hint: "No clear recommendation; includes divided and mostly Neutral votes" },
+    { id: "avoid", label: "Mostly\nUnwanted", hint: "Don't Want is the largest group, with at least twice as many Don't Want as Want" },
   ];
   if (style === "standard") return TIERS;
   return TIERS.map((tier) => ({ ...tier, hint: ({
-    S: `Net support +${FIXED_SCORE_CUTOFFS.S} or higher`,
-    A: `Net support +${FIXED_SCORE_CUTOFFS.A} to below +${FIXED_SCORE_CUTOFFS.S}`,
-    B: `Net support +${FIXED_SCORE_CUTOFFS.B} to below +${FIXED_SCORE_CUTOFFS.A}`,
-    C: `Lower priority · Net support 0 to below +${FIXED_SCORE_CUTOFFS.B}`,
+    S: `Net support ${FIXED_SCORE_CUTOFFS.S} or higher`,
+    A: `Net support ${FIXED_SCORE_CUTOFFS.A} to below ${FIXED_SCORE_CUTOFFS.S}`,
+    B: `Net support ${FIXED_SCORE_CUTOFFS.B} to below ${FIXED_SCORE_CUTOFFS.A}`,
+    C: `Lower priority · Net support 0 to below ${FIXED_SCORE_CUTOFFS.B}`,
   } as Record<string, string>)[tier.id] ?? tier.hint }));
 }
 
@@ -114,8 +112,10 @@ export interface RankedLine {
   neutral: number;
   /** Score (see scoreOf); what tiers rank on. */
   score: number;
-  /** Net support per 100 players: Neutral 0, all Want +100, all Don't Want -200. */
+  /** Net support per 100 players: Neutral 0, all Want +100, all Don't Want -100. */
   support: number | null;
+  /** Detail preserved within Consensus's shared Mixed group. */
+  consensusNote?: "Divisive" | "Mostly Neutral";
   tops: number;
   /**
    * Share of the pool who want it, 0 to 1, stars not weighted. Null with no
@@ -137,12 +137,11 @@ export function supportOf(score: number, voters: number): number | null {
   return voters > 0 ? 100 * score / voters : null;
 }
 
-/** Keep nearby scores distinguishable, and never display negative support as zero. */
+/** Whole-number labels only; sorting and tier boundaries retain exact support. */
 export function formatSupport(support: number): string {
   if (support === 0) return "0";
-  const sign = support > 0 ? "+" : "−";
-  const magnitude = Math.abs(support);
-  return sign + (magnitude < 0.05 ? "<0.1" : magnitude.toFixed(1).replace(/\.0$/, ""));
+  const magnitude = Math.round(Math.abs(support));
+  return (support < 0 ? "−" : "") + (magnitude === 0 ? "<1" : magnitude.toString());
 }
 
 const byRank = (a: RankedLine, b: RankedLine) =>
@@ -184,16 +183,17 @@ export function buildTiers(
   out.set("top", top);
   // Nobody has voted: nothing to rank, so everything is C.
   if (voters <= 0) {
-    out.get("C")!.push(...all.sort(byRank));
+    out.get(style === "consensus" ? "A" : "C")!.push(...all.sort(byRank));
     return out;
   }
   if (style === "consensus") {
     for (const row of all.sort(byRank)) {
       const want = row.wants / voters, dont = row.dontWants / voters, neutral = row.neutral / voters;
-      const bucket: TierId = want >= 0.25 && dont >= 0.25 ? "C"
-        : want >= 0.5 && dont < 0.25 ? "S"
-        : dont >= 0.5 && want < 0.25 ? "avoid"
-        : neutral >= 0.5 ? "B" : "A";
+      const divisive = want >= 0.25 && dont >= 0.25;
+      const bucket: TierId = divisive ? "A"
+        : want > neutral && want > dont && want >= 2 * dont ? "S"
+        : dont > neutral && dont > want && dont >= 2 * want ? "avoid" : "A";
+      if (bucket === "A") row.consensusNote = divisive ? "Divisive" : neutral >= 0.5 ? "Mostly Neutral" : undefined;
       out.get(bucket)!.push(row);
     }
     return out;

@@ -35,7 +35,7 @@ Anywhere else, a fit under 25% shows as an amber **low fit** (`LOW_FIT_PCT` in `
 
 ## Tier list rules
 
-The Tier List answers "which candy should I send my friends?". It uses **net support**: Want +1, Neutral 0, Don't Want −2. One Don't Want offsets two Wants. Top 3 Spotlight stars do not change the score; they break ordering ties only. The signed score shown on each card is `100 × (wants − 2 × dont_wants) / voters`, rounded to one decimal for display. All-Neutral is 0, all-Want is +100, and all-Don't-Want is −200. This is support per 100 players, not a percentage or a rating out of 100.
+The Tier List answers "which candy should I send my friends?". It uses **net support**: Want +1, Neutral 0, Don't Want −1. One Don't Want offsets one Want. Top 3 Spotlight stars do not change the score; they break ordering ties only. The signed score shown on each card is `100 × (wants − dont_wants) / voters`, rounded to a whole number for display, without a positive sign; ranking and tier boundaries retain full precision. All-Neutral is 0, all-Want is +100, and all-Don't-Want is −100. This is support per 100 players, not a percentage or a rating out of 100.
 
 Standard ranks positive scores by position; zero support stays in C and every negative score goes to Avoid:
 
@@ -49,11 +49,11 @@ Standard ranks positive scores by position; zero support stays in C and every ne
 
 Equal raw scores share a tier, placed by their middle rank; the best-scoring positive tie is always S. With no voters, all candies are C and no support score appears. Filters change the candies used for Standard's percentile boundaries. Public candies need at least 10 active players' saved votes before any counts, scores or tiers are shown; Neutral counts toward that minimum.
 
-Fixed Scores uses the same signed support: S ≥ +80, A ≥ +50, B ≥ +20, C from 0 to below +20, and Avoid below 0. Boundaries use the exact score before display rounding. These are dev trial benchmarks. Consensus keeps its percentage-based categories and does not use these tier cutoffs.
+Fixed Scores uses the same signed support: S ≥ +80, A ≥ +50, B ≥ +20, C from 0 to below +20, and Avoid below 0. Boundaries use the exact score before display rounding. These are dev trial benchmarks. Consensus uses Mostly Wanted, Mixed, and Mostly Unwanted; Divisive and Mostly Neutral are badges within Mixed. Clear Want/Don't Want leads require the largest group and at least twice the opposing vote count; Divisive takes precedence when both sides reach 25%. It does not use score cutoffs. Its cards display the three vote percentages, with exact counts in tooltips, instead of weighted support scores.
 
 The **Top 3 Spotlight** row sits apart in a dashed gold frame to give personal favorites visibility even when they rank low overall. It repeats the 9 most-starred candies, with **Show all** to expand to every spotlighted candy, including Avoid. Candies also stay in their regular tier. Within a tier, ordering uses score, then Spotlight count, rarity, fewer Don't Wants, and Pokédex order.
 
-The SQL functions `list_tiers` and `top3_tiers_set` mirror Standard for friend-card tiers and sorting. `20261025000000_net_support_tiers.sql` moves their Avoid boundary to the Neutral baseline without changing match percentages or privacy checks.
+The SQL functions `list_tiers` and `top3_tiers_set` mirror Standard for friend-card tiers and sorting. `20261025000000_net_support_tiers.sql` moves their Avoid boundary to the Neutral baseline; `20261025000100_equal_vote_support.sql` balances Want and Don't Want equally without changing match percentages or privacy checks.
 
 ## Privacy
 

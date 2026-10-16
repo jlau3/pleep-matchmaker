@@ -21,7 +21,7 @@ describe("Tier List rules shared with the database", () => {
     return out;
   };
   it("matches list_tiers for 20, 10 and 8 lines", () => {
-    for (const count of [20, 10]) expect(tiersFor(count)).toEqual({ q1: "S", q2: "A", q6: "B", q4: "C", "": "C", q3: "C", q7: "Avoid", q8: "Avoid", q5: "Avoid" });
-    expect(tiersFor(8)).toEqual({ q1: "S", q2: "A", q6: "B", q4: "C", q3: "C", q7: "Avoid", q8: "Avoid", q5: "Avoid" });
+    for (const count of [20, 10]) expect(tiersFor(count)).toEqual({ q1: "S", q2: "A", q6: "A", q4: "B", "": "C", q3: "B", q7: "C", q8: "Avoid", q5: "Avoid" });
+    expect(tiersFor(8)).toEqual({ q1: "S", q2: "A", q6: "A", q4: "B", q3: "B", q7: "C", q8: "Avoid", q5: "Avoid" });
   });
 });
