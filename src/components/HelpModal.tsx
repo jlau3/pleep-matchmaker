@@ -3,11 +3,12 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { markHelpSeen } from "@/app/actions";
-import { HELP_COOKIE } from "@/lib/help";
+import { HELP_COOKIE, TIER_TOUR_EVENT } from "@/lib/help";
 import { HowItWorks } from "./HowItWorks";
 
 /**
  * The ? in the nav, and the How it works popup it opens over the current page
+ * (on the Tier List it replays that page's tour instead, see TIER_TOUR_EVENT)
  * (a native <dialog>: darkened backdrop, Esc or a click outside closes it).
  * `autoOpen` opens it by itself, for a player who hasn't seen this
  * HELP_VERSION; closing it records that on their account. That first time it
@@ -48,7 +49,11 @@ export function HelpModal({
     <>
       <button
         type="button"
-        onClick={() => dialog.current?.showModal()}
+        onClick={() => {
+          // On the Tier List, ? replays its tour; elsewhere (or if the tour can't open) it's How it works.
+          if (!window.dispatchEvent(new Event(TIER_TOUR_EVENT, { cancelable: true }))) return;
+          dialog.current?.showModal();
+        }}
         aria-label="How it works"
         title="How it works"
         className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-white/40 font-bold text-white/80 hover:bg-white/15 hover:text-white"

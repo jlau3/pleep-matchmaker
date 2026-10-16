@@ -2,8 +2,19 @@
 
 import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState, type RefObject } from "react";
 import { profileGuideScroll } from "@/lib/profileGuideScroll";
+import { TIER_TOUR_EVENT } from "@/lib/help";
 
 const SEEN_KEY = "pm_tier_tour_seen:v1";
+const SEEN_COOKIE = "pm_tier_tour_seen"; // ":" isn't allowed in cookie names.
+const seen = () => {
+  if (document.cookie.split("; ").includes(`${SEEN_COOKIE}=1`)) return true;
+  try { return localStorage.getItem(SEEN_KEY) === "1"; } catch { return false; }
+};
+// Cookie and localStorage, so either surviving is enough (in-app browsers often drop one).
+const markSeen = () => {
+  document.cookie = `${SEEN_COOKIE}=1; path=/; max-age=31536000; samesite=lax`;
+  try { localStorage.setItem(SEEN_KEY, "1"); } catch { /* The cookie still remembers. */ }
+};
 const STEPS = [
   { selectors: ['[data-tier-tour="pool"]'], title: "Everyone or Your Friends", description: "Everyone shows the global Tier List. Sign up and add your Pokémon Sleep friends to see what they want in My Friends." },
   { selectors: ['[data-tier-tour="island"]', '[data-tier-tour="sleep"]'], title: "Narrow Down Your Options", description: "Choose an Island and Sleep Type to see the candy available where you're researching. Tap a selected filter again to clear it." },
@@ -11,7 +22,10 @@ const STEPS = [
   { selectors: ['[data-tier-tour="export"]'], title: "Share Your Tier List", description: "Export an image of your current list, including your filters and ranking style. Preview it, then download, copy, or share." },
 ];
 
-/** One tour per browser, shared between signed-out and signed-in visits. */
+/**
+ * Opens by itself once per browser (shared between signed-out and signed-in
+ * visits); the ? in the nav replays it on the Tier List (TIER_TOUR_EVENT).
+ */
 export function TierGuide({ root, signedIn }: { root: RefObject<HTMLDivElement | null>; signedIn: boolean }) {
   const dialog = useRef<HTMLDialogElement>(null);
   const panel = useRef<HTMLDivElement>(null);
@@ -25,24 +39,33 @@ export function TierGuide({ root, signedIn }: { root: RefObject<HTMLDivElement |
   const [position, setPosition] = useState({ top: 16, left: 16, targetTop: 0, targetLeft: 0, width: 0, height: 0 });
   const step = steps[index];
   const open = useCallback(() => {
-    if (document.querySelector("dialog[open]")) return;
+    if (document.querySelector("dialog[open]")) return false;
     const available = STEPS.filter((step) => step.selectors.every((selector) => root.current?.querySelector(selector)));
-    if (!available.length) return;
+    if (!available.length) return false;
     opened.current = true;
+    // Seen once it opens: a refresh or closed tab mid-tour doesn't bring it back.
+    markSeen();
     setSteps(available.map((step) => signedIn && step === STEPS[0]
       ? { ...step, description: "Everyone shows the global Tier List. Add your Pokémon Sleep friends here; once they accept, My Friends shows what they want." } : step));
     setIndex(0);
     setActive(true);
     dialog.current?.showModal();
+    return true;
   }, [root, signedIn]);
   const close = () => {
-    try { localStorage.setItem(SEEN_KEY, "1"); } catch { /* The tour still closes without storage. */ }
     dialog.current?.close();
     setActive(false);
   };
 
   useEffect(() => {
-    try { if (localStorage.getItem(SEEN_KEY) === "1") return; } catch { /* Show once this visit. */ }
+    // The nav's ? asks for the tour; preventDefault tells it the tour opened.
+    const replay = (event: Event) => { if (open()) event.preventDefault(); };
+    window.addEventListener(TIER_TOUR_EVENT, replay);
+    return () => window.removeEventListener(TIER_TOUR_EVENT, replay);
+  }, [open]);
+
+  useEffect(() => {
+    if (seen()) return;
     const showWhenReady = () => { if (!opened.current && !document.querySelector("dialog[open]")) open(); };
     showWhenReady();
     const observer = new MutationObserver(showWhenReady);
@@ -100,7 +123,6 @@ export function TierGuide({ root, signedIn }: { root: RefObject<HTMLDivElement |
   }, [active, step, root]);
 
   return <>
-    <button type="button" onClick={open} className="text-sm font-semibold underline">Tier List tour</button>
     <dialog ref={dialog} aria-labelledby={titleId} aria-describedby={descriptionId}
       onCancel={(event) => { event.preventDefault(); close(); }}
       className="fixed inset-0 m-0 h-dvh max-h-none w-screen max-w-none overflow-hidden border-0 bg-transparent p-0 text-ink backdrop:bg-transparent dark:text-white">

@@ -12,6 +12,12 @@ export const HELP_VERSION = 1;
  */
 export const HELP_COOKIE = "pm_help_seen";
 
+/**
+ * Window event the nav's ? dispatches (cancelable) before opening How it works.
+ * The Tier List tour (TierGuide) cancels it when it opens instead.
+ */
+export const TIER_TOUR_EVENT = "pm:tier-tour";
+
 export const helpCookieValue = (userId: string) => `${HELP_VERSION}:${userId}`;
 
 /**
