@@ -10,6 +10,8 @@ insert into auth.users (id, raw_user_meta_data) values
 update public.profiles set ign = 'RqSender', friend_code = '555500000001', reddit_username = 'rq_snoo' where id = '00000000-0000-0000-0035-000000000001';
 update public.profiles set ign = 'RqOther', friend_code = '555500000003' where id = '00000000-0000-0000-0035-000000000003';
 
+-- Existing social fixtures include a chosen icon.
+update public.profiles set game_avatar = coalesce(game_avatar, 'pikachu:normal') where id::text like any (array['00000000-0000-0000-0035-%']);
 set role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0035-000000000001', false);
 do $$ begin assert public.send_friend_request('00000000-0000-0000-0035-000000000002') = 'sent'; end $$;

@@ -15,6 +15,8 @@ update public.profiles set friend_code = '200000000003', open_to_friends = false
 -- Senders need an IGN and friend code (20261020000300).
 select public.test_complete_profiles('00000000-0000-0000-0020-');
 
+-- Existing social fixtures include a chosen icon.
+update public.profiles set game_avatar = coalesce(game_avatar, 'pikachu:normal') where id::text like any (array['00000000-0000-0000-0020-%', '00000000-0000-0000-0021-%']);
 set role authenticated;
 
 -- 1. Ann asks Bob: nobody is on anyone's list yet.
@@ -94,6 +96,8 @@ do $$ begin
 end $$;
 update public.friend_requests set created_at = now() - interval '31 days'
 where from_id = '00000000-0000-0000-0020-000000000001' and to_id = '00000000-0000-0000-0020-000000000003';
+-- Existing social fixtures include a chosen icon.
+update public.profiles set game_avatar = coalesce(game_avatar, 'pikachu:normal') where id::text like any (array['00000000-0000-0000-0020-%', '00000000-0000-0000-0021-%']);
 set role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0020-000000000003', false);
 do $$ begin
@@ -121,11 +125,15 @@ from generate_series(1, 50) g;
 select public.test_befriend('00000000-0000-0000-0020-000000000005', ('00000000-0000-0000-0021-' || lpad(g::text, 12, '0'))::uuid)
 from generate_series(1, 48) g;
 -- Eve (49 friends) asks Cal, then fills her list before Cal answers.
+-- Existing social fixtures include a chosen icon.
+update public.profiles set game_avatar = coalesce(game_avatar, 'pikachu:normal') where id::text like any (array['00000000-0000-0000-0020-%', '00000000-0000-0000-0021-%']);
 set role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0020-000000000005', false);
 select public.send_friend_request('00000000-0000-0000-0020-000000000003');
 reset role;
 select public.test_befriend('00000000-0000-0000-0020-000000000005', '00000000-0000-0000-0021-000000000050');
+-- Existing social fixtures include a chosen icon.
+update public.profiles set game_avatar = coalesce(game_avatar, 'pikachu:normal') where id::text like any (array['00000000-0000-0000-0020-%', '00000000-0000-0000-0021-%']);
 set role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0020-000000000003', false);
 do $$ begin
@@ -159,6 +167,7 @@ insert into public.friends (user_id, friend_id) values ('00000000-0000-0000-0020
 \ir ../migrations/20261021000800_code_visibility.sql
 \ir ../migrations/20261021000900_codes_on_requests.sql
 \ir ../migrations/20261021001000_request_without_code.sql
+\ir ../migrations/20261024000100_require_profile_icon.sql
 do $$ begin
   assert not exists (select 1 from public.friends where user_id = '00000000-0000-0000-0020-000000000004' and friend_id = '00000000-0000-0000-0020-000000000003'), 'one-way add removed';
   assert (select status from public.friend_requests where from_id = '00000000-0000-0000-0020-000000000004' and to_id = '00000000-0000-0000-0020-000000000003') = 'open', 'now a request';

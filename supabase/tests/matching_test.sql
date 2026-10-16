@@ -62,6 +62,8 @@ select '00000000-0000-0000-0000-00000000000e'::uuid, line_id, choice
 from public.preferences where user_id = '00000000-0000-0000-0000-00000000000b';
 update public.profiles set last_seen_at = now() - interval '5 months' where id = '00000000-0000-0000-0000-00000000000e';
 
+-- Existing social fixtures include a chosen icon.
+update public.profiles set game_avatar = coalesce(game_avatar, 'pikachu:normal') where id::text like any (array['00000000-0000-0000-0000-%']);
 set role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-00000000000a', false);
 
@@ -102,6 +104,8 @@ delete from public.blocks where blocker_id = auth.uid();
 -- open_to_friends=false hides from matches but not lookup.
 reset role;
 update public.profiles set open_to_friends = false where discord_username = 'bob';
+-- Existing social fixtures include a chosen icon.
+update public.profiles set game_avatar = coalesce(game_avatar, 'pikachu:normal') where id::text like any (array['00000000-0000-0000-0000-%']);
 set role authenticated;
 do $$ begin
   assert not exists (select 1 from public.get_matches() where user_id = public.test_uid('bob')), 'closed hidden from matches';
@@ -125,6 +129,8 @@ end $$;
 reset role;
 update public.profiles set friend_code = '123412341234' where discord_username = 'dan';
 update public.profiles set allow_lookup = false where discord_username = 'cara';
+-- Existing social fixtures include a chosen icon.
+update public.profiles set game_avatar = coalesce(game_avatar, 'pikachu:normal') where id::text like any (array['00000000-0000-0000-0000-%']);
 set role authenticated;
 do $$ begin
   assert exists (select 1 from public.lookup_players('1234-1234-1234')), 'by friend code with separators';
@@ -151,11 +157,15 @@ do $$ begin
   assert public.get_voter_count() = (select n from vc) + 1, 'stale user counted once active';
 end $$;
 update public.profiles set last_seen_at = now() - interval '5 months' where discord_username = 'eve';
+-- Existing social fixtures include a chosen icon.
+update public.profiles set game_avatar = coalesce(game_avatar, 'pikachu:normal') where id::text like any (array['00000000-0000-0000-0000-%']);
 set role authenticated;
 
 -- prefs_updated_at only moves on a real change.
 reset role;
 update public.profiles set prefs_updated_at = '2020-01-01' where discord_username = 'alice';
+-- Existing social fixtures include a chosen icon.
+update public.profiles set game_avatar = coalesce(game_avatar, 'pikachu:normal') where id::text like any (array['00000000-0000-0000-0000-%']);
 set role authenticated;
 update public.preferences set choice = 'want' where user_id = auth.uid() and line_id = 'w1';
 do $$ begin

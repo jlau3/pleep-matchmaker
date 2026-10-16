@@ -12,6 +12,8 @@ insert into public.preferences (user_id, line_id, choice) values
 
 -- Strangers see IGNs, not Discord names (20261020001100_discord_friends_only.sql): IGN = Discord name here.
 update public.profiles set ign = coalesce(ign, discord_username) where id::text like '00000000-0000-0000-0001-%';
+-- Existing social fixtures include a chosen icon.
+update public.profiles set game_avatar = coalesce(game_avatar, 'pikachu:normal') where id::text like any (array['00000000-0000-0000-0001-%']);
 set role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0001-000000000001', false);
 
@@ -38,6 +40,8 @@ end $$;
 -- Friend turns search off: still a full friend (20261020000700_lookup_only_search.sql).
 reset role;
 update public.profiles set allow_lookup = false, ign = 'F3Ign' where discord_username = 'f3';
+-- Existing social fixtures include a chosen icon.
+update public.profiles set game_avatar = coalesce(game_avatar, 'pikachu:normal') where id::text like any (array['00000000-0000-0000-0001-%']);
 set role authenticated;
 do $$
 declare r record;
@@ -52,6 +56,8 @@ select public.test_befriend(auth.uid(), '00000000-0000-0000-0001-000000000004');
 reset role;
 update public.profiles set allow_lookup = false where discord_username = 'f5';
 select public.test_complete_profiles('00000000-0000-0000-0001-000000000001');
+-- Existing social fixtures include a chosen icon.
+update public.profiles set game_avatar = coalesce(game_avatar, 'pikachu:normal') where id::text like any (array['00000000-0000-0000-0001-%']);
 set role authenticated;
 do $$ begin
   assert public.send_friend_request('00000000-0000-0000-0001-000000000005') = 'sent', 'request to a search-off player';
@@ -64,6 +70,8 @@ do $$ begin
 end $$;
 reset role;
 insert into auth.users (id, raw_user_meta_data) values ('00000000-0000-0000-0001-000000000099', '{"name":"extra#0"}');
+-- Existing social fixtures include a chosen icon.
+update public.profiles set game_avatar = coalesce(game_avatar, 'pikachu:normal') where id::text like any (array['00000000-0000-0000-0001-%']);
 set role authenticated;
 do $$ begin
   begin
@@ -101,6 +109,8 @@ from unnest(array['00000000-0000-0000-0001-000000000001', '00000000-0000-0000-00
 -- Searching needs your own IGN (20261021000300_search_needs_ign.sql).
 update public.profiles set ign = coalesce(ign, 'ZzSearcher100'), friend_code = coalesce(friend_code, '420001100000') where id = '00000000-0000-0000-0001-000000000100';
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0001-000000000100', false);
+-- Existing social fixtures include a chosen icon.
+update public.profiles set game_avatar = coalesce(game_avatar, 'pikachu:normal') where id::text like any (array['00000000-0000-0000-0001-%']);
 set role authenticated;
 do $$ begin
   assert not exists (select 1 from public.browse_players('fit', true, 50, 0) where user_id = public.test_uid('f1')), 'full list hidden from matches';
@@ -108,6 +118,8 @@ do $$ begin
 end $$;
 reset role;
 delete from public.friends where user_id = '00000000-0000-0000-0001-000000000001' and friend_id = '00000000-0000-0000-0001-000000000052';
+-- Existing social fixtures include a chosen icon.
+update public.profiles set game_avatar = coalesce(game_avatar, 'pikachu:normal') where id::text like any (array['00000000-0000-0000-0001-%']);
 set role authenticated;
 do $$ begin
   assert exists (select 1 from public.browse_players('fit', true, 50, 0) where user_id = public.test_uid('f1')), 'back in matches below cap';

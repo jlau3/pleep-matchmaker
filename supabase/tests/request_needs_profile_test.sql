@@ -9,6 +9,8 @@ insert into auth.users (id, raw_user_meta_data) values
 update public.profiles set ign = 'RpAnn', friend_code = '260000000001' where id = '00000000-0000-0000-0026-000000000001';
 update public.profiles set ign = 'RpCal' where id = '00000000-0000-0000-0026-000000000003';
 
+-- Existing social fixtures include a chosen icon.
+update public.profiles set game_avatar = coalesce(game_avatar, 'pikachu:normal') where id::text like any (array['00000000-0000-0000-0026-%']);
 set role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0026-000000000002', false);
 do $$ begin

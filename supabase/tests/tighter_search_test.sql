@@ -18,6 +18,8 @@ update public.profiles set ign = 'Mah' where id = '00000000-0000-0000-0017-00000
 
 -- Searching needs your own IGN (20261021000300_search_needs_ign.sql).
 update public.profiles set ign = coalesce(ign, 'ZzSearcher001'), friend_code = coalesce(friend_code, '420017001000') where id = '00000000-0000-0000-0017-000000000001';
+-- Existing social fixtures include a chosen icon.
+update public.profiles set game_avatar = coalesce(game_avatar, 'pikachu:normal') where id::text like any (array['00000000-0000-0000-0017-%']);
 set role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0017-000000000001', false);
 do $$

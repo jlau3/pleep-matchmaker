@@ -179,7 +179,7 @@ export function ProfileForm({ profile, friendListFull, guideRequested = false, c
         <div>
           <h2 id="profile-privacy" className="scroll-mt-20 text-lg font-bold">Privacy</h2>
           <p className="text-sm text-slate-600 dark:text-slate-300">
-            <b>Your votes are only shown to friends.</b> Everyone else sees match %s.
+            <b>Your votes are only shown to friends.</b>
           </p>
         </div>
         <fieldset data-profile-step="visibility" className="space-y-2">

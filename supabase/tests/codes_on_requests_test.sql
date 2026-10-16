@@ -11,6 +11,8 @@ insert into public.preferences (user_id, line_id, choice)
 select ('00000000-0000-0000-0037-00000000000' || u)::uuid, l, 'want'::public.choice
 from generate_series(1, 2) u, unnest(array['ca', 'cb', 'cc']) l;
 
+-- Existing social fixtures include a chosen icon.
+update public.profiles set game_avatar = coalesce(game_avatar, 'pikachu:normal') where id::text like any (array['00000000-0000-0000-0037-%']);
 set role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0037-000000000002', false);
 do $$ begin
@@ -44,6 +46,8 @@ end $$;
 reset role;
 insert into auth.users (id, raw_user_meta_data) values ('00000000-0000-0000-0037-000000000003', '{"name":"cor_cid#0"}');
 update public.profiles set ign = 'CorCid', friend_code = '737300000003' where id = '00000000-0000-0000-0037-000000000003';
+-- Existing social fixtures include a chosen icon.
+update public.profiles set game_avatar = coalesce(game_avatar, 'pikachu:normal') where id::text like any (array['00000000-0000-0000-0037-%']);
 set role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0037-000000000002', false);
 do $$ begin

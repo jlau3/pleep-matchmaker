@@ -14,6 +14,8 @@ select ('00000000-0000-0000-0033-00000000000' || u)::uuid, l, 'want'::public.cho
 from generate_series(1, 2) u, unnest(array['ra', 'rb', 'rc']) l;
 select public.test_befriend('00000000-0000-0000-0033-000000000001', '00000000-0000-0000-0033-000000000003');
 
+-- Existing social fixtures include a chosen icon.
+update public.profiles set game_avatar = coalesce(game_avatar, 'pikachu:normal') where id::text like any (array['00000000-0000-0000-0033-%']);
 set role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0033-000000000002', false);
 do $$ begin

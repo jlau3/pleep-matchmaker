@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { FriendSetupBanner } from "@/components/FriendSetupBanner";
 import { FriendAction } from "@/components/FriendAction";
 import { PlayerHeader, playerName } from "@/components/PlayerHeader";
 import { PlayerLists } from "@/components/PlayerLists";
@@ -71,6 +72,7 @@ export default async function FriendsPage({ searchParams }: { searchParams: Prom
     <div className="space-y-8">
       <section className="space-y-3">
         <SubTabs tabs={FRIENDS_TABS} active="/friends" />
+        <FriendSetupBanner profile={profile} />
         <PlayerSearch supabase={supabase} q={q} relations={relations} viewerId={user.id} />
       </section>
 

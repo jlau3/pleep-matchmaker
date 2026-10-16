@@ -20,6 +20,8 @@ update public.profiles set game_avatar = 'pikachu:happy' where id = '00000000-00
 
 -- Strangers see IGNs, not Discord names (20261020001100_discord_friends_only.sql): IGN = Discord name here.
 update public.profiles set ign = coalesce(ign, discord_username) where id::text like '00000000-0000-0000-0027-%';
+-- Existing social fixtures include a chosen icon.
+update public.profiles set game_avatar = coalesce(game_avatar, 'pikachu:normal') where id::text like any (array['00000000-0000-0000-0027-%']);
 set role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0027-000000000001', false);
 do $$

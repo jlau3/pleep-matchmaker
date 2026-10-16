@@ -1,5 +1,4 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import Link from "next/link";
 import type { Relations } from "@/lib/relations";
 import type { LookupRow } from "@/lib/types";
 import { PlayerSearchBox } from "./PlayerSearchBox";
@@ -27,18 +26,7 @@ export async function PlayerSearch({
   viewerId: string;
 }) {
   // No IGN and friend code, no search (the database returns nothing either): point at Profile instead.
-  if (relations.canSearch === false)
-    return (
-      <div className="card p-4 text-center text-sm">
-        <p className="text-slate-600 dark:text-slate-300">
-          To search for players, first{" "}
-          <Link href="/profile" className="font-semibold underline">
-            add your in-game name and friend code
-          </Link>
-          , so the people you find know who you are.
-        </p>
-      </div>
-    );
+  if (relations.canSearch === false) return null;
   let rows: LookupRow[] = [];
   if (q) {
     const { data, error } = await supabase.rpc("lookup_players", { q });

@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-const db = vi.hoisted(() => ({ error: null as object | null, rpc: vi.fn(), update: vi.fn(), eq: vi.fn(), revalidate: vi.fn() }));
+const db = vi.hoisted(() => ({ error: null as object | null, icon: "pikachu:normal" as string | null, rpc: vi.fn(), update: vi.fn(), eq: vi.fn(), revalidate: vi.fn() }));
 vi.mock("next/cache", () => ({ revalidatePath: db.revalidate }));
 vi.mock("next/headers", () => ({ cookies: vi.fn(), headers: vi.fn() }));
 vi.mock("@/lib/supabase/server", () => ({
@@ -7,14 +7,14 @@ vi.mock("@/lib/supabase/server", () => ({
   requireUser: async () => ({ user: { id: "viewer" }, supabase: {
     rpc: db.rpc,
     from: () => ({
-      select: () => ({ eq: () => ({ maybeSingle: async () => ({ data: { ign: "Sleepy", friend_code: "123456789012" } }) }) }),
+      select: () => ({ eq: () => ({ maybeSingle: async () => ({ data: { ign: "Sleepy", friend_code: "123456789012", game_avatar: db.icon } }) }) }),
       update: db.update,
     }),
   } }),
 }));
 import { lookupPlayers } from "./actions";
 beforeEach(() => {
-  vi.clearAllMocks(); db.error = null;
+  vi.clearAllMocks(); db.error = null; db.icon = "pikachu:normal";
   db.rpc.mockImplementation(async () => ({ data: [], error: db.error }));
   db.eq.mockResolvedValue({ error: null }); db.update.mockReturnValue({ eq: db.eq });
 });
@@ -34,4 +34,10 @@ describe("looking up friends completes the setup attempt", () => {
     expect((await lookupPlayers("Sleepy friend")).error).toBeTruthy();
     expect(db.update).not.toHaveBeenCalled();
   });
+});
+
+it("requires a selected Pokémon picture before attempting a lookup", async () => {
+  db.icon = null;
+  expect((await lookupPlayers("Sleepy friend")).error).toContain("Pokémon picture");
+  expect(db.rpc).not.toHaveBeenCalled();
 });

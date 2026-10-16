@@ -20,6 +20,8 @@ from generate_series(5, 7) g;
 select public.test_befriend('00000000-0000-0000-0022-000000000003', ('00000000-0000-0000-0022-' || lpad(g::text, 12, '0'))::uuid)
 from generate_series(8, 10) g;
 
+-- Existing social fixtures include a chosen icon.
+update public.profiles set game_avatar = coalesce(game_avatar, 'pikachu:normal') where id::text like any (array['00000000-0000-0000-0022-%']);
 set role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0022-000000000001', false);
 do $$

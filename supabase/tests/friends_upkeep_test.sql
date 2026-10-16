@@ -17,6 +17,8 @@ insert into public.blocks (blocker_id, blocked_id)
 -- Senders need an IGN and friend code (20261020000300).
 select public.test_complete_profiles('00000000-0000-0000-0015-');
 
+-- Existing social fixtures include a chosen icon.
+update public.profiles set game_avatar = coalesce(game_avatar, 'pikachu:normal') where id::text like any (array['00000000-0000-0000-0015-%']);
 set role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0015-000000000001', false);
 
@@ -43,6 +45,8 @@ do $$ begin
     where user_id in ('00000000-0000-0000-0015-000000000001', '00000000-0000-0000-0015-000000000002')
   ), 'gone both ways';
 end $$;
+-- Existing social fixtures include a chosen icon.
+update public.profiles set game_avatar = coalesce(game_avatar, 'pikachu:normal') where id::text like any (array['00000000-0000-0000-0015-%']);
 set role authenticated;
 
 -- 3. Placeholders: found flag, exact IGN only, blocks hide, adding the friend clears it.

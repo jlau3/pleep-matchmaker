@@ -53,6 +53,8 @@ insert into public.friends (user_id, friend_id) values
 
 -- Strangers see IGNs, not Discord names (20261020001100_discord_friends_only.sql): IGN = Discord name here.
 update public.profiles set ign = coalesce(ign, discord_username) where id::text like '00000000-0000-0000-0005-%';
+-- Existing social fixtures include a chosen icon.
+update public.profiles set game_avatar = coalesce(game_avatar, 'pikachu:normal') where id::text like any (array['00000000-0000-0000-0005-%']);
 set role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0005-000000000001', false);
 
@@ -79,6 +81,8 @@ end $$;
 -- 20261020000700_lookup_only_search.sql): c4 stays at 25%.
 reset role;
 update public.profiles set allow_lookup = false where discord_username = 'ftwo';
+-- Existing social fixtures include a chosen icon.
+update public.profiles set game_avatar = coalesce(game_avatar, 'pikachu:normal') where id::text like any (array['00000000-0000-0000-0005-%']);
 set role authenticated;
 do $$ begin
   assert (select match_pct from public.lookup_players('cfour')) = 25,
@@ -86,6 +90,8 @@ do $$ begin
 end $$;
 reset role;
 update public.profiles set allow_lookup = true where discord_username = 'ftwo';
+-- Existing social fixtures include a chosen icon.
+update public.profiles set game_avatar = coalesce(game_avatar, 'pikachu:normal') where id::text like any (array['00000000-0000-0000-0005-%']);
 set role authenticated;
 
 -- Inactive reports: yours hide them from your Find New right away.
@@ -112,6 +118,8 @@ end $$;
 -- Coming back clears it.
 reset role;
 update public.profiles set last_seen_at = now() + interval '1 second' where discord_username = 'cone';
+-- Existing social fixtures include a chosen icon.
+update public.profiles set game_avatar = coalesce(game_avatar, 'pikachu:normal') where id::text like any (array['00000000-0000-0000-0005-%']);
 set role authenticated;
 do $$ begin
   assert exists (select 1 from public.get_matches() where user_id = public.test_uid('cone')), 'back after a visit';

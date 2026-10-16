@@ -16,6 +16,8 @@ from unnest(array['00000000-0000-0000-000b-000000000001', '00000000-0000-0000-00
 
 -- Searching needs your own IGN (20261021000300_search_needs_ign.sql).
 update public.profiles set ign = coalesce(ign, 'ZzSearcher002'), friend_code = coalesce(friend_code, '420011002000') where id = '00000000-0000-0000-000b-000000000002';
+-- Existing social fixtures include a chosen icon.
+update public.profiles set game_avatar = coalesce(game_avatar, 'pikachu:normal') where id::text like any (array['00000000-0000-0000-000b-%']);
 set role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-000b-000000000002', false);
 do $$

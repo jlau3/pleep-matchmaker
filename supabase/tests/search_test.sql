@@ -9,6 +9,8 @@ update public.profiles set ign = 'SnorLAX  Fan' where id = '00000000-0000-0000-0
 -- stranger finds MixedCase_User by IGN only; a friend by Discord name too.
 -- Searching needs your own IGN (20261021000300_search_needs_ign.sql).
 update public.profiles set ign = coalesce(ign, 'ZzSearcher002'), friend_code = coalesce(friend_code, '420009002000') where id = '00000000-0000-0000-0009-000000000002';
+-- Existing social fixtures include a chosen icon.
+update public.profiles set game_avatar = coalesce(game_avatar, 'pikachu:normal') where id::text like any (array['00000000-0000-0000-0009-%']);
 set role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0009-000000000002', false);
 do $$ begin
@@ -19,6 +21,8 @@ end $$;
 reset role;
 select public.test_befriend('00000000-0000-0000-0009-000000000001', '00000000-0000-0000-0009-000000000002');
 
+-- Existing social fixtures include a chosen icon.
+update public.profiles set game_avatar = coalesce(game_avatar, 'pikachu:normal') where id::text like any (array['00000000-0000-0000-0009-%']);
 set role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0009-000000000002', false);
 do $$
@@ -45,6 +49,8 @@ update public.profiles set ign = discord_username where id::text like '00000000-
 insert into auth.users (id, raw_user_meta_data) values
   ('00000000-0000-0000-0009-000000000003', '{"name":"hidden_dragonite#0"}');
 update public.profiles set show_discord = false, ign = 'Quiet One' where discord_username = 'hidden_dragonite';
+-- Existing social fixtures include a chosen icon.
+update public.profiles set game_avatar = coalesce(game_avatar, 'pikachu:normal') where id::text like any (array['00000000-0000-0000-0009-%']);
 set role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0009-000000000002', false);
 do $$

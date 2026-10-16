@@ -1,5 +1,7 @@
 "use client";
 
+import { strongNameKey } from "@/lib/names";
+
 import Link from "next/link";
 import { useState, useTransition } from "react";
 import { addPlaceholder } from "@/app/actions";
@@ -34,8 +36,20 @@ export function PlayerResults({
   // You can't add or block yourself: say it's you instead of showing your own card.
   const foundSelf = rows.some((player) => player.user_id === viewerId);
   const players = rows.filter((player) => player.user_id !== viewerId);
+  const nameGroups = new Map<string, { name: string; count: number }>();
+  for (const player of rows) {
+    if (!player.ign?.trim()) continue;
+    const key = strongNameKey(player.ign);
+    const group = nameGroups.get(key);
+    nameGroups.set(key, { name: group?.name ?? player.ign, count: (group?.count ?? 0) + 1 });
+  }
   return (
     <>
+      {[...nameGroups.values()].filter((group) => group.count > 1).map((group) => (
+        <p key={group.name} className="rounded-xl bg-sky/60 px-3 py-2 text-sm dark:bg-night-deep">
+          {group.count} players named {group.name}. Match the Pokémon picture to find your friend.
+        </p>
+      ))}
       {foundSelf && (
         <p className="rounded-2xl bg-sky/60 p-3 text-center text-sm dark:bg-night-deep">
           That&apos;s you! Other players can find you with this search.

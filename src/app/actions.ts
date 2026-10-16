@@ -346,8 +346,8 @@ export async function removeFriend(friendId: string, inactive = false): Promise<
 
 /** Searching needs your own IGN and friend code (the database enforces it too). A failed lookup lets the search run. */
 async function profileReady(supabase: SupabaseClient, userId: string): Promise<boolean> {
-  const { data, error } = await supabase.from("profiles").select("ign, friend_code").eq("id", userId).maybeSingle();
-  return Boolean(error || (data?.ign && data?.friend_code));
+  const { data, error } = await supabase.from("profiles").select("ign, friend_code, game_avatar").eq("id", userId).maybeSingle();
+  return Boolean(error || (data?.ign?.trim() && data?.friend_code && parseAvatar(data?.game_avatar)));
 }
 
 /** Player search as an action, so the search box and Not here yet can look people up without reloading the page. */

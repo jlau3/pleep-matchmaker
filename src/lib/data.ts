@@ -2,6 +2,7 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { type Choice, isChoice, LINES } from "./lines";
 import { type Relations, sortRequests } from "./relations";
+import { parseAvatar } from "./avatars";
 import type { OwnProfile } from "./types";
 
 export { MAX_FRIENDS } from "./friendship";
@@ -104,10 +105,10 @@ export async function loadRelations(supabase: SupabaseClient, userId: string): P
   const [friendIds, requests, profile] = await Promise.all([
     loadFriendIds(supabase, userId),
     supabase.from("friend_requests").select("from_id, to_id, status, created_at").or(`from_id.eq.${userId},to_id.eq.${userId}`),
-    supabase.from("profiles").select("ign, friend_code").eq("id", userId).single(),
+    supabase.from("profiles").select("ign, friend_code, game_avatar").eq("id", userId).single(),
   ]);
   const sorted = requests.error ? { sent: {}, incoming: [] } : sortRequests(requests.data, userId);
   // Unknown (lookup failed): let them try; the database still checks.
-  const profileReady = profile.error ? true : Boolean(profile.data.ign && profile.data.friend_code);
+  const profileReady = profile.error ? true : Boolean(profile.data.ign?.trim() && profile.data.friend_code && parseAvatar(profile.data.game_avatar));
   return { friendIds: [...friendIds], ...sorted, profileReady, canSearch: profileReady };
 }

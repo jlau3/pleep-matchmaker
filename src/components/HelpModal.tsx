@@ -101,9 +101,6 @@ export function HelpModal({
               <Link href="/profile?setup=profile" className="btn-primary block w-full py-2">
                 Set up my profile →
               </Link>
-              <button type="button" onClick={() => dialog.current?.close()} className="text-sm font-semibold text-slate-500 underline">
-                Look around first
-              </button>
             </div>
           ) : (
             <button type="button" onClick={() => dialog.current?.close()} className="btn-primary mt-6 w-full py-2">

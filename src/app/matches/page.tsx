@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { FriendSetupBanner } from "@/components/FriendSetupBanner";
 import { FindNewBoard } from "@/components/FindNewBoard";
 import { loadTop3Tiers, type Top3Tiers } from "@/lib/top3Tiers";
 import { PlayerSearch, searchQuery } from "@/components/PlayerSearch";
@@ -55,20 +56,6 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
   const unsorted = LINES.length - Object.keys(choices).length;
 
   const notices: React.ReactNode[] = [];
-  // Other players only see your IGN (Discord names are friends-only), and Find New skips players without one.
-  if (!profile.ign)
-    notices.push(
-      <>
-        Add your in-game name in <Link href="/profile" className="underline">Profile</Link> so other players can recognize
-        and find you. Until then you don&apos;t show up here.
-      </>,
-    );
-  if (!profile.friend_code)
-    notices.push(
-      <>
-        Add your friend code in <Link href="/profile" className="underline">Profile</Link> so others can find you.
-      </>,
-    );
   if (relations.friendIds.length >= MAX_FRIENDS)
     notices.push(
       <>
@@ -88,6 +75,7 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
     <div className="space-y-4">
       <div>
         <SubTabs tabs={FRIENDS_TABS} active="/matches" />
+        <FriendSetupBanner profile={profile} />
         <PlayerSearch supabase={supabase} q={q} relations={relations} viewerId={user.id} />
         <div className="mt-4">
           <FriendPostCard {...friendPostProps(profile, choices, tops)} />
@@ -102,7 +90,7 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
       <FriendshipLevel5 />
 
       <FindNewBoard
-        rows={rows}
+        rows={relations.profileReady ? rows : []}
         initialHiddenIds={hiddenIds}
         autoOpenGuide={profile.match_guide_seen === false}
         relations={relations}
