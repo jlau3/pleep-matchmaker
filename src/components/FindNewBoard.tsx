@@ -312,20 +312,13 @@ function Pill({ active, onClick, hint, children }: { active: boolean; onClick: (
 }
 
 /**
- * Why a player's numbers are dashes when it's on their side: they haven't
- * voted ("for them"), or fewer than 3 of their friends have ("for you").
- * Nothing is estimated in the meantime; the note says what's missing.
+ * Why "for them" is a dash: they haven't voted. Their friends' side never
+ * waits: until their friends vote, everyone's votes stand in
+ * (20261026000300_blend_demand.sql).
  */
 function NewPlayerNote({ match, name }: { match: MatchRow; name: string }) {
-  const noVotes = match.voted === false;
-  const noList = (match.list_voters ?? 0) < 3;
-  if (!noVotes && !noList) return null;
-  const text =
-    noVotes && noList
-      ? `${name} hasn't voted yet and has fewer than 3 friends voting here, so their numbers aren't ready yet.`
-      : noVotes
-        ? `${name} hasn't voted yet, so "for them" isn't ready yet.`
-        : "This player has fewer than 3 friends voting here, so \"for you\" isn't ready yet.";
+  if (match.voted !== false) return null;
+  const text = `${name} hasn't voted yet, so "for them" isn't ready yet.`;
   return (
     <p className="mt-3 rounded-xl bg-sky/60 px-3 py-2 text-xs dark:bg-night-deep">
       <b>New here:</b> {text}

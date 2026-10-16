@@ -1,6 +1,10 @@
 -- Run with scripts/test-db.sh. Raises an exception on the first failed check.
 \set ON_ERROR_STOP on
 
+-- Friends-only math below: no Everyone stand-ins (20261026000300_blend_demand.sql;
+-- restored at the end of this file).
+create or replace function public.demand_prior_votes() returns numeric language sql immutable as $$ select 0::numeric $$;
+
 
 -- Users: a (caller), b, c, d, e
 insert into auth.users (id, raw_user_meta_data) values
@@ -214,4 +218,6 @@ do $$ begin
 end $$;
 reset role;
 
+reset role;
+create or replace function public.demand_prior_votes() returns numeric language sql immutable as $$ select 5::numeric $$;
 \echo 'ALL DB TESTS PASSED'

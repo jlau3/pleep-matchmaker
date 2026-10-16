@@ -1,5 +1,9 @@
 \set ON_ERROR_STOP on
 
+-- Friends-only math below: no Everyone stand-ins (20261026000300_blend_demand.sql;
+-- restored at the end of this file).
+create or replace function public.demand_prior_votes() returns numeric language sql immutable as $$ select 0::numeric $$;
+
 insert into auth.users (id, raw_user_meta_data) values
   ('00000000-0000-0000-0003-000000000001', '{"name":"tara#0"}'),
   ('00000000-0000-0000-0003-000000000002', '{"name":"tom#0"}');
@@ -156,4 +160,6 @@ do $$ begin
   end;
 end $$;
 
+reset role;
+create or replace function public.demand_prior_votes() returns numeric language sql immutable as $$ select 5::numeric $$;
 \echo 'ALL TOP 3 TESTS PASSED'

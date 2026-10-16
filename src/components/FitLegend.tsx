@@ -42,12 +42,16 @@ export function FitLegend({ friendsVoted = true, youVoted = true, autoOpen = fal
         <p>
           <b className="text-slate-700 dark:text-slate-200">For them</b>: Their wants compared with what your friends want.
         </p>
-        <p><b>&ndash; means not enough votes yet.</b> It doesn&apos;t mean a bad match.</p>
+        <p>
+          <b>No friends voting yet?</b> Everyone&apos;s votes stand in for a player&apos;s friends, and each friend who
+          votes counts for more until their own friends decide the number.
+        </p>
+        <p><b>&ndash; means they haven&apos;t voted yet.</b> It doesn&apos;t mean a bad match.</p>
         {!youVoted && (
           <p><Link href="/vote" className="font-semibold underline">Choose the candy you want</Link> to help calculate &ldquo;For you&rdquo;.</p>
         )}
         {!friendsVoted && (
-          <p>&ldquo;For them&rdquo; needs your friends&apos; votes. <Link href="/friends" className="font-semibold underline">Add your Pokémon Sleep friends</Link> and ask them to vote.</p>
+          <p>&ldquo;For them&rdquo; uses everyone&apos;s votes until yours come in. <Link href="/friends" className="font-semibold underline">Add your Pokémon Sleep friends</Link> and ask them to vote.</p>
         )}
       </div>
       <button type="button" onClick={close} className="btn-primary mt-6 w-full py-2">Got it</button>

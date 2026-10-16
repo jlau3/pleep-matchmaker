@@ -1,5 +1,9 @@
 \set ON_ERROR_STOP on
 
+-- Friends-only math below: no Everyone stand-ins (20261026000300_blend_demand.sql;
+-- restored at the end of this file).
+create or replace function public.demand_prior_votes() returns numeric language sql immutable as $$ select 0::numeric $$;
+
 -- Fit is measured against your friends' wants, not your own.
 -- v (viewer) wants only zz. Friends: f1 wants fa (starred), fb; f2 wants fa, fc.
 -- Stars don't count in fit. Group demand: fa 2, fb 1, fc 1 -> shares fa 1, fb 0.5, fc 0.5.
@@ -139,4 +143,6 @@ do $$ begin
 end $$;
 reset role;
 
+reset role;
+create or replace function public.demand_prior_votes() returns numeric language sql immutable as $$ select 5::numeric $$;
 \echo 'ALL FIT TESTS PASSED'
