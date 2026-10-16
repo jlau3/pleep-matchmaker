@@ -10,7 +10,7 @@ import { Top3Tiers } from "./Top3Tiers";
 
 /**
  * Grid view: one compact tile per player, like an in-game friend list. Icon,
- * name, both fits, Top 3 sprites, friend code and the request button; the
+ * name, both fits, Top 3 Spotlight sprites, friend code and the request button; the
  * list view keeps the full breakdown.
  */
 export function MatchTile({
@@ -22,7 +22,7 @@ export function MatchTile({
   hideControl?: React.ReactNode;
   match: MatchRow;
   relation: Relation;
-  /** Sorting by your Top 3: your starred lines and their tiers on this player's list (instead of their own Top 3). */
+  /** Sorting by your Top 3 Spotlight: your starred lines and their tiers on this player's list (instead of their own Top 3 Spotlight). */
   top3?: { tops: string[]; tiers: Record<string, string> | undefined };
 }) {
   const name = playerName(match);
@@ -39,7 +39,7 @@ export function MatchTile({
         <Top3Tiers tops={top3.tops} tiers={top3.tiers} />
       ) : (
         tops.length > 0 && (
-          <span className="flex gap-1" title={`Top ${tops.length}: ${tops.map((l) => l.name).join(", ")}`}>
+          <span className="flex gap-1" title={`Top 3 Spotlight: ${tops.map((l) => l.name).join(", ")}`}>
             {tops.map((line) => (
               <img key={line.id} src={lineSpriteUrl(line)} alt={line.name} className="h-8 w-8" />
             ))}

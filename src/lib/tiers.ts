@@ -34,7 +34,7 @@ export interface Tier {
  * scores a line (POINTS): Want +3, Neutral +1 (players use it for "don't
  * mind", so it's mild support; it also covers lines they haven't voted on),
  * Don't Want -3. Since Neutral is everyone else, that ranks the same as wants
- * minus 2 x don't-wants: one Don't Want cancels two Wants. Top 3 stars don't
+ * minus 2 x don't-wants: one Don't Want cancels two Wants. Top 3 Spotlight stars don't
  * change the score; they're the first tie-breaker.
  *
  * Below 0 is Avoid: the Don't Wants outweigh the Wants plus a third of the
@@ -43,14 +43,14 @@ export interface Tier {
  * that tie share a tier, placed by the tie's middle rank (the best-ranked tie
  * is always S). With no voters at all, everything is C.
  *
- * Above S, the Top 3 row repeats every line the pool starred, most stars
+ * Above S, the Top 3 Spotlight row repeats every line the pool starred, most stars
  * first, Avoid lines included (nobody's pick is left out). The board shows the
  * first TOP_ROW_SIZE and folds the rest behind "Show all". They also stay in their regular tier, so
  * the rest of the list never shifts.
  */
 export const TIER_SHARES = { S: 0.2, A: 0.25, B: 0.3 } as const;
 
-/** How many of the most-starred lines the Top 3 row shows before "Show all". */
+/** How many of the most-starred lines the Top 3 Spotlight row shows before "Show all". */
 export const TOP_ROW_SIZE = 9;
 
 /** What each voter's choice adds to a line's score. Tier List only; match %s use public.dont_want_weight(). */
@@ -70,7 +70,7 @@ export const TIER_STYLE: Record<string, string> = {
 
 
 export const TIERS: Tier[] = [
-  { id: "top", label: "Top 3", hint: "Players' Top 3, separate from the ranking" },
+  { id: "top", label: "Top 3\nSpotlight", hint: "Candy players most want friends to send" },
   { id: "S", label: "S", hint: `Top ${pct(TIER_SHARES.S)}% most wanted` },
   { id: "A", label: "A", hint: `Next ${pct(TIER_SHARES.A)}%` },
   { id: "B", label: "B", hint: `Next ${pct(TIER_SHARES.B)}%` },
@@ -100,7 +100,7 @@ export function tierDefinitions(style: TierStyle): Tier[] {
 export interface LineVotes {
   wants: number;
   dontWants: number;
-  /** Players who starred it as one of their Top 3 (a subset of wants). */
+  /** Players who starred it as one of their Top 3 Spotlight (a subset of wants). */
   tops?: number;
   /** Everyone pool only: active voters who've seen the line (any vote, Neutral included; get_line_stats). */
   seen?: number;
@@ -159,7 +159,7 @@ const byRank = (a: RankedLine, b: RankedLine) =>
 
 /**
  * Buckets lines into tiers (see TIER_SHARES), best first inside each tier (score,
- * then Top 3 stars, then rare lines, then fewer don't-wants, then dex). Lines that tie on score share a tier whatever their stars. The Top 3 row
+ * then Top 3 Spotlight stars, then rare lines, then fewer don't-wants, then dex). Lines that tie on score share a tier whatever their stars. The Top 3 Spotlight row
  * holds every starred line, ordered by stars and then the same keys.
  */
 export function buildTiers(

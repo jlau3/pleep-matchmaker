@@ -9,7 +9,7 @@ const callout =
 
 /**
  * A ready-to-paste "looking for friends" post for anywhere players gather
- * (Discord, Reddit, group chats): friend code, Top 3
+ * (Discord, Reddit, group chats): friend code, Top 3 Spotlight
  * (or a few wants), and a pointer to look you up here, where search shows how
  * well your wants fit the reader's friends.
  */
@@ -106,13 +106,11 @@ export function FriendPostCard({
   }
 
   const favorites =
-    topNames.length === 1
-      ? `My top candy: ${topNames[0]}`
-      : topNames.length > 1
-        ? `My Top ${topNames.length} candies: ${topNames.join(", ")}`
-        : wantNames.length > 0
-          ? `Candies I'm after: ${wantNames.join(", ")}`
-          : null;
+    topNames.length > 0
+      ? `My Top 3 Spotlight: ${topNames.join(", ")}`
+      : wantNames.length > 0
+        ? `Candies I'm after: ${wantNames.join(", ")}`
+        : null;
   // The link opens Friends with your friend code already searched: unique, always set here, and
   // lookup matches it exactly (IGNs can be shared; Discord names can be hidden).
   const link = `${origin}/friends?q=${friendCode}`;

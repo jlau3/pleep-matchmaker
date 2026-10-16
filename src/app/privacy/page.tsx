@@ -38,7 +38,7 @@ export default function PrivacyPage() {
           </li>
           <li>
             <b>What you enter.</b> Your in-game name (IGN), friend code, icon, Reddit name if you add one, candy votes
-            and Top 3, friends list, blocked players, and settings.
+            and Top 3 Spotlight, friends list, blocked players, and settings.
           </li>
           <li>
             <b>Activity.</b> When you were last active and when your votes last changed, so inactive players drop out of
@@ -64,14 +64,14 @@ export default function PrivacyPage() {
             A request can include your <b>friend code</b> so the other player can add you in Pokémon Sleep. You can also include it in a shared friend post. Players who search your code can see it in the result.
           </li>
           <li>
-            <b>Only your friends</b> see your candy votes and Top 3. Your name-sharing switches also let friends see your Discord or Reddit name. Enabled Discord names are visible on requests between you; enabled Reddit names are visible to people you send a request to.
+            <b>Only your friends</b> see your candy votes and Top 3 Spotlight. Your name-sharing switches also let friends see your Discord or Reddit name. Enabled Discord names are visible on requests between you; enabled Reddit names are visible to people you send a request to.
           </li>
           <li>
             <b>Other players cannot see your email.</b> It&apos;s only used to sign you in.
           </li>
           <li>
             <b>The public Everyone Tier List</b> shows combined candy totals, never individual players&apos; votes or identities.
-            A candy's totals, Top 3 count, and tier stay hidden until it has saved votes from at least 10 active players.
+            A candy's totals, Top 3 Spotlight count, and tier stay hidden until it has saved votes from at least 10 active players.
           </li>
           <li>
             <b>You control it</b> in Profile under Privacy: <b>Who Can Find You</b> (Everyone, Only by search, or Only my friends), whether friends see your Discord name, and who you block.

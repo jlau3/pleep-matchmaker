@@ -2,7 +2,7 @@
 export const BROWSE_SORTS = [
   ["fit", "Best match"],
   ["you_fit", "Best for you"],
-  ["top3", "Your Top 3"],
+  ["top3", "Your Top 3 Spotlight"],
   ["active", "Recently active"],
 ] as const;
 
@@ -10,7 +10,7 @@ export const BROWSE_SORTS = [
 export const BROWSE_SORT_HINTS: Record<(typeof BROWSE_SORTS)[number][0], string> = {
   fit: "Highest total of both match %s first (a – counts as 0): you'd each send candy the other wants, so they're likely to add you back.",
   you_fit: "Highest \"for you\" first: most of what you want is what their friends want.",
-  top3: "Players whose Tier List ranks your Top 3 highest first, so they're likeliest to send your favorite candy. Star your Top 3 in My Votes.",
+  top3: "Players whose Tier Lists rank your spotlighted candies highest first, so they're more likely to send what you want. Set your Top 3 Spotlight in My Votes.",
   active: "Most recently online first, so they're likely to accept your friend request soon.",
 };
 export type BrowseSort = (typeof BROWSE_SORTS)[number][0];
@@ -54,7 +54,7 @@ export interface SortablePlayer {
 const TIER_POINTS: Record<string, number> = { S: 4, A: 3, B: 2, C: 1, Avoid: 0 };
 
 /**
- * Your Top 3's score on one player's Tier List: S 4, A 3, B 2, C 1, Avoid 0
+ * Your Top 3 Spotlight's score on one player's Tier List: S 4, A 3, B 2, C 1, Avoid 0
  * per starred line. Null when every one is a dash (they sort last).
  */
 export function top3Score(tiers: Record<string, string> | null | undefined): number | null {

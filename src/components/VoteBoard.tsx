@@ -41,7 +41,7 @@ const pill = (active: boolean) =>
  * List view is one big card per line in a single column; grid view is a
  * compact multi-column layout. The choice is remembered per browser. Lines
  * are always in dex order. The star on each card picks up to MAX_TOP wants as
- * the player's Top 3, shown pinned above the list. Every click saves immediately.
+ * the player's Top 3 Spotlight, shown pinned above the list. Every click saves immediately.
  */
 export function VoteBoard({
   userId,
@@ -69,7 +69,7 @@ export function VoteBoard({
   }
   const [tops, setTops] = useState(() => new Set(initialTops));
   const [error, setError] = useState<string | null>(null);
-  /** Line the player tried to star while their Top 3 was full; opens the swap prompt. */
+  /** Line the player tried to star while their Top 3 Spotlight was full; opens the swap prompt. */
   const [swapFor, setSwapFor] = useState<string | null>(null);
   const [view, setView] = useState<View>("list");
   const [query, setQuery] = useState("");
@@ -207,7 +207,7 @@ export function VoteBoard({
     save(lineId, { choice: "want", top: true }, () => setTop(lineId, true));
   }
 
-  /** Swap prompt: drop `outId` from the Top 3 and star `swapFor` instead. */
+  /** Swap prompt: drop `outId` from the Top 3 Spotlight and star `swapFor` instead. */
   async function swap(outId: string) {
     const inId = swapFor;
     if (!inId) return;
@@ -306,9 +306,9 @@ export function VoteBoard({
         />
       ))}
 
-      <section className="card mb-4 p-3" aria-label="Your Top 3">
-        <h2 className="font-bold">Your Top {MAX_TOP}</h2>
-        <p className="mb-2 text-xs text-slate-500">Tap ★ to add a candy to your Top 3.</p>
+      <section className="card mb-4 p-3" aria-label="Your Top 3 Spotlight">
+        <h2 className="font-bold">Your Top {MAX_TOP} Spotlight</h2>
+        <p className="mb-2 text-xs text-slate-500">Tap ★ to spotlight up to {MAX_TOP} candies you most want friends to send.</p>
         <ul className="grid grid-cols-3 gap-2">
           {Array.from({ length: MAX_TOP }, (_, i) => {
             const line = topLines[i];

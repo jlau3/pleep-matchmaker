@@ -19,7 +19,7 @@ const STEPS: { title: string; body: React.ReactNode; href: string; cta: string }
     body: (
       <>
         Choose <b>Want</b> for candy you need and <b>Don&apos;t Want</b> for candy you don't need. Leave the rest <b>Neutral</b>.
-        Votes save automatically. Mark up to {MAX_TOP} candies as your <b>Top {MAX_TOP}</b>.
+        Votes save automatically. Use <b>Top {MAX_TOP} Spotlight</b> to highlight the candy you most want friends to send.
       </>
     ),
     href: "/vote",

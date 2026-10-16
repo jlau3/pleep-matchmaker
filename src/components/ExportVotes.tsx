@@ -3,16 +3,16 @@
 import { type Choice, LINES, lineSpriteUrl } from "@/lib/lines";
 import { type ImageRow, ImageExport, today } from "./TierExport";
 
-/** Badge colors: the Tier List's gold for Top 3, then the vote colors used across the site. */
+/** Badge colors: the Tier List's gold for Top 3 Spotlight, then the vote colors used across the site. */
 const ROWS: { choice: Choice | "top"; label: string; color: ImageRow["color"] }[] = [
-  { choice: "top", label: "Top 3", color: { bg: "#ffd24d", fg: "#5b3e00" } },
+  { choice: "top", label: "Top 3\nSpotlight", color: { bg: "#ffd24d", fg: "#5b3e00" } },
   { choice: "want", label: "Want", color: { bg: "#3fb86b", fg: "#ffffff" } },
   { choice: "undecided", label: "Neutral", color: { bg: "#8a97ab", fg: "#ffffff" } },
   { choice: "dont_want", label: "Don't\nWant", color: { bg: "#ec6b6b", fg: "#ffffff" } },
 ];
 
 /**
- * Export your votes as an image, like the Tier List's: rows for Top 3, Want,
+ * Export your votes as an image, like the Tier List's: rows for Top 3 Spotlight, Want,
  * Neutral and Don't Want, each in Pokédex order. Always your current votes.
  */
 export function ExportVotes({ choices, tops }: { choices: Record<string, Choice>; tops: Set<string> }) {

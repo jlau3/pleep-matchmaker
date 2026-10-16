@@ -1,6 +1,6 @@
 "use client";
 
-/** Yellow Top 3 star. Filled when starred, outlined otherwise. */
+/** Yellow Top 3 Spotlight star. Filled when starred, outlined otherwise. */
 export function StarButton({
   starred,
   name,
@@ -17,8 +17,8 @@ export function StarButton({
       type="button"
       onClick={onClick}
       aria-pressed={starred}
-      aria-label={starred ? `Remove ${name} from Top 3` : `Add ${name} to Top 3`}
-      title={starred ? "Remove from Top 3" : "Add to Top 3"}
+      aria-label={starred ? `Remove ${name} from Top 3 Spotlight` : `Add ${name} to Top 3 Spotlight`}
+      title={starred ? "Remove from Top 3 Spotlight" : "Add to Top 3 Spotlight"}
       className={`rounded-full p-1.5 hover:bg-sun/20 ${className}`}
     >
       <svg viewBox="0 0 24 24" className="h-7 w-7" aria-hidden="true">

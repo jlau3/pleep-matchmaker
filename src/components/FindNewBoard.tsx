@@ -22,8 +22,8 @@ type Tiers = Record<string, Record<string, string>>;
  * Find New's suggested players. Every player comes down once (browse_all), so
  * Good matches / Everyone, the sorts and the pages all switch here, with no
  * trip to the server; the URL follows along so a reload or a shared link
- * shows the same view. Your Top 3's tiers arrive for the first page with the
- * page, and for everyone else in the background (the Top 3 sort waits for
+ * shows the same view. Your Top 3 Spotlight's tiers arrive for the first page with the
+ * page, and for everyone else in the background (the Top 3 Spotlight sort waits for
  * them if tapped first).
  */
 export function FindNewBoard({
@@ -47,7 +47,7 @@ export function FindNewBoard({
   /** Your starred lines. */
   tops: string[];
   initial: BrowseOptions;
-  /** Tiers already loaded (the first page's, or everyone's when the page opened sorted by Top 3). */
+  /** Tiers already loaded (the first page's, or everyone's when the page opened sorted by Top 3 Spotlight). */
   initialTiers: Tiers;
   allTiersLoaded: boolean;
   /** The search box's query, kept in the URL. */
@@ -84,7 +84,7 @@ export function FindNewBoard({
   }, [allTiersLoaded, tops.length, rows]);
 
   const tiersReady = known === "all";
-  // Sorting by Top 3 before the tiers are in: keep Best match order until they are.
+  // Sorting by Top 3 Spotlight before the tiers are in: keep Best match order until they are.
   const effectiveSort = opts.sort === "top3" && !tiersReady ? "fit" : opts.sort;
   const listed = useMemo(() => {
     const pool = rows.filter((r) => !hidden.has(r.user_id) && (opts.everyone || r.good));
@@ -166,7 +166,7 @@ export function FindNewBoard({
         </div>
         {opts.sort === "top3" && !tiersReady && tops.length > 0 && (
           <p className="text-xs font-semibold text-slate-500" role="status">
-            {tierError ? "Couldn't load Top 3 tiers. Try again." : "Ranking by your Top 3…"}
+            {tierError ? "Couldn't load Top 3 Spotlight tiers. Try again." : "Ranking by your Top 3 Spotlight…"}
           </p>
         )}
         <FitLegend friendsVoted={friendsVoted} youVoted={picked > 0} autoOpen={autoOpenGuide} />
@@ -334,7 +334,7 @@ function NewPlayerNote({ match, name }: { match: MatchRow; name: string }) {
 }
 
 /**
- * Their Top 3 always shown, then a dropdown with both directions: what
+ * Their Top 3 Spotlight always shown, then a dropdown with both directions: what
  * they'd send you (your wants and don't-wants their friends want) and what
  * you'd send them (their wants and don't-wants your friends want).
  */
@@ -359,7 +359,7 @@ function FitLists({ match }: { match: MatchRow }) {
     <div className="mt-3 space-y-3">
       {tops.length > 0 && (
         <div>
-          <h4 className="mb-2 text-sm font-semibold text-sun-deep">★ Top {tops.length}</h4>
+          <h4 className="mb-2 text-sm font-semibold text-sun-deep">★ Top 3 Spotlight</h4>
           <LineChips lines={linesFromIds(tops)} />
         </div>
       )}

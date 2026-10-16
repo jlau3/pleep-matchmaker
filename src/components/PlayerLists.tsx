@@ -2,8 +2,8 @@ import { linesFromIds } from "@/lib/lines";
 import { LineChips } from "./LineChips";
 
 /**
- * A player's Top 3 (always shown), then wants and don't-wants in a dropdown.
- * Starred lines are listed under Top 3 only, not repeated under Wants.
+ * A player's Top 3 Spotlight (always shown), then wants and don't-wants in a dropdown.
+ * Starred lines are listed under Top 3 Spotlight only, not repeated under Wants.
  */
 export function PlayerLists({
   wants,
@@ -24,7 +24,7 @@ export function PlayerLists({
     <div className="mt-3 space-y-3">
       {topWants.length > 0 && (
         <div>
-          <h4 className="mb-2 text-sm font-semibold text-sun-deep">★ Top 3</h4>
+          <h4 className="mb-2 text-sm font-semibold text-sun-deep">★ Top 3 Spotlight</h4>
           <LineChips lines={linesFromIds(topWants)} />
         </div>
       )}

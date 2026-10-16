@@ -65,7 +65,7 @@ export function VoteGuide({ autoOpen = false }: { autoOpen?: boolean }) {
               <b className="text-dont">Don&apos;t Want:</b> ones you&apos;ll never build, or have finished building.
             </li>
             <li>
-              <b className="text-sun-deep">★ Top {MAX_TOP}:</b> mark up to {MAX_TOP} candies you want most. Friends see them separately from the Tier List ranking.
+              <b className="text-sun-deep">★ Top {MAX_TOP} Spotlight:</b> spotlight up to {MAX_TOP} candies you most want friends to send, even when they rank low overall. Stars don&apos;t change tier scores.
             </li>
           </ul>
           <div className="mt-5 space-y-2 rounded-2xl bg-sun/25 p-4 text-sm">

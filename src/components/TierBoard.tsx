@@ -2,7 +2,7 @@ import { type RankedLine, rankedSpriteUrl, type TierId, TIER_STYLE, tierDefiniti
 
 
 const panel = "card p-3";
-/** The Top 3 row isn't a tier: a dashed gold frame and a gap set it apart from S. */
+/** The Top 3 Spotlight row isn't a tier: a dashed gold frame and a gap set it apart from S. */
 const topPanel = "card mb-6 border-2 border-dashed border-sun-deep/60 bg-[#fff3c9] p-3 dark:bg-night";
 
 /**
@@ -44,8 +44,8 @@ function VoteCard({ ranked }: { ranked: RankedLine }) {
 }
 
 /**
- * `pool` words the Top 3 blurb: "your friends" on My Friends, "players" on
- * Everyone. The Top 3 row starts folded so the ranking leads.
+ * `pool` words the Top 3 Spotlight blurb: "your friends" on My Friends, "players" on
+ * Everyone. The Top 3 Spotlight row starts folded so the ranking leads.
  */
 export function TierBoard({ tiers, pool = "friends", style = "standard" }: { tiers: Map<TierId, RankedLine[]>; pool?: "friends" | "everyone"; style?: TierStyle }) {
   return (
@@ -58,14 +58,14 @@ export function TierBoard({ tiers, pool = "friends", style = "standard" }: { tie
           <>
             <span
               style={categoryColor ? { backgroundColor: categoryColor.bg, color: categoryColor.fg, boxShadow: `0 3px 0 ${categoryColor.shadow}` } : undefined}
-              className={`inline-flex ${style === "consensus" && tier.id !== "top" ? "min-h-12 w-24 whitespace-pre-line py-2" : "h-9 w-14"} shrink-0 items-center justify-center rounded-lg text-center font-black leading-none ${
+              className={`inline-flex ${tier.id === "top" || style === "consensus" ? "min-h-12 w-24 whitespace-pre-line py-2" : "h-9 w-14"} shrink-0 items-center justify-center rounded-lg text-center font-black leading-none ${
                 tier.label.length > 2 ? "text-xs" : "text-lg"
               } ${categoryColor ? "" : TIER_STYLE[tier.id]}`}
             >
               {tier.label}
             </span>
             <span className="text-sm text-slate-500">
-              {/* The Top 3 row is folded, so no count there: just what it is. */}
+              {/* The Top 3 Spotlight row is folded, so no count there: just what it is. */}
               {tier.id === "top" ? tier.hint : `${ranked.length} · ${tier.hint}`}
             </span>
           </>
@@ -77,7 +77,7 @@ export function TierBoard({ tiers, pool = "friends", style = "standard" }: { tie
             ))}
           </ul>
         );
-        // The Top 3 row shows its first TOP_ROW_SIZE lines; the rest of the starred lines fold away.
+        // The Top 3 Spotlight row shows its first TOP_ROW_SIZE lines; the rest of the starred lines fold away.
         const folded = tier.id === "top" ? ranked.slice(TOP_ROW_SIZE) : [];
         const cards = (
           <>
@@ -85,7 +85,7 @@ export function TierBoard({ tiers, pool = "friends", style = "standard" }: { tie
             {folded.length > 0 && (
               <details className="group mt-2">
                 <summary className="cursor-pointer list-none text-sm font-semibold text-slate-500 underline">
-                  <span className="group-open:hidden">Show all {ranked.length} Top 3 picks</span>
+                  <span className="group-open:hidden">Show all {ranked.length} spotlighted candies</span>
                   <span className="hidden group-open:inline">Show fewer</span>
                 </summary>
                 {grid(folded)}
@@ -106,7 +106,7 @@ export function TierBoard({ tiers, pool = "friends", style = "standard" }: { tie
                   </span>
                 </span>
                 <span className="mt-2 block text-sm text-slate-600 dark:text-slate-300">
-                  Top 3 lets {pool === "friends" ? "your friends" : "players"} spotlight the candy they most want friends to send,
+                  A place for {pool === "friends" ? "your friends" : "players"} to highlight the candy they most want friends to send,
                   even when it ranks low overall. Stars don&apos;t change tier scores.
                 </span>
               </summary>

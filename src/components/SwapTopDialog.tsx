@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { type CandyLine, lineSpriteUrl, MAX_TOP } from "@/lib/lines";
 
 /**
- * Shown when a player stars a line while their Top 3 is full: pick which star
+ * Shown when a player stars a line while their Top 3 Spotlight is full: pick which star
  * to give up for it, or cancel. Bottom sheet on phones, centered on desktop.
  */
 export function SwapTopDialog({
@@ -37,9 +37,9 @@ export function SwapTopDialog({
           <img src={lineSpriteUrl(incoming)} alt="" className="h-12 w-12 rounded-full bg-sky object-contain dark:bg-night" />
           <div>
             <h2 id="swap-title" className="font-bold">
-              Add {incoming.name} To Your Top {MAX_TOP}?
+              Add {incoming.name} To Your Top {MAX_TOP} Spotlight?
             </h2>
-            <p className="text-sm text-slate-500">Your Top {MAX_TOP} is full. Pick one to swap out.</p>
+            <p className="text-sm text-slate-500">Your Top {MAX_TOP} Spotlight is full. Pick one to swap out.</p>
           </div>
         </div>
         <ul className="grid grid-cols-3 gap-2">
@@ -64,7 +64,7 @@ export function SwapTopDialog({
           onClick={onCancel}
           className="mt-3 w-full rounded-full border border-slate-300 py-2 text-sm font-semibold dark:border-slate-600"
         >
-          Keep my Top {MAX_TOP}
+          Keep my Top {MAX_TOP} Spotlight
         </button>
       </div>
     </div>
