@@ -1,8 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState, useTransition } from "react";
-import { enableLookup } from "@/app/actions";
+import { useEffect, useRef, useState } from "react";
 import { formatFriendCode } from "@/lib/format";
 
 const callout =
@@ -26,7 +25,7 @@ export function FriendPostCard({
   friendCode: string | null;
   /** Your in-game name, so readers recognize you in Pokémon Sleep. */
   ign: string | null;
-  /** With lookup off, search can't find you, so the post leaves the link out. */
+  /** Sharing needs lookup so the post can include a working compatibility link. */
   allowLookup: boolean;
   topNames: string[];
   wantNames: string[];
@@ -34,8 +33,6 @@ export function FriendPostCard({
   const [origin, setOrigin] = useState("https://pleep-matchmaker.vercel.app");
   const [copied, setCopied] = useState(false);
   const [canShare, setCanShare] = useState(false);
-  const [turningOn, startTurningOn] = useTransition();
-  const [lookupError, setLookupError] = useState<string | null>(null);
   const [hidden, setHidden] = useState<boolean | null>(null);
   const [postOpen, setPostOpen] = useState(false);
   const reopen = useRef<HTMLButtonElement>(null);
@@ -61,7 +58,16 @@ export function FriendPostCard({
     setOrigin(window.location.origin);
     setCanShare(typeof navigator.share === "function");
   }, []);
+  useEffect(() => {
+    if (!allowLookup) setPostOpen(false);
+  }, [allowLookup]);
 
+  if (!allowLookup) return (
+    <p className="text-sm text-slate-500">
+      To include your candy compatibility link, allow people who know your IGN or friend code to find you.{" "}
+      <Link href="/profile#profile-privacy" className="font-semibold underline">Privacy settings</Link>
+    </p>
+  );
   if (hidden === null) return null;
   if (hidden) return (
     <button ref={reopen} type="button" onClick={() => {
@@ -113,7 +119,7 @@ export function FriendPostCard({
     `Friend code: ${formatFriendCode(friendCode)}`,
     ign ? `IGN: ${ign}` : null,
     favorites,
-    allowLookup ? `See how my candy wishlist matches your friends' on Pleep Matchmaker: ${link}` : null,
+    `See how my candy wishlist matches your friends' on Pleep Matchmaker: ${link}`,
   ]
     .filter(Boolean)
     .join("\n");
@@ -148,9 +154,6 @@ export function FriendPostCard({
               Send them a friend request here too, so your Tier List reflects the people you actually send candy to. Looking
               for more friends? Share a post with your friend code below!
             </span>
-            {!allowLookup && (
-              <span className="ml-1 font-semibold text-amber-800 dark:text-amber-200">Lookup is off, so it won&apos;t link to you.</span>
-            )}
           </span>
           <span className="shrink-0 text-xs font-semibold underline group-open:hidden">Show</span>
           <span className="hidden shrink-0 text-xs font-semibold underline group-open:inline">Hide</span>
@@ -168,33 +171,6 @@ export function FriendPostCard({
             </button>
           </div>
         </div>
-        {!allowLookup && (
-          <div className="mb-2 flex flex-wrap items-center gap-x-3 gap-y-1 rounded-xl bg-amber-100 px-3 py-2 text-xs text-amber-900 dark:bg-amber-900/30 dark:text-amber-200">
-            <span>
-              &quot;Allow lookup&quot; is off, so readers can&apos;t find you here and the post leaves out your link. Planning to
-              share it? Turn lookup back on.
-            </span>
-            <button
-              type="button"
-              disabled={turningOn}
-              onClick={() =>
-                startTurningOn(async () => {
-                  setLookupError(null);
-                  try {
-                    const result = await enableLookup();
-                    if (result.error) setLookupError(result.error);
-                  } catch {
-                    setLookupError("Couldn't turn it on, try again");
-                  }
-                })
-              }
-              className="shrink-0 rounded-full bg-amber-600 px-3 py-1 font-semibold text-white disabled:opacity-60"
-            >
-              {turningOn ? "Turning on…" : "Turn on lookup"}
-            </button>
-            {lookupError && <span className="text-dont">{lookupError}</span>}
-          </div>
-        )}
         <pre className="whitespace-pre-wrap rounded-2xl bg-white p-3 font-sans text-sm dark:bg-night-deep">{message}</pre>
       </details>
     </section>
