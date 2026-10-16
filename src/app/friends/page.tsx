@@ -4,7 +4,6 @@ import { PlayerHeader, playerName } from "@/components/PlayerHeader";
 import { PlayerLists } from "@/components/PlayerLists";
 import { FriendPostCard } from "@/components/FriendPostCard";
 import { friendPostProps } from "@/lib/friendPost";
-import { InviteReminder } from "@/components/InviteReminder";
 import { FitPair } from "@/components/FitPair";
 import { PlayerSearch, searchQuery } from "@/components/PlayerSearch";
 import { FRIENDS_TABS, SubTabs } from "@/components/SubTabs";
@@ -152,11 +151,6 @@ export default async function FriendsPage({ searchParams }: { searchParams: Prom
         {placeholders && (
           <div id="not-here-yet" className="mb-3 scroll-mt-20">
             <FriendPlaceholders rows={placeholders} relations={relations} viewerId={user.id} />
-          </div>
-        )}
-        {friends.length < MAX_FRIENDS && (
-          <div className="mb-3">
-            <InviteReminder friendCount={friends.length} />
           </div>
         )}
         {friends.length === 0 ? (
