@@ -9,7 +9,7 @@ const tierOf = (tiers: ReturnType<typeof buildTiers>, id: string): TierId | unde
 
 describe("Tier List ranking styles", () => {
   it("defaults to the shared Standard rules, including unknown URL values", () => {
-    for (const value of [undefined, null, "custom", "STANDARD", "natural", {}]) expect(parseTierStyle(value)).toBe("standard");
+    for (const value of [undefined, null, "custom", "STANDARD", "natural", "percentile", {}]) expect(parseTierStyle(value)).toBe("standard");
     expect(parseTierStyle("fixed")).toBe("fixed");
     const votes = new Map([[lines[0].id, { wants: 2, dontWants: 0 }]]);
     expect(buildTiers(votes, 10, lines)).toEqual(buildTiers(votes, 10, lines, "standard"));
@@ -66,13 +66,6 @@ describe("Tier List ranking styles", () => {
 });
 
 describe("comparison ranking styles", () => {
-  it("Percentile Only ranks negative totals instead of applying Standard's Avoid cutoff", () => {
-    const votes = new Map(lines.slice(0, 4).map((line, i) => [line.id, { wants: 0, dontWants: 60 + i * 10 }]));
-    expect(buildTiers(votes, 100, lines.slice(0, 4), "standard").get("avoid")).toHaveLength(4);
-    const percentile = buildTiers(votes, 100, lines.slice(0, 4), "percentile");
-    expect(percentile.get("avoid")).toHaveLength(0);
-    expect(percentile.get("S")).toHaveLength(1);
-  });
   it("Consensus separates disagreement from a mostly Neutral group with the same score", () => {
     const votes = new Map([
       [lines[0].id, { wants: 40, dontWants: 20 }], // same score as all Neutral
@@ -88,7 +81,7 @@ describe("comparison ranking styles", () => {
     expect(tierOf(consensus, lines[3].id)).toBe("S"); // mostly Wanted
     expect(tierOf(consensus, lines[4].id)).toBe("avoid"); // mostly Unwanted
   });
-  it.each(["standard", "fixed", "percentile", "consensus"] as const)("%s never loses or duplicates a ranked candy or exposes low-count totals", (style) => {
+  it.each(["standard", "fixed", "consensus"] as const)("%s never loses or duplicates a ranked candy or exposes low-count totals", (style) => {
     const votes = new Map(lines.map((line, i) => [line.id, { wants: i, dontWants: 0, tops: i === 0 ? 0 : 1, seen: i === 0 ? 9 : 20 }]));
     const publicView = buildPublicTiers(votes, 20, lines, style);
     const ranked = [...publicView.tiers].filter(([id]) => id !== "top").flatMap(([, rows]) => rows.map((r) => r.line.id));

@@ -1,15 +1,14 @@
 import { type CandyLine, LINES, lineSpriteUrl } from "./lines";
 
-export const TIER_STYLES = ["standard", "fixed", "percentile", "consensus"] as const;
+export const TIER_STYLES = ["standard", "fixed", "consensus"] as const;
 export type TierStyle = typeof TIER_STYLES[number];
 export const TIER_STYLE_LABEL: Record<TierStyle, string> = {
-  standard: "Standard", fixed: "Fixed Scores", percentile: "Percentile Only", consensus: "Consensus",
+  standard: "Standard", fixed: "Fixed Scores", consensus: "Consensus",
 };
 export const TIER_STYLE_DESCRIPTION: Record<TierStyle, string> = {
-  standard: "Recommended shared ranking. Negative totals go to Avoid; the rest split by percentile within your filters.",
-  fixed: "Uses fixed score cutoffs. A candy keeps its tier when filters change. Some tiers may be empty.",
-  percentile: "Ranks all candy by percentile, including negative scores. Shows relative priorities without an Avoid cutoff.",
-  consensus: "Groups candy by Want, Neutral, and Don't Want percentages, including a Divisive group. These are categories, not S–C ranks.",
+  standard: "Recommended shared ranking. Negative totals go to Avoid; the rest split by percentile.",
+  fixed: "Compare support across lists using the same score cutoffs. Tiers depend on each candy's votes, not how other candy scores.",
+  consensus: "Groups candy by Want, Neutral, and Don't Want percentages, including a Divisive group.",
 };
 export const parseTierStyle = (value: unknown): TierStyle =>
   TIER_STYLES.includes(value as TierStyle) ? value as TierStyle : "standard";
@@ -89,7 +88,6 @@ export function tierDefinitions(style: TierStyle): Tier[] {
     { id: "C", label: "Divisive", hint: "At least 25% Want and at least 25% Don't Want" },
     { id: "avoid", label: "Mostly\nUnwanted", hint: "At least 50% Don't Want and fewer than 25% Want" },
   ];
-  if (style === "percentile") return TIERS.filter((tier) => tier.id !== "avoid");
   if (style === "standard") return TIERS;
   return TIERS.map((tier) => ({ ...tier, hint: ({
     S: `${FIXED_SCORE_CUTOFFS.S}–100/100`,
@@ -205,7 +203,7 @@ export function buildTiers(
     }
     return out;
   }
-  if (style !== "percentile") for (const r of all) if (r.score < 0) out.get("avoid")!.push(r);
+  for (const r of all) if (r.score < 0) out.get("avoid")!.push(r);
 
   if (style === "fixed") {
     for (const row of all.filter((r) => r.score >= 0).sort(byRank)) {
@@ -222,7 +220,7 @@ export function buildTiers(
   // Lines at 0 or above fill S/A/B/C by rank. A run of lines tied on score all go to
   // the tier of the run's middle position, so with few voters (lots of ties)
   // tier sizes stay near their targets instead of one tie swallowing S.
-  const ranked = all.filter((r) => style === "percentile" || r.score >= 0).sort(byRank);
+  const ranked = all.filter((r) => r.score >= 0).sort(byRank);
   const n = ranked.length;
   const ends: [Exclude<TierId, "top" | "avoid">, number][] = [
     ["S", Math.ceil(TIER_SHARES.S * n)],
