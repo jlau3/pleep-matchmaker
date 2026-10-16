@@ -38,7 +38,7 @@ export function Top3Tiers({
               !tier
                 ? `${line.name}: no list yet (fewer than 3 of their friends vote)`
                 : tier === "Avoid"
-                  ? `${line.name}: unlikely from this player`
+                  ? `${line.name}: F on their Tier List, unlikely from this player`
                   : `${line.name}: ${tier} on their Tier List`
             }
           >
@@ -48,7 +48,7 @@ export function Top3Tiers({
                 tier ? TIER_STYLE[tier === "Avoid" ? "avoid" : tier] : "text-slate-500"
               }`}
             >
-              {tier ?? "–"}
+              {tier === "Avoid" ? "F" : tier ?? "–"}
             </span>
           </span>
         );

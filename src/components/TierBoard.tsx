@@ -27,7 +27,7 @@ function VoteCard({ ranked, consensus }: { ranked: RankedLine; consensus: boolea
         <div className="flex items-baseline justify-between gap-2">
           <span className="flex min-w-0 items-center gap-1.5"><span className="truncate font-semibold">{ranked.line.name}</span>{ranked.isNew && <NewTag />}</span>
           {!consensus && ranked.support !== null && (
-            <span className="shrink-0 whitespace-nowrap" title={`Score: (${ranked.wants} Want − ½ × ${ranked.dontWants} Don't Want) ÷ ${total} players who've seen it × 100. Neutral counts 0. ${ranked.support! < 0 ? "Below 0 is Avoid." : `As good as ${Math.round(ranked.support!)}% of players wanting it and the rest Neutral.`} Rounded for display; tiers use exact scores.`} aria-label={`Score ${formatScore(ranked.support)}`}>
+            <span className="shrink-0 whitespace-nowrap" title={`Score: (${ranked.wants} Want − ½ × ${ranked.dontWants} Don't Want) ÷ ${total} players who've seen it × 100. Neutral counts 0. ${ranked.support! < 0 ? "Below 0 is F: Don't Wants outnumber Wants 2 to 1." : `As good as ${Math.round(ranked.support!)}% of players wanting it and the rest Neutral.`} Rounded for display; tiers use exact scores.`} aria-label={`Score ${formatScore(ranked.support)}`}>
               <span className={`text-lg font-extrabold ${supportColor(ranked.support)}`}>{formatSupport(ranked.support)}</span>
               {ranked.support >= 0 && <span className="ml-0.5 text-xs text-slate-500">/100</span>}
             </span>
