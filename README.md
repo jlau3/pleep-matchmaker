@@ -186,4 +186,4 @@ Find New supports account-persisted Hide controls in both layouts, with Undo and
 
 The Add a friend setup step completes after a successful nonempty lookup (including no results), sending a request, or saving a Not here yet name. It stays complete while people have yet to accept; existing requests, friends, and saved names are backfilled by `20261023000100_friend_setup_started.sql`.
 
-Setup opens `/tiers?pool=everyone`, overriding a previously saved My Friends view. Everyone is listed first. Tier List help opens once per signed-in account in each browser, remains available from its button, and is manual for public visitors. Island/Sleep Type filters have explicit All controls; exports preserve the selected pool and filters.
+Setup opens `/tiers?pool=everyone`, overriding a previously saved My Friends view. Everyone is listed first. Tier List help opens once per signed-in account in each browser, remains available from its button, and is manual for public visitors. Tapping a selected Island or Sleep Type filter again clears it; exports preserve the selected pool and filters.

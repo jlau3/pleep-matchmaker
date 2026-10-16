@@ -39,7 +39,7 @@ export function TierGuide({ userId }: { userId: string | null }) {
       <div className="space-y-3 text-sm">
         <p><b>Everyone</b> shows the candy active players want most. You can use it before any friends join.</p>
         <p><b>My Friends</b> uses your accepted friends&apos; votes. Your own votes shape their Tier Lists.</p>
-        <p><b>Filters:</b> Pick an Island or Sleep Type to narrow the Pokémon shown. The tiers update for that selection. Tap the same filter again, or use All Islands and All Sleep Types, to reset.</p>
+        <p><b>Filters:</b> Pick an Island or Sleep Type to narrow the Pokémon shown. The tiers update for that selection. Tap a selected filter again to clear it.</p>
         <p><b>Export Image:</b> Make a shareable image of the current list with your selected filters. Preview it, then download, copy, or share using your browser&apos;s available options.</p>
         <p><b>Top 3</b> shows players&apos; personal favorites above the ranked tiers. Candies with fewer than 10 active players&apos; saved choices stay unranked in Everyone.</p>
       </div>

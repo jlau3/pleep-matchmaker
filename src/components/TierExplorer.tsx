@@ -219,8 +219,6 @@ export function TierExplorer({
 
       <div className="flex flex-wrap items-center gap-2">
         <span className="text-sm font-semibold">Island</span>
-        <button type="button" className={pill(islandId === null)} aria-pressed={islandId === null}
-          onClick={() => show({ island: null })}>All Islands</button>
       </div>
       {/* One tap picks an island; tapping it again (or another) goes back / switches. None picked: all islands. */}
       {MAPPED_ISLANDS.length > 0 && (
@@ -265,8 +263,6 @@ export function TierExplorer({
       {/* Same one-tap toggle as the islands: a line shows if any of its forms sleeps that way. */}
       <div role="group" aria-label="Sleep Type" className="flex flex-wrap items-center gap-2">
         <span className="text-sm font-semibold">Sleep Type</span>
-        <button type="button" className={pill(sleepType === null)} aria-pressed={sleepType === null}
-          onClick={() => show({ sleep: null })}>All Sleep Types</button>
         {SLEEP_TYPES.map((type) => {
           const active = type === sleepType;
           return (
