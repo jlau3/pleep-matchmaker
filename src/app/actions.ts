@@ -294,9 +294,10 @@ export async function sendFriendRequest(
   /** Send your friend code with it; false for "We're already friends in Pokémon Sleep" (20261021001000). */
   withCode = true,
 ): Promise<{ status?: "sent" | "friends"; error?: string }> {
-  const { supabase } = await requireUser();
+  const { supabase, user } = await requireUser();
   const { data, error } = await supabase.rpc("send_friend_request", withCode ? { target: targetId } : { target: targetId, with_code: false });
   if (error) return { error: FRIEND_ERRORS[error.message] ?? "Couldn't send the request, try again" };
+  await recordFriendSetupStarted(supabase, user.id);
   // Whole layout: the requests banner and every Add friend button may change.
   if (!deferRefresh) revalidatePath("/", "layout");
   return { status: data === "friends" ? "friends" : "sent" };
@@ -357,7 +358,10 @@ export async function lookupPlayers(q: string): Promise<{ rows?: LookupRow[]; er
   if (!(await profileReady(supabase, user.id))) return { error: SEARCH_NEEDS_PROFILE };
   const { data, error } = await supabase.rpc("lookup_players", { q: query });
   if (error) return { error: "Search failed, try again" };
-  return { rows: await withExtras(supabase, data as LookupRow[]) };
+  const rows = await withExtras(supabase, data as LookupRow[]);
+  await recordFriendSetupStarted(supabase, user.id);
+  revalidatePath("/", "layout");
+  return { rows };
 }
 
 /**
@@ -400,7 +404,8 @@ export async function addPlaceholder(name: string): Promise<{ error?: string }> 
   if (error?.code === "23505") return { error: "Already on your list." };
   if (error?.message === "placeholder_limit") return { error: `That's ${MAX_FRIENDS} already. Remove one first.` };
   if (error) return { error: "Couldn't save, try again" };
-  revalidatePath("/friends");
+  await recordFriendSetupStarted(supabase, user.id);
+  revalidatePath("/", "layout");
   return {};
 }
 
@@ -526,4 +531,15 @@ export async function markMatchGuideSeen(): Promise<void> {
     revalidatePath("/friends");
     revalidatePath("/matches");
   }
+}
+
+async function recordFriendSetupStarted(supabase: SupabaseClient, userId: string): Promise<void> {
+  await supabase.from("profiles").update({ friends_setup_started: true }).eq("id", userId);
+}
+
+/** A shared ?q= link already ran its search on the server before this client action. */
+export async function markFriendSetupStarted(): Promise<void> {
+  const { supabase, user } = await requireUser();
+  await recordFriendSetupStarted(supabase, user.id);
+  revalidatePath("/", "layout");
 }

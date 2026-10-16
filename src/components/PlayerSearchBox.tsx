@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
-import { lookupPlayers } from "@/app/actions";
+import { lookupPlayers, markFriendSetupStarted } from "@/app/actions";
 import { rethrowIfNavigation } from "@/lib/saveError";
 import type { Relations } from "@/lib/relations";
 import type { LookupRow } from "@/lib/types";
@@ -28,6 +28,10 @@ export function PlayerSearchBox({
   const [result, setResult] = useState({ q: initialQ, rows: initialRows });
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+
+  useEffect(() => {
+    if (initialQ.trim()) void markFriendSetupStarted().catch(() => {});
+  }, [initialQ]);
 
   // Arrived with ?q=: it's already searched (initialRows), so drop it and a refresh starts empty.
   useEffect(() => {

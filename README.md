@@ -183,3 +183,5 @@ npm run test:db   # migrations + SQL tests against a throwaway local Postgres
 `test:db` needs the Postgres server binaries (`initdb`, `pg_ctl`) and `psql`. It stubs the Supabase `auth` schema and default grants, so it runs without Docker or the Supabase CLI.
 
 Find New supports account-persisted Hide controls in both layouts, with Undo and a Hidden players restore list. Hiding filters suggestions before sorting and pagination; it does not change blocks, friendships, requests, or search. The shared match-score guide opens once per account across My Friends and Find New, waits for other dialogs, and remains available from its button. Requires `20261023000000_hidden_suggestions.sql`.
+
+The Add a friend setup step completes after a successful nonempty lookup (including no results), sending a request, or saving a Not here yet name. It stays complete while people have yet to accept; existing requests, friends, and saved names are backfilled by `20261023000100_friend_setup_started.sql`.

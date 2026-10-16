@@ -5,7 +5,7 @@ export interface SetupProgress {
   picture: boolean;
   /** At least one Want or Don't Want. Neutral is the default. */
   voted: boolean;
-  /** An accepted friend or an unexpired outgoing request. */
+  /** A completed lookup, sent request, accepted friend, or saved Not here yet name. */
   friends: boolean;
 }
 
@@ -45,7 +45,7 @@ export function setupSteps(progress: SetupProgress): SetupStep[] {
     {
       id: "friends",
       label: "Add a friend",
-      next: "Look up your Pokémon Sleep friends by their exact in-game name, or find new friends. Send a request to get started.",
+      next: "Look up your Pokémon Sleep friends, send a request in Find New, or save a name under Not here yet. You can keep going while requests are pending.",
       href: "/friends",
       cta: "Add friends",
       done: progress.friends,

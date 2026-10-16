@@ -18,8 +18,8 @@ export async function SetupChecklist() {
   const { supabase, userId } = await getAuth();
   if (!userId) return null;
   if ((await cookies()).get(SETUP_COOKIE)?.value === userId) return null;
-  const [profile, votes, friends, sent] = await Promise.all([
-    supabase.from("profiles").select("ign, friend_code, game_avatar, setup_done").eq("id", userId).maybeSingle(),
+  const [profile, votes, friends, sent, placeholders] = await Promise.all([
+    supabase.from("profiles").select("ign, friend_code, game_avatar, setup_done, friends_setup_started").eq("id", userId).maybeSingle(),
     supabase.from("preferences").select("line_id", { count: "exact", head: true }).eq("user_id", userId).neq("choice", "undecided"),
     supabase.from("friends").select("friend_id", { count: "exact", head: true }).eq("user_id", userId),
     supabase
@@ -28,16 +28,17 @@ export async function SetupChecklist() {
       .eq("from_id", userId)
       .eq("status", "open")
       .gt("created_at", new Date(Date.now() - REQUEST_TTL_DAYS * 86_400_000).toISOString()),
+    supabase.from("friend_placeholders").select("name", { count: "exact", head: true }).eq("user_id", userId),
   ]);
   if (profile.error || !profile.data || votes.error || friends.error) return null;
-  const row = profile.data as { ign: string | null; friend_code: string | null; game_avatar: string | null; setup_done: boolean };
+  const row = profile.data as { ign: string | null; friend_code: string | null; game_avatar: string | null; setup_done: boolean; friends_setup_started: boolean };
   if (row.setup_done) return <SetupChecklistView userId={userId} done steps={[]} />;
   const steps = setupSteps({
     name: Boolean(row.ign?.trim()),
     code: Boolean(row.friend_code && normalizeFriendCode(row.friend_code)),
     picture: Boolean(parseAvatar(row.game_avatar ?? "")),
     voted: Boolean(votes.count),
-    friends: Boolean(friends.count) || Boolean(!sent.error && sent.count),
+    friends: row.friends_setup_started || Boolean(friends.count) || Boolean(!sent.error && sent.count) || Boolean(!placeholders.error && placeholders.count),
   });
   return <SetupChecklistView userId={userId} done={false} steps={steps} />;
 }
