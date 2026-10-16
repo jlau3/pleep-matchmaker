@@ -64,8 +64,8 @@ export function FriendPostCard({
 
   if (!allowLookup) return (
     <p className="text-sm text-slate-500">
-      To include your candy compatibility link, allow people who know your IGN or friend code to find you.{" "}
-      <Link href="/profile#profile-privacy" className="font-semibold underline">Privacy settings</Link>
+      To share a friend post, choose &ldquo;People who know me&rdquo; in{" "}
+      <Link href="/profile#profile-privacy" className="font-semibold underline">Privacy settings</Link>.
     </p>
   );
   if (hidden === null) return null;
