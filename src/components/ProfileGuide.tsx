@@ -111,7 +111,9 @@ export function ProfileGuide({
       let rect = target.getBoundingClientRect();
       const cardHeight = card.getBoundingClientRect().height;
       const cardWidth = Math.min(384, width - 32);
-      const left = Math.max(16, Math.min(rect.left, width - cardWidth - 16));
+      const left = complete
+        ? (viewport?.offsetLeft ?? 0) + (width - cardWidth) / 2
+        : Math.max(16, Math.min(rect.left, width - cardWidth - 16));
       const scroll = !complete && reveal ? profileGuideScroll(rect, cardHeight, { top, height }, window.scrollY) : 0;
       if (scroll) {
         window.scrollBy({ top: scroll, behavior: "instant" });
