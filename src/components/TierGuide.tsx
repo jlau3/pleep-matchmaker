@@ -1,54 +1,129 @@
 "use client";
 
-import { useCallback, useEffect, useId, useRef } from "react";
-import { FIXED_SCORE_CUTOFFS, POINTS, TIER_STYLES, TIER_STYLE_LABEL, TIER_STYLE_DESCRIPTION } from "@/lib/tiers";
+import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState, type RefObject } from "react";
+import { profileGuideScroll } from "@/lib/profileGuideScroll";
 
-/** First signed-in visit per account/browser; public visitors can open help on demand. */
-export function TierGuide({ userId }: { userId: string | null }) {
+const SEEN_KEY = "pm_tier_tour_seen:v1";
+const STEPS = [
+  { selectors: ['[data-tier-tour="pool"]'], title: "Everyone or Your Friends", description: "Everyone shows the global Tier List. Sign up and add your Pokémon Sleep friends to see what they want in My Friends." },
+  { selectors: ['[data-tier-tour="island"]', '[data-tier-tour="sleep"]'], title: "Narrow Down Your Options", description: "Choose an Island and Sleep Type to see the candy available where you're researching. Tap a selected filter again to clear it." },
+  { selectors: ['[data-tier-tour="style"]'], title: "Choose a Ranking Style", description: "Open this menu to explore different views. Each style is explained inside." },
+  { selectors: ['[data-tier-tour="export"]'], title: "Share Your Tier List", description: "Export an image of your current list, including your filters and ranking style. Preview it, then download, copy, or share." },
+];
+
+/** One tour per browser, shared between signed-out and signed-in visits. */
+export function TierGuide({ root, signedIn }: { root: RefObject<HTMLDivElement | null>; signedIn: boolean }) {
   const dialog = useRef<HTMLDialogElement>(null);
+  const panel = useRef<HTMLDivElement>(null);
+  const title = useRef<HTMLHeadingElement>(null);
   const opened = useRef(false);
   const titleId = useId();
-  const storageKey = `pm_tier_guide_seen:${userId ?? "public"}`;
+  const descriptionId = useId();
+  const [active, setActive] = useState(false);
+  const [steps, setSteps] = useState(STEPS);
+  const [index, setIndex] = useState(0);
+  const [position, setPosition] = useState({ top: 16, left: 16, targetTop: 0, targetLeft: 0, width: 0, height: 0 });
+  const step = steps[index];
   const open = useCallback(() => {
+    if (document.querySelector("dialog[open]")) return;
+    const available = STEPS.filter((step) => step.selectors.every((selector) => root.current?.querySelector(selector)));
+    if (!available.length) return;
     opened.current = true;
+    setSteps(available.map((step) => signedIn && step === STEPS[0]
+      ? { ...step, description: "Everyone shows the global Tier List. Add your Pokémon Sleep friends here; once they accept, My Friends shows what they want." } : step));
+    setIndex(0);
+    setActive(true);
     dialog.current?.showModal();
-    try { localStorage.setItem(storageKey, "1"); } catch { /* Help still works without storage. */ }
-  }, [storageKey]);
+  }, [root, signedIn]);
+  const close = () => {
+    try { localStorage.setItem(SEEN_KEY, "1"); } catch { /* The tour still closes without storage. */ }
+    dialog.current?.close();
+    setActive(false);
+  };
 
   useEffect(() => {
-    if (!userId || opened.current) return;
-    try { if (localStorage.getItem(storageKey) === "1") return; } catch { return; }
-    const showWhenReady = () => {
-      if (!opened.current && !document.querySelector("dialog[open]")) open();
-    };
+    try { if (localStorage.getItem(SEEN_KEY) === "1") return; } catch { /* Show once this visit. */ }
+    const showWhenReady = () => { if (!opened.current && !document.querySelector("dialog[open]")) open(); };
     showWhenReady();
     const observer = new MutationObserver(showWhenReady);
     observer.observe(document.body, { subtree: true, attributes: true, attributeFilter: ["open"], childList: true });
     return () => observer.disconnect();
-  }, [userId, storageKey, open]);
+  }, [open]);
 
-  const close = () => dialog.current?.close();
+  useLayoutEffect(() => {
+    if (!active || !panel.current) return;
+    const targets = step.selectors.map((selector) => root.current?.querySelector<HTMLElement>(selector)).filter((node): node is HTMLElement => !!node);
+    if (!targets.length) return;
+    // Explanations never change a filter, pool, or ranking style.
+    const place = (reveal = false) => {
+      const viewport = window.visualViewport;
+      const viewportTop = viewport?.offsetTop ?? 0;
+      const viewportLeft = viewport?.offsetLeft ?? 0;
+      const height = viewport?.height ?? window.innerHeight;
+      const width = viewport?.width ?? window.innerWidth;
+      const bounds = () => {
+        const rects = targets.map((target) => target.getBoundingClientRect());
+        return { top: Math.min(...rects.map((r) => r.top)) - 6, bottom: Math.max(...rects.map((r) => r.bottom)) + 6,
+          left: Math.min(...rects.map((r) => r.left)) - 6, right: Math.max(...rects.map((r) => r.right)) + 6 };
+      };
+      let rect = bounds();
+      const cardHeight = panel.current!.getBoundingClientRect().height;
+      const cardWidth = Math.min(384, width - 32);
+      const scroll = reveal ? profileGuideScroll(rect, cardHeight, { top: viewportTop, height }, window.scrollY) : 0;
+      if (scroll) { window.scrollBy({ top: scroll, behavior: "instant" }); rect = bounds(); }
+      const below = rect.bottom + 16 + cardHeight <= viewportTop + height - 16;
+      const desiredTop = below ? rect.bottom + 16 : rect.top - cardHeight - 16;
+      setPosition({
+        top: Math.max(viewportTop + 16, Math.min(desiredTop, viewportTop + height - cardHeight - 16)),
+        left: Math.max(viewportLeft + 16, Math.min(rect.left, viewportLeft + width - cardWidth - 16)),
+        targetTop: rect.top, targetLeft: rect.left, width: rect.right - rect.left, height: rect.bottom - rect.top,
+      });
+    };
+    const reposition = () => place();
+    const reveal = () => place(true);
+    reveal();
+    title.current?.focus({ preventScroll: true });
+    const observer = new ResizeObserver(reposition);
+    targets.forEach((target) => observer.observe(target));
+    observer.observe(panel.current);
+    window.addEventListener("scroll", reposition, true);
+    window.addEventListener("resize", reveal);
+    window.visualViewport?.addEventListener("resize", reveal);
+    window.visualViewport?.addEventListener("scroll", reposition);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("scroll", reposition, true);
+      window.removeEventListener("resize", reveal);
+      window.visualViewport?.removeEventListener("resize", reveal);
+      window.visualViewport?.removeEventListener("scroll", reposition);
+    };
+  }, [active, step, root]);
+
   return <>
-    <button type="button" onClick={open} className="text-sm font-semibold underline">How to use the Tier List</button>
-    <dialog ref={dialog} aria-labelledby={titleId}
-      onClick={(event) => { if (event.target === event.currentTarget) close(); }}
-      className="m-auto max-h-[88dvh] w-[calc(100%-2rem)] max-w-xl overflow-y-auto rounded-3xl bg-cream p-6 text-ink shadow-2xl backdrop:bg-black/60 dark:bg-night dark:text-[#eef1ff]">
-      <div className="mb-4 flex items-start justify-between gap-3">
-        <h2 id={titleId} className="text-2xl font-extrabold">How to Use the Tier List</h2>
-        <button type="button" onClick={close} aria-label="Close" className="rounded-full px-2 text-2xl leading-none text-slate-500">×</button>
-      </div>
-      <div className="space-y-3 text-sm">
-        <p><b>Everyone</b> shows the candy active players want most. You can use it before any friends join.</p>
-        <p><b>My Friends</b> uses your accepted friends&apos; votes. Your own votes shape their Tier Lists.</p>
-        <p><b>Scoring:</b> Want adds {POINTS.want} points, Neutral adds {POINTS.neutral}, and Don&apos;t Want subtracts {Math.abs(POINTS.dontWant)}. Standard and Fixed Scores put negative totals in Avoid.</p>
-        <p><b>Standard (Recommended)</b> is the shared ranking: negative totals go to Avoid, then the rest split into percentile tiers. Choose it when comparing lists with other players. Friend comparisons elsewhere also use Standard.</p>
-        <p><b>Fixed Scores</b> lets you compare support across lists against the same benchmarks. A candy's tier depends on its own votes, not how other candy scores. S starts at {FIXED_SCORE_CUTOFFS.S}/100, A at {FIXED_SCORE_CUTOFFS.A}, B at {FIXED_SCORE_CUTOFFS.B}, and C covers lower scores with nonnegative totals. All-Neutral scores {FIXED_SCORE_CUTOFFS.B}, so it lands in B. Negative totals still go to Avoid.</p>
-        {TIER_STYLES.filter((style) => style !== "standard" && style !== "fixed").map((style) => <p key={style}><b>{TIER_STYLE_LABEL[style]}:</b> {TIER_STYLE_DESCRIPTION[style]}</p>)}
-        <p><b>Filters:</b> Pick an Island or Sleep Type to narrow the Pokémon shown. Standard can change tiers with the selection. Fixed Scores and Consensus keep the same rules. Tap a selected filter again to clear it.</p>
-        <p><b>Export Image:</b> Make a shareable image of the current list with your selected filters and ranking style. Preview it, then download, copy, or share using your browser&apos;s available options.</p>
-        <p><b>Top 3</b> shows the candies players marked as their Top 3 above the ranked tiers. Candy stays unranked in Everyone until 10 active players have saved a vote for it. Neutral counts too.</p>
-      </div>
-      <button type="button" onClick={close} className="btn-primary mt-6 w-full py-2">Got it</button>
+    <button type="button" onClick={open} className="text-sm font-semibold underline">Tier List tour</button>
+    <dialog ref={dialog} aria-labelledby={titleId} aria-describedby={descriptionId}
+      onCancel={(event) => { event.preventDefault(); close(); }}
+      className="fixed inset-0 m-0 h-dvh max-h-none w-screen max-w-none overflow-hidden border-0 bg-transparent p-0 text-ink backdrop:bg-transparent dark:text-white">
+      {active && <>
+        <div aria-hidden="true" data-tier-tour-outline style={{ top: position.targetTop, left: position.targetLeft, width: position.width, height: position.height }}
+          className="pointer-events-none fixed rounded-xl border-4 border-sun shadow-[0_0_0_100vmax_rgba(0,0,0,0.6)]" />
+        <div ref={panel} data-tier-tour-panel style={{ top: position.top, left: position.left }}
+          className="fixed max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-sm overflow-y-auto rounded-2xl border border-sun bg-cream p-4 shadow-2xl dark:bg-night">
+          <div className="flex items-start justify-between gap-3">
+            <div><p className="text-xs font-semibold text-slate-500">Step {index + 1} of {steps.length}</p>
+              <h2 ref={title} id={titleId} tabIndex={-1} className="mt-1 text-lg font-extrabold outline-none">{step.title}</h2></div>
+            <button type="button" onClick={close} aria-label="Close Tier List tour" className="rounded-full px-2 text-xl text-slate-500">×</button>
+          </div>
+          <p id={descriptionId} className="mt-2 text-sm text-slate-600 dark:text-slate-300">{step.description}</p>
+          <div className="mt-4 flex items-center justify-between gap-3">
+            <button type="button" onClick={close} className="text-sm font-semibold text-slate-500 underline">Skip tour</button>
+            <div className="flex items-center gap-3">
+              {index > 0 && <button type="button" onClick={() => setIndex(index - 1)} className="text-sm font-semibold underline">Back</button>}
+              <button type="button" onClick={() => index === steps.length - 1 ? close() : setIndex(index + 1)} className="btn-primary px-4 py-2">{index === steps.length - 1 ? "Got it" : "Next →"}</button>
+            </div>
+          </div>
+        </div>
+      </>}
     </dialog>
   </>;
 }

@@ -94,7 +94,6 @@ export function TierBoard({ tiers, pool = "friends", style = "standard" }: { tie
           </>
         );
         if (tier.id === "top") {
-          const who = pool === "friends" ? "your friends" : "players";
           return (
             <details key={tier.id} className={`${topPanel} group/top`}>
               {/* The blurb sits in the summary so it shows while folded. */}
@@ -107,8 +106,8 @@ export function TierBoard({ tiers, pool = "friends", style = "standard" }: { tie
                   </span>
                 </span>
                 <span className="mt-2 block text-sm text-slate-600 dark:text-slate-300">
-                  Candy {who} want most, from their personal Top 3. Some rank low on the Tier List below,
-                  but whoever starred them really wants them.
+                  Top 3 lets {pool === "friends" ? "your friends" : "players"} spotlight the candy they most want friends to send,
+                  even when it ranks low overall. Stars don&apos;t change tier scores.
                 </span>
               </summary>
               {cards}

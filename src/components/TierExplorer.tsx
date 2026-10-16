@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { isSleepType, ISLANDS, LINES, SLEEP_TYPE_LABEL, SLEEP_TYPES, lineSpriteUrl, sleepTypeMember, spriteUrl, type SleepType } from "@/lib/lines";
 import { buildTiers, buildPublicTiers, TIER_STYLE_LABEL, TIER_STYLES, TIER_STYLE_DESCRIPTION, type TierStyle, type LineVotes } from "@/lib/tiers";
 import { InviteButton } from "./InviteButton";
@@ -88,6 +88,7 @@ export function TierExplorer({
   viewerId?: string | null;
   everyoneSnapshot?: { exportedAt: string; candies: number };
 }) {
+  const tourRoot = useRef<HTMLDivElement>(null);
   const openSignIn = useSignIn();
   const viewKey = signedIn ? VIEW_KEY : `${VIEW_KEY}_public`;
   const [pool, setPool] = useState<Pool>(signedIn ? initialPool : "everyone");
@@ -188,7 +189,7 @@ export function TierExplorer({
     `rounded-full border px-3 py-1 text-sm ${active ? "pill-active border-transparent" : "border-slate-300 dark:border-slate-700"}`;
 
   return (
-    <div className="space-y-5">
+    <div ref={tourRoot} className="space-y-5">
       <div>
         <div className="flex flex-wrap items-baseline justify-between gap-x-3">
           <h1 className="text-2xl font-bold">Tier List</h1>
@@ -206,20 +207,22 @@ export function TierExplorer({
       {pool === "everyone" && everyoneSnapshot && <p role="status" className="rounded-xl bg-sky/60 px-3 py-2 text-sm dark:bg-night-deep">
         Dev snapshot: {everyone.voters} players · {everyoneSnapshot.candies} candies. Imported totals for comparing styles; My Friends uses your dev friends.
       </p>}
-      <TierGuide userId={signedIn ? viewerId : null} />
+      <TierGuide root={tourRoot} signedIn={signedIn} />
 
       {notice}
 
       {pool === "friends" && data.voters > 0 && <InviteReminder friendCount={data.friendCount} />}
 
       <div className="flex flex-wrap items-center gap-2">
-        {(["everyone", "friends"] as const).map((p) => (
-          <button key={p} type="button" onClick={() => show({ pool: p })} aria-pressed={pool === p} className={pill(pool === p)}>
-            {POOL_LABEL[p]}{!signedIn && p === "friends" && <span aria-hidden="true" className="ml-1">🔒</span>}
-          </button>
-        ))}
+        <div data-tier-tour="pool" className="flex flex-wrap items-center gap-2">
+          {(["everyone", "friends"] as const).map((p) => (
+            <button key={p} type="button" onClick={() => show({ pool: p })} aria-pressed={pool === p} className={pill(pool === p)}>
+              {POOL_LABEL[p]}{!signedIn && p === "friends" && <span aria-hidden="true" className="ml-1">🔒</span>}
+            </button>
+          ))}
+        </div>
         {(data.voters > 0 || data.thresholded) && (
-          <div className="ml-auto">
+          <div data-tier-tour="export" className="ml-auto">
             <TierExport
               title={[everyoneSnapshot && pool === "everyone" && `Dev Snapshot ${everyoneSnapshot.exportedAt.slice(0, 10)}`, poolLabel, TIER_STYLE_LABEL[style], selected ? selected.name : "All Islands", sleepType && SLEEP_TYPE_LABEL[sleepType]]
                 .filter(Boolean)
@@ -237,7 +240,7 @@ export function TierExplorer({
       </div>
       {/* One tap picks an island; tapping it again (or another) goes back / switches. None picked: all islands. */}
       {MAPPED_ISLANDS.length > 0 && (
-        <div role="group" aria-label="Island" className="grid grid-cols-5 gap-1 sm:grid-cols-9">
+        <div data-tier-tour="island" role="group" aria-label="Island" className="grid grid-cols-5 gap-1 sm:grid-cols-9">
           {MAPPED_ISLANDS.map((island) => {
             const active = island.id === islandId;
             const art = islandArt(island.id);
@@ -277,7 +280,7 @@ export function TierExplorer({
 
       {/* Same one-tap toggle as the islands: a line shows if any of its forms sleeps that way. */}
       <div className="flex flex-wrap items-start justify-between gap-3">
-        <div role="group" aria-label="Sleep Type" className="flex flex-wrap items-center gap-2">
+        <div data-tier-tour="sleep" role="group" aria-label="Sleep Type" className="flex flex-wrap items-center gap-2">
           <span className="text-sm font-semibold">Sleep Type</span>
           {SLEEP_TYPES.map((type) => {
             const active = type === sleepType;
@@ -296,7 +299,7 @@ export function TierExplorer({
             );
           })}
         </div>
-        <details className="relative ml-auto max-w-full text-sm">
+        <details data-tier-tour="style" className="relative ml-auto max-w-full text-sm">
           <summary className="w-fit cursor-pointer py-1 font-semibold">Ranking Style: {TIER_STYLE_LABEL[style]}</summary>
           <fieldset className="absolute right-0 z-20 mt-2 w-[min(24rem,calc(100vw-2rem))] space-y-3 rounded-xl border border-slate-300 bg-cream p-3 shadow-lg dark:border-slate-700 dark:bg-night">
             <legend className="px-1 font-semibold">Choose a ranking style</legend>
