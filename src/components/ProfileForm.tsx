@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useRef, useState } from "react";
+import { startTransition, useActionState, useEffect, useRef, useState } from "react";
 import { type ProfileFormState, updateProfile } from "@/app/actions";
 import { rethrowIfNavigation, SAVE_FAILED } from "@/lib/saveError";
 import { formatFriendCode } from "@/lib/format";
@@ -121,7 +121,18 @@ export function ProfileForm({ profile, friendListFull, guideRequested = false }:
     </span>
   );
   return (
-    <form ref={form} action={action} className="grid items-start gap-6 md:grid-cols-2">
+    <form
+      ref={form}
+      action={action}
+      onSubmit={(event) => {
+        event.preventDefault();
+        // Dispatch without React's automatic form reset: it restores radios and
+        // switches to their initial values, even when their state is controlled.
+        const values = new FormData(event.currentTarget, (event.nativeEvent as SubmitEvent).submitter);
+        startTransition(() => action(values));
+      }}
+      className="grid items-start gap-6 md:grid-cols-2"
+    >
       <input type="hidden" name="has_extras" value="1" />
       <section className={card} aria-labelledby="profile-details">
         <div className="flex items-baseline justify-between gap-3">

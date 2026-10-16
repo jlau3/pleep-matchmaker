@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useLayoutEffect, useRef, useState, type RefObject } from "react";
 import { profileGuideError, type ProfileGuideStep } from "@/lib/profileGuide";
+import { profileGuideScroll } from "@/lib/profileGuideScroll";
 
 const FOCUSABLE =
   'a[href], button:not(:disabled), input:not([type="hidden"]):not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex="0"]';
@@ -35,7 +36,10 @@ export function ProfileGuide({
   const close = useRef(onClose);
   close.current = onClose;
   const step = steps[index];
-  const [position, setPosition] = useState({ top: 0, left: 16, arrow: 32, below: true, compact: false });
+  const [position, setPosition] = useState(() => ({
+    top: 0, left: 16, arrow: 32, below: true,
+    compact: typeof window !== "undefined" && (window.visualViewport?.height ?? window.innerHeight) < 680,
+  }));
 
   // Welcome and the native icon picker take precedence over this overlay.
   useEffect(() => {
@@ -55,6 +59,16 @@ export function ProfileGuide({
     else setIndex((current) => current + 1);
   }, [result, index, steps.length]);
 
+  // Reserve scroll space once, rather than removing and restoring it between
+  // steps (which can clamp the scroll position near the end of the page).
+  useLayoutEffect(() => {
+    const root = form.current;
+    if (!ready || !root) return;
+    const previousPadding = root.style.paddingBottom;
+    root.style.paddingBottom = `${window.innerHeight}px`;
+    return () => { root.style.paddingBottom = previousPadding; };
+  }, [ready, form]);
+
   useLayoutEffect(() => {
     const root = form.current;
     const target = root?.querySelector<HTMLElement>(`[data-profile-step="${step.id}"]`);
@@ -63,9 +77,6 @@ export function ProfileGuide({
     if (!ready || !root || !target || !card || !overlay) return;
     const previousFocus = document.activeElement as HTMLElement | null;
     const previousRole = root.getAttribute("role");
-    const previousPadding = root.style.paddingBottom;
-    // Allow the final controls to scroll clear of the floating card, too.
-    root.style.paddingBottom = `${window.innerHeight}px`;
     root.setAttribute("role", "dialog");
     root.setAttribute("aria-modal", "true");
     root.setAttribute("aria-labelledby", "profile-guide-title");
@@ -84,10 +95,9 @@ export function ProfileGuide({
       }
     };
     isolate(document.body);
-    if (!complete) target.scrollIntoView({ block: "center", behavior: "instant" });
     title.current?.focus({ preventScroll: true });
 
-    const place = () => {
+    const place = (reveal = false) => {
       const viewport = window.visualViewport;
       const top = viewport?.offsetTop ?? 0;
       const height = viewport?.height ?? window.innerHeight;
@@ -96,13 +106,9 @@ export function ProfileGuide({
       const cardHeight = card.getBoundingClientRect().height;
       const cardWidth = Math.min(384, width - 32);
       const left = Math.max(16, Math.min(rect.left, width - cardWidth - 16));
-      if (
-        !complete &&
-        rect.height + cardHeight + 52 <= height &&
-        rect.bottom + cardHeight + 36 > top + height &&
-        rect.top - cardHeight - 20 < top + 16
-      ) {
-        window.scrollBy({ top: rect.top - top - 16, behavior: "instant" });
+      const scroll = !complete && reveal ? profileGuideScroll(rect, cardHeight, { top, height }, window.scrollY) : 0;
+      if (scroll) {
+        window.scrollBy({ top: scroll, behavior: "instant" });
         rect = target.getBoundingClientRect();
       }
       const below = rect.bottom + 20 + cardHeight <= top + height - 16;
@@ -115,14 +121,16 @@ export function ProfileGuide({
         compact: height < 680,
       });
     };
-    place();
-    const observer = new ResizeObserver(place);
+    const reposition = () => place();
+    const reveal = () => place(true);
+    reveal();
+    const observer = new ResizeObserver(reveal);
     observer.observe(target);
     observer.observe(card);
-    window.addEventListener("scroll", place, true);
-    window.addEventListener("resize", place);
-    window.visualViewport?.addEventListener("resize", place);
-    window.visualViewport?.addEventListener("scroll", place);
+    window.addEventListener("scroll", reposition, true);
+    window.addEventListener("resize", reveal);
+    window.visualViewport?.addEventListener("resize", reveal);
+    window.visualViewport?.addEventListener("scroll", reposition);
 
     const keydown = (event: KeyboardEvent) => {
       if (document.querySelector("dialog[open]")) return;
@@ -149,16 +157,15 @@ export function ProfileGuide({
     document.addEventListener("keydown", keydown);
     return () => {
       observer.disconnect();
-      window.removeEventListener("scroll", place, true);
-      window.removeEventListener("resize", place);
-      window.visualViewport?.removeEventListener("resize", place);
-      window.visualViewport?.removeEventListener("scroll", place);
+      window.removeEventListener("scroll", reposition, true);
+      window.removeEventListener("resize", reveal);
+      window.visualViewport?.removeEventListener("resize", reveal);
+      window.visualViewport?.removeEventListener("scroll", reposition);
       document.removeEventListener("keydown", keydown);
       target.classList.remove("profile-guide-target");
       madeInert.forEach((element) => {
         element.inert = false;
       });
-      root.style.paddingBottom = previousPadding;
       if (previousRole) root.setAttribute("role", previousRole);
       else root.removeAttribute("role");
       root.removeAttribute("aria-modal");

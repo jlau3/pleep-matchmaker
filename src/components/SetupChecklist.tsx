@@ -8,7 +8,7 @@ import { getAuth } from "@/lib/supabase/server";
 import { SetupChecklistView } from "./SetupChecklistView";
 
 /**
- * "Get set up": name, code, picture, votes, friends and Tier List, under the
+ * "Get set up": profile, votes, friends and Tier List, under the
  * nav on every page until the player finishes or skips it. Each step ticks
  * itself off from their real data, so it can't drift out of sync. Absent when
  * signed out, once done (the cookie skips the lookup), or if the lookup fails

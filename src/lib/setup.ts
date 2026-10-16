@@ -9,7 +9,7 @@ export interface SetupProgress {
   friends: boolean;
 }
 
-export type SetupStepId = "name" | "code" | "picture" | "vote" | "friends" | "tiers";
+export type SetupStepId = "profile" | "vote" | "friends" | "tiers";
 
 export interface SetupStep {
   id: SetupStepId;
@@ -21,30 +21,18 @@ export interface SetupStep {
 }
 
 export function setupSteps(progress: SetupProgress): SetupStep[] {
+  const profileTask = !progress.name
+    ? { next: "Add your name exactly as it appears in Pokémon Sleep, so friends can find you.", cta: "Add my name" }
+    : !progress.code
+      ? { next: "Add your 12-digit Pokémon Sleep friend code. Find it in Research Community in the game.", cta: "Add my friend code" }
+      : { next: "Choose the Pokémon profile picture you use in the game.", cta: "Choose my picture" };
   return [
     {
-      id: "name",
-      label: "In-game name",
-      next: "Add your name exactly as it appears in Pokémon Sleep, so friends can find you.",
+      id: "profile",
+      label: "Profile setup",
+      ...profileTask,
       href: "/profile?setup=profile",
-      cta: "Add my name",
-      done: progress.name,
-    },
-    {
-      id: "code",
-      label: "Friend code",
-      next: "Add your 12-digit Pokémon Sleep friend code. Find it in Research Community in the game.",
-      href: "/profile?setup=profile",
-      cta: "Add my friend code",
-      done: progress.code,
-    },
-    {
-      id: "picture",
-      label: "Profile picture",
-      next: "Choose the Pokémon profile picture you use in the game. Your Discord picture doesn't complete this step.",
-      href: "/profile?setup=profile",
-      cta: "Choose my picture",
-      done: progress.picture,
+      done: progress.name && progress.code && progress.picture,
     },
     {
       id: "vote",

@@ -10,7 +10,7 @@ import { currentStep, SETUP_VOTE_EVENT, type SetupStep } from "@/lib/setup";
 
 /**
  * The checklist card. "Hide for now" hides it until the browser session ends;
- * "Skip setup" hides it for good. Opening the Tier List with the first five
+ * "Skip setup" hides it for good. Opening the Tier List with the first three
  * steps done finishes it with a short "all set" note. Already done: remembers
  * that in this browser and shows nothing.
  */
@@ -111,15 +111,15 @@ export function SetupChecklistView({ userId, done, steps }: { userId: string; do
             {completed} of {visibleSteps.length} complete
           </span>
         </div>
-        <progress aria-label="Setup progress" value={completed} max={visibleSteps.length} className="mt-2 h-2 w-full accent-want" />
-        <ol aria-label="Setup checklist" className="mt-3 grid grid-cols-2 gap-2">
+        <progress aria-label="Setup progress" value={completed} max={visibleSteps.length} className="mt-1.5 h-1.5 w-full accent-want" />
+        <ol aria-label="Setup checklist" className="mt-2 grid grid-cols-2 gap-1.5 sm:flex sm:flex-wrap">
           {visibleSteps.map((item, i) => (
             <li
               key={item.id}
               data-setup-step={item.id}
               data-complete={item.done}
               aria-current={!item.done && item.id === step.id ? "step" : undefined}
-              className={`flex min-h-11 items-center gap-2 rounded-xl border px-2.5 py-2 ${
+              className={`flex items-center gap-1.5 rounded-lg border px-2 py-1 ${
                 item.done
                   ? "border-want/40 bg-want/10"
                   : item.id === step.id
@@ -129,20 +129,19 @@ export function SetupChecklistView({ userId, done, steps }: { userId: string; do
             >
               <span
                 aria-hidden="true"
-                className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-extrabold ${item.done ? "bg-want text-night-deep" : item.id === step.id ? "bg-sun text-[#5b3e00]" : "border border-slate-400 text-slate-500"}`}
+                className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-xs font-extrabold ${item.done ? "bg-want text-night-deep" : item.id === step.id ? "bg-sun text-[#5b3e00]" : "border border-slate-400 text-slate-500"}`}
               >
                 {item.done ? "✓" : i + 1}
               </span>
-              <span className="text-xs font-semibold sm:text-sm">
+              <span className="text-xs font-semibold">
                 <span className="sr-only">{item.done ? "Complete: " : "To do: "}</span>
                 {item.label}
               </span>
             </li>
           ))}
         </ol>
-        <p className="mt-2 text-xs text-slate-500">Checks update automatically after saving.</p>
-        <p className="mt-3 text-slate-700 dark:text-slate-200">
-          <strong>Next:</strong> {step.next}
+        <p className="mt-2 text-sm text-slate-700 dark:text-slate-200">
+          <strong>Step {index + 1} of {visibleSteps.length}</strong> · {step.next}
         </p>
         <div className="mt-2 flex flex-wrap items-center gap-3">
           {!here ? (
