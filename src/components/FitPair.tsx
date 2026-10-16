@@ -33,19 +33,19 @@ export function FitPair({
   if (compact)
     return (
       <span className="whitespace-nowrap text-xs font-semibold text-slate-500">
-        <b className={`text-sm ${color(you)}`} title={you == null ? youMissing : `For you${youFrom}`} aria-label={you == null ? youMissing : undefined}>{pct(you)}</b> you ·{" "}
-        <b className={`text-sm ${color(they)}`} title={they == null ? theyMissing : `For them${theyFrom}`} aria-label={they == null ? theyMissing : undefined}>{pct(they)}</b> them
+        <b className={`text-sm ${color(you)}`} title={you == null ? youMissing : `For you${youFrom}: how much of the candy they'd send is on your Want list. Your Don't Wants lower it.`} aria-label={you == null ? youMissing : undefined}>{pct(you)}</b> you ·{" "}
+        <b className={`text-sm ${color(they)}`} title={they == null ? theyMissing : `For them${theyFrom}: how much of the candy you'd send is on their Want list. Their Don't Wants lower it.`} aria-label={they == null ? theyMissing : undefined}>{pct(they)}</b> them
       </span>
     );
   return (
     <div className="shrink-0 whitespace-nowrap text-right leading-none">
-      <div title={you == null ? youMissing : `For you: how well the candy they'd send matches your votes${youFrom}`}>
+      <div title={you == null ? youMissing : `For you${youFrom}: how much of the candy they'd send is on your Want list. Your Don't Wants lower it.`}>
         <span className={`text-2xl font-extrabold ${color(you)}`} aria-label={you == null ? youMissing : undefined}>{you == null ? "–" : `${you}%`}</span>{" "}
         <span className={`text-sm font-semibold ${low(you) ? "text-amber-700 dark:text-amber-300" : "text-slate-500"}`}>
           For you
         </span>
       </div>
-      <div className="mt-1" title={they == null ? theyMissing : `For them: how well the candy you'd send matches their votes${theyFrom}`}>
+      <div className="mt-1" title={they == null ? theyMissing : `For them${theyFrom}: how much of the candy you'd send is on their Want list. Their Don't Wants lower it.`}>
         <span className={`text-base font-bold ${color(they)}`} aria-label={they == null ? theyMissing : undefined}>{they == null ? "–" : `${they}%`}</span>{" "}
         <span className={`text-xs font-semibold ${low(they) ? "text-amber-700 dark:text-amber-300" : "text-slate-500"}`}>
           For them

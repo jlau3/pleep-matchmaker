@@ -37,15 +37,14 @@ export function FitLegend({ friendsVoted = true, youVoted = true, autoOpen = fal
         </div>
       <div className="space-y-3 text-sm">
         <p>
-          <b className="text-slate-700 dark:text-slate-200">For you</b>: Your wants compared with what their friends want.
+          You send the candy your friends want most. A match % is how much of that candy the other player Wants.
+          Their Don&apos;t Wants lower it.
         </p>
         <p>
-          <b className="text-slate-700 dark:text-slate-200">For them</b>: Their wants compared with what your friends want.
+          <b className="text-slate-700 dark:text-slate-200">For you</b>: what they&apos;d send you (picked by their friends) against your votes.
         </p>
         <p>
-          <b>How the % is found:</b> each candy gets a demand level from what that side&apos;s friends want, with the most-wanted candy at 100%.
-          We add up the demand on the candy the player Wants and divide by the best they could get. Candy they Don&apos;t Want that would still
-          get sent counts against it. 100% means the candy they&apos;d receive is exactly what they want.
+          <b className="text-slate-700 dark:text-slate-200">For them</b>: what you&apos;d send them (picked by your friends) against their votes.
         </p>
         <p>
           <b>Few friends voting yet?</b> Scores lean on global votes until more friends vote.
