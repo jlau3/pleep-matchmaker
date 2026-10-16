@@ -208,22 +208,6 @@ export function TierExplorer({
       </p>}
       <TierGuide userId={signedIn ? viewerId : null} />
 
-      <details className="text-sm">
-        <summary className="w-fit cursor-pointer font-semibold">Ranking Style: {TIER_STYLE_LABEL[style]}{style === "standard" && " (Recommended)"}</summary>
-        <fieldset className="mt-3 space-y-3 rounded-xl border border-slate-300 p-3 dark:border-slate-700">
-          <legend className="px-1 font-semibold">Choose a ranking style</legend>
-          {TIER_STYLES.map((option) => <label key={option} className="flex cursor-pointer items-start gap-2">
-            <input type="radio" name="tier-style" value={option} checked={style === option}
-              onChange={() => show({ style: option })} className="mt-1 accent-want" />
-            <span><b>{TIER_STYLE_LABEL[option]}{option === "standard" && " (Recommended)"}</b>
-              <span className="block text-xs text-slate-500">{TIER_STYLE_DESCRIPTION[option]}</span></span>
-          </label>)}
-        </fieldset>
-      </details>
-      {style !== "standard" && <p className="text-sm text-slate-600 dark:text-slate-300">
-        You're viewing {TIER_STYLE_LABEL[style]}. For the shared default, <button type="button" onClick={() => show({ style: "standard" })} className="font-semibold underline">use Standard</button>.
-      </p>}
-
       {notice}
 
       {pool === "friends" && data.voters > 0 && <InviteReminder friendCount={data.friendCount} />}
@@ -292,25 +276,42 @@ export function TierExplorer({
       )}
 
       {/* Same one-tap toggle as the islands: a line shows if any of its forms sleeps that way. */}
-      <div role="group" aria-label="Sleep Type" className="flex flex-wrap items-center gap-2">
-        <span className="text-sm font-semibold">Sleep Type</span>
-        {SLEEP_TYPES.map((type) => {
-          const active = type === sleepType;
-          return (
-            <button
-              key={type}
-              type="button"
-              onClick={() => show({ sleep: active ? null : type })}
-              aria-pressed={active}
-              title={active ? `${SLEEP_TYPE_LABEL[type]} (tap again for all sleep types)` : `Pokémon with a ${SLEEP_TYPE_LABEL[type]} form`}
-              className={`flex items-center gap-1.5 ${pill(active)} ${sleepType && !active ? "opacity-50 hover:opacity-100" : ""}`}
-            >
-              <span className={`h-2.5 w-2.5 rounded-full ${SLEEP_DOT[type]}`} aria-hidden />
-              {SLEEP_TYPE_LABEL[type]}
-            </button>
-          );
-        })}
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div role="group" aria-label="Sleep Type" className="flex flex-wrap items-center gap-2">
+          <span className="text-sm font-semibold">Sleep Type</span>
+          {SLEEP_TYPES.map((type) => {
+            const active = type === sleepType;
+            return (
+              <button
+                key={type}
+                type="button"
+                onClick={() => show({ sleep: active ? null : type })}
+                aria-pressed={active}
+                title={active ? `${SLEEP_TYPE_LABEL[type]} (tap again for all sleep types)` : `Pokémon with a ${SLEEP_TYPE_LABEL[type]} form`}
+                className={`flex items-center gap-1.5 ${pill(active)} ${sleepType && !active ? "opacity-50 hover:opacity-100" : ""}`}
+              >
+                <span className={`h-2.5 w-2.5 rounded-full ${SLEEP_DOT[type]}`} aria-hidden />
+                {SLEEP_TYPE_LABEL[type]}
+              </button>
+            );
+          })}
+        </div>
+        <details className="relative ml-auto max-w-full text-sm">
+          <summary className="w-fit cursor-pointer py-1 font-semibold">Ranking Style: {TIER_STYLE_LABEL[style]}</summary>
+          <fieldset className="absolute right-0 z-20 mt-2 w-[min(24rem,calc(100vw-2rem))] space-y-3 rounded-xl border border-slate-300 bg-cream p-3 shadow-lg dark:border-slate-700 dark:bg-night">
+            <legend className="px-1 font-semibold">Choose a ranking style</legend>
+            {TIER_STYLES.map((option) => <label key={option} className="flex cursor-pointer items-start gap-2">
+              <input type="radio" name="tier-style" value={option} checked={style === option}
+                onChange={() => show({ style: option })} className="mt-1 accent-want" />
+              <span><b>{TIER_STYLE_LABEL[option]}{option === "standard" && " (Recommended)"}</b>
+                <span className="block text-xs text-slate-500">{TIER_STYLE_DESCRIPTION[option]}</span></span>
+            </label>)}
+          </fieldset>
+        </details>
       </div>
+      {style !== "standard" && <p className="text-sm text-slate-600 dark:text-slate-300">
+        You're viewing {TIER_STYLE_LABEL[style]}. For the shared default, <button type="button" onClick={() => show({ style: "standard" })} className="font-semibold underline">use Standard</button>.
+      </p>}
 
       {data.voters === 0 && !data.thresholded ? (
         <p className="py-8 text-center text-slate-500">
