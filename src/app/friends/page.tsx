@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { FriendAction } from "@/components/FriendAction";
 import { PlayerHeader, playerName } from "@/components/PlayerHeader";
 import { PlayerLists } from "@/components/PlayerLists";
@@ -147,6 +148,12 @@ export default async function FriendsPage({ searchParams }: { searchParams: Prom
             {friends.length} / {MAX_FRIENDS}
           </span>
         </h2>
+        {friends.length === 0 && (
+          <p className="mb-3 text-sm text-slate-500">
+            <strong>No friends yet?</strong> Search above for your Pokémon Sleep friends,{" "}
+            <Link href="/matches" className="font-semibold underline">find new friends</Link>, or share your friend code.
+          </p>
+        )}
         {placeholders && (
           <div id="not-here-yet" className="mb-3 scroll-mt-20">
             <FriendPlaceholders rows={placeholders} relations={relations} viewerId={user.id} />
