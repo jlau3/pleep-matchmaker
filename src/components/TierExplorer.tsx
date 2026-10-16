@@ -34,7 +34,7 @@ const saveStyle = (style: TierStyle) => {
   try { localStorage.setItem(STYLE_KEY, style); } catch { /* Not remembered; fine. */ }
 };
 
-const POOL_LABEL: Record<Pool, string> = { friends: "My Friends", everyone: "Everyone" };
+const POOL_LABEL: Record<Pool, string> = { friends: "My Friends", everyone: "Global" };
 const MAPPED_ISLANDS = ISLANDS.filter((island) => island.lines.length > 0);
 
 /** Island art from Neroli's Lab (public/islands, Apache-2.0; see NOTICE there). Expert areas reuse the base art. */

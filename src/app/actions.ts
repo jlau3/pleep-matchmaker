@@ -458,7 +458,8 @@ export async function markSetupDone(finished = false): Promise<{ error?: string;
     .eq("id", user.id);
   if (error) return { error: "Couldn't save your setup progress. Try again." };
   const store = await cookies();
-  store.set(SETUP_COOKIE, user.id, { path: "/", maxAge: 31536000, sameSite: "lax" });
+  // Finishing: the card sets this itself once its "all set" note is gone, so the refresh keeps it on screen.
+  if (!finished) store.set(SETUP_COOKIE, user.id, { path: "/", maxAge: 31536000, sameSite: "lax" });
   const next = safeNextPath(store.get(SETUP_NEXT_COOKIE)?.value);
   store.delete(SETUP_NEXT_COOKIE);
   return next ? { next } : {};

@@ -70,7 +70,7 @@ export default function PrivacyPage() {
             <b>Other players cannot see your email.</b> It&apos;s only used to sign you in.
           </li>
           <li>
-            <b>The public Everyone Tier List</b> shows combined candy totals, never individual players&apos; votes or identities.
+            <b>The public Global Tier List</b> shows combined candy totals, never individual players&apos; votes or identities.
             A candy&apos;s totals and Top 3 Spotlight count stay hidden until at least 10 active players have seen it, and it&apos;s ranked once 50 have.
           </li>
           <li>

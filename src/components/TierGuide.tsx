@@ -16,7 +16,7 @@ const markSeen = () => {
   try { localStorage.setItem(SEEN_KEY, "1"); } catch { /* The cookie still remembers. */ }
 };
 const STEPS = [
-  { selectors: ['[data-tier-tour="pool"]'], title: "Everyone or Your Friends", description: "Everyone shows the global Tier List. Sign up and add your Pokémon Sleep friends to see what they want in My Friends." },
+  { selectors: ['[data-tier-tour="pool"]'], title: "Global or Your Friends", description: "Global ranks candy by every active player's votes. Sign up and add your Pokémon Sleep friends to see what they want in My Friends." },
   { selectors: ['[data-tier-tour="island"]', '[data-tier-tour="sleep"]'], title: "Narrow Down Your Options", description: "Choose an Island and Sleep Type to see the candy available where you're researching. Tap a selected filter again to clear it." },
   { selectors: ['[data-tier-tour="style"]'], title: "Choose a Ranking Style", description: "Open this menu to explore different views. Each style is explained inside." },
   { selectors: ['[data-tier-tour="export"]'], title: "Share Your Tier List", description: "Export an image of your current list, including your filters and ranking style. Preview it, then download, copy, or share." },
@@ -46,7 +46,7 @@ export function TierGuide({ root, signedIn }: { root: RefObject<HTMLDivElement |
     // Seen once it opens: a refresh or closed tab mid-tour doesn't bring it back.
     markSeen();
     setSteps(available.map((step) => signedIn && step === STEPS[0]
-      ? { ...step, description: "Everyone shows the global Tier List. Add your Pokémon Sleep friends here; once they accept, My Friends shows what they want." } : step));
+      ? { ...step, description: "Global ranks candy by every active player's votes. Add your Pokémon Sleep friends here; once they accept, My Friends shows what they want." } : step));
     setIndex(0);
     setActive(true);
     dialog.current?.showModal();
@@ -66,7 +66,8 @@ export function TierGuide({ root, signedIn }: { root: RefObject<HTMLDivElement |
 
   useEffect(() => {
     if (seen()) return;
-    const showWhenReady = () => { if (!opened.current && !document.querySelector("dialog[open]")) open(); };
+    // Waits for open dialogs and the setup card's "all set" note.
+    const showWhenReady = () => { if (!opened.current && !document.querySelector("dialog[open], [data-setup-celebration]")) open(); };
     showWhenReady();
     const observer = new MutationObserver(showWhenReady);
     observer.observe(document.body, { subtree: true, attributes: true, attributeFilter: ["open"], childList: true });

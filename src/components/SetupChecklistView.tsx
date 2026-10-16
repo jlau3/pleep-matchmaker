@@ -8,10 +8,13 @@ import { SETUP_COOKIE, SETUP_SNOOZE_KEY } from "@/lib/help";
 import { rethrowIfNavigation, SAVE_FAILED } from "@/lib/saveError";
 import { currentStep, SETUP_VOTE_EVENT, type SetupStep } from "@/lib/setup";
 
+const CELEBRATE_MS = 4000;
+
 /**
  * The checklist card. "Hide for now" hides it until the browser session ends;
  * "Skip setup" hides it for good. Opening the Tier List with the first three
- * steps done finishes it with a short "all set" note. Already done: remembers
+ * steps done finishes it with a short "all set" note
+ * that stays a few seconds, before the Tier List tour. Already done: remembers
  * that in this browser and shows nothing.
  */
 export function SetupChecklistView({ userId, done, steps }: { userId: string; done: boolean; steps: SetupStep[] }) {
@@ -44,8 +47,20 @@ export function SetupChecklistView({ userId, done, steps }: { userId: string; do
     }
   }, [router]);
 
+  // The "all set" note stays a few seconds (the Tier List tour waits for it), then the card is gone for good.
+  useEffect(() => {
+    if (!finished) return;
+    const timer = setTimeout(() => setClosed(true), CELEBRATE_MS);
+    return () => clearTimeout(timer);
+  }, [finished]);
+  useEffect(() => {
+    if (!closed || !finished) return;
+    document.cookie = `${SETUP_COOKIE}=${userId}; path=/; max-age=31536000; samesite=lax`;
+  }, [closed, finished, userId]);
+
   useEffect(() => {
     if (done) {
+      if (finished) return; // Set when the note closes.
       document.cookie = `${SETUP_COOKIE}=${userId}; path=/; max-age=31536000; samesite=lax`;
       return;
     }
@@ -54,7 +69,7 @@ export function SetupChecklistView({ userId, done, steps }: { userId: string; do
     } catch {
       setSnoozed(false); // Storage unavailable: show it.
     }
-  }, [done, userId]);
+  }, [done, finished, userId]);
 
   const [savedVote, setSavedVote] = useState<boolean | null>(null);
   useEffect(() => {
@@ -81,16 +96,18 @@ export function SetupChecklistView({ userId, done, steps }: { userId: string; do
     void saveSetup(true);
   }, [done, snoozed, step?.id, pathname, saveSetup]);
 
-  if (done || closed || !step) return null;
+  if (closed) return null;
   if (finished)
     return (
-      <Shell>
+      <Shell celebrate>
         <span className="flex-1">
-          🎉 <strong>You&apos;re all set!</strong> Check back when new Pokémon come out, and keep your friend list matching the game.
+          <span aria-hidden="true" className="mr-1 inline-block animate-bounce text-xl">🎉</span>
+          <strong className="text-base">You&apos;re all set!</strong> Check back when new Pokémon come out, and keep your friend list matching the game.
         </span>
         <CloseButton onClick={() => setClosed(true)} />
       </Shell>
     );
+  if (done || !step) return null;
   if (snoozed) return null;
 
   const index = visibleSteps.indexOf(step);
@@ -208,10 +225,11 @@ export function SetupChecklistView({ userId, done, steps }: { userId: string; do
   );
 }
 
-function Shell({ children }: { children: React.ReactNode }) {
+function Shell({ children, celebrate = false }: { children: React.ReactNode; celebrate?: boolean }) {
   return (
     <div className="mx-auto max-w-5xl px-4 pt-3">
-      <div className="flex items-start gap-3 rounded-2xl border border-sun/60 bg-sun/15 px-4 py-3 text-sm">{children}</div>
+      <div role={celebrate ? "status" : undefined} data-setup-celebration={celebrate || undefined}
+        className={`flex items-start gap-3 rounded-2xl border px-4 py-3 text-sm ${celebrate ? "border-want bg-want/15" : "border-sun/60 bg-sun/15"}`}>{children}</div>
     </div>
   );
 }

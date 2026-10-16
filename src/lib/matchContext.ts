@@ -1,4 +1,13 @@
+/** player_extras' codes for which votes a score uses (shown as matchSourceLabel). */
 export type MatchSource = "Everyone estimate" | "Friends + Everyone" | "Friends";
+
+const SOURCE_LABEL: Record<MatchSource, string> = {
+  "Everyone estimate": "global votes",
+  "Friends + Everyone": "friends' and global votes",
+  Friends: "friends' votes",
+};
+/** Tooltip suffix; scores look the same whatever their source. */
+export const matchSourceLabel = (source?: MatchSource) => (source && SOURCE_LABEL[source] ? ` (from ${SOURCE_LABEL[source]})` : "");
 
 /** Each direction uses a different player's friend list and votes. */
 export interface MatchContext {

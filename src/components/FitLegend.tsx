@@ -43,8 +43,7 @@ export function FitLegend({ friendsVoted = true, youVoted = true, autoOpen = fal
           <b className="text-slate-700 dark:text-slate-200">For them</b>: Their wants compared with what your friends want.
         </p>
         <p>
-          <b>No friends voting yet?</b> Everyone&apos;s votes act as five stand-in friends. Each real friend who votes has the same weight as one stand-in,
-          so Everyone has less influence as more friends vote. Labels beside each score show which data it uses.
+          <b>Few friends voting yet?</b> Scores lean on global votes until more friends vote.
         </p>
         <p><b>For you needs your votes. For them needs theirs.</b> A dash means there isn&apos;t enough voting data to calculate that score; it doesn&apos;t mean a bad match.</p>
         {!youVoted && (

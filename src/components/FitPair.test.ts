@@ -4,14 +4,15 @@ import { describe, expect, it } from "vitest";
 import { FitPair } from "./FitPair";
 
 describe("match score provenance", () => {
-  it("labels both directions independently in card and grid views", () => {
+  it("names each direction's source in its tooltip only, in card and grid views", () => {
     for (const compact of [false, true]) {
       const markup = renderToStaticMarkup(createElement(FitPair, {
         you: 0, they: 80, compact,
         context: { you_source: "Everyone estimate", they_source: "Friends + Everyone" },
       }));
-      expect(markup).toContain("Everyone estimate");
-      expect(markup).toContain("Friends + Everyone");
+      expect(markup).toContain("(from global votes)");
+      expect(markup).toContain("(from friends&#x27;");
+      expect(markup).not.toContain(">Everyone estimate<");
       expect(markup).toContain("0%");
     }
   });
@@ -22,6 +23,6 @@ describe("match score provenance", () => {
     }));
     expect(markup).toContain("For you: vote on candy to calculate this score");
     expect(markup).toContain("For them: not enough voting data");
-    expect(markup).not.toContain("Everyone estimate");
+    expect(markup).not.toContain("global votes");
   });
 });
