@@ -5,6 +5,5 @@ export function signInReason(destination: string): string {
   if (path === "/matches") return "Sign in to find new Pokémon Sleep friends.";
   if (path === "/friends") return "Sign in to find and add your Pokémon Sleep friends.";
   if (path === "/vote" || path === "/profile") return "Sign in to save your candy wishlist and set up your profile.";
-  if (path === "/guides") return "Sign in to browse the candy guides.";
   return "Sign in to use your personal Pleep Matchmaker features.";
 }

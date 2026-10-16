@@ -6,11 +6,11 @@ vi.mock("@/lib/supabase/env", () => ({ supabaseEnv: () => ({ url: "https://dev.e
 import { middleware } from "./middleware";
 beforeEach(() => { auth.id = null; });
 describe("public and locked routes", () => {
-  it.each(["/", "/tiers", "/tiers?island=cyan-beach"])("allows signed-out visitors at %s", async (path) => {
+  it.each(["/", "/tiers", "/tiers?island=cyan-beach", "/guides", "/guides?topic=candy"])("allows signed-out visitors at %s", async (path) => {
     const response = await middleware(new NextRequest(`https://example.com${path}`));
     expect(response.headers.get("location")).toBeNull();expect(response.headers.get("x-middleware-rewrite")).toBeNull();
   });
-  it.each(["/friends?q=Sleepy%20Head", "/matches?sort=match", "/profile", "/vote", "/guides"])("retains the original shared address while presenting sign-in at %s", async (path) => {
+  it.each(["/friends?q=Sleepy%20Head", "/matches?sort=match", "/profile", "/vote"])("retains the original shared address while presenting sign-in at %s", async (path) => {
     const response = await middleware(new NextRequest(`https://example.com${path}`));
     const rewrite = new URL(response.headers.get("x-middleware-rewrite")!);
     expect(rewrite.pathname).toBe("/auth/required");expect(rewrite.searchParams.get("next")).toBe(path);

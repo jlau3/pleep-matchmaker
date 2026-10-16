@@ -34,7 +34,7 @@ export function NavLinks({ signedIn = true }: { signedIn?: boolean }) {
     <>
       {LINKS.map((link) => {
         const active = link.match.some((m) => pathname.startsWith(m)) || (pathname === "/" && link.href === "/tiers");
-        const locked = !signedIn && link.href !== "/tiers";
+        const locked = !signedIn && !["/tiers", "/guides"].includes(link.href);
         return (
           <Link
             key={link.href}
