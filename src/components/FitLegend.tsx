@@ -37,15 +37,25 @@ export function FitLegend({ friendsVoted = true, youVoted = true, autoOpen = fal
         </div>
       <div className="space-y-3 text-sm">
         <p>
-          You send the candy your friends want most. A match % is how much of that candy the other player Wants.
-          Their Don&apos;t Wants lower it.
+          <b className="text-slate-700 dark:text-slate-200">For them</b>: how well the candy you&apos;d send (what your friends want) fits their votes.{" "}
+          <b className="text-slate-700 dark:text-slate-200">For you</b>: the same, flipped: what their friends want against your votes.
         </p>
-        <p>
-          <b className="text-slate-700 dark:text-slate-200">For you</b>: what they&apos;d send you (picked by their friends) against your votes.
-        </p>
-        <p>
-          <b className="text-slate-700 dark:text-slate-200">For them</b>: what you&apos;d send them (picked by your friends) against their votes.
-        </p>
+        <div className="rounded-2xl bg-sun/25 p-4">
+          <p className="font-bold">How For them is worked out</p>
+          <ol className="mt-1 list-decimal space-y-1 pl-5">
+            <li>Your friends&apos; votes give every candy a demand score. Their most-wanted candy is 100; the rest score relative to it.</li>
+            <li>The other player earns the score of each candy they Want. Neutral counts for nothing.</li>
+            <li>That&apos;s divided by the most they could earn: 100 per Want. Each Don&apos;t Want adds its score to that total, so it pulls the % down.</li>
+          </ol>
+          <p className="mt-2">
+            <b>Example:</b> your friends score Pikachu 100, Eevee 60, Bulbasaur 20. The other player Wants Pikachu and Bulbasaur
+            and Don&apos;t Wants Eevee. Earned: 100 + 20 = 120. Most possible: 2 Wants × 100, plus Eevee&apos;s 60 = 260.
+            120 ÷ 260 = <b>46%</b>.
+          </p>
+          <p className="mt-2 text-xs text-slate-600 dark:text-slate-300">
+            So it&apos;s about the quality of their Wants, not how many: one Want on your friends&apos; top candy is 100%.
+          </p>
+        </div>
         <p>
           <b>Few friends voting yet?</b> Scores lean on global votes until more friends vote.
         </p>
