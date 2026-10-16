@@ -8,7 +8,7 @@ import { AVATAR_NAMES, AVATAR_VARIANTS, AVATARS, avatarLabel, avatarSrc, DEFAULT
  * In-game icon picker for the profile form. Tapping your picture opens a
  * popup: the Pokémon grid scrolls on its own, and the style pills and Save
  * stay pinned below it. Saving submits the whole profile form with
- * game_avatar ("pikachu:happy"), or empty for the Discord picture.
+ * game_avatar ("pikachu:happy").
  */
 export function AvatarPicker({ initial, discordAvatar, requiredForSetup = false }: { initial: string | null; discordAvatar: string | null; requiredForSetup?: boolean }) {
   const start = parseAvatar(initial);
@@ -156,10 +156,7 @@ export function AvatarPicker({ initial, discordAvatar, requiredForSetup = false 
                 );
               })}
             </div>
-            <div className="flex items-center justify-between gap-2">
-              <button type="button" onClick={() => save("")} className="text-xs text-slate-500 underline">
-                Use {discordAvatar ? "Discord picture" : "no icon"}
-              </button>
+            <div className="flex justify-end">
               <button
                 type="button"
                 disabled={!name}
