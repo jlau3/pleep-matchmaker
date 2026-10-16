@@ -1,5 +1,11 @@
 import { type CandyLine, LINES, lineSpriteUrl } from "./lines";
 
+export type TierStyle = "standard" | "fixed";
+export const TIER_STYLE_LABEL: Record<TierStyle, string> = { standard: "Standard", fixed: "Fixed Scores" };
+export const parseTierStyle = (value: unknown): TierStyle => value === "fixed" ? "fixed" : "standard";
+/** Cutoffs use the displayed 0–100 rating. All-Neutral (67) belongs in B. */
+export const FIXED_SCORE_CUTOFFS = { S: 90, A: 80, B: 67 } as const;
+
 export type TierId = "top" | "S" | "A" | "B" | "C" | "avoid";
 
 export interface Tier {
@@ -56,6 +62,17 @@ export const TIERS: Tier[] = [
   { id: "C", label: "C", hint: "The rest" },
   { id: "avoid", label: "Avoid", hint: "Don't Want votes outweigh support from Want and Neutral" },
 ];
+
+/** Labels follow the selected presentation; the shared default stays unchanged. */
+export function tierDefinitions(style: TierStyle): Tier[] {
+  if (style === "standard") return TIERS;
+  return TIERS.map((tier) => ({ ...tier, hint: ({
+    S: `${FIXED_SCORE_CUTOFFS.S}–100/100`,
+    A: `${FIXED_SCORE_CUTOFFS.A}–${FIXED_SCORE_CUTOFFS.S - 1}/100`,
+    B: `${FIXED_SCORE_CUTOFFS.B}–${FIXED_SCORE_CUTOFFS.A - 1}/100 · All-Neutral scores ${FIXED_SCORE_CUTOFFS.B}`,
+    C: `Below ${FIXED_SCORE_CUTOFFS.B}/100, with a nonnegative vote total`,
+  } as Record<string, string>)[tier.id] ?? tier.hint }));
+}
 
 export interface LineVotes {
   wants: number;
@@ -126,6 +143,7 @@ export function buildTiers(
   votes: Map<string, LineVotes>,
   voters: number,
   lines: CandyLine[] = LINES,
+  style: TierStyle = "standard",
 ): Map<TierId, RankedLine[]> {
   const all: RankedLine[] = lines.map((line) => {
     const v = votes.get(line.id) ?? { wants: 0, dontWants: 0 };
@@ -152,6 +170,18 @@ export function buildTiers(
     return out;
   }
   for (const r of all) if (r.score < 0) out.get("avoid")!.push(r);
+
+  if (style === "fixed") {
+    for (const row of all.filter((r) => r.score >= 0).sort(byRank)) {
+      const rating = row.rating!;
+      const tier = rating >= FIXED_SCORE_CUTOFFS.S ? "S"
+        : rating >= FIXED_SCORE_CUTOFFS.A ? "A"
+        : rating >= FIXED_SCORE_CUTOFFS.B ? "B" : "C";
+      out.get(tier)!.push(row);
+    }
+    out.get("avoid")!.sort(byRank);
+    return out;
+  }
 
   // Lines at 0 or above fill S/A/B/C by rank. A run of lines tied on score all go to
   // the tier of the run's middle position, so with few voters (lots of ties)
@@ -184,11 +214,11 @@ export function buildTiers(
 export const rankedSpriteUrl = (ranked: Pick<RankedLine, "line" | "sprite">) => ranked.sprite ?? lineSpriteUrl(ranked.line);
 
 /** Public lines below the database threshold stay out of every ranking and star row. */
-export function buildPublicTiers(votes: Map<string, LineVotes>, voters: number, lines: CandyLine[] = LINES) {
+export function buildPublicTiers(votes: Map<string, LineVotes>, voters: number, lines: CandyLine[] = LINES, style: TierStyle = "standard") {
   const eligible = lines.filter((line) => (votes.get(line.id)?.seen ?? 0) >= 10);
   const ids = new Set(eligible.map((line) => line.id));
   return {
-    tiers: buildTiers(votes, voters, eligible),
+    tiers: buildTiers(votes, voters, eligible, style),
     unranked: lines.filter((line) => !ids.has(line.id)).map((line): Pick<RankedLine, "line" | "sprite"> => ({ line })),
   };
 }

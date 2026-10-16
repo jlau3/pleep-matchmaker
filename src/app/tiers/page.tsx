@@ -4,7 +4,7 @@ import { LINES, isSleepType } from "@/lib/lines";
 import { countOwnVotes } from "@/lib/data";
 import { getAuth } from "@/lib/supabase/server";
 import { loadPublicCommunityStats } from "@/lib/communityStats";
-import { countVotes } from "@/lib/tiers";
+import { countVotes, parseTierStyle } from "@/lib/tiers";
 import type { FriendRow } from "@/lib/types";
 
 /**
@@ -13,7 +13,7 @@ import type { FriendRow } from "@/lib/types";
  * islands or one island, any sleep type or one) in the browser. Switching views never goes back to the
  * server; the query string only picks the view shown first.
  */
-export default async function TiersPage({ searchParams }: { searchParams: Promise<{ pool?: string; island?: string; sleep?: string }> }) {
+export default async function TiersPage({ searchParams }: { searchParams: Promise<{ pool?: string; island?: string; sleep?: string; style?: string }> }) {
   const { supabase, userId } = await getAuth();
   const params = await searchParams;
 
@@ -41,6 +41,7 @@ export default async function TiersPage({ searchParams }: { searchParams: Promis
       friends={friends}
       everyone={everyone}
       initialPool={!userId || params.pool !== "friends" ? "everyone" : "friends"}
+      initialStyle={parseTierStyle(params.style)}
       initialIsland={params.island ?? null}
       initialSleep={isSleepType(params.sleep) ? params.sleep : null}
       loadedAt={new Date().toISOString()}

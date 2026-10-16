@@ -4,7 +4,7 @@ import { safeNextPath } from "@/lib/nextPath";
 import { getAuth } from "@/lib/supabase/server";
 import { signInLanding } from "@/lib/signInLanding";
 
-export default async function Home({ searchParams }: { searchParams: Promise<{ error?: string; error_description?: string; code?: string; deleted?: string; next?: string; pool?: string; island?: string; sleep?: string }> }) {
+export default async function Home({ searchParams }: { searchParams: Promise<{ error?: string; error_description?: string; code?: string; deleted?: string; next?: string; pool?: string; island?: string; sleep?: string; style?: string }> }) {
   const params = await searchParams;
   // Supabase can fall back to the Site URL if the callback isn't allow-listed.
   if (params.code) redirect(`/auth/callback?code=${encodeURIComponent(params.code)}`);

@@ -1,4 +1,4 @@
-import { type RankedLine, rankedSpriteUrl, type TierId, TIER_STYLE, TIERS, TOP_ROW_SIZE } from "@/lib/tiers";
+import { type RankedLine, rankedSpriteUrl, type TierId, TIER_STYLE, tierDefinitions, type TierStyle, TOP_ROW_SIZE } from "@/lib/tiers";
 
 
 const panel = "card p-3";
@@ -47,10 +47,10 @@ function VoteCard({ ranked }: { ranked: RankedLine }) {
  * `pool` words the Top 3 blurb: "your friends" on My Friends, "players" on
  * Everyone. The Top 3 row starts folded so the ranking leads.
  */
-export function TierBoard({ tiers, pool = "friends" }: { tiers: Map<TierId, RankedLine[]>; pool?: "friends" | "everyone" }) {
+export function TierBoard({ tiers, pool = "friends", style = "standard" }: { tiers: Map<TierId, RankedLine[]>; pool?: "friends" | "everyone"; style?: TierStyle }) {
   return (
     <div className="space-y-3">
-      {TIERS.map((tier) => {
+      {tierDefinitions(style).map((tier) => {
         const ranked = tiers.get(tier.id)!;
         if (ranked.length === 0) return null;
         const header = (

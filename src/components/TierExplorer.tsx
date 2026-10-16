@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { isSleepType, ISLANDS, LINES, SLEEP_TYPE_LABEL, SLEEP_TYPES, lineSpriteUrl, sleepTypeMember, spriteUrl, type SleepType } from "@/lib/lines";
-import { buildTiers, buildPublicTiers, type LineVotes } from "@/lib/tiers";
+import { buildTiers, buildPublicTiers, TIER_STYLE_LABEL, type TierStyle, type LineVotes } from "@/lib/tiers";
 import { InviteButton } from "./InviteButton";
 import { InviteReminder } from "./InviteReminder";
 import { RefreshStamp } from "./RefreshStamp";
@@ -65,6 +65,7 @@ export function TierExplorer({
   initialPool,
   initialIsland,
   initialSleep,
+  initialStyle = "standard",
   loadedAt,
   notice,
   signedIn = true,
@@ -77,6 +78,7 @@ export function TierExplorer({
   initialIsland: string | null;
   /** Sleep type to open on (?sleep=), or null for all. */
   initialSleep: SleepType | null;
+  initialStyle?: TierStyle;
   /** When the server counted these votes (ISO), for "Updated 5m ago". */
   loadedAt: string;
   /** Shown under the heading (e.g. "3 new candies to vote on"). */
@@ -91,6 +93,7 @@ export function TierExplorer({
     MAPPED_ISLANDS.some((island) => island.id === initialIsland) ? initialIsland : null,
   );
 
+  const [style, setStyle] = useState<TierStyle>(initialStyle);
   const [sleepType, setSleepType] = useState<SleepType | null>(initialSleep);
 
   // Plain /tiers (from the nav): reopen the last view. A link with its own query wins, and
@@ -121,22 +124,26 @@ export function TierExplorer({
     // Once, on arrival.
   }, []);
 
-  function show(next: { pool?: Pool; island?: string | null; sleep?: SleepType | null }) {
+  function show(next: { pool?: Pool; island?: string | null; sleep?: SleepType | null; style?: TierStyle }) {
     if (!signedIn && next.pool === "friends") {
       const query = new URLSearchParams({ pool: "friends" });
       if (islandId) query.set("island", islandId);
       if (sleepType) query.set("sleep", sleepType);
+      if (style === "fixed") query.set("style", style);
       openSignIn(`/tiers?${query}`);
       return;
     }
     const p = next.pool ?? pool;
     const id = next.island !== undefined ? next.island : islandId;
     const sleep = next.sleep !== undefined ? next.sleep : sleepType;
+    const rankingStyle = next.style ?? style;
+    setStyle(rankingStyle);
     setPool(p);
     setIslandId(id);
     setSleepType(sleep);
     const qs = new URLSearchParams();
     qs.set("pool", p);
+    if (rankingStyle === "fixed") qs.set("style", rankingStyle);
     if (id) qs.set("island", id);
     if (sleep) qs.set("sleep", sleep);
     const query = qs.toString();
@@ -169,12 +176,12 @@ export function TierExplorer({
     const lines = LINES.filter((line) => shown.has(line.id));
     const votes = new Map(Object.entries(data.votes));
     const { tiers: built, unranked } = data.thresholded
-      ? buildPublicTiers(votes, data.voters, lines)
-      : { tiers: buildTiers(votes, data.voters, lines), unranked: [] };
+      ? buildPublicTiers(votes, data.voters, lines, style)
+      : { tiers: buildTiers(votes, data.voters, lines, style), unranked: [] };
     for (const rows of built.values()) for (const r of rows) r.sprite = shown.get(r.line.id);
     for (const row of unranked) row.sprite = shown.get(row.line.id);
     return { tiers: built, unranked };
-  }, [data, selected, sleepType]);
+  }, [data, selected, sleepType, style]);
   const pill = (active: boolean) =>
     `rounded-full border px-3 py-1 text-sm ${active ? "pill-active border-transparent" : "border-slate-300 dark:border-slate-700"}`;
 
@@ -194,6 +201,26 @@ export function TierExplorer({
 
       <TierGuide userId={signedIn ? viewerId : null} />
 
+      <details className="text-sm">
+        <summary className="w-fit cursor-pointer font-semibold">Ranking Style: {TIER_STYLE_LABEL[style]}{style === "standard" && " (Recommended)"}</summary>
+        <fieldset className="mt-3 space-y-3 rounded-xl border border-slate-300 p-3 dark:border-slate-700">
+          <legend className="px-1 font-semibold">Choose a ranking style</legend>
+          <label className="flex cursor-pointer items-start gap-2">
+            <input type="radio" name="tier-style" value="standard" checked={style === "standard"}
+              onChange={() => show({ style: "standard" })} className="mt-1 accent-want" />
+            <span><b>Standard (Recommended)</b><span className="block text-xs text-slate-500">Our shared default. Negative totals go to Avoid; the rest rank by percentile within your filters. Use this when comparing lists with other players.</span></span>
+          </label>
+          <label className="flex cursor-pointer items-start gap-2">
+            <input type="radio" name="tier-style" value="fixed" checked={style === "fixed"}
+              onChange={() => show({ style: "fixed" })} className="mt-1 accent-want" />
+            <span><b>Fixed Scores</b><span className="block text-xs text-slate-500">Uses fixed 0–100 score cutoffs. A candy keeps its tier when filters change. Some tiers may be empty.</span></span>
+          </label>
+        </fieldset>
+      </details>
+      {style === "fixed" && <p className="text-sm text-slate-600 dark:text-slate-300">
+        You&apos;re viewing Fixed Scores. For the shared default, <button type="button" onClick={() => show({ style: "standard" })} className="font-semibold underline">use Standard</button>.
+      </p>}
+
       {notice}
 
       {pool === "friends" && data.voters > 0 && <InviteReminder friendCount={data.friendCount} />}
@@ -207,7 +234,7 @@ export function TierExplorer({
         {(data.voters > 0 || data.thresholded) && (
           <div className="ml-auto">
             <TierExport
-              title={[poolLabel, selected ? selected.name : "All Islands", sleepType && SLEEP_TYPE_LABEL[sleepType]]
+              title={[poolLabel, TIER_STYLE_LABEL[style], selected ? selected.name : "All Islands", sleepType && SLEEP_TYPE_LABEL[sleepType]]
                 .filter(Boolean)
                 .join(" · ")}
               voters={data.voters || null}
@@ -297,7 +324,7 @@ export function TierExplorer({
         </p>
       ) : (
         <>
-          {Array.from(tiers.values()).some((rows) => rows.length > 0) && <TierBoard tiers={tiers} pool={pool} />}
+          {Array.from(tiers.values()).some((rows) => rows.length > 0) && <TierBoard tiers={tiers} pool={pool} style={style} />}
           {unranked.length > 0 && <section className="card p-4" aria-label="Not enough votes yet">
             <h2 className="font-bold">Not enough votes yet</h2>
             <p className="mt-1 text-sm text-slate-500">These candies need saved choices from at least 10 active players before their tiers and totals are public.</p>
