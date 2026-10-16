@@ -43,6 +43,11 @@ export async function middleware(request: NextRequest) {
   return response;
 }
 
+// Pages only: static files (sprites, island maps, profile icons, any image or
+// .ico/.txt/.xml) skip the session check, which verifies the sign-in token and
+// would otherwise run once per icon on a page full of players.
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|sprites/|islands/|og.png|logo.png|api/keepalive|api/kofi|favicon.ico).*)"],
+  matcher: [
+    "/((?!_next/static|_next/image|sprites/|islands/|avatars/|api/keepalive|api/kofi|.*\\.(?:png|webp|jpg|jpeg|gif|svg|ico|txt|xml)$).*)",
+  ],
 };
