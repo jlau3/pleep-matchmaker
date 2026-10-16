@@ -51,7 +51,7 @@ export function FitLegend({ friendsVoted = true, youVoted = true, autoOpen = fal
           <p><Link href="/vote" className="font-semibold underline">Choose the candy you want</Link> to help calculate &ldquo;For you&rdquo;.</p>
         )}
         {!friendsVoted && (
-          <p>&ldquo;For them&rdquo; uses an Everyone estimate until your friends vote. <Link href="/friends" className="font-semibold underline">Add your Pokémon Sleep friends</Link> and ask them to vote.</p>
+          <p>Want matches based on your friends? <Link href="/friends" className="font-semibold underline">Add your Pokémon Sleep friends</Link> and ask them to vote.</p>
         )}
       </div>
       <button type="button" onClick={close} className="btn-primary mt-6 w-full py-2">Got it</button>
