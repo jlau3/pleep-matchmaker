@@ -53,13 +53,14 @@ export function TierBoard({ tiers, pool = "friends", style = "standard" }: { tie
       {tierDefinitions(style).map((tier) => {
         const ranked = tiers.get(tier.id)!;
         if (ranked.length === 0) return null;
+        const categoryColor = style === "consensus" ? CONSENSUS_COLORS[tier.id] : undefined;
         const header = (
           <>
             <span
-              style={style === "consensus" ? { backgroundColor: CONSENSUS_COLORS[tier.id]?.bg, color: CONSENSUS_COLORS[tier.id]?.fg } : undefined}
+              style={categoryColor ? { backgroundColor: categoryColor.bg, color: categoryColor.fg, boxShadow: `0 3px 0 ${categoryColor.shadow}` } : undefined}
               className={`inline-flex ${style === "consensus" && tier.id !== "top" ? "min-h-12 w-24 whitespace-pre-line py-2" : "h-9 w-14"} shrink-0 items-center justify-center rounded-lg text-center font-black leading-none ${
                 tier.label.length > 2 ? "text-xs" : "text-lg"
-              } ${TIER_STYLE[tier.id]}`}
+              } ${categoryColor ? "" : TIER_STYLE[tier.id]}`}
             >
               {tier.label}
             </span>

@@ -13,10 +13,10 @@ export const TIER_STYLE_DESCRIPTION: Record<TierStyle, string> = {
 };
 export const parseTierStyle = (value: unknown): TierStyle =>
   TIER_STYLES.includes(value as TierStyle) ? value as TierStyle : "standard";
-export const CONSENSUS_COLORS: Record<string, { bg: string; fg: string }> = {
-  S: { bg: "#3fb86b", fg: "#ffffff" }, A: { bg: "#ffd24d", fg: "#5b3e00" },
-  B: { bg: "#8a97ab", fg: "#ffffff" }, C: { bg: "#ffb36b", fg: "#5b3e00" },
-  avoid: { bg: "#ec6b6b", fg: "#ffffff" },
+export const CONSENSUS_COLORS: Record<string, { bg: string; fg: string; shadow: string }> = {
+  S: { bg: "#3fb86b", fg: "#ffffff", shadow: "#2b874c" }, A: { bg: "#ffd24d", fg: "#5b3e00", shadow: "#c99c21" },
+  B: { bg: "#8a97ab", fg: "#ffffff", shadow: "#626f83" }, C: { bg: "#ffb36b", fg: "#5b3e00", shadow: "#d08743" },
+  avoid: { bg: "#ec6b6b", fg: "#ffffff", shadow: "#ba4848" },
 };
 
 /** Cutoffs use the displayed 0–100 rating. All-Neutral (67) belongs in B. */
