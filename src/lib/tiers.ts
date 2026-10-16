@@ -54,7 +54,7 @@ export const TIERS: Tier[] = [
   { id: "A", label: "A", hint: `Next ${pct(TIER_SHARES.A)}%` },
   { id: "B", label: "B", hint: `Next ${pct(TIER_SHARES.B)}%` },
   { id: "C", label: "C", hint: "The rest" },
-  { id: "avoid", label: "Avoid", hint: "Don't Wants outweigh the Wants and don't-minds" },
+  { id: "avoid", label: "Avoid", hint: "Don't Want votes outweigh support from Want and Neutral" },
 ];
 
 export interface LineVotes {
