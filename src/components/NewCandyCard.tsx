@@ -1,7 +1,7 @@
 "use client";
 
 import { type CandyLine, type Choice, ISLANDS } from "@/lib/lines";
-import { seenBy } from "@/lib/crowd";
+import { seenBy, type CrowdHint } from "@/lib/crowd";
 import type { LineVotes } from "@/lib/tiers";
 import { LineCard } from "./LineCard";
 
@@ -14,6 +14,7 @@ export function NewCandyCard({
   line,
   votes,
   voters,
+  hint,
   choice,
   starred,
   onChoose,
@@ -23,6 +24,7 @@ export function NewCandyCard({
   line: CandyLine;
   votes?: LineVotes;
   voters: number;
+  hint?: CrowdHint;
   choice?: Choice;
   starred: boolean;
   onChoose: (choice: Choice) => void;
@@ -32,7 +34,6 @@ export function NewCandyCard({
   const islands = ISLANDS.filter((island) => island.lines.includes(line.id)).map((island) => island.name);
   const wants = votes?.wants ?? 0;
   const dontWants = votes?.dontWants ?? 0;
-  const tops = votes?.tops ?? 0;
   // Out of the players who've opened My Votes since it arrived (it grows as they come back), not everyone.
   const seen = seenBy(votes, voters);
   const released = new Date(`${line.addedAt}T00:00:00Z`).toLocaleDateString(undefined, { month: "short", day: "numeric", timeZone: "UTC" });
@@ -48,7 +49,7 @@ export function NewCandyCard({
               <>
                 So far: <span className="font-semibold text-want">{wants} want</span>,{" "}
                 <span className="font-semibold text-dont">{dontWants} don&apos;t</span>
-                {tops > 0 && <span className="font-semibold text-sun-deep">, ★ {tops}</span>} out of {seen} who&apos;ve
+                {" "}out of {seen} who&apos;ve
                 seen it.
               </>
             ) : (
@@ -65,7 +66,7 @@ export function NewCandyCard({
           ×
         </button>
       </div>
-      <LineCard line={line} choice={choice} onChoose={onChoose} starred={starred} onStar={onStar} />
+      <LineCard line={line} choice={choice} onChoose={onChoose} starred={starred} onStar={onStar} hint={hint} />
     </section>
   );
 }

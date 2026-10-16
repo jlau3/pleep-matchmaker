@@ -485,7 +485,8 @@ export async function finishProfileSetup(next?: string | null): Promise<{ error?
 /** Records that the player opened the detailed voting guide (VoteGuide). */
 export async function markVoteGuideSeen(): Promise<void> {
   const { supabase, user } = await requireUser();
-  await supabase.from("profiles").update({ vote_guide_seen: true }).eq("id", user.id);
+  const { error } = await supabase.from("profiles").update({ vote_guide_seen: true }).eq("id", user.id);
+  if (!error) revalidatePath("/vote");
 }
 
 /** Your Top 3's tiers on these players' Tier Lists, for Find New's Top 3 sort (FindNewBoard). */

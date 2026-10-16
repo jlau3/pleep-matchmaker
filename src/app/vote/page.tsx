@@ -13,8 +13,8 @@ export default async function VotePage() {
     loadOwnVotes(supabase, user.id),
     supabase.from("profiles").select("vote_guide_seen").eq("id", user.id).maybeSingle(),
   ]);
-  // Offer inline guidance instead of interrupting the player with another popup.
-  const showGuideIntro = !guide.error && guide.data?.vote_guide_seen === false;
+  // Open the existing voting guide once; returning players can reopen it manually.
+  const autoOpenGuide = !guide.error && guide.data?.vote_guide_seen === false;
   const { choices, newIds } = await seedUndecided(supabase, user.id, own);
 
   // Everyone's totals (a shared 5-minute cache): the new candy cards and "Show what others pick".
@@ -31,8 +31,8 @@ export default async function VotePage() {
       <SubTabs tabs={PROFILE_TABS} active="/vote" />
       <VoteBoard
         userId={user.id}
-        initial={choices} initialTops={tops} firstVisit={newIds.length === LINES.length} newCandy={newCandy}
-        crowd={crowd} showGuideIntro={showGuideIntro} />
+        initial={choices} initialTops={tops} newCandy={newCandy}
+        crowd={crowd} autoOpenGuide={autoOpenGuide} />
     </div>
   );
 }

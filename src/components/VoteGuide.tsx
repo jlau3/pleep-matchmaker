@@ -1,17 +1,30 @@
 "use client";
 
-import { useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { markVoteGuideSeen } from "@/app/actions";
 import { MAX_TOP } from "@/lib/lines";
 
-/** Detailed voting help, opened only when the player asks for it. */
-export function VoteGuide() {
+/** Voting help opens for new players and can always be reopened from its button. */
+export function VoteGuide({ autoOpen = false }: { autoOpen?: boolean }) {
   const dialog = useRef<HTMLDialogElement>(null);
+  const opened = useRef(false);
 
-  const open = () => {
+  const open = useCallback(() => {
+    opened.current = true;
     dialog.current?.showModal();
     void markVoteGuideSeen().catch(() => {});
-  };
+  }, []);
+  useEffect(() => {
+    if (!autoOpen || opened.current) return;
+    // Let a welcome or another open dialog finish before showing voting help.
+    const showWhenReady = () => {
+      if (!opened.current && !document.querySelector("dialog[open]")) open();
+    };
+    showWhenReady();
+    const observer = new MutationObserver(showWhenReady);
+    observer.observe(document.body, { subtree: true, attributes: true, attributeFilter: ["open"], childList: true });
+    return () => observer.disconnect();
+  }, [autoOpen, open]);
   const close = () => dialog.current?.close();
   return (
     <>

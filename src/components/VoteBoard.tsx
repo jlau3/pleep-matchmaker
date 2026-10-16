@@ -47,21 +47,19 @@ export function VoteBoard({
   userId,
   initial,
   initialTops,
-  firstVisit,
   newCandy,
   crowd,
-  showGuideIntro = false,
+  autoOpenGuide = false,
 }: {
   userId: string;
   initial: Record<string, Choice>;
   initialTops: string[];
-  firstVisit: boolean;
   /** Recently released lines and what players have voted on them so far. */
   newCandy?: { ids: string[]; votes: Record<string, LineVotes>; voters: number };
   /** Everyone's vote totals for "Show what others pick"; absent while too few have voted. */
   crowd?: { votes: Record<string, LineVotes>; voters: number };
-  /** Show a short inline introduction until the player has read the voting guide. */
-  showGuideIntro?: boolean;
+  /** Open How to vote once for players who haven't seen it. */
+  autoOpenGuide?: boolean;
 }) {
   const [choices, setChoices] = useState(initial);
   const savedChoices = useRef({ ...initial });
@@ -77,8 +75,8 @@ export function VoteBoard({
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<Filter>("all");
 
-  // "Show what others pick": off by default so players vote their own taste first; remembered per browser.
-  const [showCrowd, setShowCrowd] = useState(false);
+  // Community hints start on; remember an explicit choice to turn them off.
+  const [showCrowd, setShowCrowd] = useState(true);
   const hints = useMemo(() => {
     if (!crowd || !showCrowd) return undefined;
     const out: Record<string, CrowdHint> = {};
@@ -88,7 +86,7 @@ export function VoteBoard({
 
   useEffect(() => {
     try {
-      setShowCrowd(localStorage.getItem(CROWD_KEY) === "1");
+      setShowCrowd(localStorage.getItem(CROWD_KEY) !== "0");
       const saved = localStorage.getItem(VIEW_KEY);
       if (saved === "list" || saved === "grid") setView(saved);
     } catch {
@@ -279,7 +277,7 @@ export function VoteBoard({
             </span>
           </span>
           <span className="flex shrink-0 items-center gap-3">
-            <VoteGuide />
+            <VoteGuide autoOpen={autoOpenGuide} />
             <ExportVotes choices={choices} tops={tops} />
           </span>
         </div>
@@ -293,23 +291,13 @@ export function VoteBoard({
         )}
       </div>
 
-      {(firstVisit || showGuideIntro) && (
-        <section className="card mb-4 space-y-2 p-4 text-sm" aria-labelledby="vote-intro-title">
-          <h2 id="vote-intro-title" className="font-bold">Start with the candy you care about</h2>
-          <p className="text-slate-600 dark:text-slate-300">
-            Pick <b className="text-want">Want</b> for Pokémon you&apos;re building and <b className="text-dont">Don&apos;t Want</b> for
-            candy you don&apos;t need. Leave the rest Neutral. You don&apos;t have to decide on every Pokémon.
-          </p>
-          <p className="text-slate-600 dark:text-slate-300">Every change saves automatically. Your votes help your friends choose what candy to send you.</p>
-        </section>
-      )}
-
       {newCards.map((id) => (
         <NewCandyCard
           key={id}
           line={LINES_BY_ID.get(id)!}
           votes={newCandy!.votes[id]}
           voters={newCandy!.voters}
+          hint={showCrowd ? crowdHint(newCandy!.votes[id], newCandy!.voters) : undefined}
           choice={choices[id]}
           starred={tops.has(id)}
           onChoose={(choice) => choose(id, choice)}
