@@ -65,8 +65,8 @@ export const GUIDE_SECTIONS: GuideSection[] = [
         title: "Fill your friend list early",
         body: (
           <>
-            You can get candy from each friend once a day, so a full list of 50 means up to 50 candy a day. Sharing
-            reports back and forth also raises your friendship levels, which come with rewards.
+            You can get candy from each friend once a day. A full list means up to 50 friends' reports, and a report
+            can give two candies as friendship grows. Sharing reports also raises friendship levels, which come with rewards.
           </>
         ),
       },
