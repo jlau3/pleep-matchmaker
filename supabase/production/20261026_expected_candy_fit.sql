@@ -1,6 +1,6 @@
--- Expected candy fit production handoff: squash of 20261026000000–20261026000500.
+-- Expected candy fit production handoff: squash of 0000–0500 plus the legacy-RPC closure.
 -- Requires the schema through 20261025000100. Run once, after dev approval.
--- Do not also apply the six individual files. Dev keeps its existing history.
+-- Do not also apply the individual source files. Dev keeps its existing history.
 begin;
 do $guard$ begin
   if to_regprocedure('public.trial_pair_scores(uuid,uuid[])') is not null then
@@ -1441,6 +1441,15 @@ notify pgrst, 'reload schema';
 alter function public.trial_pair_scores(uuid,uuid[]) set jit = off;
 alter function public.browse_all() set jit = off;
 alter function public.get_friends(boolean) set jit = off;
+
+
+-- Source: 20261026000600_close_legacy_match_rpc.sql
+-- get_matches is an unused pre-browse RPC that exposes the other direction.
+-- The trial client has no fallback to it. Closing this compatibility endpoint
+-- is essential: the accepted Recommended flag must be the only other-side
+-- match disclosure in the suggestions API, including direct RPC calls.
+revoke all on function public.get_matches() from public, anon, authenticated;
+notify pgrst, 'reload schema';
 
 
 commit;

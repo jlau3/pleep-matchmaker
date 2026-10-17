@@ -153,12 +153,17 @@ do $$ begin
  assert exists(select 1 from public.get_friends()),'authenticated friend endpoint failed';
  begin perform * from public.trial_pair_scores(auth.uid(),'{}'); raise exception 'private scores exposed'; exception when insufficient_privilege then null; end;
  begin perform * from public.match_trial_diagnostics(array[auth.uid()]); raise exception 'diagnostics exposed'; exception when insufficient_privilege then null; end;
+ begin perform * from public.get_matches(); raise exception 'legacy match API exposed'; exception when insufficient_privilege then null; end;
  begin perform * from public.trial_friend_contacts(true); raise exception 'old score endpoint exposed'; exception when insufficient_privilege then null; end;
 end $$;
 reset role;
 do $$ begin
  assert exists(select 1 from public.match_trial_diagnostics(array[auth.uid()]) where scored>0),'admin diagnostics missing';
  assert not has_function_privilege('anon','public.browse_all()','execute'),'anonymous suggestions exposed';
+ assert not exists(select 1 from pg_proc p join pg_namespace n on n.oid=p.pronamespace
+   where n.nspname='public' and has_function_privilege('authenticated',p.oid,'execute')
+   and p.prosrc ~ '\m(fit_pct|you_fit_pct|group_demand|trial_pair_scores)\M'
+   and p.proname not in ('browse_all','get_friends','get_friend_requests','lookup_players')), 'unreviewed match-score API remains executable';
 end $$;
 rollback;
 \echo 'EXPECTED CANDY FIT TRIAL CONTRACT AND PRIVACY TESTS PASSED'
