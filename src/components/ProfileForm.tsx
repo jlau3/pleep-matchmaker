@@ -149,7 +149,6 @@ export function ProfileForm({ profile, friendListFull, guideRequested = false, c
           <h2 id="profile-details" className="text-lg font-bold">Your Profile</h2>
           {status}
         </div>
-        <button type="button" onClick={() => setGuideOpen(true)} className="text-sm font-semibold underline">Show me what to fill in</button>
         <div id="profile-picture" data-profile-step="game_avatar">
           <AvatarPicker initial={profile.game_avatar ?? null} discordAvatar={profile.avatar_url} requiredForSetup={guideOpen} />
         </div>
