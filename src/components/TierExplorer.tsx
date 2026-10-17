@@ -350,8 +350,7 @@ export function TierExplorer({
             <fieldset className="min-w-0 space-y-3 border-0 p-0">
               <legend className="mb-2 w-full p-0 font-semibold">Choose a ranking style</legend>
               <div className="space-y-1.5 text-xs text-slate-600 dark:text-slate-300">
-                <p>Each candy you send goes to all your friends at once, so the best pick is one many of them Want and few Don&apos;t Want.</p>
-                <p><b>Score:</b> Want +1, Neutral 0, Don&apos;t Want −½, averaged over {pool === "everyone" ? "the players who have seen it" : "your voting friends"} and shown out of 100. A Don&apos;t Want counts half because it takes two of them to cancel out one friend who Wants it. 60 is as good as 60% Want with the rest Neutral.</p>
+                <p><b>Score:</b> to a friend, a Wanted candy is worth 3, a Neutral one 1 and a Don&apos;t Want 0. We average that over {pool === "everyone" ? "the players who have seen it" : "your voting friends"} and show it on a scale where 0 is as good as everyone Neutral and 100 is everyone Wanting it.</p>
                 <p><b>F</b> (Percentile and Fixed Scores): below 0, meaning more than twice as many Don&apos;t Want votes as Want votes.</p>
               </div>
               {TIER_STYLES.map((option) => <label key={option} className="flex cursor-pointer items-start gap-2">
