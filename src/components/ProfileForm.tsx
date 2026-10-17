@@ -1,6 +1,7 @@
 "use client";
 
 import { startTransition, useActionState, useEffect, useRef, useState } from "react";
+import { flushSync } from "react-dom";
 import { type ProfileFormState, updateProfile, markHelpSeen } from "@/app/actions";
 import { rethrowIfNavigation, SAVE_FAILED } from "@/lib/saveError";
 import { formatFriendCode } from "@/lib/format";
@@ -100,6 +101,12 @@ export function ProfileForm({ profile, friendListFull, guideRequested = false, c
   const [showDiscord, setShowDiscord] = useState(profile.show_discord);
   const [showReddit, setShowReddit] = useState(profile.show_reddit ?? true);
   const save = () => form.current?.requestSubmit();
+  // Commit the click first: set in the same event as the save, the new value would wait on the
+  // save's transition, so a switch showed its old position until the server answered.
+  const saveNow = (update: () => void) => {
+    flushSync(update);
+    save();
+  };
   const savedText: Record<string, string> = {
     ign: profile.ign ?? "",
     friend_code: profile.friend_code ? formatFriendCode(profile.friend_code) : "",
@@ -197,7 +204,7 @@ export function ProfileForm({ profile, friendListFull, guideRequested = false, c
                 name="visibility"
                 value={option.value}
                 checked={visibility === option.value}
-                onChange={() => { setVisibility(option.value); save(); }}
+                onChange={() => saveNow(() => setVisibility(option.value))}
                 className="mt-1 h-4 w-4 accent-[var(--color-night)]"
               />
               <span>
@@ -217,7 +224,7 @@ export function ProfileForm({ profile, friendListFull, guideRequested = false, c
               <Toggle
                 name="show_discord"
                 checked={showDiscord}
-                onChange={(value) => { setShowDiscord(value); save(); }}
+                onChange={(value) => saveNow(() => setShowDiscord(value))}
                 title={
                   <>
                     <DiscordIcon /> Show my Discord name to friends
@@ -235,7 +242,7 @@ export function ProfileForm({ profile, friendListFull, guideRequested = false, c
               <Toggle
                 name="show_reddit"
                 checked={showReddit}
-                onChange={(value) => { setShowReddit(value); save(); }}
+                onChange={(value) => saveNow(() => setShowReddit(value))}
                 title={
                   <>
                     <RedditIcon /> Show my Reddit name to friends
