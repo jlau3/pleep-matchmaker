@@ -42,12 +42,14 @@ export async function Nav() {
         <Link href="/" className="shrink-0" aria-label="Pleep Matchmaker home">
           <img src="/logo.png" alt="Pleep Matchmaker" className="h-8 w-8" />
         </Link>
-        <div className="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto sm:gap-4">
+        <div className="flex min-w-0 items-center gap-1 overflow-x-auto sm:gap-4">
           <NavLinks signedIn={user} />
         </div>
-        <PageHelpButton />
-        {user && <NavStars />}
-        {user ? <NavExtras donateUrl={process.env.NEXT_PUBLIC_DONATION_URL} /> : <SignInButton />}
+        <NavStars />
+        <div className="ml-auto flex shrink-0 items-center gap-2">
+          <PageHelpButton />
+          {user ? <NavExtras donateUrl={process.env.NEXT_PUBLIC_DONATION_URL} /> : <SignInButton />}
+        </div>
       </nav>
       {note && (popup.autoOpen || popup.rememberSeen) && (
         <MetaNoteModal

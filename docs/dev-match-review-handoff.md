@@ -108,3 +108,7 @@ Checked existing behavior before implementing: trial_candidates does not exclude
 Apply `20261026001000_suggestion_filter_flags.sql` separately after the matching bundle, alongside this app deploy. Its authenticated RPC returns only is_new and has_declined for caller-eligible suggestions, without exact creation times or third-party relationship details. App fetches these flags once per candidate batch and drops candidates that became ineligible between reads. Dev migration workflow applies this migration automatically; production still requires user approval. SQL privacy/boundary tests passed on incremental migrations and the standalone bundle plus this migration.
 
 My Votes community label now reads Show XX active community votes, with X out of X candies underneath and List/Grid beside it. Find Filters anchors directly to its button and adjusts for viewport edges. Main navbar remains the existing roughly 48px sticky bar; secondary page tabs scroll normally.
+
+## Navbar arrangement
+
+Keep logo and page tabs together on the left, with help and feedback/support (or Sign in) grouped at the right edge. Stars occupy only the flexible gap between those groups, in a balanced staggered pattern: none below 56px of free space, one at 56px, three at 140px, seven at 320px. Checks at 320/390/768/1280px cover signed-in, visitor and support-enabled layouts; the header remains 48px sticky, utility buttons stay adjacent, and stars do not overlap controls. Secondary page tabs remain in normal document flow.

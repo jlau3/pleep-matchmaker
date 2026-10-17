@@ -24,3 +24,5 @@
 - Find New Friends defaults to all eligible suggestions. Its Filters dropdown combines optional Mutual Fit, Active This Week, Has Voting Friends, New to Pleep (past 14 days), and Hide Players I've Declined or Who Declined Me (retained requests either direction); all start off and preserve the selected sort. The optional None of My Spotlight in F filter requires a known S/A/B/C rank for every selected Spotlight candy; unknown ranks and no Spotlight do not pass. Do not add mutual-friend disclosure without a separate product decision.
 
 - My Votes labels community hints "Show XX active community votes", with "X out of X candies" beneath it. Keep List/Grid to their right. Anchor the Find New Friends filter menu to its own button and clamp it inside the viewport. Main navigation stays as the single sticky top bar; sub-tabs scroll with page content.
+
+- Navbar: keep logo/page tabs together and help with feedback/support or Sign in at the right edge. Stars live only in the flexible gap between those groups, with density reduced on narrow screens; keep them clear of controls.
