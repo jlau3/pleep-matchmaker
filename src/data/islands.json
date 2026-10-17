@@ -922,8 +922,8 @@
       "heracross",
       "suicune",
       "treecko",
-      "piplup",
       "gulpin",
+      "piplup",
       "croagunk",
       "darkrai",
       "rufflet",
@@ -1017,13 +1017,13 @@
         "Grovyle",
         "Sceptile"
       ],
+      "gulpin": [
+        "Gulpin"
+      ],
       "piplup": [
         "Piplup",
         "Prinplup",
         "Empoleon"
-      ],
-      "gulpin": [
-        "Gulpin"
       ],
       "croagunk": [
         "Croagunk",

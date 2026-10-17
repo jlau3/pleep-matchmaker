@@ -1121,6 +1121,28 @@
     ]
   },
   {
+    "id": "misdreavus",
+    "name": "Misdreavus",
+    "dex": 200,
+    "type": "ghost",
+    "addedAt": "2026-10-26",
+    "weight": 0.1,
+    "members": [
+      {
+        "name": "Misdreavus",
+        "dex": 200,
+        "sprite": 200,
+        "sleepType": "dozing"
+      },
+      {
+        "name": "Mismagius",
+        "dex": 429,
+        "sprite": 429,
+        "sleepType": "dozing"
+      }
+    ]
+  },
+  {
     "id": "wobbuffet",
     "name": "Wobbuffet",
     "dex": 202,
