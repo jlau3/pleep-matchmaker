@@ -1,6 +1,8 @@
 # Keeps the dev database (behind Vercel previews) on the latest schema: any
 # push to a branch other than main that changes supabase/migrations applies
-# the new ones there (scripts/dev-migrate.sh). Production stays manual.
+# the new ones there (scripts/dev-migrate.sh). Changing dev_match_seed.py also
+# refreshes synthetic match fixtures; unrelated migrations do not reset them.
+# Production stays manual.
 # Needs the DEV_DATABASE_URL secret: the dev project's Session pooler
 # connection string (GitHub runners have no IPv6 for the direct one).
 name: Dev database migrations
@@ -8,8 +10,13 @@ name: Dev database migrations
 on:
   push:
     branches-ignore: [main]
-    paths: ["supabase/migrations/**"]
+    paths: ["supabase/migrations/**", "scripts/dev_match_seed.py"]
   workflow_dispatch:
+    inputs:
+      refresh_match_fixtures:
+        description: Refresh synthetic votes and friend communities (dev only)
+        type: boolean
+        default: false
 
 concurrency:
   group: dev-database
@@ -17,11 +24,37 @@ concurrency:
 
 jobs:
   migrate:
+    if: github.ref != 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Apply new migrations to the dev database
         env:
           DATABASE_URL: ${{ secrets.DEV_DATABASE_URL }}
         run: scripts/dev-migrate.sh
+      - name: Check whether match fixtures need refreshing
+        id: fixtures
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BEFORE: ${{ github.event.before }}
+          MANUAL_REFRESH: ${{ inputs.refresh_match_fixtures }}
+        run: |
+          refresh=false
+          if [[ "$EVENT_NAME" == workflow_dispatch ]]; then
+            [[ "$MANUAL_REFRESH" != true ]] || refresh=true
+          elif [[ "$BEFORE" != 0000000000000000000000000000000000000000 ]] &&
+            [[ -n "$(git diff --name-only "$BEFORE" "$GITHUB_SHA" -- scripts/dev_match_seed.py)" ]]; then
+            refresh=true
+          fi
+          echo "refresh=$refresh" >> "$GITHUB_OUTPUT"
+      - name: Refresh synthetic match fixtures in dev
+        if: steps.fixtures.outputs.refresh == 'true'
+        env:
+          DATABASE_URL: ${{ secrets.DEV_DATABASE_URL }}
+        run: |
+          test -n "$DATABASE_URL"
+          python3 scripts/dev_match_seed.py > "$RUNNER_TEMP/dev-match-seed.sql"
+          psql "$DATABASE_URL" -X --single-transaction -v ON_ERROR_STOP=1 -f "$RUNNER_TEMP/dev-match-seed.sql"

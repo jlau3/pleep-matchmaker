@@ -111,6 +111,10 @@ Vercel previews should use their own Supabase project, so new migrations are tri
 
 The dev project pauses after a week without traffic (the keepalive cron only runs in production); restore it from the Supabase dashboard.
 
+For the expected-candy-fit trial, `scripts/dev_match_seed.py` prints an incremental refresh. Run its SQL as **one transaction** with `ON_ERROR_STOP`; the Dev database migrations workflow does this when that script changes, or when manually dispatched with **Refresh synthetic votes and friend communities** checked. It requires the existing dev helpers, migration log, trial schema and 200 fake accounts. It refreshes only fake IDs 21–200, preserving real accounts, votes, friends and requests, plus the first 20 identity/privacy fixtures. Do not rerun the original full seed to refresh matches: that replaces fake accounts and removes connections to them.
+
+The refresh creates 60 discoverable candidates with Wanted, Unwanted, Neutral, Balanced and mixed sending communities, using the saved votes of up to three recently active dev testers as read-only anchors. Another 120 fake players supply those communities and are closed to new friends. Every fake player must have a unique voting history or the transaction rolls back. Look for **Broad Wishlist Bea**, **Picky Parker**, **Neutral Nell**, **First Vote Finn** and the original **NewbieNell** for edge cases. Recently Active dates and 0/2/10/40 donor targets vary independently; existing preserved connections can raise those counts. This seed is development data, not a production migration.
+
 ### 4. Deploy to Vercel
 
 Import the repo in Vercel and set `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` and `CRON_SECRET`. Optional:
