@@ -198,13 +198,16 @@ export function VoteBoard({
     if (failure) {
       setError(failure);
       apply(previous.choice, previous.top);
-    } else reportSavedChoice(lineId, next.choice);
+      return false;
+    }
+    reportSavedChoice(lineId, next.choice);
+    return true;
   }
 
   function choose(lineId: string, choice: Choice) {
     linger(lineId);
     // Anything but Want drops the star (the database does the same).
-    save(lineId, { choice, top: choice === "want" && tops.has(lineId) }, () => setChoice(lineId, choice));
+    return save(lineId, { choice, top: choice === "want" && tops.has(lineId) }, () => setChoice(lineId, choice));
   }
 
   function toggleTop(lineId: string) {
