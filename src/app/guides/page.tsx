@@ -21,20 +21,40 @@ export default function GuidesPage() {
 
       {active && <MetaNote post={active} highlight />}
 
-      {GUIDE_SECTIONS.map((section) => (
-        <section key={section.id} id={section.id} className="card space-y-4 p-5">
-          <h2 className="text-xl font-extrabold">{section.title}</h2>
-          {section.intro && <div className="guide-body">{section.intro}</div>}
-          <ul className="space-y-4">
-            {section.tips.map((tip) => (
-              <li key={tip.title}>
-                <h3 className="mb-1 font-bold">{tip.title}</h3>
-                <div className="guide-body">{tip.body}</div>
-              </li>
-            ))}
-          </ul>
-        </section>
-      ))}
+      {GUIDE_SECTIONS.map((section) => {
+        const body = (
+          <>
+            {section.intro && <div className="guide-body">{section.intro}</div>}
+            <ul className="space-y-4">
+              {section.tips.map((tip) => (
+                <li key={tip.title}>
+                  <h3 className="mb-1 font-bold">{tip.title}</h3>
+                  <div className="guide-body">{tip.body}</div>
+                </li>
+              ))}
+            </ul>
+          </>
+        );
+        // Same Show / Hide pattern as Friends to Find.
+        return section.collapsed ? (
+          <details key={section.id} id={section.id} className="card group p-5">
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-3">
+              <span>
+                <span className="block text-xl font-extrabold">{section.title}</span>
+                <span className="block text-sm text-slate-500">{section.collapsed}</span>
+              </span>
+              <span className="shrink-0 text-xs font-semibold underline group-open:hidden">Show</span>
+              <span className="hidden shrink-0 text-xs font-semibold underline group-open:inline">Hide</span>
+            </summary>
+            <div className="mt-4 space-y-4">{body}</div>
+          </details>
+        ) : (
+          <section key={section.id} id={section.id} className="card space-y-4 p-5">
+            <h2 className="text-xl font-extrabold">{section.title}</h2>
+            {body}
+          </section>
+        );
+      })}
 
       <section className="card flex flex-wrap items-center justify-between gap-3 p-5">
         <p className="guide-body">

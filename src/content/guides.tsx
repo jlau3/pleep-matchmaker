@@ -9,11 +9,87 @@ export const META_DISCORD_URL = "https://discord.gg/pokemonsleep";
 export interface GuideSection {
   id: string;
   title: string;
+  /** Collapsed until opened, with this line under the title. */
+  collapsed?: string;
   intro?: React.ReactNode;
   tips: { title: string; body: React.ReactNode }[];
 }
 
 export const GUIDE_SECTIONS: GuideSection[] = [
+  {
+    id: "sending-candy",
+    title: "Sending Candy to Your Friends",
+    collapsed: "New to friends? How the candy you send is chosen.",
+    intro: (
+      <p>
+        At the end of each research session you keep one photo, and that Pokémon&apos;s candy is what every friend gets
+        from you when they open your sleep report.
+      </p>
+    ),
+    tips: [
+      {
+        title: "The photo you keep is the candy you send",
+        body: (
+          <p>
+            When the session&apos;s photo first appears, tap it to pick a different Pokémon. If you&apos;ve already moved on
+            to the next screen, you can still tap the photo to change it. Your Tier List shows which candy your friends
+            want most.
+          </p>
+        ),
+      },
+      {
+        title: "Star rating doesn't change the candy",
+        body: <p>Stars reflect how rare the sleep style is. They don&apos;t change which candy your friends get or how many.</p>,
+      },
+      {
+        title: "Send candy people actually use",
+        body: (
+          <p>
+            Most players want candy for strong Pokémon they use often. Many remove friends who keep sending candy they
+            don&apos;t want, or who autopick. Shinies are often forgiven. Not sure what to send? Check your Tier List.
+          </p>
+        ),
+      },
+      {
+        title: "Don't autopick",
+        body: (
+          <p>
+            Autopicking means always keeping the photo the game chooses. The game picks for high star ratings, shinies
+            and new sleep styles, not for whether the Pokémon is worth building, so its pick is often candy nobody
+            wants.
+          </p>
+        ),
+      },
+      {
+        title: "Fill your friend list early",
+        body: (
+          <p>
+            You can get candy from each friend once a day, so a full list of 50 means up to 50 candy a day. Sharing
+            reports back and forth also raises your friendship levels, which come with rewards.
+          </p>
+        ),
+      },
+      {
+        title: "Friendship levels pay off",
+        body: (
+          <>
+            <p>Each new level brings a reward:</p>
+            <ul>
+              <li>Level 1: 1 Handy Candy S</li>
+              <li>Level 2: 1 Ingredient Ticket S</li>
+              <li>Level 3: 1 Linking Cord</li>
+              <li>Level 4: 2 Ingredient Ticket S</li>
+              <li>Level 5: 2 Handy Candy S</li>
+            </ul>
+            <p>
+              Some events also give better odds on their currency with high-level friends, so a level 5 friend is worth
+              keeping over starting a new friendship.
+            </p>
+          </>
+        ),
+      },
+    ],
+  },
   {
     id: "candy-considerations",
     title: "Candy Considerations",
