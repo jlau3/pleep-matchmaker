@@ -31,34 +31,32 @@ export function FitLegend({ friendsVoted = true, youVoted = true, autoOpen = fal
   return (
     <>
       <dialog ref={dialog} aria-labelledby={titleId}
-        onClick={(e) => { if (e.target === e.currentTarget) close(); }}
+        onClick={(event) => {
+          if (event.target !== event.currentTarget) return;
+          const bounds = event.currentTarget.getBoundingClientRect();
+          if (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom) close();
+        }}
         className="m-auto max-h-[88dvh] w-[calc(100%-2rem)] max-w-xl overflow-y-auto rounded-3xl bg-cream p-6 text-ink shadow-2xl backdrop:bg-black/60 dark:bg-night dark:text-[#eef1ff]">
-        <div className="mb-4 flex items-start justify-between gap-3">
+        <div className="mb-5 flex items-start justify-between gap-3 border-b border-slate-200 pb-4 dark:border-slate-700">
           <h2 id={titleId} className="text-2xl font-extrabold">How Match Scores Work</h2>
           <button type="button" onClick={close} aria-label="Close" className="rounded-full px-2 text-2xl leading-none text-slate-500">×</button>
         </div>
-      <div className="space-y-4 text-sm">
-        <section className="space-y-2">
-          <h3 className="font-bold">Will Their Candy Suit You?</h3>
+      <div className="space-y-6 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
+        <section className="space-y-3">
+          <h3 className="text-lg font-extrabold text-ink dark:text-white">Will Their Candy Suit You?</h3>
           <p><b>For you</b> estimates how much of the candy they&apos;d send is candy you Want. <b>Unwanted</b> is the share you marked Don&apos;t Want. The rest is candy you left Neutral.</p>
-          <p><b>71% For you · 29% unwanted</b> means about 7 in 10 candies in their estimated mix would be ones you Want, and 3 in 10 ones you don&apos;t.</p>
         </section>
-        <section className="space-y-2">
-          <h3 className="font-bold">Where the Estimate Comes From</h3>
-          <p>We use their friends&apos; Want votes to estimate what they might send. Global votes add a five-friend baseline, so they matter most when few of their friends have voted. It&apos;s an estimate: we never see what anyone sends.</p>
-        </section>
-        <section className="space-y-2">
-          <h3 className="font-bold">Finding a Good Fit</h3>
-          <ul className="list-disc space-y-2 pl-5">
-            <li><b>Best for you</b> puts the most wanted, least unwanted candy first.</li>
+        <section className="space-y-3">
+          <h3 className="text-lg font-extrabold text-ink dark:text-white">Finding a Good Fit</h3>
+          <ul className="list-disc space-y-3 pl-5">
             <li><b>Mutual fit</b> shows players whose candy suits you and yours suits them. <b>All players</b> skips that check. A high For you score can still miss Mutual fit if your candy doesn&apos;t suit them.</li>
-            <li><b>Amber</b> means the wanted share doesn&apos;t outweigh the unwanted penalty.</li>
+            <li><b className="text-amber-600 dark:text-amber-400">Amber coloring</b> on a For you or For them percentage means the wanted share doesn&apos;t outweigh the unwanted penalty.</li>
             <li><b>A dash</b> means that side hasn&apos;t saved votes, or no sending estimate is available. 0% is a real result.</li>
           </ul>
         </section>
         <p>On incoming requests you see how their candy suits you. My Friends shows both directions.</p>
-        <details className="rounded-xl border border-slate-300 p-3 dark:border-slate-700">
-          <summary className="cursor-pointer font-semibold">How It&apos;s Calculated</summary>
+        <details className="rounded-xl border border-sky-200 bg-sky-50 p-4 text-slate-700 dark:border-sky-800 dark:bg-sky-950/50 dark:text-slate-200">
+          <summary className="cursor-pointer text-base font-bold text-sky-900 dark:text-sky-200">How It&apos;s Calculated</summary>
           <div className="mt-3 space-y-3">
             <p><b>1. Count their friends&apos; Wants.</b> This simplified example leaves out the global baseline.</p>
             <table className="w-full text-left text-xs sm:text-sm">
