@@ -1,6 +1,7 @@
 import { GUIDE_SECTIONS, META_DISCORD_URL } from "@/content/guides";
 import { activeMetaPost, type MetaPost, publishedMetaPosts } from "@/content/meta";
 import { LINES_BY_ID, lineSpriteUrl } from "@/lib/lines";
+import { HowItWorks } from "@/components/HowItWorks";
 
 export const metadata = { title: "Guides · Pleep Matchmaker" };
 
@@ -16,8 +17,14 @@ export default function GuidesPage() {
     <div className="mx-auto max-w-2xl space-y-6">
       <div>
         <h1 className="text-2xl font-bold">Guides</h1>
-        <p className="text-sm text-slate-600 dark:text-slate-300">Tips on where your candy does the most good.</p>
+        <p className="text-sm text-slate-600 dark:text-slate-300">Getting started and tips on where your candy does the most good.</p>
       </div>
+
+      <section id="getting-started" className="card scroll-mt-20 p-5">
+        <h2 className="mb-3 text-xl font-extrabold">Getting Started</h2>
+        <p className="mb-5 text-sm text-slate-600 dark:text-slate-300">Save your candy wishlist, connect with Pokémon Sleep friends, and see which candy they want you to send.</p>
+        <HowItWorks />
+      </section>
 
       {active && <MetaNote post={active} highlight />}
 

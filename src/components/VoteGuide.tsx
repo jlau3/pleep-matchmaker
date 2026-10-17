@@ -3,8 +3,10 @@
 import { useCallback, useEffect, useRef } from "react";
 import { markVoteGuideSeen } from "@/app/actions";
 import { MAX_TOP } from "@/lib/lines";
+import { VOTE_HELP_EVENT } from "@/lib/help";
+import { usePageHelp } from "@/lib/usePageHelp";
 
-/** Voting help opens for new players and can always be reopened from its button. */
+/** Voting help opens for new players and reopens from the navbar's ?. */
 export function VoteGuide({ autoOpen = false }: { autoOpen?: boolean }) {
   const dialog = useRef<HTMLDialogElement>(null);
   const opened = useRef(false);
@@ -14,9 +16,10 @@ export function VoteGuide({ autoOpen = false }: { autoOpen?: boolean }) {
     dialog.current?.showModal();
     void markVoteGuideSeen().catch(() => {});
   }, []);
+  usePageHelp(VOTE_HELP_EVENT, open);
   useEffect(() => {
     if (!autoOpen || opened.current) return;
-    // Let a welcome or another open dialog finish before showing voting help.
+    // Let another open dialog finish before showing voting help.
     const showWhenReady = () => {
       if (!opened.current && !document.querySelector("dialog[open]")) open();
     };
@@ -28,9 +31,6 @@ export function VoteGuide({ autoOpen = false }: { autoOpen?: boolean }) {
   const close = () => dialog.current?.close();
   return (
     <>
-      <button type="button" onClick={open} className="text-sm font-semibold underline">
-        How to vote
-      </button>
       <dialog
         ref={dialog}
         onClick={(e) => {

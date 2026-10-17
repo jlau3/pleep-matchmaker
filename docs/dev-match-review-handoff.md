@@ -2,6 +2,14 @@
 
 Work stays on `claude/pokemon-sleep-matchmaking-esw90a`. Production application is not authorized; the user will approve dev and hand it to the production agent.
 
+## Contextual help and onboarding replay release
+
+After the matching bundle, apply `supabase/migrations/20261026000700_replay_onboarding.sql` once alongside the contextual-help app release. This separately resets only `help_seen_version`, `setup_done`, `vote_guide_seen` and `match_guide_seen`. It preserves identities, privacy, availability, votes, Spotlight, friends and requests. Do not repeat the reset on subsequent releases. Dev uses its normal migration log; do not add this migration to the matching squash.
+
+The app uses version 2 browser markers for the checklist, snooze, Profile dismissal and Tier List tour, so old dismissal cookies cannot suppress this replay. Existing sessions start at guided Profile on their next rendered visit, preserving the original destination; sign-ins use the same rule. Opening guided Profile records the legacy onboarding marker and refreshes the shared layout so subsequent navigation is not redirected again. Existing votes/friends remain checked only after their corresponding guides have opened. Completing or dismissing setup is still remembered normally.
+
+The navbar ? now opens the current page's help: match scores on My Friends/Find New Friends, How to Vote, the Profile walkthrough or Tier List walkthrough. Other pages link to Getting Started in Guides. First-visit page guides remain, the automatic welcome is removed, and the sign-in sheet keeps a short What You Get list.
+
 ## Trial behavior
 
 - Count friends' Wants, add the existing k=5 global prior, and normalize total demand into sending shares. Do not divide a friend's contribution across their Wants or weight Spotlight. Exclude the receiver from a sender's existing friends. Inactive friends' votes remain, with the existing stale-votes note.

@@ -4,8 +4,8 @@ import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState, type 
 import { profileGuideScroll } from "@/lib/profileGuideScroll";
 import { TIER_TOUR_EVENT } from "@/lib/help";
 
-const SEEN_KEY = "pm_tier_tour_seen:v1";
-const SEEN_COOKIE = "pm_tier_tour_seen"; // ":" isn't allowed in cookie names.
+const SEEN_KEY = "pm_tier_tour_seen:v2";
+const SEEN_COOKIE = "pm_tier_tour_seen_v2"; // ":" isn't allowed in cookie names.
 const seen = () => {
   if (document.cookie.split("; ").includes(`${SEEN_COOKIE}=1`)) return true;
   try { return localStorage.getItem(SEEN_KEY) === "1"; } catch { return false; }

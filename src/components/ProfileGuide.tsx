@@ -47,7 +47,7 @@ export function ProfileGuide({
     compact: typeof window !== "undefined" && (window.visualViewport?.height ?? window.innerHeight) < 680,
   }));
 
-  // Welcome and the native icon picker take precedence over this overlay.
+  // Native dialogs such as the icon picker take precedence over this overlay.
   useEffect(() => {
     const check = () => setReady(!document.querySelector("dialog[open]"));
     check();

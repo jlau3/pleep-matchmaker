@@ -45,7 +45,7 @@ export function SignInProvider({ children, signedIn }: { children: React.ReactNo
         {request.error && <p role="alert" className="mb-4 text-sm text-dont">{request.error}</p>}
         <h3 className="text-sm font-bold">What You Get</h3>
         <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-slate-600 dark:text-slate-300">
-          <li>A candy wishlist your friends can use.</li><li>A Tier List based on your friends' votes.</li><li>New friends who want the candy you send.</li>
+          <li>Save your candy wishlist.</li><li>Find friends with compatible candy preferences.</li><li>See which candy your friends want.</li>
         </ul>
       </dialog>
     </SignInContext.Provider>

@@ -1,11 +1,12 @@
 "use client";
 
 import { startTransition, useActionState, useEffect, useRef, useState } from "react";
-import { type ProfileFormState, updateProfile } from "@/app/actions";
+import { type ProfileFormState, updateProfile, markHelpSeen } from "@/app/actions";
 import { rethrowIfNavigation, SAVE_FAILED } from "@/lib/saveError";
 import { formatFriendCode } from "@/lib/format";
 import type { OwnProfile } from "@/lib/types";
-import { firstProfileGuideStep, profileGuideSteps } from "@/lib/profileGuide";
+import { profileGuideSteps } from "@/lib/profileGuide";
+import { PROFILE_HELP_EVENT } from "@/lib/help";
 import { ProfileGuide } from "./ProfileGuide";
 import { AvatarPicker } from "./AvatarPicker";
 import { DiscordIcon, RedditIcon } from "./BrandIcons";
@@ -72,18 +73,20 @@ export function ProfileForm({ profile, friendListFull, guideRequested = false, c
     }
   }, { submission: 0 });
   const [guideOpen, setGuideOpen] = useState(false);
-  const guideDismissedKey = `pm_profile_guide_dismissed:${profile.id}`;
+  const guideDismissedKey = `pm_profile_guide_dismissed:v2:${profile.id}`;
   useEffect(() => {
     if (!guideRequested) return;
+    // Keep returning-player routing independent of the retired welcome popup.
+    void markHelpSeen().catch(() => {});
     try {
       if (sessionStorage.getItem(guideDismissedKey)) return;
     } catch { /* Storage is optional. */ }
     setGuideOpen(true);
   }, [guideRequested, guideDismissedKey]);
   useEffect(() => {
-    const open = () => setGuideOpen(true);
-    window.addEventListener("pm-profile-guide-open", open);
-    return () => window.removeEventListener("pm-profile-guide-open", open);
+    const open = (event: Event) => { setGuideOpen(true); event.preventDefault(); };
+    window.addEventListener(PROFILE_HELP_EVENT, open);
+    return () => window.removeEventListener(PROFILE_HELP_EVENT, open);
   }, []);
   const closeGuide = () => {
     setGuideOpen(false);
@@ -250,7 +253,7 @@ export function ProfileForm({ profile, friendListFull, guideRequested = false, c
         <ProfileGuide
           form={form}
           steps={profileGuideSteps(Boolean(profile.discord_username || (profile.reddit_username && profile.show_reddit !== undefined)))}
-          initialStep={firstProfileGuideStep(profile)}
+          initialStep={0}
           pending={pending}
           result={state}
           onClose={closeGuide}

@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { FRIEND_SORT_HINTS, FRIEND_SORTS, type FriendSort } from "@/lib/friendSort";
-import { FitLegend } from "./FitLegend";
 import { SortMenu } from "./SortMenu";
 import { ViewToggle } from "./ViewToggle";
 
@@ -25,14 +24,9 @@ export interface FriendItem {
 export function FriendsBoard({
   items,
   initialSort,
-  friendsVoted,
-  autoOpenGuide = false,
 }: {
   items: FriendItem[];
   initialSort: FriendSort;
-  /** Whether any friend has voted; "for them" is a dash until one has. */
-  friendsVoted: boolean;
-  autoOpenGuide?: boolean;
 }) {
   const [sort, setSort] = useState(initialSort);
   const [view, setView] = useState<"list" | "grid">("list");
@@ -76,9 +70,6 @@ export function FriendsBoard({
           </div>
         </div>
       )}
-      <div className="mb-3">
-        <FitLegend friendsVoted={friendsVoted} autoOpen={autoOpenGuide} />
-      </div>
       <ul className={view === "grid" ? "grid gap-3 md:grid-cols-2" : "space-y-3"}>
         {sorted.map((item) => (
           <li key={item.id} className="card p-4">

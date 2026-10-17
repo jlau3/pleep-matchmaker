@@ -1,11 +1,12 @@
 import { cookies } from "next/headers";
-import { SETUP_COOKIE } from "@/lib/help";
+import { HELP_VERSION, SETUP_COOKIE } from "@/lib/help";
 import { parseAvatar } from "@/lib/avatars";
 import { normalizeFriendCode } from "@/lib/format";
 import { REQUEST_TTL_DAYS } from "@/lib/relations";
 import { setupSteps } from "@/lib/setup";
 import { getAuth } from "@/lib/supabase/server";
 import { SetupChecklistView } from "./SetupChecklistView";
+import { StartProfileSetup } from "./StartProfileSetup";
 
 /**
  * "Get set up": profile, votes, friends and Tier List, under the
@@ -19,7 +20,7 @@ export async function SetupChecklist() {
   if (!userId) return null;
   if ((await cookies()).get(SETUP_COOKIE)?.value === userId) return null;
   const [profile, votes, friends, sent, placeholders] = await Promise.all([
-    supabase.from("profiles").select("ign, friend_code, game_avatar, setup_done, friends_setup_started").eq("id", userId).maybeSingle(),
+    supabase.from("profiles").select("ign, friend_code, game_avatar, setup_done, friends_setup_started, help_seen_version, vote_guide_seen, match_guide_seen").eq("id", userId).maybeSingle(),
     supabase.from("preferences").select("line_id", { count: "exact", head: true }).eq("user_id", userId).neq("choice", "undecided"),
     supabase.from("friends").select("friend_id", { count: "exact", head: true }).eq("user_id", userId),
     supabase
@@ -31,14 +32,15 @@ export async function SetupChecklist() {
     supabase.from("friend_placeholders").select("name", { count: "exact", head: true }).eq("user_id", userId),
   ]);
   if (profile.error || !profile.data || votes.error || friends.error) return null;
-  const row = profile.data as { ign: string | null; friend_code: string | null; game_avatar: string | null; setup_done: boolean; friends_setup_started: boolean };
+  const row = profile.data as { ign: string | null; friend_code: string | null; game_avatar: string | null; setup_done: boolean; friends_setup_started: boolean; help_seen_version: number; vote_guide_seen: boolean; match_guide_seen: boolean };
+  if (!row.setup_done && row.help_seen_version < HELP_VERSION) return <StartProfileSetup />;
   if (row.setup_done) return <SetupChecklistView userId={userId} done steps={[]} />;
   const steps = setupSteps({
     name: Boolean(row.ign?.trim()),
     code: Boolean(row.friend_code && normalizeFriendCode(row.friend_code)),
     picture: Boolean(parseAvatar(row.game_avatar ?? "")),
-    voted: Boolean(votes.count),
-    friends: row.friends_setup_started || Boolean(friends.count) || Boolean(!sent.error && sent.count) || Boolean(!placeholders.error && placeholders.count),
+    voted: row.vote_guide_seen && Boolean(votes.count),
+    friends: row.match_guide_seen && (row.friends_setup_started || Boolean(friends.count) || Boolean(!sent.error && sent.count) || Boolean(!placeholders.error && placeholders.count)),
   });
   return <SetupChecklistView userId={userId} done={false} steps={steps} />;
 }

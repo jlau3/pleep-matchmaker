@@ -433,11 +433,15 @@ export async function deleteAccount() {
   redirect("/?deleted=1");
 }
 
-/** Records that the player has seen this HELP_VERSION of the How it works popup. */
+/** Records that the player has started guided Profile setup (legacy onboarding marker). */
 export async function markHelpSeen(): Promise<void> {
   const { supabase, user } = await requireUser();
   const { error } = await supabase.from("profiles").update({ help_seen_version: HELP_VERSION }).eq("id", user.id);
-  if (!error) (await cookies()).set(HELP_COOKIE, helpCookieValue(user.id), { path: "/", maxAge: 31536000, sameSite: "lax" });
+  if (!error) {
+    (await cookies()).set(HELP_COOKIE, helpCookieValue(user.id), { path: "/", maxAge: 31536000, sameSite: "lax" });
+    // Remove the release replay redirect from the persistent shared layout.
+    revalidatePath("/", "layout");
+  }
 }
 
 /**

@@ -155,7 +155,7 @@ export function FindNewBoard({
         <h2 className="text-lg font-semibold">
           Suggested Players <span className="text-sm font-normal text-slate-500">{total}</span>
         </h2>
-        <FitLegend compact friendsVoted={friendsVoted} youVoted={picked > 0} autoOpen={autoOpenGuide} />
+        <FitLegend friendsVoted={friendsVoted} youVoted={picked > 0} autoOpen={autoOpenGuide} />
       </div>
       <div className="space-y-2">
         <div className="inline-flex overflow-hidden rounded-xl border border-slate-300 text-sm dark:border-slate-700" role="group" aria-label="Suggested player pool">

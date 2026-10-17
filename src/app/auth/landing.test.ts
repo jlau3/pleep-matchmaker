@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { HELP_VERSION } from "@/lib/help";
 
 const auth = vi.hoisted(() => ({
   profile: { help_seen_version: 0, setup_done: false },
@@ -64,25 +65,25 @@ describe("sign-in landing pages", () => {
     ["OAuth", () => callback(new Request(`${origin}/auth/callback?code=test`))],
     ["email", () => confirm(new Request(`${origin}/auth/confirm?token_hash=test&type=email`))],
   ])("sends returning %s players to the Tier List by default", async (_name, route) => {
-    auth.profile.help_seen_version = 1;
+    auth.profile.help_seen_version = HELP_VERSION;
     expect((await route()).headers.get("location")).toBe(`${origin}/tiers`);
   });
 
   it("preserves a returning player's explicit destination", async () => {
-    auth.profile.help_seen_version = 1;
+    auth.profile.help_seen_version = HELP_VERSION;
     auth.next = "/friends?q=Sleepy";
     expect((await callback(new Request(`${origin}/auth/callback?code=test`))).headers.get("location")).toBe(`${origin}${auth.next}`);
   });
 
   it("uses the same rule for Google's sign-in button", async () => {
     await expect(signInWithGoogleToken("test-token", "test-nonce", "/friends")).rejects.toThrow("redirect:/profile?setup=profile&next=%2Ffriends");
-    auth.profile.help_seen_version = 1;
+    auth.profile.help_seen_version = HELP_VERSION;
     await expect(signInWithGoogleToken("test-token", "test-nonce", null)).rejects.toThrow("redirect:/tiers");
   });
 
   it("uses the same rule when Supabase redirects to the home page", async () => {
     await expect(Home({ searchParams: Promise.resolve({ next: "/friends" }) })).rejects.toThrow("redirect:/profile?setup=profile&next=%2Ffriends");
-    auth.profile.help_seen_version = 1;
+    auth.profile.help_seen_version = HELP_VERSION;
     await expect(Home({ searchParams: Promise.resolve({}) })).rejects.toThrow("redirect:/tiers");
   });
 
@@ -98,8 +99,16 @@ describe("sign-in landing pages", () => {
     expect((await callback(new Request(`${origin}/auth/callback?code=test`))).headers.get("location")).toBe(`${origin}/tiers`);
   });
 
+  it("replays the release's setup for an existing player whose tutorial progress was reset", async () => {
+    auth.profile = { help_seen_version: HELP_VERSION - 1, setup_done: false };
+    auth.next = "/matches?sort=active";
+    expect((await callback(new Request(`${origin}/auth/callback?code=test`))).headers.get("location")).toBe(
+      `${origin}/profile?setup=profile&next=${encodeURIComponent(auth.next)}`,
+    );
+  });
+
   it("rejects unsafe return destinations", async () => {
-    auth.profile.help_seen_version = 1;
+    auth.profile.help_seen_version = HELP_VERSION;
     auth.next = "//another-site.example";
     expect((await callback(new Request(`${origin}/auth/callback?code=test`))).headers.get("location")).toBe(`${origin}/tiers`);
   });

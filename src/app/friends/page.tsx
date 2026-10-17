@@ -7,6 +7,7 @@ import { FriendPostCard } from "@/components/FriendPostCard";
 import { friendPostProps } from "@/lib/friendPost";
 import { staleFriend } from "@/lib/format";
 import { FitPair } from "@/components/FitPair";
+import { FitLegend } from "@/components/FitLegend";
 import { PlayerSearch, searchQuery } from "@/components/PlayerSearch";
 import { FRIENDS_TABS, SubTabs } from "@/components/SubTabs";
 import { loadOwnProfile, loadOwnVotes, loadRelations, MAX_FRIENDS } from "@/lib/data";
@@ -161,12 +162,11 @@ export default async function FriendsPage({ searchParams }: { searchParams: Prom
             <FriendPlaceholders rows={placeholders} relations={relations} viewerId={user.id} />
           </div>
         )}
+        <FitLegend autoOpen={profile.match_guide_seen === false} youVoted={Object.keys(choices).length > 0}
+          friendsVoted={friends.some((f) => f.visible && f.wants.length > 0)} />
         {friends.length > 0 && (
           <FriendsBoard
             initialSort={sort}
-            autoOpenGuide={profile.match_guide_seen === false}
-            // "For them" scores against your friends' votes (group_demand: visible friends' wants).
-            friendsVoted={friends.some((f) => f.visible && f.wants.length > 0)}
             items={friends.map(
               (friend): FriendItem => ({
                 id: friend.user_id,

@@ -59,11 +59,7 @@ const STEPS: { title: string; body: React.ReactNode; href: string; cta: string }
   },
 ];
 
-/**
- * What the app does, in five steps. Shown on the sign-in page and in the
- * How it works popup (HelpModal), which opens from the ? in the nav and by
- * itself on a player's first sign-in.
- */
+/** Optional Getting Started overview in Guides. */
 export function HowItWorks({ links = true }: { links?: boolean }) {
   return (
     <div>
