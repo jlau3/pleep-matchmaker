@@ -1,56 +1,29 @@
 import { matchSourceLabel, missingMatchReason, type MatchContext } from "@/lib/matchContext";
-import { LOW_FIT_PCT } from "@/lib/fit";
+import { candyUtility, shareLabel } from "@/lib/fit";
 
-const color = (pct: number | null | undefined) =>
-  pct == null ? "text-slate-500" : pct < LOW_FIT_PCT ? "text-amber-600 dark:text-amber-400" : "text-want";
-
-/**
- * Both fits, top right of a player's card (My Friends, Find New Friends,
- * search). "For you" (big, on top): how much of what you want their friends
- * want, so the candy they send suits you. "For them" (smaller, below): how
- * well their wants match your friends', so the candy you send suits them.
- * Either turns amber below LOW_FIT_PCT, so a lopsided friendship stands out.
- * A missing one shows a dash with a reason; FitLegend provides on-demand help.
- */
-export function FitPair({
-  they,
-  you,
-  compact = false,
-  context,
-}: {
-  they: number | null | undefined;
+/** Estimated shares, not a weighted match percentage. Suggestions/requests show only the viewer's side. */
+export function FitPair({ they, you, compact = false, context, onlyYou = false }: {
+  they?: number | null;
   you: number | null | undefined;
   context?: MatchContext;
-  /** One small line, for grid tiles. */
   compact?: boolean;
+  onlyYou?: boolean;
 }) {
-  const youMissing = missingMatchReason("you", context?.you_voted);
-  const theyMissing = missingMatchReason("them", context?.they_voted);
-  const youFrom = matchSourceLabel(context?.you_source);
-  const theyFrom = matchSourceLabel(context?.they_source);
-  const low = (pct: number | null | undefined) => pct != null && pct < LOW_FIT_PCT;
-  const pct = (n: number | null | undefined) => (n == null ? "–" : `${n}%`);
-  if (compact)
-    return (
-      <span className="whitespace-nowrap text-xs font-semibold text-slate-500">
-        <b className={`text-sm ${color(you)}`} title={you == null ? youMissing : `For you${youFrom}: how much of the candy they'd send is on your Want list. Your Don't Wants lower it.`} aria-label={you == null ? youMissing : undefined}>{pct(you)}</b> you ·{" "}
-        <b className={`text-sm ${color(they)}`} title={they == null ? theyMissing : `For them${theyFrom}: how much of the candy you'd send is on their Want list. Their Don't Wants lower it.`} aria-label={they == null ? theyMissing : undefined}>{pct(they)}</b> them
-      </span>
-    );
-  return (
-    <div className="shrink-0 whitespace-nowrap text-right leading-none">
-      <div title={you == null ? youMissing : `For you${youFrom}: how much of the candy they'd send is on your Want list. Your Don't Wants lower it.`}>
-        <span className={`text-2xl font-extrabold ${color(you)}`} aria-label={you == null ? youMissing : undefined}>{you == null ? "–" : `${you}%`}</span>{" "}
-        <span className={`text-sm font-semibold ${low(you) ? "text-amber-700 dark:text-amber-300" : "text-slate-500"}`}>
-          For you
-        </span>
-      </div>
-      <div className="mt-1" title={they == null ? theyMissing : `For them${theyFrom}: how much of the candy you'd send is on their Want list. Their Don't Wants lower it.`}>
-        <span className={`text-base font-bold ${color(they)}`} aria-label={they == null ? theyMissing : undefined}>{they == null ? "–" : `${they}%`}</span>{" "}
-        <span className={`text-xs font-semibold ${low(they) ? "text-amber-700 dark:text-amber-300" : "text-slate-500"}`}>
-          For them
-        </span>
-      </div>
-    </div>
-  );
+  function direction(label: "For you" | "For them", want: number | null | undefined, unwanted: number | null | undefined, utility: number | null | undefined, source: string, voted?: boolean | null) {
+    const exactUtility = utility ?? candyUtility(want, unwanted);
+    const low = want != null && exactUtility != null && exactUtility <= 0;
+    const color = want == null ? "text-slate-500" : low ? "text-amber-600 dark:text-amber-400" : "text-want";
+    const explanation = want == null ? missingMatchReason(label === "For you" ? "you" : "them", voted)
+      : `${label}: an estimated ${shareLabel(want)} of received candy matches ${label === "For you" ? "your" : "their"} Wants; ${shareLabel(unwanted)} is unwanted${source}. Amber means Want share minus half unwanted share is zero or below, using unrounded shares.`;
+    if (compact) return <span title={explanation} className="whitespace-nowrap"><b className={`${color} text-sm`}>{shareLabel(want)}</b> {onlyYou ? label : label === "For you" ? "you" : "them"}</span>;
+    return <div title={explanation} className={label === "For them" ? "mt-2" : undefined}>
+      <span className={`${color} ${label === "For you" ? "text-2xl" : "text-base"} font-extrabold`}>{shareLabel(want)}</span>{" "}
+      <span className="text-sm font-semibold text-slate-500">{label}</span>
+      <span className="mt-1 block text-xs font-normal text-slate-500">{shareLabel(unwanted)} unwanted</span>
+    </div>;
+  }
+  return <div className={`shrink-0 text-right leading-none ${compact ? "flex flex-wrap justify-end gap-x-1 text-xs text-slate-500" : "whitespace-nowrap"}`}>
+    {direction("For you", you, context?.you_unwanted_pct, context?.you_utility, matchSourceLabel(context?.you_source), context?.you_voted)}
+    {!onlyYou && <>{compact && <span>·</span>}{direction("For them", they, context?.they_unwanted_pct, context?.they_utility, matchSourceLabel(context?.they_source), context?.they_voted)}</>}
+  </div>;
 }

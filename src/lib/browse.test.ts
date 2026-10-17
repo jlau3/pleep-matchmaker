@@ -1,59 +1,34 @@
 import { describe, expect, it } from "vitest";
-import { browseQuery, parseBrowse, type SortablePlayer, sortPlayers, top3Score } from "./browse";
+import { BROWSE_SORTS, browseQuery, parseBrowse, type SortablePlayer, sortPlayers, top3Score } from "./browse";
 
-describe("Find New Friends options", () => {
-  it("defaults and validates", () => {
-    expect(parseBrowse({})).toEqual({ sort: "fit", everyone: false, page: 1 });
-    expect(parseBrowse({ sort: "nope", show: "x", page: "-3" })).toEqual({ sort: "fit", everyone: false, page: 1 });
-    expect(parseBrowse({ sort: "active", show: "all", page: "4" })).toEqual({ sort: "active", everyone: true, page: 4 });
-  });
-
-  it("builds query strings without defaults, keeping the search", () => {
-    expect(browseQuery({ sort: "fit", everyone: false, page: 1 })).toBe("");
-    expect(browseQuery({ sort: "active", everyone: true, page: 2 }, "bob")).toBe("?q=bob&sort=active&show=all&page=2");
+describe("trial suggestion controls", () => {
+  it("defaults to Best for you and removes legacy sort/filter URL settings", () => {
+    for (const params of [{}, { sort: "fit", spotlight: "safe" }, { sort: "unknown", page: "-3" }]) {
+      expect(parseBrowse(params)).toEqual({ sort: "you_fit", everyone: false, page: 1 });
+    }
+    expect(BROWSE_SORTS.map(([id]) => id)).toEqual(["you_fit", "top3", "active"]);
+    expect(browseQuery({ sort: "you_fit", everyone: false, page: 1 })).toBe("");
+    expect(browseQuery({ sort: "active", everyone: true, page: 2 }, "Snack")).toBe("?q=Snack&sort=active&show=all&page=2");
   });
 });
 
-describe("sortPlayers", () => {
-  const row = (user_id: string, o: Partial<SortablePlayer> = {}): SortablePlayer => ({
-    user_id,
-    last_seen_at: "2026-10-10T00:00:00Z",
-    you_fit_pct: null,
-    both_pct: null,
-    you_fit_wants: [],
-    ...o,
+describe("estimated candy utility sorting", () => {
+  const row = (user_id: string, you_fit_pct: number | null, you_utility: number | null): SortablePlayer => ({
+    user_id, you_fit_pct, you_utility, last_seen_at: "2026-10-10T00:00:00Z",
   });
-  const rows = [
-    row("a", { both_pct: 120, you_fit_pct: 40, last_seen_at: "2026-10-01T00:00:00Z" }),
-    row("b", { both_pct: 150, you_fit_pct: 90 }),
-    row("c", { both_pct: null, you_fit_pct: null, last_seen_at: "2026-10-14T00:00:00Z" }),
-    row("d", { both_pct: 120, you_fit_pct: 70, you_fit_wants: ["x", "y"] }),
-  ];
-  const ids = (sorted: SortablePlayer[]) => sorted.map((r) => r.user_id).join("");
-
-  it("Best match: both_pct, then more of your wants, then recent; no numbers last", () => {
-    expect(ids(sortPlayers(rows, "fit"))).toBe("bdac");
+  const rows = [row("a", 90, 40), row("b", 65, 60), row("c", null, null), row("d", 0, -10)];
+  it("sorts by unrounded utility, not Want percentage, and preserves negative values", () => {
+    expect(sortPlayers(rows, "you_fit").map((r) => r.user_id)).toEqual(["b", "a", "d", "c"]);
+    expect(sortPlayers([row("a", 10.01, 0.005), row("b", 10.02, 0.004)], "you_fit")[0].user_id).toBe("a");
   });
-
-  it("other sorts lead with their own key, missing values last", () => {
-    expect(ids(sortPlayers(rows, "you_fit"))).toBe("bdac");
-    expect(ids(sortPlayers(rows, "active"))).toBe("cbda");
-    // Top 3: a scores S+A (7), d C (1), b and c all dashes (fall back to Best match).
-    expect(ids(sortPlayers(rows, "top3", { a: { l1: "S", l2: "A" }, d: { l1: "C" }, b: {} }))).toBe("adbc");
+  it("uses only the viewer's fit to break ties, never a hidden other score", () => {
+    const candidates = [{ ...rows[0], both_pct: 999 }, { ...rows[1], both_pct: -999 }];
+    expect(sortPlayers(candidates, "you_fit")[0].user_id).toBe("b");
+    expect(sortPlayers(candidates, "active")[0].user_id).toBe("b");
   });
-
-  it("scores Top 3 tiers", () => {
+  it("keeps Spotlight and activity sorts with the viewer's utility as fallback", () => {
+    expect(sortPlayers(rows, "top3", { a: { x: "S" }, b: { x: "C" } }).map((r) => r.user_id)).toEqual(["a", "b", "d", "c"]);
     expect(top3Score({ x: "S", y: "B", z: "Avoid" })).toBe(6);
     expect(top3Score({})).toBeNull();
-    expect(top3Score(undefined)).toBeNull();
-  });
-});
-
-describe("Spotlight specialty filter", () => {
-  it("round-trips through shared URLs without losing the pool, sort or search", () => {
-    const opts = parseBrowse({ sort: "top3", show: "all", spotlight: "safe", page: "2" });
-    expect(opts.spotlight).toBe(true);
-    expect(browseQuery(opts, "Snack")).toBe("?q=Snack&sort=top3&show=all&spotlight=safe&page=2");
-    expect(parseBrowse({ spotlight: "other" }).spotlight).toBeUndefined();
   });
 });

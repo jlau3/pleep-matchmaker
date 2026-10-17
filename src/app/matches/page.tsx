@@ -13,9 +13,8 @@ import { BROWSE_PAGE_SIZE, parseBrowse, sortPlayers } from "@/lib/browse";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { requireUser } from "@/lib/supabase/server";
 import type { MatchRow } from "@/lib/types";
-import { withExtras } from "@/lib/extras";
 
-type Params = { q?: string; sort?: string; show?: string; page?: string; spotlight?: string };
+type Params = { q?: string; sort?: string; show?: string; page?: string };
 
 export default async function MatchesPage({ searchParams }: { searchParams: Promise<Params> }) {
   const { supabase, user } = await requireUser();
@@ -38,7 +37,7 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
   let tiers: Top3Tiers = {};
   let allTiers = tops.length === 0;
   if (tops.length > 0 && rows.length > 0) {
-    if (opts.sort === "top3" || opts.spotlight) {
+    if (opts.sort === "top3") {
       try {
         tiers = await loadTop3Tiers(supabase, rows.map((r) => r.user_id), true);
         allTiers = true;
@@ -56,7 +55,7 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
   // "For them" is a dash until a friend has voted (assume they have if the check isn't deployed yet).
   const friendsVoted = votedResult.error ? true : Boolean(votedResult.data);
 
-  const picked = Object.values(choices).filter((c) => c !== "undecided").length;
+  const picked = Object.keys(choices).length;
   const unsorted = LINES.length - Object.keys(choices).length;
 
   const notices: React.ReactNode[] = [];
@@ -112,21 +111,11 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
 
 /**
  * Everyone Find New could suggest, with their numbers (browse_all, up to 1000,
- * Best match first). Before 20261020000500_browse_all.sql: the first 50 of
- * Everyone and of Recommended from browse_players instead.
+ * ordered by the viewer's exact trial utility). No legacy response fallback.
  */
 async function loadCandidates(supabase: SupabaseClient): Promise<MatchRow[]> {
   const all = await supabase.rpc("browse_all");
-  if (!all.error) return all.data as MatchRow[];
-  const page = (everyone: boolean) =>
-    supabase.rpc("browse_players", { sort: "fit", everyone, page_size: 50, page_offset: 0, line_count: LINES.length });
-  const [everyone, good] = await Promise.all([page(true), page(false)]);
-  if (everyone.error) throw everyone.error;
-  const goodIds = new Set(((good.data ?? []) as MatchRow[]).map((r) => r.user_id));
-  const rows = (everyone.data as MatchRow[]).map((r) => ({
-    ...r,
-    good: goodIds.has(r.user_id),
-    both_pct: r.match_pct == null && r.you_fit_pct == null ? null : (r.match_pct ?? 0) + (r.you_fit_pct ?? 0),
-  }));
-  return withExtras(supabase, rows);
+  // Never fall back to the old response contract: it exposed the hidden direction.
+  if (all.error) throw all.error;
+  return all.data as MatchRow[];
 }

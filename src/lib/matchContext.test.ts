@@ -8,8 +8,8 @@ describe("directional missing match explanations", () => {
   });
   it("does not invent a missing-votes reason when votes exist or are private/unknown", () => {
     for (const voted of [true, undefined, null]) {
-      expect(missingMatchReason("you", voted)).toBe("For you: not enough voting data");
-      expect(missingMatchReason("them", voted)).toBe("For them: not enough voting data");
+      expect(missingMatchReason("you", voted)).toBe("For you: no sending estimate yet");
+      expect(missingMatchReason("them", voted)).toBe("For them: no sending estimate yet");
     }
   });
 });

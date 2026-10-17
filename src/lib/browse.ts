@@ -1,6 +1,5 @@
-/** Sort choices shared by My Friends and Find New Friends. */
+/** Find New Friends sorts; none uses the hidden other direction. */
 export const BROWSE_SORTS = [
-  ["fit", "Best match"],
   ["you_fit", "Best for you"],
   ["top3", "Your Top 3 Spotlight"],
   ["active", "Recently active"],
@@ -8,8 +7,7 @@ export const BROWSE_SORTS = [
 
 /** One line under the sort pills saying what the chosen order means. */
 export const BROWSE_SORT_HINTS: Record<(typeof BROWSE_SORTS)[number][0], string> = {
-  fit: "Highest total of both match %s first (a – counts as 0): you'd each send candy the other wants, so they're likely to add you back.",
-  you_fit: "Highest \"for you\" first: most of what you want is what their friends want.",
+  you_fit: "Your estimated Want share minus half your unwanted share, highest first.",
   top3: "Players whose Tier Lists rank your spotlighted candies highest first, so they're more likely to send what you want. Set your Top 3 Spotlight in My Votes.",
   active: "Most recently online first, so they're likely to accept your friend request soon.",
 };
@@ -19,27 +17,24 @@ export const BROWSE_PAGE_SIZE = 20;
 
 export interface BrowseOptions {
   sort: BrowseSort;
-  /** false: recommended players only; true: everyone you could add. */
+  /** false: both exact utilities > 0; true: all eligible suggestions. */
   everyone: boolean;
-  /** Every spotlighted candy has a known S–C tier on their friend list. */
-  spotlight?: boolean;
   /** 1-based. */
   page: number;
 }
 
 export function parseBrowse(params: { sort?: string; show?: string; page?: string; spotlight?: string }): BrowseOptions {
-  const sort = BROWSE_SORTS.some(([id]) => id === params.sort) ? (params.sort as BrowseSort) : "fit";
+  const sort = BROWSE_SORTS.some(([id]) => id === params.sort) ? (params.sort as BrowseSort) : "you_fit";
   const page = Math.max(1, Math.min(1000, Number.parseInt(params.page ?? "1", 10) || 1));
-  return { sort, everyone: params.show === "all", page, ...(params.spotlight === "safe" ? { spotlight: true } : {}) };
+  return { sort, everyone: params.show === "all", page };
 }
 
 /** Query string for these options, dropping defaults; `q` (the search box) is kept. */
 export function browseQuery(opts: BrowseOptions, q?: string): string {
   const p = new URLSearchParams();
   if (q) p.set("q", q);
-  if (opts.sort !== "fit") p.set("sort", opts.sort);
+  if (opts.sort !== "you_fit") p.set("sort", opts.sort);
   if (opts.everyone) p.set("show", "all");
-  if (opts.spotlight) p.set("spotlight", "safe");
   if (opts.page > 1) p.set("page", String(opts.page));
   const s = p.toString();
   return s ? `?${s}` : "";
@@ -50,6 +45,7 @@ export interface SortablePlayer {
   user_id: string;
   last_seen_at: string;
   you_fit_pct?: number | null;
+  you_utility?: number | null;
   both_pct?: number | null;
   you_fit_wants?: string[];
 }
@@ -67,12 +63,12 @@ export function top3Score(tiers: Record<string, string> | null | undefined): num
 
 /** Shared primary score for both friend lists; each supplies its own row fields and tie order. */
 export function playerSortScore(
-  player: Pick<SortablePlayer, "last_seen_at" | "you_fit_pct" | "both_pct">,
-  sort: BrowseSort,
+  player: Pick<SortablePlayer, "last_seen_at" | "you_fit_pct" | "both_pct" | "you_utility">,
+  sort: BrowseSort | "fit",
   tiers?: Record<string, string>,
 ): number | null {
   if (sort === "active") return Date.parse(player.last_seen_at);
-  if (sort === "you_fit") return player.you_fit_pct ?? null;
+  if (sort === "you_fit") return player.you_utility ?? null;
   if (sort === "top3") return top3Score(tiers);
   return player.both_pct ?? null;
 }
@@ -80,12 +76,12 @@ export function playerSortScore(
 /**
  * Find New's order, in the browser: the same keys as browse_players'
  * ORDER BY, so a sort looks the same either way. The chosen sort first
- * (missing values last), then Best match (both_pct), more of your wants on
- * their list, more recently seen, and the id to break ties.
+ * (missing values last), then your exact utility, activity and id. Hidden
+ * other-player scores never affect this order.
  */
 export function sortPlayers<T extends SortablePlayer>(
   rows: T[],
-  sort: BrowseSort,
+  sort: BrowseSort | "fit",
   top3: Record<string, Record<string, string>> = {},
 ): T[] {
   const desc = (a: number | null | undefined, b: number | null | undefined) =>
@@ -93,14 +89,8 @@ export function sortPlayers<T extends SortablePlayer>(
   return [...rows].sort(
     (a, b) =>
       desc(playerSortScore(a, sort, top3[a.user_id]), playerSortScore(b, sort, top3[b.user_id])) ||
-      desc(a.both_pct, b.both_pct) ||
-      (b.you_fit_wants?.length ?? 0) - (a.you_fit_wants?.length ?? 0) ||
+      desc(a.you_utility, b.you_utility) ||
       Date.parse(b.last_seen_at) - Date.parse(a.last_seen_at) ||
       (a.user_id < b.user_id ? -1 : a.user_id > b.user_id ? 1 : 0),
   );
-}
-
-/** An unknown/missing tier never passes the specialty filter. */
-export function spotlightOutsideF(tops: string[], tiers: Record<string, string> | undefined): boolean {
-  return tops.length > 0 && tops.every((id) => ["S", "A", "B", "C"].includes(tiers?.[id] ?? ""));
 }

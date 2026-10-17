@@ -1,6 +1,6 @@
-/**
- * Below this fit % a fit is flagged "low fit" (amber). Same as Find New's cutoff
- * (match_config().min_pct), so it flags exactly the people Find New would
- * never suggest.
- */
-export const LOW_FIT_PCT = 25;
+/** Trial utility uses exact, unrounded shares. Neutral contributes zero. */
+export function candyUtility(want: number | null | undefined, unwanted: number | null | undefined): number | null {
+  return want == null || unwanted == null ? null : want - 0.5 * unwanted;
+}
+
+export const shareLabel = (share: number | null | undefined): string => share == null ? "–" : `${Math.round(share)}%`;

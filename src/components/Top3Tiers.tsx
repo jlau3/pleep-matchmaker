@@ -58,10 +58,10 @@ export function Top3Tiers({
 }
 
 /** A card's top right: both fits, with your Top 3's tiers underneath when given. */
-export function FitWithTop3({ they, you, tops, tiers, context }: { context?: MatchContext; they: number | null; you: number | null | undefined; tops?: string[]; tiers?: Record<string, string> }) {
+export function FitWithTop3({ they, you, tops, tiers, context, onlyYou = false }: { onlyYou?: boolean; context?: MatchContext; they?: number | null; you: number | null | undefined; tops?: string[]; tiers?: Record<string, string> }) {
   return (
     <div className="flex shrink-0 flex-col items-end gap-1.5">
-      <FitPair they={they} you={you} context={context} />
+      <FitPair they={they} you={you} context={context} onlyYou={onlyYou} />
       {tops && <Top3Tiers tops={tops} tiers={tiers} align="end" />}
     </div>
   );

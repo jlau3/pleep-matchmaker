@@ -1,53 +1,68 @@
-# Dev match review handoff
+# Expected candy fit trial: dev handoff
 
-Scope: dev branch `claude/pokemon-sleep-matchmaking-esw90a`. This work does not authorize production changes. The user will review dev before handing it to the production agent.
+Work stays on `claude/pokemon-sleep-matchmaking-esw90a`. Production application is not authorized; the user will approve dev and hand it to the production agent.
 
-## Behavior
+## Trial behavior
 
-- My Friends calculates current Everyone Want rates once per `get_friends` RPC and passes them to private helpers for both directional scores. No persistent cache, scheduled refresh, weight change, or score change.
-- Friend/search/suggestion cards and suggestion grids label each available score independently: Everyone estimate, Friends + Everyone, or Friends. `player_extras` supplies the context; it retains existing icon, Reddit, private-vote and block rules. Voting activity is unknown for players whose votes the viewer cannot see.
-- Extras requests are split into 200-player batches, matching the existing RPC limit, so larger suggestion lists also receive context.
-- Missing scores explain whose votes are needed when known; otherwise they say there is not enough voting data. Source labels are omitted for missing scores.
-- Shared Tier List URLs include every selected style explicitly, including `style=standard` (Percentile). Explicit links override a recipient's saved style; normal navigation still remembers the last style.
-- Cards and exports retain the existing whole-number formatter. Score explanations no longer introduce a different rounded number. Wording distinguishes Everyone's seen-player denominator from My Friends' voting-friend denominator.
-- Style explanations use parallel purpose statements. Percentile acknowledges ties and zero scores; F requires more than twice as many Don't Want votes as Want votes. The scoring formula and bucketing behavior are unchanged.
+- Count friends' Wants, add the existing k=5 global prior, and normalize total demand into sending shares. Do not divide a friend's contribution across their Wants or weight Spotlight. Exclude the receiver from a sender's existing friends. Inactive friends' votes remain, with the existing stale-votes note.
+- Display nearest-whole Want share and unwanted share on full cards, including 0% unwanted. Tiles show only Want %. Exact utility is Want share minus half unwanted share. Compute the net numerator before dividing so exact-zero cases cannot become positive through percentage rounding. Amber means utility <= 0.
+- Find New defaults to Best for You (exact utility). Keep Spotlight and Recently Active. Remove Best Match and the separate Spotlight specialty filter. Recommended's explanation lives in How Match Scores Work, not in another toolbar paragraph.
+- Recommended requires both exact utilities > 0. Newcomers see a vote-first note with All Players available; never fall back to the hidden direction. Saved Neutral votes can produce known 0% Want; a dash means no saved votes or no sending estimate.
+- Find New and incoming requests show only the viewer/recipient's side. My Friends shows both directions. Search withholds the other direction unless the caller can see that player's votes.
 
-## Database changes
+## API/privacy contract
 
-New migration: `supabase/migrations/20261026000400_match_context_and_shared_rates.sql`.
+`browse_all` and `browse_players` return the viewer's Want share, unwanted share and exact utility, plus the per-row `good` flag and existing contact/eligibility metadata. They do not return the hidden direction's score, shares, utility, lift, vote status, shared-vote arrays, or combined score. Sorting and tie-breakers use only the viewer's utility, Spotlight tiers, activity and ID.
 
-Requires the earlier dev matching migration `20261026000300_blend_demand.sql` and its prerequisites. Before any authorized production migration, check production's applied migration state and include missing prerequisites in order.
+The `good` bit is an intentionally accepted disclosure on every All Players row: it tells the viewer whether the pair passes positive utility in both directions. This is needed because filtering and paging run on the client. It is not zero disclosure. The existing global prior also remains a shared aggregate of active players' votes.
 
-The new migration preserves `get_friends(boolean)`'s signature and existing privacy/contact expressions. It adds private rate-aware scoring helpers and recreates `player_extras(uuid[])` with additive result columns, restoring authenticated-only execution. Deploy the database migration before relying on the new source labels. Older app code tolerates the added columns; newer app code can render without context if the older RPC is still installed.
+Old contact queries are private, revoked helpers called without legacy score work. Search and request contact/privacy rules are preserved. Individual/private score helpers and admin diagnostics are revoked from public, anon and authenticated. The changed RPC return schemas are announced to PostgREST at commit. Deploy database and app together; the app deliberately does not fall back to the old suggestion response.
 
-Historical fresh-install repair: `20261021000200_reddit_friends_only.sql` now drops/recreates `player_extras` before changing its return columns, with explicit grants restored. Already-applied copies need not be rerun. The friend-request migration replay test restores the new migration after replaying older definitions.
+## Database and production squash
 
-## Validation
+Dev adds `supabase/migrations/20261026000500_expected_candy_fit.sql` after the existing applied migrations. Do not rewrite dev's migration log.
 
-- 218 unit tests in 36 files passed, including directional missing-score wording, labels in list/grid views and extras batching/failure handling.
-- All 34 SQL test files passed on a throwaway PostgreSQL 17 database, including score equivalence, source direction, privacy/block protection and helper permissions.
-- Type checking and the Next.js production build passed.
-- Local Chromium checks at 390px and 1280px passed: conflicting remembered-style recipient, score tooltip, ties, 50-player ranking threshold, export, help and horizontal overflow. Mobile suggestion-card labels were visually inspected. These checks used actual app components with local service/navigation mocks, not the deployed authenticated site.
+The user's requested production squash is **supabase/production/20261026_expected_candy_fit.sql**, generated by:
 
-## Performance measurement
+```sh
+scripts/bundle-match-trial.sh > supabase/production/20261026_expected_candy_fit.sql
+```
 
-Synthetic local PostgreSQL fixture: 107 saved candy votes per player, 50 viewer friends, ten additional voting friends per candidate. Compared the original `get_friends` definition with the optimized definition on identical data, checked equality of every directional score, warmed both queries, then took three samples each.
+It is one transactional SQL file containing 20261026000000 through 20261026000500, with an already-installed guard. It requires the earlier schema through 20261025000100. Production should apply this file once after approval, **instead of also applying its six source files**, and record it through the production agent's normal migration process. It is outside the auto-applied dev migration directory. No production connection or changes were used to prepare it.
 
-| Players / saved votes | Original samples | Optimized samples |
+## Diagnostics
+
+`public.match_trial_diagnostics(viewers uuid[])` is admin-only and runs on demand; it stores no telemetry. Start with a small sample of viewer UUIDs:
+
+```sql
+select * from public.match_trial_diagnostics(array['VIEWER_UUID'::uuid]);
+```
+
+It reports per-direction pair/scored/recommended counts, mean utility and its p10/p50/p90, mean unwanted share, and mean/median lift. Lift is utility minus utility under the global mix, in points. Bins 0 / 1–4 / 5+ count voting friends actually feeding each estimate (at least one Want), excluding the receiver. Five friend voters matches the prior's pre-normalization voter weight; final demand shares need not be exactly 50/50.
+
+Use these distributions and representative pairings to choose a later Recommended rule. Do not carry forward 25%, 33%, or the old three-candy minimum.
+
+## Validation strategy
+
+- Unit tests cover new defaults/URL compatibility, utility sorting without hidden tie-breakers, negative utilities above missing data, nearest-whole shares, consistent zero-unwanted labels, one-direction cards and exact amber boundaries.
+- SQL validation preserves the historical contract/migration replay suites through 0400, then upgrades the populated database and tests the new trial contract. These historical assertions intentionally remain on their original scoring contract; they are not presented as end-state trial tests.
+- Trial SQL tests exercise exact 8/4/2 arithmetic, zero/negative/Neutral/missing scores, broad Wants, no Spotlight weight, k=5 baseline/lift, 0/1–4/5+ bins, newbie eligibility, hidden payload fields, private search, recipient-only requests, both-direction friends, skip-self behavior, eligibility/privacy/block gates and actual API-role permissions.
+- The same trial suite also runs on a separate database cloned before 0000, after installing only the single production bundle. CI compares the generated bundle with the checked-in artifact.
+- Build/type checks and local mobile/desktop Chromium component checks cover cards/tiles, exact amber versus displayed rounded shares, controls, guide, pagination and newcomer flows. Local component checks mock navigation/actions; authenticated hosted smoke tests still require the user's dev session.
+
+## Production-agent review after dev approval
+
+Confirm the target schema and missing prerequisites. Apply the single reviewed squash through the production migration process, coordinate the app deploy, and verify PostgREST has the new return contracts. Inspect actual suggestion/request network responses to confirm no hidden-direction values. Check Recommended and All Players with no votes, saved Neutral votes, private votes and some friend data. Check both My Friends directions and an incoming request from each participant's side. Measure the hosted query plan if latency differs from the local synthetic benchmark.
+
+## Local validation measurements
+
+224 unit tests passed. The 34 historical SQL suites ran before the trial upgrade; the trial contract/privacy suite passed on both the upgraded database and the independently installed production squash. Build/type checks and Chromium checks at 390px/1280px passed.
+
+Synthetic PostgreSQL 17 fixture, three warm samples, 107 saved votes per player and a 50-friend list:
+
+| Players | My Friends query | Find New query |
 | --- | --- | --- |
-| 200 / 21,400 | 808, 745, 738 ms | 402, 377, 318 ms |
-| 2,000 / 214,000 | 5,197, 6,459, 5,347 ms | 302, 558, 321 ms |
+| 200 | 123 / 124 / 126 ms | 105 / 105 / 114 ms |
+| 2,000 | 322 / 307 / 317 ms | 1,596 / 1,721 / 1,747 ms |
 
-These are local SQL measurements, not a hosted latency promise. Other validation work ran concurrently. No production data or database was used for this benchmark.
-
-## Production-agent checks after user approval
-
-Review the migration against production's actual schema and missing prerequisites. Verify authenticated My Friends, incoming requests, search and both suggestion layouts after the database/app rollout. Check the two source labels with zero and some voting friends, plus a private-vote player. Verify a shared Percentile URL against a browser that last selected Fixed Scores. Recheck the full friend-list query on the hosted database if its plan differs materially from the local fixture.
-
-## Follow-up: friend toolbar and Spotlight filter
-
-- Suggested Players keeps its filtered count and a compact help button in the heading. Recommended/All players remain pool controls. Recommended now visibly explains the existing rule: at least 25% both directions and at least three Want candies in what the candidate is likely to send; scores may include global votes.
-- Both friend pages use a shared sort dropdown with option explanations. Recently Active remains a sort. Find New Friends puts the shared List/Grid switch on the right of the sort row; My Votes uses the same switch styling. Existing per-page layout preferences are preserved.
-- The optional “Keep my Spotlight out of F” filter requires a known S/A/B/C tier for every selected Spotlight candy. F/Avoid and missing tiers are excluded; no selected Spotlight disables the filter and links to My Votes. The filter is applied before counts and pagination, survives URL reloads (`spotlight=safe`), and handles loading failures with retry instead of treating unknown data as qualifying.
-- My Friends retains inactive friends and their votes. After two calendar months, cards say “Last here over 2 months ago. Their votes may be stale.” No new removal prompt or automatic cleanup is added. The existing matchmaking inactivity cutoff is unchanged.
-- This follow-up needs no new database migration. Validation includes unit tests for filter eligibility, URL state and calendar-month cutoff, plus mobile/desktop component checks for toolbar alignment, pool count, filtering, layout, error/retry and the stale notice.
+These are local SQL times, not hosted page latency. The score batch keeps one global calculation. An EXPLAIN during validation showed about 1.1 seconds of JIT compilation alone at 2,000 players, so JIT is disabled only for the interactive batch functions, not database-wide. At larger scale, measure the hosted Find New query plan and consider short-lived response caching separately; this trial does not add a scheduled cache.

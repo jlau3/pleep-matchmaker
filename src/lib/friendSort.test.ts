@@ -19,6 +19,8 @@ const friend = (id: string, they: number | null, you: number | null, extra: Part
   top_wants: [],
   match_pct: they,
   you_fit_pct: you,
+  you_utility: you,
+  they_utility: they,
   added_me: false,
   ...extra,
 });
@@ -73,4 +75,9 @@ describe("friend sorts", () => {
     }));
     expect(sortFriends(friends, sort, tiers).map((f) => f.user_id)).toEqual(sortPlayers(candidates, sort, tiers).map((f) => f.user_id));
   });
+});
+
+it("keeps real negative utility above missing data and private friends", () => {
+  const rows = [friend("unknown", null, null), friend("private", 0, 0, { visible: false }), friend("negative", -40, -30)];
+  expect(sortFriends(rows, "you_fit").map((r) => r.user_id)).toEqual(["negative", "unknown", "private"]);
 });

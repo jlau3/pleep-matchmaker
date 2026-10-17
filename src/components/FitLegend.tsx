@@ -36,36 +36,18 @@ export function FitLegend({ friendsVoted = true, youVoted = true, autoOpen = fal
           <button type="button" onClick={close} aria-label="Close" className="rounded-full px-2 text-2xl leading-none text-slate-500">×</button>
         </div>
       <div className="space-y-3 text-sm">
-        <p>
-          <b className="text-slate-700 dark:text-slate-200">For them</b>: how well the candy you&apos;d send (what your friends want) fits their votes.{" "}
-          <b className="text-slate-700 dark:text-slate-200">For you</b>: the same, flipped: what their friends want against your votes.
-        </p>
+        <p><b>For you</b> estimates the share of candy you would receive that matches your Wants. The smaller unwanted percentage is the share you Don&apos;t Want. The rest is Neutral.</p>
+        <p><b>The sending estimate</b> uses how many friends Want each candy, topped up by global votes equivalent to five voting friends. We normalize those counts into a mix totaling 100%. Spotlight does not change it. We don&apos;t observe what players actually send.</p>
         <div className="rounded-2xl bg-sun/25 p-4">
-          <p className="font-bold">How For them is worked out</p>
-          <ol className="mt-1 list-decimal space-y-1 pl-5">
-            <li>Your friends&apos; votes give every candy a demand score. Their most-wanted candy is 100; the rest score relative to it.</li>
-            <li>The other player earns the score of each candy they Want. Neutral counts for nothing.</li>
-            <li>That&apos;s divided by the most they could earn: 100 per Want. Each Don&apos;t Want adds its score to that total, so it pulls the % down.</li>
-          </ol>
-          <p className="mt-2">
-            <b>Example:</b> your friends score Pikachu 100, Eevee 60, Bulbasaur 20. The other player Wants Pikachu and Bulbasaur
-            and Don&apos;t Wants Eevee. Earned: 100 + 20 = 120. Most possible: 2 Wants × 100, plus Eevee&apos;s 60 = 260.
-            120 ÷ 260 = <b>46%</b>.
-          </p>
-          <p className="mt-2 text-xs text-slate-600 dark:text-slate-300">
-            So it&apos;s about the quality of their Wants, not how many: one Want on your friends&apos; top candy is 100%.
-          </p>
+          <p><b>Example:</b> an estimated mix of 8 Pikachu, 4 Eevee and 2 Bulbasaur gives about 57%, 29% and 14%. If you Want Pikachu and Bulbasaur and Don&apos;t Want Eevee, your card shows <b>71% For you · 29% unwanted</b>.</p>
         </div>
-        <p>
-          <b>Few friends voting yet?</b> Scores lean on global votes until more friends vote.
-        </p>
-        <p><b>For you needs your votes. For them needs theirs.</b> A dash means there isn&apos;t enough voting data to calculate that score; it doesn&apos;t mean a bad match.</p>
-        {!youVoted && (
-          <p><Link href="/vote" className="font-semibold underline">Choose the candy you want</Link> to help calculate &ldquo;For you&rdquo;.</p>
-        )}
-        {!friendsVoted && (
-          <p>Want matches based on your friends? <Link href="/friends" className="font-semibold underline">Add your Pokémon Sleep friends</Link> and ask them to vote.</p>
-        )}
+        <p><b>Best for you</b> sorts by Want share minus half unwanted share. Neutral earns nothing. Amber means that result is zero or below. Shares are rounded to whole percentages; sorting and eligibility use the exact values.</p>
+        <p><b>Recommended</b> requires positive estimated utility in both directions: Want share must exceed half unwanted share for each player. You see your own fit; the other player sees theirs when they receive your request.</p>
+        <p><b>All players</b> includes eligible suggestions without the mutual-fit requirement. Activity, availability, privacy and blocking rules still apply.</p>
+        <p><b>Incoming requests</b> show your own estimated fit. <b>My Friends</b> shows both directions, so you can also see how your candy fits their votes.</p>
+        <p>A dash means that side has no saved votes, or no sending estimate is available. Saved Neutral votes can give 0% Want; that is different from a dash.</p>
+        {!youVoted && <p><Link href="/vote" className="font-semibold underline">Save your candy votes</Link> to see Recommended players, or browse All players first.</p>}
+        {!friendsVoted && <p><Link href="/friends" className="font-semibold underline">Add your Pokémon Sleep friends</Link> and ask them to vote to make your sending estimate more personal.</p>}
       </div>
       <button type="button" onClick={close} className="btn-primary mt-6 w-full py-2">Got it</button>
       </dialog>

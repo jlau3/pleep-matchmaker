@@ -59,8 +59,9 @@ export default function PrivacyPage() {
         <ul className="list-disc space-y-1 pl-5">
           <li>
             <b>Other players</b> can see your IGN, icon, roughly when you were last active
-            (&quot;active this week&quot;), and match %s, depending on <b>Who Can Find You</b>: when they search your IGN
+            (&quot;active this week&quot;), and their own estimated candy fit with you, depending on <b>Who Can Find You</b>: when they search your IGN
             or friend code, when you appear in their Find New Friends, or when you send them a friend request.
+            Your own fit result stays hidden from non-friends. Recommended uses both sides&apos; fit to decide whether a pairing qualifies.
             A request can include your <b>friend code</b> so the other player can add you in Pokémon Sleep. You can also include it in a shared friend post. Players who search your code can see it in the result.
           </li>
           <li>

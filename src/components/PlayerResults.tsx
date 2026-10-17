@@ -83,7 +83,7 @@ export function PlayerResults({
                       to see how you match
                     </Link>
                   ) : (
-                    <FitPair they={player.match_pct} you={player.you_fit_pct} context={player} />
+                    <FitPair they={player.match_pct} you={player.you_fit_pct} context={player} onlyYou={!relations.friendIds.includes(player.user_id)} />
                   )
                 }
               />

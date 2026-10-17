@@ -21,5 +21,26 @@ trap cleanup EXIT
 
 PSQL=(psql -h /tmp -p "$PORT" -U postgres -d postgres -v ON_ERROR_STOP=1 -q)
 "${PSQL[@]}" -f "$ROOT/supabase/tests/auth_stub.sql"
-for f in "$ROOT"/supabase/migrations/*.sql; do "${PSQL[@]}" -f "$f"; done
-for t in "$ROOT"/supabase/tests/*_test.sql; do "${PSQL[@]}" -f "$t"; done
+# The trial deliberately changes the public matching contract. Preserve the
+# historical score/migration-replay regression suite on its original contract,
+# then migrate that populated database and test the new contract/privacy rules.
+TRIAL_MIGRATION="20261026000500_expected_candy_fit.sql"
+for f in "$ROOT"/supabase/migrations/*.sql; do
+  if [[ "$(basename "$f")" == 20261026000000_* ]]; then
+    "${PSQL[@]}" -c 'create database trial_squash template postgres'
+  fi
+  [[ "$(basename "$f")" < "$TRIAL_MIGRATION" ]] && "${PSQL[@]}" -f "$f"
+done
+for t in "$ROOT"/supabase/tests/*_test.sql; do
+  [[ "$(basename "$t")" == trial_* ]] || "${PSQL[@]}" -f "$t"
+done
+for f in "$ROOT"/supabase/migrations/*.sql; do
+  [[ "$(basename "$f")" < "$TRIAL_MIGRATION" ]] || "${PSQL[@]}" -f "$f"
+done
+for t in "$ROOT"/supabase/tests/trial_*_test.sql; do "${PSQL[@]}" -f "$t"; done
+# Validate the single production bundle from its real pre-0000 schema, without
+# historical fixture state or running its six source migrations individually.
+"$ROOT/scripts/bundle-match-trial.sh" | cmp - "$ROOT/supabase/production/20261026_expected_candy_fit.sql"
+SQUASH_PSQL=(psql -h /tmp -p "$PORT" -U postgres -d trial_squash -v ON_ERROR_STOP=1 -q)
+"${SQUASH_PSQL[@]}" -f "$ROOT/supabase/production/20261026_expected_candy_fit.sql"
+for t in "$ROOT"/supabase/tests/trial_*_test.sql; do "${SQUASH_PSQL[@]}" -f "$t"; done
