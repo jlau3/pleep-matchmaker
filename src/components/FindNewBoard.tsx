@@ -18,7 +18,7 @@ type Tiers = Record<string, Record<string, string>>;
 
 /**
  * Find New's suggested players. Every player comes down once (browse_all), so
- * Recommended / All players, the sorts and the pages all switch here, with no
+ * Mutual fit / All players, the sorts and the pages all switch here, with no
  * trip to the server; the URL follows along so a reload or a shared link
  * shows the same view. Your Top 3 Spotlight's tiers arrive for the first page with the
  * page, and for everyone else in the background (the Top 3 Spotlight sort waits for
@@ -159,7 +159,7 @@ export function FindNewBoard({
       </div>
       <div className="space-y-2">
         <div className="inline-flex overflow-hidden rounded-xl border border-slate-300 text-sm dark:border-slate-700" role="group" aria-label="Suggested player pool">
-          <Pill active={!opts.everyone} onClick={() => change({ everyone: false })}>Recommended</Pill>
+          <Pill active={!opts.everyone} onClick={() => change({ everyone: false })}>Mutual fit</Pill>
           <Pill active={opts.everyone} onClick={() => change({ everyone: true })}>All players</Pill>
         </div>
 
@@ -205,7 +205,7 @@ export function FindNewBoard({
 
       {picked === 0 && !opts.everyone ? (
         <p className="py-8 text-center text-slate-500">
-          <Link href="/vote" className="font-semibold underline">Save your candy votes</Link> to see Recommended players, or{" "}
+          <Link href="/vote" className="font-semibold underline">Save your candy votes</Link> to find mutual fits, or{" "}
           <button type="button" onClick={() => change({ everyone: true })} className="underline">browse All players</button> first.
         </p>
       ) : shown.length === 0 ? (
@@ -214,7 +214,7 @@ export function FindNewBoard({
             "No one to suggest right now. Check back as more players join."
           ) : (
             <>
-              No recommended players yet.{" "}
+              No mutual fits yet.{" "}
               <button type="button" onClick={() => change({ everyone: true })} className="underline">
                 See everyone
               </button>{" "}

@@ -6,8 +6,8 @@ Work stays on `claude/pokemon-sleep-matchmaking-esw90a`. Production application 
 
 - Count friends' Wants, add the existing k=5 global prior, and normalize total demand into sending shares. Do not divide a friend's contribution across their Wants or weight Spotlight. Exclude the receiver from a sender's existing friends. Inactive friends' votes remain, with the existing stale-votes note.
 - Display nearest-whole Want share and unwanted share on full cards, including 0% unwanted. Tiles show only Want %. Exact utility is Want share minus half unwanted share. Compute the net numerator before dividing so exact-zero cases cannot become positive through percentage rounding. Amber means utility <= 0.
-- Find New defaults to Best for You (exact utility). Keep Spotlight and Recently Active. Remove Best Match and the separate Spotlight specialty filter. Recommended's explanation lives in How Match Scores Work, not in another toolbar paragraph.
-- Recommended requires both exact utilities > 0. Newcomers see a vote-first note with All Players available; never fall back to the hidden direction. Saved Neutral votes can produce known 0% Want; a dash means no saved votes or no sending estimate.
+- Find New defaults to Best for You (exact utility). Keep Spotlight and Recently Active. Remove Best Match and the separate Spotlight specialty filter. Mutual fit's explanation lives in How Match Scores Work, not in another toolbar paragraph.
+- Mutual fit requires both exact utilities > 0. Newcomers see a vote-first note with All Players available; never fall back to the hidden direction. Saved Neutral votes can produce known 0% Want; a dash means no saved votes or no sending estimate.
 - Find New and incoming requests show only the viewer/recipient's side. My Friends shows both directions. Search withholds the other direction unless the caller can see that player's votes.
 
 ## API/privacy contract
@@ -38,9 +38,9 @@ It is one transactional SQL file containing 20261026000000 through 2026102600050
 select * from public.match_trial_diagnostics(array['VIEWER_UUID'::uuid]);
 ```
 
-It reports per-direction pair/scored/recommended counts, mean utility and its p10/p50/p90, mean unwanted share, and mean/median lift. Lift is utility minus utility under the global mix, in points. Bins 0 / 1–4 / 5+ count voting friends actually feeding each estimate (at least one Want), excluding the receiver. Five friend voters matches the prior's pre-normalization voter weight; final demand shares need not be exactly 50/50.
+It reports per-direction pair/scored/mutual-fit counts, mean utility and its p10/p50/p90, mean unwanted share, and mean/median lift. Lift is utility minus utility under the global mix, in points. Bins 0 / 1–4 / 5+ count voting friends actually feeding each estimate (at least one Want), excluding the receiver. Five friend voters matches the prior's pre-normalization voter weight; final demand shares need not be exactly 50/50.
 
-Use these distributions and representative pairings to choose a later Recommended rule. Do not carry forward 25%, 33%, or the old three-candy minimum.
+Use these distributions and representative pairings to choose a later Mutual fit rule. Do not carry forward 25%, 33%, or the old three-candy minimum.
 
 ## Validation strategy
 
@@ -52,7 +52,7 @@ Use these distributions and representative pairings to choose a later Recommende
 
 ## Production-agent review after dev approval
 
-Confirm the target schema and missing prerequisites. Apply the single reviewed squash through the production migration process, coordinate the app deploy, and verify PostgREST has the new return contracts. Inspect actual suggestion/request network responses to confirm no hidden-direction values. Check Recommended and All Players with no votes, saved Neutral votes, private votes and some friend data. Check both My Friends directions and an incoming request from each participant's side. Measure the hosted query plan if latency differs from the local synthetic benchmark.
+Confirm the target schema and missing prerequisites. Apply the single reviewed squash through the production migration process, coordinate the app deploy, and verify PostgREST has the new return contracts. Inspect actual suggestion/request network responses to confirm no hidden-direction values. Check Mutual fit and All Players with no votes, saved Neutral votes, private votes and some friend data. Check both My Friends directions and an incoming request from each participant's side. Measure the hosted query plan if latency differs from the local synthetic benchmark.
 
 ## Local validation measurements
 

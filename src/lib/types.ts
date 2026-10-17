@@ -15,7 +15,7 @@ export interface PlayerContact extends MatchContext {
   game_avatar?: string | null;
   /** Reddit handle (unverified), added by withExtras. */
   reddit_username?: string | null;
-  /** Private vote lists stay hidden; Recommended eligibility may still use internal fit. Added by withExtras. */
+  /** Private vote lists stay hidden; Mutual fit eligibility may still use internal fit. Added by withExtras. */
   votes_hidden?: boolean;
 }
 

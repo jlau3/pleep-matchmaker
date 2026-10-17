@@ -42,11 +42,11 @@ export function FitLegend({ friendsVoted = true, youVoted = true, autoOpen = fal
           <p><b>Example:</b> an estimated mix of 8 Pikachu, 4 Eevee and 2 Bulbasaur gives about 57%, 29% and 14%. If you Want Pikachu and Bulbasaur and Don&apos;t Want Eevee, your card shows <b>71% For you · 29% unwanted</b>.</p>
         </div>
         <p><b>Best for you</b> sorts by Want share minus half unwanted share. Neutral earns nothing. Amber means that result is zero or below. Shares are rounded to whole percentages; sorting and eligibility use the exact values.</p>
-        <p><b>Recommended</b> requires positive estimated utility in both directions: Want share must exceed half unwanted share for each player. You see your own fit; the other player sees theirs when they receive your request.</p>
+        <p><b>Mutual fit</b> requires positive estimated utility in both directions: Want share must exceed half unwanted share for each player. You see your own fit; the other player sees theirs when they receive your request.</p>
         <p><b>All players</b> includes eligible suggestions without the mutual-fit requirement. Activity, availability, privacy and blocking rules still apply.</p>
         <p><b>Incoming requests</b> show your own estimated fit. <b>My Friends</b> shows both directions, so you can also see how your candy fits their votes.</p>
         <p>A dash means that side has no saved votes, or no sending estimate is available. Saved Neutral votes can give 0% Want; that is different from a dash.</p>
-        {!youVoted && <p><Link href="/vote" className="font-semibold underline">Save your candy votes</Link> to see Recommended players, or browse All players first.</p>}
+        {!youVoted && <p><Link href="/vote" className="font-semibold underline">Save your candy votes</Link> to find mutual fits, or browse All players first.</p>}
         {!friendsVoted && <p><Link href="/friends" className="font-semibold underline">Add your Pokémon Sleep friends</Link> and ask them to vote to make your sending estimate more personal.</p>}
       </div>
       <button type="button" onClick={close} className="btn-primary mt-6 w-full py-2">Got it</button>
