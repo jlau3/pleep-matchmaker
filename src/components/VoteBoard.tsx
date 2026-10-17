@@ -3,9 +3,9 @@
 import { ViewToggle } from "./ViewToggle";
 
 import Link from "next/link";
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { setChoice, setTop, swapTop } from "@/app/actions";
-import { CHOICE_LABEL, type Choice, LINES, LINES_BY_ID, lineSpriteUrl, MAX_TOP, ISLANDS, lineHasSleepType, type SleepType } from "@/lib/lines";
+import { CHOICE_LABEL, type Choice, LINES, LINES_BY_ID, lineSpriteUrl, MAX_TOP, ISLANDS, SLEEP_TYPE_LABEL, lineHasSleepType, type SleepType } from "@/lib/lines";
 import { type CrowdHint, crowdHint } from "@/lib/crowd";
 import { rethrowIfNavigation, SAVE_FAILED } from "@/lib/saveError";
 import { notifySetupVotesSaved } from "@/lib/setup";
@@ -30,10 +30,9 @@ const NEW_DISMISSED_KEY = "pm_new_candy_dismissed";
 const CROWD_KEY = "pm_show_crowd";
 
 const FILTERS: { value: Filter; label: string }[] = [
-  { value: "all", label: "All" },
   { value: "want", label: CHOICE_LABEL.want },
-  { value: "dont_want", label: CHOICE_LABEL.dont_want },
   { value: "undecided", label: CHOICE_LABEL.undecided },
+  { value: "dont_want", label: CHOICE_LABEL.dont_want },
 ];
 
 const pill = (active: boolean) =>
@@ -75,22 +74,9 @@ export function VoteBoard({
   /** Line the player tried to star while their Top 3 Spotlight was full; opens the swap prompt. */
   const [swapFor, setSwapFor] = useState<string | null>(null);
   const [view, setView] = useState<View>("list");
-  const [query, setQuery] = useState("");
   const [islandId, setIslandId] = useState<string | null>(null);
   const [sleepType, setSleepType] = useState<SleepType | null>(null);
   const [filter, setFilter] = useState<Filter>("all");
-  const toolbar = useRef<HTMLDivElement>(null);
-  const [headerHeight, setHeaderHeight] = useState(49);
-  useLayoutEffect(() => {
-    const header = document.querySelector<HTMLElement>("[data-site-header]");
-    if (!header) return;
-    const measure = () => setHeaderHeight(header.getBoundingClientRect().height);
-    measure();
-    const observer = new ResizeObserver(measure);
-    observer.observe(header);
-    return () => observer.disconnect();
-  }, []);
-
   // Community hints start on; remember an explicit choice to turn them off.
   const [showCrowd, setShowCrowd] = useState(true);
   const hints = useMemo(() => {
@@ -160,19 +146,19 @@ export function VoteBoard({
     setFilter(next);
   }
 
-  const visible = useMemo(() => {
-    const q = query.trim().toLowerCase();
+  const scopedLines = useMemo(() => {
     const island = ISLANDS.find((item) => item.id === islandId);
     return LINES.filter((line) => {
       if (island && !island.lines.includes(line.id)) return false;
       if (sleepType && !lineHasSleepType(line, sleepType, island)) return false;
-      if (filter !== "all" && (choices[line.id] ?? "undecided") !== filter && !lingering.has(line.id)) return false;
-      return !q || line.members.some((member) => member.name.toLowerCase().includes(q));
+      return true;
     });
-  }, [choices, query, filter, lingering, islandId, sleepType]);
-
-  const counts = { want: 0, dont_want: 0, undecided: 0 };
-  for (const line of LINES) counts[choices[line.id] ?? "undecided"]++;
+  }, [islandId, sleepType]);
+  const filtered = scopedLines.filter((line) => filter === "all" || (choices[line.id] ?? "undecided") === filter);
+  // Keep the brief undo window on the page, but export only current filter matches.
+  const visible = scopedLines.filter((line) => filter === "all" || (choices[line.id] ?? "undecided") === filter || lingering.has(line.id));
+  const filterLabel = [ISLANDS.find((item) => item.id === islandId)?.name, sleepType && SLEEP_TYPE_LABEL[sleepType],
+    filter !== "all" && CHOICE_LABEL[filter]].filter(Boolean).join(" · ");
 
   /** Applies a change locally, saves it, and rolls both maps back if the save fails. */
   async function save(lineId: string, next: { choice: Choice; top: boolean }, request: () => Promise<{ error?: string }>) {
@@ -280,53 +266,31 @@ export function VoteBoard({
   // Which new lines get a card is fixed at load (undecided, not starred), so a card stays put while you vote on it
   // and is gone next visit. Closing it hides it for good in this browser.
   const [pinnedNew] = useState(() => (newCandy?.ids ?? []).filter((id) => (initial[id] ?? "undecided") === "undecided" && !initialTops.includes(id)));
-  const newCards = dismissedNew ? pinnedNew.filter((id) => !dismissedNew.has(id) && LINES_BY_ID.has(id)) : [];
+  const newCards = dismissedNew ? pinnedNew.filter((id) => !dismissedNew.has(id) && LINES_BY_ID.has(id) && visible.some((line) => line.id === id)) : [];
   const cancelSwap = useCallback(() => setSwapFor(null), []);
 
   return (
     <div>
-      <div ref={toolbar} data-vote-toolbar style={{ top: headerHeight }} className="sticky z-10 -mx-4 mb-4 bg-sky/95 px-4 py-2 shadow-sm backdrop-blur dark:bg-night-deep/95">
-        <div className="flex items-center justify-between gap-3 text-sm">
-          <span className="flex flex-wrap gap-x-3">
-            <span className="text-want">
-              <strong>{counts.want}</strong> want
-            </span>
-            <span className="text-dont">
-              <strong>{counts.dont_want}</strong> don&apos;t want
-            </span>
-            <span className="text-meh">
-              <strong>{counts.undecided}</strong> neutral
-            </span>
-          </span>
-          <span className="flex shrink-0 items-center gap-3">
-            <VoteGuide autoOpen={autoOpenGuide} />
-            <ExportVotes choices={choices} tops={tops} />
-          </span>
+      <div className="mb-4 space-y-4">
+        <div className="flex items-center justify-between gap-3">
+          <ExportVotes choices={choices} tops={tops} lines={filtered} filterLabel={filterLabel} />
+          <ViewToggle view={view} onChange={changeView} />
         </div>
-        {error && (
-          <div role="alert" className="mt-2 flex items-center justify-between gap-3 text-sm text-dont">
-            <span>{error}</span>
-            <button type="button" onClick={() => window.location.reload()} className="shrink-0 font-bold underline">
-              Refresh
-            </button>
+        <VoteGuide autoOpen={autoOpenGuide} />
+        {error && <div role="alert" className="flex items-center justify-between gap-3 text-sm text-dont">
+          <span>{error}</span>
+          <button type="button" onClick={() => window.location.reload()} className="shrink-0 font-bold underline">Refresh</button>
+        </div>}
+        <CandyFilters islandId={islandId} sleepType={sleepType} onIsland={setIslandId} onSleep={setSleepType}>
+          <div role="group" aria-label="Vote" className="ml-auto flex flex-wrap items-center gap-2">
+            {FILTERS.map((item) => <button key={item.value} type="button" aria-pressed={filter === item.value}
+              title={filter === item.value ? `${item.label} (tap again for all votes)` : item.label}
+              onClick={() => changeFilter(filter === item.value ? "all" : item.value)} className={pill(filter === item.value)}>
+              {item.label}
+            </button>)}
           </div>
-        )}
+        </CandyFilters>
       </div>
-
-      {newCards.map((id) => (
-        <NewCandyCard
-          key={id}
-          line={LINES_BY_ID.get(id)!}
-          votes={newCandy!.votes[id]}
-          voters={newCandy!.voters}
-          hint={showCrowd ? crowdHint(newCandy!.votes[id], newCandy!.voters) : undefined}
-          choice={choices[id]}
-          starred={tops.has(id)}
-          onChoose={(choice) => choose(id, choice)}
-          onStar={() => toggleTop(id)}
-          onDismiss={() => dismissNew(id)}
-        />
-      ))}
 
       <section className="card mb-4 p-3" aria-label="Your Top 3 Spotlight">
         <h2 className="font-bold">Your Top {MAX_TOP} Spotlight</h2>
@@ -353,25 +317,7 @@ export function VoteBoard({
       </section>
 
       <div className="mb-4 space-y-3">
-        <div className="flex gap-2">
-          <input
-            type="search"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search Pokémon"
-            className="field min-w-0 flex-1"
-          />
-          <ViewToggle view={view} onChange={changeView} />
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {FILTERS.map((f) => (
-            <button key={f.value} type="button" onClick={() => changeFilter(f.value)} aria-pressed={filter === f.value} className={pill(filter === f.value)}>
-              {f.label}
-            </button>
-          ))}
-        </div>
-        <CandyFilters islandId={islandId} sleepType={sleepType} onIsland={setIslandId} onSleep={setSleepType} />
-        <p className="text-xs text-slate-500" role="status">{visible.length} of {LINES.length} candies</p>
+        <p className="text-xs text-slate-500" role="status">{filtered.length} of {LINES.length} candies</p>
         {crowd && (
           <label className="flex cursor-pointer items-center gap-2 text-sm">
             <input type="checkbox" checked={showCrowd} onChange={toggleCrowd} className="h-4 w-4 accent-[var(--color-night)]" />
@@ -383,10 +329,25 @@ export function VoteBoard({
         )}
       </div>
 
+      {newCards.map((id) => (
+        <NewCandyCard
+          key={id}
+          line={LINES_BY_ID.get(id)!}
+          votes={newCandy!.votes[id]}
+          voters={newCandy!.voters}
+          hint={showCrowd ? crowdHint(newCandy!.votes[id], newCandy!.voters) : undefined}
+          choice={choices[id]}
+          starred={tops.has(id)}
+          onChoose={(choice) => choose(id, choice)}
+          onStar={() => toggleTop(id)}
+          onDismiss={() => dismissNew(id)}
+        />
+      ))}
+
       {visible.length === 0 ? (
         <p className="py-8 text-center text-slate-500">Nothing here.</p>
       ) : view === "list" ? (
-        <PickFlow lines={visible} choices={choices} onChoose={choose} tops={tops} onStar={toggleTop} hints={hints} toolbar={toolbar} />
+        <PickFlow lines={visible} choices={choices} onChoose={choose} tops={tops} onStar={toggleTop} hints={hints} />
       ) : (
         <CollectionGrid lines={visible} choices={choices} onChoose={choose} tops={tops} onStar={toggleTop} hints={hints} />
       )}

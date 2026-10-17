@@ -83,7 +83,7 @@ These are local SQL times, not hosted page latency. The score batch keeps one gl
 
 ## Filter and control polish
 
-Unselected pills use a shared contrasting fill in light and dark themes, including voting, feedback, layout, profile, and friend-page controls. My Votes now combines vote, name, island, and sleep-type filters. Its island icons and colored sleep-type pills come from the same CandyFilters component as Tier List. Mythicals (Mew and Darkrai) match every sleep type while retaining island restrictions, shared with Tier List/export filtering. Incoming Friend Requests can be collapsed and start expanded so new requests remain visible. Best Match scoring is unchanged pending product discussion about broad Want lists and baseline comparisons.
+Unselected pills use a shared contrasting fill in light and dark themes, including voting, feedback, layout, profile, and friend-page controls. My Votes combines vote, island, and sleep-type filters; Search and the All vote button have been removed. Tapping a selected vote filter clears it. Its island icons and colored sleep-type pills come from the same CandyFilters component as Tier List. Mythicals (Mew and Darkrai) match every sleep type while retaining island restrictions, shared with Tier List/export filtering. Incoming Friend Requests can be collapsed and start expanded so new requests remain visible. Best Match scoring is unchanged pending product discussion about broad Want lists and baseline comparisons.
 
 ## Review of recent parallel-agent changes
 
@@ -92,3 +92,7 @@ Reviewed 3bac3af (merged Pumpkaboo/Gourgeist icons), fdce4a5 (blocking copy), an
 The production agent should include `supabase/migrations/20261026000900_merge_sized_avatars.sql` separately after the matching bundle; it is not part of that squash. Old keys remain readable before this data normalization. This review does not authorize production changes.
 
 Also reviewed the subsequently fetched 8f63fc4–bf19e02 changes (ranking copy, score tooltips, immediate Profile updates, persistent route-group sub-tabs, and collapsible Guides). Preserved them during rebase. Corrected the guide's 50-candy ceiling: a report can give two candies. The 3/1/0 score framing is mathematically equivalent to the existing formula, but adds another explanatory scale; retained for product review. Type checking, unit tests and shared-filter walkthrough/browser checks were rerun on the combined tree. The isolated PostgreSQL migration, matching/privacy, squash, and seed replay checks passed; no remote database was changed by this review.
+
+## My Votes hierarchy and export
+
+My Votes now orders controls as a plain Export Image link with List/Grid, island icons, sleep types with vote filters aligned to the right, the full Top 3 Spotlight, then voting cards. The colored sticky toolbar is removed; auto-advance reserves only the fixed site header. Exported vote rows, counts and filter labels reflect the exact active island/sleep/vote filters, excluding the brief lingering undo cards. Spotlight stays complete on the page and in exports regardless of filters. New-Pokémon prompts also respect the active filters. Mobile wraps the two filter groups without horizontal overflow.

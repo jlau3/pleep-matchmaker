@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, type RefObject } from "react";
+import { useEffect, useRef } from "react";
 import type { CrowdHint } from "@/lib/crowd";
 import type { CandyLine, Choice } from "@/lib/lines";
 import { LineCard } from "./LineCard";
@@ -13,7 +13,6 @@ export function PickFlow({
   tops,
   onStar,
   hints,
-  toolbar,
 }: {
   lines: CandyLine[];
   choices: Record<string, Choice>;
@@ -22,7 +21,6 @@ export function PickFlow({
   onStar: (lineId: string) => void;
   /** Crowd hints per line id, when "Show what others pick" is on. */
   hints?: Record<string, CrowdHint>;
-  toolbar?: RefObject<HTMLDivElement | null>;
 }) {
   const cardRefs = useRef(new Map<string, HTMLLIElement>());
   const request = useRef(0);
@@ -60,12 +58,12 @@ export function PickFlow({
         if (request.current !== token) return;
         const card = cardRefs.current.get(next.id);
         if (!card) return;
-        const bar = toolbar?.current;
-        const covered = bar ? (Number.parseFloat(getComputedStyle(bar).top) || 0) + bar.getBoundingClientRect().height : 0;
+        const header = document.querySelector<HTMLElement>("[data-site-header]");
+        const covered = Math.max(0, header?.getBoundingClientRect().bottom ?? 0);
         const available = (window.visualViewport?.height ?? window.innerHeight) - covered - 24;
         const tall = card.getBoundingClientRect().height > available;
         // Native scrolling avoids mixing document and visual-viewport offsets
-        // during mobile browser chrome changes. The margin reserves the bars.
+        // during mobile browser chrome changes. The margin reserves the fixed site header.
         card.style.scrollMarginTop = `${covered + (tall ? 12 : 0)}px`;
         card.scrollIntoView({
           block: tall ? "start" : "center",
