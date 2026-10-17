@@ -52,7 +52,7 @@ export function GoogleSignIn({ clientId, next }: { clientId: string; next: strin
           if (result?.error) setError(result.error);
         } catch (e) {
           rethrowIfNavigation(e);
-          setError("Couldn't sign in with Google. Refresh the page and try again.");
+          setError("Couldn't sign in with Google. Try again.");
         }
       },
     });

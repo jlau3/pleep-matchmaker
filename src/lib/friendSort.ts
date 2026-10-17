@@ -1,17 +1,14 @@
-import { BROWSE_SORT_HINTS } from "./browse";
+import { BROWSE_SORT_HINTS, BROWSE_SORTS, playerSortScore } from "./browse";
+import type { Top3Tiers } from "./top3Tiers";
 import type { FriendRow } from "./types";
 
 /** My Friends orders, read from ?sort= (best match when missing or unknown). Same names as Find New Friends. */
-export const FRIEND_SORTS = [
-  ["fit", "Best match"],
-  ["you_fit", "Best for you"],
-  ["active", "Recently active"],
-] as const;
+export const FRIEND_SORTS = [["fit", "Best Match"], ...BROWSE_SORTS] as const;
 export type FriendSort = (typeof FRIEND_SORTS)[number][0];
 
 export const FRIEND_SORT_HINTS: Record<FriendSort, string> = {
-  fit: BROWSE_SORT_HINTS.fit,
-  you_fit: BROWSE_SORT_HINTS.you_fit,
+  ...BROWSE_SORT_HINTS,
+  fit: "Highest combined utility first: Want share minus half unwanted share in both directions.",
   active: "Most recently online first.",
 };
 
@@ -20,21 +17,21 @@ export function parseFriendSort(value: string | null | undefined): FriendSort {
 }
 
 /**
- * Sort key for a friend: higher first. Friends with no number yet rank -1,
- * private lists -2, so they always sit at the bottom.
+ * Sort key for a friend: higher first. Missing data sorts below all known utilities,
+ * including negative ones; private lists sort last, so they always sit at the bottom.
  */
-export function friendRank(f: FriendRow, sort: FriendSort): number {
-  if (!f.visible) return -2;
-  if (sort === "active") return new Date(f.last_seen_at).getTime();
-  const forThem = f.match_pct ?? null;
-  const forYou = f.you_fit_pct ?? null;
-  if (sort === "you_fit") return forYou ?? -1;
-  // Best match: the two added up (a missing one counts as 0, like Find New Friends).
-  if (forThem == null && forYou == null) return -1;
-  return (forThem ?? 0) + (forYou ?? 0);
+export function friendRank(f: FriendRow, sort: FriendSort, tiers?: Record<string, string>): number {
+  if (!f.visible) return -Infinity;
+  const forThem = f.they_utility ?? null;
+  const forYou = f.you_utility ?? null;
+  return playerSortScore({
+    last_seen_at: f.last_seen_at,
+    you_utility: forYou,
+    both_pct: forThem == null && forYou == null ? null : (forThem ?? 0) + (forYou ?? 0),
+  }, sort, tiers) ?? -Number.MAX_VALUE;
 }
 
 /** Sorted copy; ties keep the order friends were added in. */
-export function sortFriends(friends: FriendRow[], sort: FriendSort): FriendRow[] {
-  return [...friends].sort((a, b) => friendRank(b, sort) - friendRank(a, sort));
+export function sortFriends(friends: FriendRow[], sort: FriendSort, top3: Top3Tiers = {}): FriendRow[] {
+  return [...friends].sort((a, b) => friendRank(b, sort, top3[b.user_id]) - friendRank(a, sort, top3[a.user_id]));
 }

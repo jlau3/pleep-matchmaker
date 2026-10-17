@@ -40,8 +40,10 @@ export interface CandyLine {
   dex: number;
   type: string;
   addedAt: string;
-  /** Rarity tie-break: legendary 0.4, mythical 0.3, pseudo-legendary 0.2, 16-pip 0.1, else 0. */
-  weight: number;
+  /** Legendary, mythical, pseudo-legendary or 16-pip: wins score ties over other lines, all four equally. */
+  rare: boolean;
+  /** Mythicals can be encountered with any sleep type. */
+  mythical?: boolean;
   members: LineMember[];
 }
 
@@ -62,8 +64,12 @@ export const ISLANDS = islandsData as unknown as Island[];
 export const NEW_LINE_DAYS = 14;
 
 export function recentLines(now = new Date(), days = NEW_LINE_DAYS): CandyLine[] {
-  const cutoff = now.getTime() - days * 24 * 3600 * 1000;
-  return LINES.filter((line) => new Date(`${line.addedAt}T00:00:00Z`).getTime() >= cutoff);
+  return LINES.filter((line) => isNewLine(line, now, days));
+}
+
+/** Released in the last `days` days (the new candy card, the Tier List's "new" border). */
+export function isNewLine(line: Pick<CandyLine, "addedAt">, now = new Date(), days = NEW_LINE_DAYS): boolean {
+  return new Date(`${line.addedAt}T00:00:00Z`).getTime() >= now.getTime() - days * 24 * 3600 * 1000;
 }
 
 export function isChoice(value: unknown): value is Choice {
@@ -107,7 +113,7 @@ for (const island of ISLANDS)
  */
 export function sleepTypeMember(line: CandyLine, sleepType: SleepType, island?: Island | null): LineMember | undefined {
   const spawning = island ? new Set(island.spawns[line.id] ?? []) : SPAWNS_ANYWHERE.get(line.id);
-  return line.members.find((member) => member.sleepType === sleepType && (!spawning || spawning.has(member.name)));
+  return line.members.find((member) => (line.mythical || member.sleepType === sleepType) && (!spawning || spawning.has(member.name)));
 }
 
 export function lineHasSleepType(line: CandyLine, sleepType: SleepType, island?: Island | null): boolean {

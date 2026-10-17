@@ -1,5 +1,5 @@
 /** Shown when a server action throws (offline, or the site was redeployed under an open tab). */
-export const SAVE_FAILED = "Couldn't save. The site may have just been updated. Refresh the page and try again.";
+export const SAVE_FAILED = "Couldn't save your changes. Try again.";
 
 /**
  * Next.js signals redirect()/notFound() from a server action by throwing; those

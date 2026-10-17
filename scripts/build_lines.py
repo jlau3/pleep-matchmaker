@@ -51,12 +51,12 @@ FORM_SPRITES = {
     (194, "Paldea"): 10253, # Paldean Wooper
 }
 
-# Tie-break weight for perceived rarity, read off the line's first stage. The
-# source has no legendary flag, so the EXP curve stands in for it: 1080 is
-# legendary, 1320 mythical, 900 pseudo-legendary. 16 friendship points (pips)
-# marks the rare single-stage spawns (Ditto, Absol, Mimikyu, ...).
-EXP_WEIGHTS = {1080: 0.4, 1320: 0.3, 900: 0.2}
-PIP_WEIGHTS = {16: 0.1}
+# Rarity tie-break, read off the line's first stage. The source has no
+# legendary flag, so the EXP curve stands in for it: 1080 is legendary, 1320
+# mythical, 900 pseudo-legendary. 16 friendship points (pips) marks the rare
+# single-stage spawns (Ditto, Absol, Mimikyu, ...). All four count the same.
+RARE_EXP = {1080, 1320, 900}
+RARE_PIPS = 16
 
 
 # Source typos, mapped to the three sleep types the game uses.
@@ -72,8 +72,8 @@ def sleep_type(p: dict) -> str:
     return value
 
 
-def rarity_weight(base: dict) -> float:
-    return EXP_WEIGHTS.get(base["exp"]) or PIP_WEIGHTS.get(base["fp"], 0.0)
+def is_rare(base: dict) -> bool:
+    return base["exp"] in RARE_EXP or base["fp"] == RARE_PIPS
 
 
 def fetch(url: str) -> bytes:
@@ -145,7 +145,8 @@ def main() -> int:
             "dex": rep["id"],
             "type": rep["type"],
             "addedAt": min(p["arrival"] for p in members),
-            "weight": rarity_weight(first),
+            "rare": is_rare(first),
+            **({"mythical": True} if first["exp"] == 1320 else {}),
             "members": line_members,
         })
 

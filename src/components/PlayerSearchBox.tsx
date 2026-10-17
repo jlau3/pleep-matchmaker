@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
-import { lookupPlayers } from "@/app/actions";
+import { lookupPlayers, markFriendSetupStarted } from "@/app/actions";
 import { rethrowIfNavigation } from "@/lib/saveError";
 import type { Relations } from "@/lib/relations";
 import type { LookupRow } from "@/lib/types";
@@ -29,6 +29,10 @@ export function PlayerSearchBox({
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
+  useEffect(() => {
+    if (initialQ.trim()) void markFriendSetupStarted().catch(() => {});
+  }, [initialQ]);
+
   // Arrived with ?q=: it's already searched (initialRows), so drop it and a refresh starts empty.
   useEffect(() => {
     const url = new URL(window.location.href);
@@ -49,7 +53,7 @@ export function PlayerSearchBox({
         else setResult({ q, rows: found.rows ?? [] });
       } catch (err) {
         rethrowIfNavigation(err);
-        setError("Search failed, try again");
+        setError("Couldn't search for players. Try again.");
       }
     });
   }
@@ -58,6 +62,8 @@ export function PlayerSearchBox({
     <div className="space-y-3">
       <form className="flex gap-2" onSubmit={search}>
         <input
+          id="player-search"
+          aria-label="Search players by IGN or friend code"
           name="q"
           value={input}
           onChange={(e) => setInput(e.target.value)}

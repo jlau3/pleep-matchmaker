@@ -45,7 +45,8 @@ as $$
 begin
   update public.profiles
   set ign = coalesce(ign, 'tester' || right(id::text, 4)),
-      friend_code = coalesce(friend_code, '9999' || right(replace(id::text, '-', ''), 8))
+      friend_code = coalesce(friend_code, '9999' || right(replace(id::text, '-', ''), 8)),
+      game_avatar = coalesce(game_avatar, 'pikachu:normal')
   where id::text like id_prefix || '%';
 end
 $$;

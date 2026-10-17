@@ -1,5 +1,9 @@
 \set ON_ERROR_STOP on
 
+-- Friends-only math below: no Everyone stand-ins (20261026000300_blend_demand.sql;
+-- restored at the end of this file).
+create or replace function public.demand_prior_votes() returns numeric language sql immutable as $$ select 0::numeric $$;
+
 insert into auth.users (id, raw_user_meta_data) values
   ('00000000-0000-0000-0003-000000000001', '{"name":"tara#0"}'),
   ('00000000-0000-0000-0003-000000000002', '{"name":"tom#0"}');
@@ -21,6 +25,8 @@ select '00000000-0000-0000-0003-000000000003'::uuid, l, 'want'::public.choice fr
 insert into public.friends (user_id, friend_id) values
   ('00000000-0000-0000-0003-000000000001', '00000000-0000-0000-0003-000000000003');
 
+-- Existing social fixtures include a chosen icon.
+update public.profiles set game_avatar = coalesce(game_avatar, 'pikachu:normal') where id::text like any (array['00000000-0000-0000-0003-%']);
 set role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0003-000000000001', false);
 
@@ -72,19 +78,27 @@ end $$;
 -- Find New leaves out people you already added.
 reset role;
 insert into public.friends (user_id, friend_id) values ('00000000-0000-0000-0003-000000000001', '00000000-0000-0000-0003-000000000002');
+-- Existing social fixtures include a chosen icon.
+update public.profiles set game_avatar = coalesce(game_avatar, 'pikachu:normal') where id::text like any (array['00000000-0000-0000-0003-%']);
 set role authenticated;
 do $$ begin
   assert not exists (select 1 from public.get_matches() where user_id = public.test_uid('tom')), 'friend not in Find New';
 end $$;
 reset role;
 delete from public.friends where user_id = '00000000-0000-0000-0003-000000000001';
+-- Existing social fixtures include a chosen icon.
+update public.profiles set game_avatar = coalesce(game_avatar, 'pikachu:normal') where id::text like any (array['00000000-0000-0000-0003-%']);
 set role authenticated;
 
 -- Friends, lookup and community stats expose the stars.
 reset role;
+-- Searching needs your own IGN (20261021000300_search_needs_ign.sql).
+update public.profiles set ign = coalesce(ign, 'ZzSearcher002'), friend_code = coalesce(friend_code, '420003002000') where id = '00000000-0000-0000-0003-000000000002';
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0003-000000000002', false);
 -- Friends both ways: votes are friends-only (20261020000800_private_votes.sql).
 select public.test_befriend('00000000-0000-0000-0003-000000000002', '00000000-0000-0000-0003-000000000001');
+-- Existing social fixtures include a chosen icon.
+update public.profiles set game_avatar = coalesce(game_avatar, 'pikachu:normal') where id::text like any (array['00000000-0000-0000-0003-%']);
 set role authenticated;
 do $$ begin
   assert (select top_wants from public.get_friends() where discord_username = 'tara') = '{ta,tb,te}', 'get_friends top_wants';
@@ -111,6 +125,8 @@ insert into auth.users (id, raw_user_meta_data) values ('00000000-0000-0000-0003
 do $$ begin
   assert public.fit_pct('00000000-0000-0000-0003-000000000009', '00000000-0000-0000-0003-000000000001') is null, 'no group, no pct';
 end $$;
+-- Existing social fixtures include a chosen icon.
+update public.profiles set game_avatar = coalesce(game_avatar, 'pikachu:normal') where id::text like any (array['00000000-0000-0000-0003-%']);
 set role authenticated;
 
 -- The Tier List asks without match %.
@@ -123,6 +139,8 @@ end $$;
 reset role;
 update public.profiles set allow_lookup = false where discord_username = 'tara';
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0003-000000000002', false);
+-- Existing social fixtures include a chosen icon.
+update public.profiles set game_avatar = coalesce(game_avatar, 'pikachu:normal') where id::text like any (array['00000000-0000-0000-0003-%']);
 set role authenticated;
 do $$ begin
   assert (select match_pct from public.get_friends() where discord_username = 'tara') is null, 'hidden friend has no pct';
@@ -142,4 +160,6 @@ do $$ begin
   end;
 end $$;
 
+reset role;
+create or replace function public.demand_prior_votes() returns numeric language sql immutable as $$ select 5::numeric $$;
 \echo 'ALL TOP 3 TESTS PASSED'

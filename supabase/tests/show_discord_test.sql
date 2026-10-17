@@ -14,6 +14,10 @@ select u::uuid, l, 'want'::public.choice
 from unnest(array['00000000-0000-0000-000b-000000000001', '00000000-0000-0000-000b-000000000002']) u,
      unnest(array['sa', 'sb', 'sc']) l;
 
+-- Searching needs your own IGN (20261021000300_search_needs_ign.sql).
+update public.profiles set ign = coalesce(ign, 'ZzSearcher002'), friend_code = coalesce(friend_code, '420011002000') where id = '00000000-0000-0000-000b-000000000002';
+-- Existing social fixtures include a chosen icon.
+update public.profiles set game_avatar = coalesce(game_avatar, 'pikachu:normal') where id::text like any (array['00000000-0000-0000-000b-%']);
 set role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-000b-000000000002', false);
 do $$
@@ -23,7 +27,8 @@ begin
   assert not exists (select 1 from public.lookup_players('Shy')), 'not found by hidden display name';
   select * into r from public.lookup_players('QuietNapper');
   assert found and r.discord_username is null and r.discord_display_name is null and r.avatar_url is null, 'lookup masked';
-  select * into r from public.browse_players('fit', true, 50, 0) where user_id = '00000000-0000-0000-000b-000000000001';
+  -- browse_all: every candidate, so a full test database can't page this player out.
+  select * into r from public.browse_all() where user_id = '00000000-0000-0000-000b-000000000001';
   assert found and r.discord_username is null and r.avatar_url is null, 'match masked';
 end $$;
 

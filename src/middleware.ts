@@ -2,7 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { supabaseEnv } from "@/lib/supabase/env";
 
-const PROTECTED = ["/vote", "/friends", "/tiers", "/matches", "/profile", "/pick", "/collection", "/lookup", "/popular", "/feedback"];
+const PROTECTED = ["/vote", "/friends", "/matches", "/profile", "/pick", "/collection", "/lookup", "/popular", "/feedback"];
 const SEEN_COOKIE = "pm_seen";
 
 export async function middleware(request: NextRequest) {
@@ -27,11 +27,11 @@ export async function middleware(request: NextRequest) {
   const user = data?.claims?.sub ? { id: data.claims.sub } : null;
 
   if (!user && PROTECTED.some((path) => request.nextUrl.pathname.startsWith(path))) {
-    // Remember where they were headed (e.g. a shared /friends?q=name link) so
-    // signing in can bring them back there.
-    const target = new URL("/", request.url);
+    const target = new URL("/auth/required", request.url);
     target.searchParams.set("next", request.nextUrl.pathname + request.nextUrl.search);
-    return NextResponse.redirect(target);
+    const locked = NextResponse.rewrite(target);
+    for (const cookie of response.cookies.getAll()) locked.cookies.set(cookie);
+    return locked;
   }
 
   // "Last seen" = any logged-in visit. The cookie keeps it to one write per 10 minutes.

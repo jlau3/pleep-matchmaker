@@ -14,7 +14,7 @@ export default function PageError({ error, reset }: { error: Error & { digest?: 
 
   return (
     <div className="card mx-auto max-w-md space-y-4 p-6 text-center">
-      <h1 className="text-xl font-extrabold">Something went wrong loading this page</h1>
+      <h1 className="text-xl font-extrabold">Couldn't load this page. Try again.</h1>
       <p className="text-sm text-slate-600 dark:text-slate-300">
         It&apos;s usually a brief connection blip. Your votes and friends are safe.
       </p>

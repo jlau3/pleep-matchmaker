@@ -11,7 +11,7 @@ export const COMMUNITY_STATS_TTL_SECONDS = 300;
 export interface CommunityStats {
   /** Want / don't-want / star counts per line among active players, and how many of them have seen it. */
   votes: Record<string, LineVotes>;
-  /** Active players with at least one want or don't-want. */
+  /** Active players in this pool; the public pool includes Neutral-only wishlists. */
   voters: number;
 }
 
@@ -52,4 +52,23 @@ export async function loadCommunityStats(supabase: SupabaseClient): Promise<Comm
     ["community-stats-v2", supabaseEnv().url],
     { revalidate: COMMUNITY_STATS_TTL_SECONDS },
   )();
+}
+
+/** Independent anonymous cache: never borrows or stores a visitor's session. */
+export async function loadPublicCommunityStats(): Promise<CommunityStats> {
+  return unstable_cache(async () => {
+    const { url, key } = supabaseEnv();
+    const db = createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false } });
+    const { data, error } = await db.rpc("get_public_line_stats");
+    if (error) throw error;
+    const votes: Record<string, LineVotes> = {};
+    let voters = 0;
+    for (const row of data ?? []) {
+      // Fail closed: absent/masked counts never become zero-count ranked lines.
+      if (row.wants == null || row.dont_wants == null || row.tops == null || row.seen == null || Number(row.seen) < 10) continue;
+      votes[row.line_id] = { wants: Number(row.wants), dontWants: Number(row.dont_wants), tops: Number(row.tops), seen: Number(row.seen) };
+      voters = Math.max(voters, Number(row.voters ?? row.seen));
+    }
+    return { votes, voters };
+  }, ["public-community-stats-v1", supabaseEnv().url], { revalidate: COMMUNITY_STATS_TTL_SECONDS })();
 }

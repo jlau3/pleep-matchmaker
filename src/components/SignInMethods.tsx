@@ -31,7 +31,7 @@ export function SignInMethods({
 }) {
   return (
     <section>
-      <h2 className="mb-1 font-semibold">Sign-in methods</h2>
+      <h2 className="mb-1 font-semibold">Sign-in Methods</h2>
       <p className="mb-3 text-sm text-slate-500">
         Link Discord to show your Discord name to friends, or link both to sign in with either.
       </p>
@@ -66,7 +66,7 @@ export function SignInMethods({
                 <input type="hidden" name="provider" value={p.id} />
                 {isLinked ? (
                   linked.length > 1 && (
-                    <button type="submit" className="rounded-full border border-slate-300 px-3 py-1 font-semibold dark:border-slate-600">
+                    <button type="submit" className="pill-idle rounded-full border border-slate-300 px-3 py-1 font-semibold dark:border-slate-600">
                       Unlink
                     </button>
                   )

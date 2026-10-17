@@ -10,6 +10,8 @@ update public.profiles set ign = 'PxAnnIgn' where id = '00000000-0000-0000-0016-
 -- Senders need an IGN and friend code (20261020000300).
 select public.test_complete_profiles('00000000-0000-0000-0016-');
 
+-- Existing social fixtures include a chosen icon.
+update public.profiles set game_avatar = coalesce(game_avatar, 'pikachu:normal') where id::text like any (array['00000000-0000-0000-0016-%']);
 set role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0016-000000000001', false);
 insert into public.preferences (user_id, line_id, choice, top) values
@@ -36,6 +38,7 @@ select set_config('request.jwt.claim.sub', '00000000-0000-0000-0016-000000000002
 do $$ begin
   assert (select wants from public.lookup_players('PxAnnIgn') where user_id = '00000000-0000-0000-0016-000000000001') = '{pikachu}', 'friend sees wants';
   assert not (select votes_hidden from public.player_extras(array['00000000-0000-0000-0016-000000000001'::uuid])), 'friend: not hidden';
+  assert (select reddit_username from public.player_extras(array['00000000-0000-0000-0016-000000000001'::uuid])) = 'ann_r', 'friend sees Reddit name';
 end $$;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0016-000000000003', false);
 select public.send_friend_request('00000000-0000-0000-0016-000000000001');
@@ -44,7 +47,7 @@ do $$ begin
   assert (select top_wants from public.lookup_players('PxAnnIgn') where user_id = '00000000-0000-0000-0016-000000000001') = '{}', 'stranger: no Top 3';
   assert not exists (select 1 from public.get_friends() where user_id = '00000000-0000-0000-0016-000000000001'), 'a request alone isn''t a friendship';
   assert (select game_avatar from public.player_extras(array['00000000-0000-0000-0016-000000000001'::uuid])) = 'pikachu:happy_shiny', 'icon';
-  assert (select reddit_username from public.player_extras(array['00000000-0000-0000-0016-000000000001'::uuid])) = 'ann_r', 'reddit';
+  assert (select reddit_username from public.player_extras(array['00000000-0000-0000-0016-000000000001'::uuid])) is null, 'stranger: no Reddit name (20261021000200)';
   assert (select votes_hidden from public.player_extras(array['00000000-0000-0000-0016-000000000001'::uuid])), 'stranger: votes flagged hidden';
 end $$;
 reset role;

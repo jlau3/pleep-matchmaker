@@ -15,6 +15,8 @@ update public.profiles set friend_code = '200000000003', open_to_friends = false
 -- Senders need an IGN and friend code (20261020000300).
 select public.test_complete_profiles('00000000-0000-0000-0020-');
 
+-- Existing social fixtures include a chosen icon.
+update public.profiles set game_avatar = coalesce(game_avatar, 'pikachu:normal') where id::text like any (array['00000000-0000-0000-0020-%', '00000000-0000-0000-0021-%']);
 set role authenticated;
 
 -- 1. Ann asks Bob: nobody is on anyone's list yet.
@@ -24,7 +26,7 @@ do $$ begin
   assert public.send_friend_request('00000000-0000-0000-0020-000000000002') = 'sent', 'sending again is harmless';
   assert not exists (select 1 from public.get_friends()), 'no friends until accepted';
   assert (select status from public.get_sent_requests() where user_id = '00000000-0000-0000-0020-000000000002') = 'open', 'shows as sent';
-  assert (select friend_code from public.get_sent_requests() where user_id = '00000000-0000-0000-0020-000000000002') = '200000000002', 'open player: code shown';
+  assert (select friend_code from public.get_sent_requests() where user_id = '00000000-0000-0000-0020-000000000002') is null, 'sent request: their code isn''t shown (20261021000900)';
   begin
     insert into public.friend_requests (from_id, to_id) values (auth.uid(), '00000000-0000-0000-0020-000000000004');
     assert false, 'requests only through the functions';
@@ -94,6 +96,8 @@ do $$ begin
 end $$;
 update public.friend_requests set created_at = now() - interval '31 days'
 where from_id = '00000000-0000-0000-0020-000000000001' and to_id = '00000000-0000-0000-0020-000000000003';
+-- Existing social fixtures include a chosen icon.
+update public.profiles set game_avatar = coalesce(game_avatar, 'pikachu:normal') where id::text like any (array['00000000-0000-0000-0020-%', '00000000-0000-0000-0021-%']);
 set role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0020-000000000003', false);
 do $$ begin
@@ -121,11 +125,15 @@ from generate_series(1, 50) g;
 select public.test_befriend('00000000-0000-0000-0020-000000000005', ('00000000-0000-0000-0021-' || lpad(g::text, 12, '0'))::uuid)
 from generate_series(1, 48) g;
 -- Eve (49 friends) asks Cal, then fills her list before Cal answers.
+-- Existing social fixtures include a chosen icon.
+update public.profiles set game_avatar = coalesce(game_avatar, 'pikachu:normal') where id::text like any (array['00000000-0000-0000-0020-%', '00000000-0000-0000-0021-%']);
 set role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0020-000000000005', false);
 select public.send_friend_request('00000000-0000-0000-0020-000000000003');
 reset role;
 select public.test_befriend('00000000-0000-0000-0020-000000000005', '00000000-0000-0000-0021-000000000050');
+-- Existing social fixtures include a chosen icon.
+update public.profiles set game_avatar = coalesce(game_avatar, 'pikachu:normal') where id::text like any (array['00000000-0000-0000-0020-%', '00000000-0000-0000-0021-%']);
 set role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0020-000000000003', false);
 do $$ begin
@@ -148,6 +156,25 @@ insert into public.friends (user_id, friend_id) values ('00000000-0000-0000-0020
 \ir ../migrations/20261020000800_private_votes.sql
 \ir ../migrations/20261020000900_top3_no_avoid.sql
 \ir ../migrations/20261020001000_top3_avoid.sql
+\ir ../migrations/20261020001100_discord_friends_only.sql
+\ir ../migrations/20261021000100_hide_code.sql
+\ir ../migrations/20261021000200_reddit_friends_only.sql
+\ir ../migrations/20261021000300_search_needs_ign.sql
+\ir ../migrations/20261021000400_requests_show_sender.sql
+\ir ../migrations/20261021000500_requests_show_reddit.sql
+\ir ../migrations/20261021000600_sent_requests_show_discord.sql
+\ir ../migrations/20261021000700_identity_required.sql
+\ir ../migrations/20261021000800_code_visibility.sql
+\ir ../migrations/20261021000900_codes_on_requests.sql
+\ir ../migrations/20261021001000_request_without_code.sql
+\ir ../migrations/20261024000100_require_profile_icon.sql
+\ir ../migrations/20261025000000_net_support_tiers.sql
+\ir ../migrations/20261025000100_equal_vote_support.sql
+\ir ../migrations/20261026000000_half_dont_want.sql
+\ir ../migrations/20261026000100_quarter_tiers.sql
+\ir ../migrations/20261026000200_pyramid_tiers.sql
+\ir ../migrations/20261026000300_blend_demand.sql
+\ir ../migrations/20261026000400_match_context_and_shared_rates.sql
 do $$ begin
   assert not exists (select 1 from public.friends where user_id = '00000000-0000-0000-0020-000000000004' and friend_id = '00000000-0000-0000-0020-000000000003'), 'one-way add removed';
   assert (select status from public.friend_requests where from_id = '00000000-0000-0000-0020-000000000004' and to_id = '00000000-0000-0000-0020-000000000003') = 'open', 'now a request';

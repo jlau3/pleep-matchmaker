@@ -1,11 +1,14 @@
 "use client";
 
+import { ViewToggle } from "./ViewToggle";
+
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { setChoice, setTop, swapTop } from "@/app/actions";
-import { CHOICE_LABEL, type Choice, LINES, LINES_BY_ID, lineSpriteUrl, MAX_TOP } from "@/lib/lines";
+import { CHOICE_LABEL, type Choice, LINES, LINES_BY_ID, lineSpriteUrl, MAX_TOP, ISLANDS, SLEEP_TYPE_LABEL, lineHasSleepType, type SleepType } from "@/lib/lines";
 import { type CrowdHint, crowdHint } from "@/lib/crowd";
 import { rethrowIfNavigation, SAVE_FAILED } from "@/lib/saveError";
+import { notifySetupVotesSaved } from "@/lib/setup";
 import { markVotesChanged } from "@/lib/votesChanged";
 import type { LineVotes } from "@/lib/tiers";
 import { CollectionGrid } from "./CollectionGrid";
@@ -14,6 +17,8 @@ import { PickFlow } from "./PickFlow";
 import { NewCandyCard } from "./NewCandyCard";
 import { StarButton } from "./StarButton";
 import { SwapTopDialog } from "./SwapTopDialog";
+import { CandyFilters } from "./CandyFilters";
+import { VoteGuide } from "./VoteGuide";
 
 type Filter = "all" | Choice;
 
@@ -25,48 +30,55 @@ const NEW_DISMISSED_KEY = "pm_new_candy_dismissed";
 const CROWD_KEY = "pm_show_crowd";
 
 const FILTERS: { value: Filter; label: string }[] = [
-  { value: "all", label: "All" },
   { value: "want", label: CHOICE_LABEL.want },
-  { value: "dont_want", label: CHOICE_LABEL.dont_want },
   { value: "undecided", label: CHOICE_LABEL.undecided },
+  { value: "dont_want", label: CHOICE_LABEL.dont_want },
 ];
 
 const pill = (active: boolean) =>
-  `rounded-full border px-3 py-1 text-sm ${active ? "pill-active border-transparent" : "border-slate-300 dark:border-slate-700"}`;
+  `rounded-full border px-3 py-1 text-sm ${active ? "pill-active border-transparent" : "pill-idle border-slate-300 dark:border-slate-700"}`;
 
 /**
  * Profile > My Votes. Every line is already saved (Neutral by default).
  * List view is one big card per line in a single column; grid view is a
  * compact multi-column layout. The choice is remembered per browser. Lines
  * are always in dex order. The star on each card picks up to MAX_TOP wants as
- * the player's Top 3, shown pinned above the list. Every click saves immediately.
+ * the player's Top 3 Spotlight, shown pinned above the list. Every click saves immediately.
  */
 export function VoteBoard({
+  userId,
   initial,
   initialTops,
-  firstVisit,
   newCandy,
   crowd,
+  autoOpenGuide = false,
 }: {
+  userId: string;
   initial: Record<string, Choice>;
   initialTops: string[];
-  firstVisit: boolean;
   /** Recently released lines and what players have voted on them so far. */
   newCandy?: { ids: string[]; votes: Record<string, LineVotes>; voters: number };
   /** Everyone's vote totals for "Show what others pick"; absent while too few have voted. */
   crowd?: { votes: Record<string, LineVotes>; voters: number };
+  /** Open How to vote once for players who haven't seen it. */
+  autoOpenGuide?: boolean;
 }) {
   const [choices, setChoices] = useState(initial);
+  const savedChoices = useRef({ ...initial });
+  function reportSavedChoice(lineId: string, choice: Choice) {
+    savedChoices.current[lineId] = choice;
+    notifySetupVotesSaved(userId, Object.values(savedChoices.current).some((value) => value !== "undecided"));
+  }
   const [tops, setTops] = useState(() => new Set(initialTops));
   const [error, setError] = useState<string | null>(null);
-  /** Line the player tried to star while their Top 3 was full; opens the swap prompt. */
+  /** Line the player tried to star while their Top 3 Spotlight was full; opens the swap prompt. */
   const [swapFor, setSwapFor] = useState<string | null>(null);
   const [view, setView] = useState<View>("list");
-  const [query, setQuery] = useState("");
+  const [islandId, setIslandId] = useState<string | null>(null);
+  const [sleepType, setSleepType] = useState<SleepType | null>(null);
   const [filter, setFilter] = useState<Filter>("all");
-
-  // "Show what others pick": off by default so players vote their own taste first; remembered per browser.
-  const [showCrowd, setShowCrowd] = useState(false);
+  // Community hints start on; remember an explicit choice to turn them off.
+  const [showCrowd, setShowCrowd] = useState(true);
   const hints = useMemo(() => {
     if (!crowd || !showCrowd) return undefined;
     const out: Record<string, CrowdHint> = {};
@@ -76,7 +88,7 @@ export function VoteBoard({
 
   useEffect(() => {
     try {
-      setShowCrowd(localStorage.getItem(CROWD_KEY) === "1");
+      setShowCrowd(localStorage.getItem(CROWD_KEY) !== "0");
       const saved = localStorage.getItem(VIEW_KEY);
       if (saved === "list" || saved === "grid") setView(saved);
     } catch {
@@ -134,16 +146,19 @@ export function VoteBoard({
     setFilter(next);
   }
 
-  const visible = useMemo(() => {
-    const q = query.trim().toLowerCase();
+  const scopedLines = useMemo(() => {
+    const island = ISLANDS.find((item) => item.id === islandId);
     return LINES.filter((line) => {
-      if (filter !== "all" && (choices[line.id] ?? "undecided") !== filter && !lingering.has(line.id)) return false;
-      return !q || line.members.some((member) => member.name.toLowerCase().includes(q));
+      if (island && !island.lines.includes(line.id)) return false;
+      if (sleepType && !lineHasSleepType(line, sleepType, island)) return false;
+      return true;
     });
-  }, [choices, query, filter, lingering]);
-
-  const counts = { want: 0, dont_want: 0, undecided: 0 };
-  for (const line of LINES) counts[choices[line.id] ?? "undecided"]++;
+  }, [islandId, sleepType]);
+  const filtered = scopedLines.filter((line) => filter === "all" || (choices[line.id] ?? "undecided") === filter);
+  // Keep the brief undo window on the page, but export only current filter matches.
+  const visible = scopedLines.filter((line) => filter === "all" || (choices[line.id] ?? "undecided") === filter || lingering.has(line.id));
+  const filterLabel = [ISLANDS.find((item) => item.id === islandId)?.name, sleepType && SLEEP_TYPE_LABEL[sleepType],
+    filter !== "all" && CHOICE_LABEL[filter]].filter(Boolean).join(" · ");
 
   /** Applies a change locally, saves it, and rolls both maps back if the save fails. */
   async function save(lineId: string, next: { choice: Choice; top: boolean }, request: () => Promise<{ error?: string }>) {
@@ -175,13 +190,16 @@ export function VoteBoard({
     if (failure) {
       setError(failure);
       apply(previous.choice, previous.top);
+      return false;
     }
+    reportSavedChoice(lineId, next.choice);
+    return true;
   }
 
   function choose(lineId: string, choice: Choice) {
     linger(lineId);
     // Anything but Want drops the star (the database does the same).
-    save(lineId, { choice, top: choice === "want" && tops.has(lineId) }, () => setChoice(lineId, choice));
+    return save(lineId, { choice, top: choice === "want" && tops.has(lineId) }, () => setChoice(lineId, choice));
   }
 
   function toggleTop(lineId: string) {
@@ -197,7 +215,7 @@ export function VoteBoard({
     save(lineId, { choice: "want", top: true }, () => setTop(lineId, true));
   }
 
-  /** Swap prompt: drop `outId` from the Top 3 and star `swapFor` instead. */
+  /** Swap prompt: drop `outId` from the Top 3 Spotlight and star `swapFor` instead. */
   async function swap(outId: string) {
     const inId = swapFor;
     if (!inId) return;
@@ -223,7 +241,7 @@ export function VoteBoard({
         else delete out[inId];
         return out;
       });
-    }
+    } else reportSavedChoice(inId, "want");
   }
 
   const topLines = LINES.filter((line) => tops.has(line.id));
@@ -248,59 +266,32 @@ export function VoteBoard({
   // Which new lines get a card is fixed at load (undecided, not starred), so a card stays put while you vote on it
   // and is gone next visit. Closing it hides it for good in this browser.
   const [pinnedNew] = useState(() => (newCandy?.ids ?? []).filter((id) => (initial[id] ?? "undecided") === "undecided" && !initialTops.includes(id)));
-  const newCards = dismissedNew ? pinnedNew.filter((id) => !dismissedNew.has(id) && LINES_BY_ID.has(id)) : [];
+  const newCards = dismissedNew ? pinnedNew.filter((id) => !dismissedNew.has(id) && LINES_BY_ID.has(id) && visible.some((line) => line.id === id)) : [];
   const cancelSwap = useCallback(() => setSwapFor(null), []);
 
   return (
     <div>
-      <div className="sticky top-[49px] z-10 -mx-4 mb-4 bg-sky/95 px-4 py-2 shadow-sm backdrop-blur dark:bg-night-deep/95">
-        <div className="flex items-center justify-between gap-3 text-sm">
-          <span className="flex flex-wrap gap-x-3">
-            <span className="text-want">
-              <strong>{counts.want}</strong> want
-            </span>
-            <span className="text-dont">
-              <strong>{counts.dont_want}</strong> don&apos;t want
-            </span>
-            <span className="text-meh">
-              <strong>{counts.undecided}</strong> neutral
-            </span>
-          </span>
-          <ExportVotes choices={choices} tops={tops} />
-        </div>
-        {error && (
-          <div role="alert" className="mt-2 flex items-center justify-between gap-3 text-sm text-dont">
-            <span>{error}</span>
-            <button type="button" onClick={() => window.location.reload()} className="shrink-0 font-bold underline">
-              Refresh
-            </button>
+      <div className="mb-4 space-y-4">
+        <VoteGuide autoOpen={autoOpenGuide} />
+        {error && <div role="alert" className="flex items-center justify-between gap-3 text-sm text-dont">
+          <span>{error}</span>
+          <button type="button" onClick={() => window.location.reload()} className="shrink-0 font-bold underline">Refresh</button>
+        </div>}
+        <CandyFilters islandId={islandId} sleepType={sleepType} onIsland={setIslandId} onSleep={setSleepType}
+          headerAction={<ExportVotes choices={choices} tops={tops} lines={filtered} filterLabel={filterLabel} />}>
+          <div role="group" aria-label="Vote" className="ml-auto flex flex-wrap items-center gap-2">
+            {FILTERS.map((item) => <button key={item.value} type="button" aria-pressed={filter === item.value}
+              title={filter === item.value ? `${item.label} (tap again for all votes)` : item.label}
+              onClick={() => changeFilter(filter === item.value ? "all" : item.value)} className={pill(filter === item.value)}>
+              {item.label}
+            </button>)}
           </div>
-        )}
+        </CandyFilters>
       </div>
 
-      {firstVisit && (
-        <p className="mb-4 text-center text-sm text-slate-500">
-          Pick Want or Don&apos;t Want on the candies you care about. Everything else stays Neutral.
-        </p>
-      )}
-
-      {newCards.map((id) => (
-        <NewCandyCard
-          key={id}
-          line={LINES_BY_ID.get(id)!}
-          votes={newCandy!.votes[id]}
-          voters={newCandy!.voters}
-          choice={choices[id]}
-          starred={tops.has(id)}
-          onChoose={(choice) => choose(id, choice)}
-          onStar={() => toggleTop(id)}
-          onDismiss={() => dismissNew(id)}
-        />
-      ))}
-
-      <section className="card mb-4 p-3" aria-label="Your Top 3">
-        <h2 className="font-bold">Your Top {MAX_TOP}</h2>
-        <p className="mb-2 text-xs text-slate-500">Tap ★ on a candy to star it as a top want.</p>
+      <section className="card mb-4 p-3" aria-label="Your Top 3 Spotlight">
+        <h2 className="font-bold">Your Top {MAX_TOP} Spotlight</h2>
+        <p className="mb-2 text-xs text-slate-500">Tap ★ to spotlight up to {MAX_TOP} candies you most want friends to send.</p>
         <ul className="grid grid-cols-3 gap-2">
           {Array.from({ length: MAX_TOP }, (_, i) => {
             const line = topLines[i];
@@ -323,45 +314,35 @@ export function VoteBoard({
       </section>
 
       <div className="mb-4 space-y-3">
-        <div className="flex gap-2">
-          <input
-            type="search"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search Pokémon"
-            className="field min-w-0 flex-1"
-          />
-          <div className="inline-flex shrink-0 rounded-full bg-white p-1 shadow-sm dark:bg-night" role="group" aria-label="Layout">
-            {(["list", "grid"] as const).map((v) => (
-              <button
-                key={v}
-                type="button"
-                aria-pressed={view === v}
-                onClick={() => changeView(v)}
-                className={`rounded-full px-3 py-1 text-sm font-semibold ${view === v ? "pill-active" : "text-slate-600 dark:text-slate-300"}`}
-              >
-                {v === "list" ? "List" : "Grid"}
-              </button>
-            ))}
-          </div>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          {crowd && (
+            <label className="flex min-w-0 flex-1 cursor-pointer items-center gap-2 text-sm">
+              <input type="checkbox" checked={showCrowd} onChange={toggleCrowd} className="h-4 w-4 shrink-0 accent-[var(--color-night)]" />
+              <span>
+                Show {crowd.voters} active community votes
+                <span className="block text-xs text-slate-500" role="status">{filtered.length} out of {LINES.length} candies</span>
+              </span>
+            </label>
+          )}
+          {!crowd && <p className="text-xs text-slate-500" role="status">{filtered.length} out of {LINES.length} candies</p>}
+          <span className="ml-auto shrink-0"><ViewToggle view={view} onChange={changeView} /></span>
         </div>
-        <div className="flex flex-wrap gap-2">
-          {FILTERS.map((f) => (
-            <button key={f.value} type="button" onClick={() => changeFilter(f.value)} className={pill(filter === f.value)}>
-              {f.label}
-            </button>
-          ))}
-        </div>
-        {crowd && (
-          <label className="flex cursor-pointer items-center gap-2 text-sm">
-            <input type="checkbox" checked={showCrowd} onChange={toggleCrowd} className="h-4 w-4 accent-[var(--color-night)]" />
-            <span>
-              Show what others pick{" "}
-              <span className="text-slate-500">({crowd.voters} active players)</span>
-            </span>
-          </label>
-        )}
       </div>
+
+      {newCards.map((id) => (
+        <NewCandyCard
+          key={id}
+          line={LINES_BY_ID.get(id)!}
+          votes={newCandy!.votes[id]}
+          voters={newCandy!.voters}
+          hint={showCrowd ? crowdHint(newCandy!.votes[id], newCandy!.voters) : undefined}
+          choice={choices[id]}
+          starred={tops.has(id)}
+          onChoose={(choice) => choose(id, choice)}
+          onStar={() => toggleTop(id)}
+          onDismiss={() => dismissNew(id)}
+        />
+      ))}
 
       {visible.length === 0 ? (
         <p className="py-8 text-center text-slate-500">Nothing here.</p>
@@ -377,7 +358,7 @@ export function VoteBoard({
 
       <div className="mx-auto mt-10 max-w-md text-center">
         <Link href="/matches" className="btn-primary block w-full px-6 py-4 text-lg">
-          Matchmake
+          Find New Friends →
         </Link>
       </div>
     </div>

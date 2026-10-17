@@ -65,7 +65,7 @@ export function FriendPlaceholders({
         else setHits({ hits: result.hits ?? [], searched: result.searched ?? 0 });
       } catch (e) {
         rethrowIfNavigation(e);
-        setError("Search failed, try again");
+        setError("Couldn't search for players. Try again.");
       }
     });
   }
@@ -77,18 +77,16 @@ export function FriendPlaceholders({
     <details ref={details} className="card group p-4">
       <summary className="flex cursor-pointer list-none items-center justify-between gap-3">
         <span>
-          <span className="font-semibold">Not here yet</span> <span className="text-sm text-slate-500">{rows.length}</span>
-          {maybes > 0 && <span className="ml-2 text-xs font-semibold text-want">{maybes} may have joined</span>}
-          <span className="block text-sm text-slate-500">In-game friends who haven&apos;t signed up yet.</span>
+          <span className="font-semibold">Friends to Find</span> <span className="text-sm text-slate-500">{rows.length}</span>
+          {maybes > 0 && <span className="ml-2 text-xs font-semibold text-want">{maybes} {maybes === 1 ? "name" : "names"} matched</span>}
+          <span className="block text-sm text-slate-500">Save in-game friends you haven't connected with here.</span>
         </span>
         <span className="shrink-0 text-xs font-semibold underline group-open:hidden">Show</span>
         <span className="hidden shrink-0 text-xs font-semibold underline group-open:inline">Hide</span>
       </summary>
       <div className="mt-3 space-y-3">
         <p className="text-sm text-slate-500">
-          Add their <b>exact IGN</b>, spelled as it shows in their Pokémon Sleep profile, as a reminder and search now and
-          then. We flag a name here when someone with that exact name joins (capitals, spaces and symbols don&apos;t
-          matter). Once they join, send them a friend request; you'll be asked whether to take the name off this list.
+          Save your friends' in-game names here. We'll flag matching accounts so you can check the icon and send a request.
         </p>
         <form
           className="flex flex-wrap items-center gap-2"
@@ -136,7 +134,7 @@ export function FriendPlaceholders({
               shownHits.map((hit) => (
                 <div key={hit.name} className="space-y-2">
                   <h4 className="text-sm font-semibold">
-                    Possible match{hit.rows.length === 1 ? "" : "es"} for <span className="text-want">{hit.name}</span>
+                    Possible Match{hit.rows.length === 1 ? "" : "es"} For <span className="text-want">{hit.name}</span>
                   </h4>
                   <PlayerResults q={hit.name} rows={hit.rows} relations={relations} viewerId={viewerId} suggestPlaceholder={false} placeholder={hit.name} />
                 </div>

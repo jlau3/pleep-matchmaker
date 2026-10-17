@@ -2,9 +2,11 @@ import Link from "next/link";
 import { TierExplorer, type PoolVotes } from "@/components/TierExplorer";
 import { LINES, isSleepType } from "@/lib/lines";
 import { countOwnVotes } from "@/lib/data";
-import { requireUser } from "@/lib/supabase/server";
-import { loadCommunityStats } from "@/lib/communityStats";
-import { countVotes } from "@/lib/tiers";
+import { getAuth } from "@/lib/supabase/server";
+import { loadDevTierSnapshot } from "@/lib/devTierSnapshot";
+import { loadPublicCommunityStats } from "@/lib/communityStats";
+import { parseTierStyle } from "@/lib/tiers";
+import { friendTierPool } from "@/lib/friendTierPool";
 import type { FriendRow } from "@/lib/types";
 
 /**
@@ -13,32 +15,37 @@ import type { FriendRow } from "@/lib/types";
  * islands or one island, any sleep type or one) in the browser. Switching views never goes back to the
  * server; the query string only picks the view shown first.
  */
-export default async function TiersPage({ searchParams }: { searchParams: Promise<{ pool?: string; island?: string; sleep?: string }> }) {
-  const { supabase, user } = await requireUser();
+export default async function TiersPage({ searchParams }: { searchParams: Promise<{ pool?: string; island?: string; sleep?: string; style?: string }> }) {
+  const { supabase, userId } = await getAuth();
   const params = await searchParams;
+  const snapshot = await loadDevTierSnapshot();
 
   // All three lookups at once: the page waits on the slowest only. Everyone's
   // totals come from a shared 5-minute cache, so they rarely cost a round trip.
   const [votedCount, friends, everyone] = await Promise.all([
-    countOwnVotes(supabase, user.id),
+    userId ? countOwnVotes(supabase, userId) : Promise.resolve(LINES.length),
     // Votes only: skip the per-friend fit %, which only My Friends shows.
-    supabase.rpc("get_friends", { with_match: false }).then(({ data, error }): PoolVotes => {
-      if (error) throw error;
-      const rows = data as FriendRow[];
-      const players = rows.filter((f) => f.visible && f.wants.length + f.dont_wants.length > 0);
-      return { votes: Object.fromEntries(countVotes(players)), voters: players.length, friendCount: rows.length };
-    }),
-    loadCommunityStats(supabase).then(
-      (community): PoolVotes => ({ votes: community.votes, voters: community.voters, friendCount: 0 }),
+    userId ? Promise.all([supabase.rpc("get_friends", { with_match: false }), supabase.rpc("get_friend_voters")])
+      .then(([contacts, voting]): PoolVotes => {
+        if (contacts.error) throw contacts.error;
+        if (voting.error) throw voting.error;
+        return friendTierPool(contacts.data as FriendRow[], (voting.data ?? []).map((row: { user_id: string }) => row.user_id));
+      }) : Promise.resolve({ votes: {}, voters: 0, friendCount: 0 }),
+    snapshot ? Promise.resolve({ votes: snapshot.votes, voters: snapshot.voters, friendCount: 0, thresholded: true }) : loadPublicCommunityStats().then(
+      (community): PoolVotes => ({ votes: community.votes, voters: community.voters, friendCount: 0, thresholded: true }),
     ),
   ]);
   const unvoted = Math.max(0, LINES.length - votedCount);
 
   return (
     <TierExplorer
+      signedIn={Boolean(userId)}
+      viewerId={userId}
       friends={friends}
       everyone={everyone}
-      initialPool={params.pool === "everyone" ? "everyone" : "friends"}
+      everyoneSnapshot={snapshot ? { exportedAt: snapshot.exportedAt, candies: snapshot.candies } : undefined}
+      initialPool={!userId || params.pool !== "friends" ? "everyone" : "friends"}
+      initialStyle={parseTierStyle(params.style)}
       initialIsland={params.island ?? null}
       initialSleep={isSleepType(params.sleep) ? params.sleep : null}
       loadedAt={new Date().toISOString()}

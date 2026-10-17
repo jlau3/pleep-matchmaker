@@ -1,0 +1,755 @@
+{
+  "exportedAt": "2026-10-16T15:17:47.250109+00:00",
+  "voters": 201,
+  "lines": [
+    {
+      "seen": 201,
+      "tops": 26,
+      "wants": 161,
+      "line_id": "bagon",
+      "dont_wants": 4
+    },
+    {
+      "seen": 201,
+      "tops": 27,
+      "wants": 159,
+      "line_id": "dratini",
+      "dont_wants": 11
+    },
+    {
+      "seen": 201,
+      "tops": 15,
+      "wants": 158,
+      "line_id": "larvitar",
+      "dont_wants": 10
+    },
+    {
+      "seen": 201,
+      "tops": 7,
+      "wants": 150,
+      "line_id": "latios",
+      "dont_wants": 10
+    },
+    {
+      "seen": 201,
+      "tops": 17,
+      "wants": 142,
+      "line_id": "treecko",
+      "dont_wants": 9
+    },
+    {
+      "seen": 201,
+      "tops": 11,
+      "wants": 141,
+      "line_id": "mudkip",
+      "dont_wants": 5
+    },
+    {
+      "seen": 201,
+      "tops": 7,
+      "wants": 141,
+      "line_id": "piplup",
+      "dont_wants": 5
+    },
+    {
+      "seen": 201,
+      "tops": 13,
+      "wants": 137,
+      "line_id": "spheal",
+      "dont_wants": 9
+    },
+    {
+      "seen": 201,
+      "tops": 2,
+      "wants": 137,
+      "line_id": "cresselia",
+      "dont_wants": 13
+    },
+    {
+      "seen": 201,
+      "tops": 3,
+      "wants": 132,
+      "line_id": "latias",
+      "dont_wants": 14
+    },
+    {
+      "seen": 201,
+      "tops": 3,
+      "wants": 132,
+      "line_id": "mew",
+      "dont_wants": 16
+    },
+    {
+      "seen": 201,
+      "tops": 9,
+      "wants": 131,
+      "line_id": "totodile",
+      "dont_wants": 5
+    },
+    {
+      "seen": 201,
+      "tops": 6,
+      "wants": 130,
+      "line_id": "tinkatink",
+      "dont_wants": 7
+    },
+    {
+      "seen": 201,
+      "tops": 10,
+      "wants": 127,
+      "line_id": "tyrunt",
+      "dont_wants": 9
+    },
+    {
+      "seen": 201,
+      "tops": 7,
+      "wants": 124,
+      "line_id": "darkrai",
+      "dont_wants": 19
+    },
+    {
+      "seen": 201,
+      "tops": 4,
+      "wants": 121,
+      "line_id": "cyndaquil",
+      "dont_wants": 7
+    },
+    {
+      "seen": 201,
+      "tops": 7,
+      "wants": 117,
+      "line_id": "pumpkaboo",
+      "dont_wants": 26
+    },
+    {
+      "seen": 201,
+      "tops": 9,
+      "wants": 116,
+      "line_id": "wooper",
+      "dont_wants": 24
+    },
+    {
+      "seen": 201,
+      "tops": 8,
+      "wants": 116,
+      "line_id": "shinx",
+      "dont_wants": 14
+    },
+    {
+      "seen": 201,
+      "tops": 8,
+      "wants": 114,
+      "line_id": "heracross",
+      "dont_wants": 21
+    },
+    {
+      "seen": 201,
+      "tops": 4,
+      "wants": 114,
+      "line_id": "mewtwo",
+      "dont_wants": 24
+    },
+    {
+      "seen": 201,
+      "tops": 8,
+      "wants": 113,
+      "line_id": "turtwig",
+      "dont_wants": 14
+    },
+    {
+      "seen": 201,
+      "tops": 11,
+      "wants": 112,
+      "line_id": "vulpix",
+      "dont_wants": 12
+    },
+    {
+      "seen": 201,
+      "tops": 7,
+      "wants": 112,
+      "line_id": "bulbasaur",
+      "dont_wants": 27
+    },
+    {
+      "seen": 201,
+      "tops": 7,
+      "wants": 111,
+      "line_id": "trapinch",
+      "dont_wants": 30
+    },
+    {
+      "seen": 201,
+      "tops": 3,
+      "wants": 111,
+      "line_id": "torchic",
+      "dont_wants": 19
+    },
+    {
+      "seen": 201,
+      "tops": 6,
+      "wants": 110,
+      "line_id": "chimchar",
+      "dont_wants": 17
+    },
+    {
+      "seen": 201,
+      "tops": 10,
+      "wants": 108,
+      "line_id": "grubbin",
+      "dont_wants": 24
+    },
+    {
+      "seen": 201,
+      "tops": 10,
+      "wants": 106,
+      "line_id": "dedenne",
+      "dont_wants": 16
+    },
+    {
+      "seen": 201,
+      "tops": 7,
+      "wants": 106,
+      "line_id": "sneasel",
+      "dont_wants": 16
+    },
+    {
+      "seen": 201,
+      "tops": 5,
+      "wants": 106,
+      "line_id": "squirtle",
+      "dont_wants": 19
+    },
+    {
+      "seen": 201,
+      "tops": 3,
+      "wants": 104,
+      "line_id": "raikou",
+      "dont_wants": 22
+    },
+    {
+      "seen": 201,
+      "tops": 2,
+      "wants": 103,
+      "line_id": "natu",
+      "dont_wants": 16
+    },
+    {
+      "seen": 201,
+      "tops": 1,
+      "wants": 103,
+      "line_id": "suicune",
+      "dont_wants": 21
+    },
+    {
+      "seen": 201,
+      "tops": 3,
+      "wants": 101,
+      "line_id": "sprigatito",
+      "dont_wants": 26
+    },
+    {
+      "seen": 201,
+      "tops": 0,
+      "wants": 100,
+      "line_id": "entei",
+      "dont_wants": 24
+    },
+    {
+      "seen": 201,
+      "tops": 4,
+      "wants": 99,
+      "line_id": "farfetchd",
+      "dont_wants": 29
+    },
+    {
+      "seen": 201,
+      "tops": 8,
+      "wants": 95,
+      "line_id": "stufful",
+      "dont_wants": 42
+    },
+    {
+      "seen": 201,
+      "tops": 4,
+      "wants": 95,
+      "line_id": "noibat",
+      "dont_wants": 22
+    },
+    {
+      "seen": 201,
+      "tops": 2,
+      "wants": 95,
+      "line_id": "chikorita",
+      "dont_wants": 18
+    },
+    {
+      "seen": 201,
+      "tops": 11,
+      "wants": 94,
+      "line_id": "eevee",
+      "dont_wants": 32
+    },
+    {
+      "seen": 201,
+      "tops": 4,
+      "wants": 94,
+      "line_id": "shuckle",
+      "dont_wants": 29
+    },
+    {
+      "seen": 201,
+      "tops": 6,
+      "wants": 92,
+      "line_id": "chansey",
+      "dont_wants": 42
+    },
+    {
+      "seen": 201,
+      "tops": 4,
+      "wants": 92,
+      "line_id": "aron",
+      "dont_wants": 32
+    },
+    {
+      "seen": 201,
+      "tops": 4,
+      "wants": 88,
+      "line_id": "cutiefly",
+      "dont_wants": 31
+    },
+    {
+      "seen": 201,
+      "tops": 2,
+      "wants": 88,
+      "line_id": "onix",
+      "dont_wants": 31
+    },
+    {
+      "seen": 201,
+      "tops": 4,
+      "wants": 86,
+      "line_id": "pikachu",
+      "dont_wants": 30
+    },
+    {
+      "seen": 201,
+      "tops": 3,
+      "wants": 79,
+      "line_id": "rufflet",
+      "dont_wants": 29
+    },
+    {
+      "seen": 201,
+      "tops": 3,
+      "wants": 77,
+      "line_id": "charmander",
+      "dont_wants": 33
+    },
+    {
+      "seen": 201,
+      "tops": 5,
+      "wants": 72,
+      "line_id": "spiritomb",
+      "dont_wants": 40
+    },
+    {
+      "seen": 201,
+      "tops": 3,
+      "wants": 72,
+      "line_id": "fuecoco",
+      "dont_wants": 44
+    },
+    {
+      "seen": 201,
+      "tops": 7,
+      "wants": 69,
+      "line_id": "ralts",
+      "dont_wants": 41
+    },
+    {
+      "seen": 201,
+      "tops": 4,
+      "wants": 69,
+      "line_id": "dwebble",
+      "dont_wants": 46
+    },
+    {
+      "seen": 201,
+      "tops": 2,
+      "wants": 69,
+      "line_id": "foongus",
+      "dont_wants": 46
+    },
+    {
+      "seen": 201,
+      "tops": 8,
+      "wants": 66,
+      "line_id": "mimikyu",
+      "dont_wants": 48
+    },
+    {
+      "seen": 201,
+      "tops": 2,
+      "wants": 64,
+      "line_id": "gulpin",
+      "dont_wants": 49
+    },
+    {
+      "seen": 201,
+      "tops": 4,
+      "wants": 63,
+      "line_id": "pawmi",
+      "dont_wants": 41
+    },
+    {
+      "seen": 201,
+      "tops": 3,
+      "wants": 60,
+      "line_id": "bellsprout",
+      "dont_wants": 62
+    },
+    {
+      "seen": 201,
+      "tops": 6,
+      "wants": 59,
+      "line_id": "gastly",
+      "dont_wants": 57
+    },
+    {
+      "seen": 201,
+      "tops": 4,
+      "wants": 56,
+      "line_id": "cetoddle",
+      "dont_wants": 49
+    },
+    {
+      "seen": 201,
+      "tops": 2,
+      "wants": 55,
+      "line_id": "geodude",
+      "dont_wants": 48
+    },
+    {
+      "seen": 201,
+      "tops": 7,
+      "wants": 54,
+      "line_id": "drampa",
+      "dont_wants": 57
+    },
+    {
+      "seen": 201,
+      "tops": 5,
+      "wants": 54,
+      "line_id": "cramorant",
+      "dont_wants": 50
+    },
+    {
+      "seen": 201,
+      "tops": 0,
+      "wants": 53,
+      "line_id": "quaxly",
+      "dont_wants": 60
+    },
+    {
+      "seen": 201,
+      "tops": 1,
+      "wants": 50,
+      "line_id": "magnemite",
+      "dont_wants": 62
+    },
+    {
+      "seen": 201,
+      "tops": 3,
+      "wants": 48,
+      "line_id": "doduo",
+      "dont_wants": 47
+    },
+    {
+      "seen": 201,
+      "tops": 4,
+      "wants": 47,
+      "line_id": "snover",
+      "dont_wants": 62
+    },
+    {
+      "seen": 201,
+      "tops": 4,
+      "wants": 46,
+      "line_id": "shuppet",
+      "dont_wants": 55
+    },
+    {
+      "seen": 201,
+      "tops": 2,
+      "wants": 45,
+      "line_id": "absol",
+      "dont_wants": 62
+    },
+    {
+      "seen": 201,
+      "tops": 0,
+      "wants": 44,
+      "line_id": "swablu",
+      "dont_wants": 60
+    },
+    {
+      "seen": 201,
+      "tops": 2,
+      "wants": 43,
+      "line_id": "mareep",
+      "dont_wants": 68
+    },
+    {
+      "seen": 201,
+      "tops": 3,
+      "wants": 38,
+      "line_id": "croagunk",
+      "dont_wants": 87
+    },
+    {
+      "seen": 201,
+      "tops": 2,
+      "wants": 37,
+      "line_id": "houndour",
+      "dont_wants": 68
+    },
+    {
+      "seen": 201,
+      "tops": 1,
+      "wants": 36,
+      "line_id": "sableye",
+      "dont_wants": 92
+    },
+    {
+      "seen": 201,
+      "tops": 4,
+      "wants": 35,
+      "line_id": "delibird",
+      "dont_wants": 94
+    },
+    {
+      "seen": 201,
+      "tops": 1,
+      "wants": 35,
+      "line_id": "plusle",
+      "dont_wants": 86
+    },
+    {
+      "seen": 201,
+      "tops": 2,
+      "wants": 33,
+      "line_id": "mawile",
+      "dont_wants": 92
+    },
+    {
+      "seen": 201,
+      "tops": 1,
+      "wants": 31,
+      "line_id": "murkrow",
+      "dont_wants": 100
+    },
+    {
+      "seen": 201,
+      "tops": 2,
+      "wants": 28,
+      "line_id": "drifloon",
+      "dont_wants": 100
+    },
+    {
+      "seen": 201,
+      "tops": 2,
+      "wants": 27,
+      "line_id": "sandshrew",
+      "dont_wants": 102
+    },
+    {
+      "seen": 201,
+      "tops": 1,
+      "wants": 25,
+      "line_id": "hawlucha",
+      "dont_wants": 108
+    },
+    {
+      "seen": 201,
+      "tops": 1,
+      "wants": 24,
+      "line_id": "mankey",
+      "dont_wants": 104
+    },
+    {
+      "seen": 201,
+      "tops": 0,
+      "wants": 24,
+      "line_id": "munna",
+      "dont_wants": 96
+    },
+    {
+      "seen": 201,
+      "tops": 1,
+      "wants": 23,
+      "line_id": "clefairy",
+      "dont_wants": 114
+    },
+    {
+      "seen": 201,
+      "tops": 1,
+      "wants": 23,
+      "line_id": "togepi",
+      "dont_wants": 122
+    },
+    {
+      "seen": 201,
+      "tops": 0,
+      "wants": 22,
+      "line_id": "caterpie",
+      "dont_wants": 86
+    },
+    {
+      "seen": 201,
+      "tops": 0,
+      "wants": 21,
+      "line_id": "pinsir",
+      "dont_wants": 110
+    },
+    {
+      "seen": 201,
+      "tops": 0,
+      "wants": 20,
+      "line_id": "slakoth",
+      "dont_wants": 112
+    },
+    {
+      "seen": 201,
+      "tops": 1,
+      "wants": 18,
+      "line_id": "ditto",
+      "dont_wants": 120
+    },
+    {
+      "seen": 201,
+      "tops": 1,
+      "wants": 17,
+      "line_id": "growlithe",
+      "dont_wants": 106
+    },
+    {
+      "seen": 201,
+      "tops": 1,
+      "wants": 16,
+      "line_id": "riolu",
+      "dont_wants": 124
+    },
+    {
+      "seen": 201,
+      "tops": 2,
+      "wants": 14,
+      "line_id": "toxel",
+      "dont_wants": 116
+    },
+    {
+      "seen": 201,
+      "tops": 0,
+      "wants": 14,
+      "line_id": "comfey",
+      "dont_wants": 127
+    },
+    {
+      "seen": 201,
+      "tops": 0,
+      "wants": 14,
+      "line_id": "mr-mime",
+      "dont_wants": 109
+    },
+    {
+      "seen": 201,
+      "tops": 1,
+      "wants": 13,
+      "line_id": "psyduck",
+      "dont_wants": 114
+    },
+    {
+      "seen": 201,
+      "tops": 0,
+      "wants": 13,
+      "line_id": "minun",
+      "dont_wants": 109
+    },
+    {
+      "seen": 201,
+      "tops": 1,
+      "wants": 12,
+      "line_id": "togedemaru",
+      "dont_wants": 113
+    },
+    {
+      "seen": 201,
+      "tops": 1,
+      "wants": 12,
+      "line_id": "kangaskhan",
+      "dont_wants": 116
+    },
+    {
+      "seen": 201,
+      "tops": 2,
+      "wants": 11,
+      "line_id": "slowpoke",
+      "dont_wants": 131
+    },
+    {
+      "seen": 201,
+      "tops": 1,
+      "wants": 11,
+      "line_id": "ekans",
+      "dont_wants": 127
+    },
+    {
+      "seen": 201,
+      "tops": 1,
+      "wants": 11,
+      "line_id": "jigglypuff",
+      "dont_wants": 117
+    },
+    {
+      "seen": 201,
+      "tops": 1,
+      "wants": 9,
+      "line_id": "rattata",
+      "dont_wants": 143
+    },
+    {
+      "seen": 201,
+      "tops": 0,
+      "wants": 8,
+      "line_id": "diglett",
+      "dont_wants": 143
+    },
+    {
+      "seen": 201,
+      "tops": 0,
+      "wants": 6,
+      "line_id": "meowth",
+      "dont_wants": 157
+    },
+    {
+      "seen": 201,
+      "tops": 0,
+      "wants": 4,
+      "line_id": "cubone",
+      "dont_wants": 146
+    },
+    {
+      "seen": 201,
+      "tops": 1,
+      "wants": 3,
+      "line_id": "sudowoodo",
+      "dont_wants": 158
+    },
+    {
+      "seen": 201,
+      "tops": 0,
+      "wants": 1,
+      "line_id": "wobbuffet",
+      "dont_wants": 171
+    }
+  ]
+}

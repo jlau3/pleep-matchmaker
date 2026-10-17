@@ -22,18 +22,27 @@ export default function GuidesPage() {
       {active && <MetaNote post={active} highlight />}
 
       {GUIDE_SECTIONS.map((section) => (
-        <section key={section.id} id={section.id} className="card space-y-4 p-5">
-          <h2 className="text-xl font-extrabold">{section.title}</h2>
-          {section.intro && <div className="guide-body">{section.intro}</div>}
-          <ul className="space-y-4">
-            {section.tips.map((tip) => (
-              <li key={tip.title}>
-                <h3 className="mb-1 font-bold">{tip.title}</h3>
-                <div className="guide-body">{tip.body}</div>
-              </li>
-            ))}
-          </ul>
-        </section>
+        // Collapsed like Friends to Find; inside, bold-led bullets like How Match Scores Work.
+        <details key={section.id} id={section.id} className="card group p-5">
+          <summary className="flex cursor-pointer list-none items-center justify-between gap-3">
+            <span>
+              <span className="block text-xl font-extrabold">{section.title}</span>
+              <span className="block text-sm text-slate-500">{section.collapsed}</span>
+            </span>
+            <span className="shrink-0 text-xs font-semibold underline group-open:hidden">Show</span>
+            <span className="hidden shrink-0 text-xs font-semibold underline group-open:inline">Hide</span>
+          </summary>
+          <div className="guide-body mt-4">
+            {section.intro}
+            <ul className="!space-y-3">
+              {section.tips.map((tip) => (
+                <li key={tip.title}>
+                  <b>{tip.title}.</b> {tip.body}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </details>
       ))}
 
       <section className="card flex flex-wrap items-center justify-between gap-3 p-5">
@@ -53,7 +62,7 @@ export default function GuidesPage() {
 
       {earlier.length > 0 && (
         <section className="space-y-3">
-          <h2 className="text-lg font-bold">Earlier Pokémon notes</h2>
+          <h2 className="text-lg font-bold">Earlier Pokémon Notes</h2>
           {earlier.map((post) => (
             <details key={post.id} className="card p-4">
               <summary className="font-semibold">{post.title}</summary>

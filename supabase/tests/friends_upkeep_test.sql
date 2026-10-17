@@ -17,6 +17,8 @@ insert into public.blocks (blocker_id, blocked_id)
 -- Senders need an IGN and friend code (20261020000300).
 select public.test_complete_profiles('00000000-0000-0000-0015-');
 
+-- Existing social fixtures include a chosen icon.
+update public.profiles set game_avatar = coalesce(game_avatar, 'pikachu:normal') where id::text like any (array['00000000-0000-0000-0015-%']);
 set role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0015-000000000001', false);
 
@@ -24,7 +26,7 @@ select set_config('request.jwt.claim.sub', '00000000-0000-0000-0015-000000000001
 do $$ begin
   assert (select friend_code from public.lookup_players('FuAnnIgn') where user_id = '00000000-0000-0000-0015-000000000002') is null, 'closed hides the code';
   assert (select friend_code from public.lookup_players('7711 2222 3377') where user_id = '00000000-0000-0000-0015-000000000002') = '771122223377', 'typing the code finds it';
-  assert (select friend_code from public.lookup_players('FuBobIgn') where user_id = '00000000-0000-0000-0015-000000000003') = '444455556666', 'open shows it';
+  assert (select friend_code from public.lookup_players('FuBobIgn') where user_id = '00000000-0000-0000-0015-000000000003') is null, 'search by IGN: no code (20261021000900)';
 end $$;
 
 -- 2. Unfriending removes both sides. (Ann is closed to new friends but can still accept.)
@@ -33,7 +35,7 @@ select set_config('request.jwt.claim.sub', '00000000-0000-0000-0015-000000000002
 select public.accept_friend_request('00000000-0000-0000-0015-000000000001');
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0015-000000000001', false);
 do $$ begin
-  assert (select friend_code from public.lookup_players('FuAnnIgn') where user_id = '00000000-0000-0000-0015-000000000002') = '771122223377', 'friends see it';
+  assert (select friend_code from public.lookup_players('FuAnnIgn') where user_id = '00000000-0000-0000-0015-000000000002') is null, 'friends: dropped (20261021000900)';
 end $$;
 delete from public.friends where user_id = auth.uid() and friend_id = '00000000-0000-0000-0015-000000000002';
 reset role;
@@ -43,6 +45,8 @@ do $$ begin
     where user_id in ('00000000-0000-0000-0015-000000000001', '00000000-0000-0000-0015-000000000002')
   ), 'gone both ways';
 end $$;
+-- Existing social fixtures include a chosen icon.
+update public.profiles set game_avatar = coalesce(game_avatar, 'pikachu:normal') where id::text like any (array['00000000-0000-0000-0015-%']);
 set role authenticated;
 
 -- 3. Placeholders: found flag, exact IGN only, blocks hide, adding the friend clears it.

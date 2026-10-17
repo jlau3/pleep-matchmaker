@@ -56,7 +56,7 @@ export function BlockButton({ userId, name, blocked: initiallyBlocked = false }:
     return (
       <span role="alertdialog" aria-label={`Block ${name}?`} className="inline-flex flex-wrap items-center gap-2 text-xs">
         <span>
-          Block <strong>{name}</strong>? You&apos;ll stop seeing each other in matches, lookups and friend lists.
+          Block <strong>{name}</strong>? You&apos;ll stop seeing each other in matches, lookups and friend lists. Blocking prevents further requests.
         </span>
         <button
           type="button"

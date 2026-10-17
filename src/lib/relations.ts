@@ -3,7 +3,7 @@
  * (20261019000000_friend_requests.sql): friends both ways, a request either
  * way (open, or one of yours they declined or let lapse), or nothing yet.
  */
-export type Relation = "friend" | "sent" | "declined" | "expired" | "incoming" | "none" | "setup";
+export type Relation = "friend" | "sent" | "declined" | "expired" | "incoming" | "incoming-setup" | "none" | "setup";
 
 /** Your request's state: open, declined, or open but unanswered past REQUEST_TTL_DAYS. */
 export type SentStatus = "open" | "declined" | "expired";
@@ -17,6 +17,8 @@ export interface Relations {
   incoming: string[];
   /** You have an IGN and friend code, which sending a request needs (else "setup" in place of "none"). */
   profileReady: boolean;
+  /** Searching needs an IGN and friend code too (20261021000700_identity_required.sql). Missing: allowed. */
+  canSearch?: boolean;
 }
 
 /** How long an unanswered request stays open (public.request_ttl()). */
@@ -25,14 +27,18 @@ export const REQUEST_TTL_DAYS = 30;
 export const NO_RELATIONS: Relations = { friendIds: [], sent: {}, incoming: [], profileReady: true };
 
 /** send_friend_request's error when your IGN or friend code is missing (20261020000300_request_needs_profile.sql). */
-export const PROFILE_INCOMPLETE = "Add your in-game name and friend code in Profile first, so they know who's asking.";
+/** Search's error when your IGN or friend code is missing. */
+export const SEARCH_NEEDS_PROFILE = "Add your in-game name, friend code, and Pokémon Sleep icon in Profile to search for players.";
+
+export const PROFILE_INCOMPLETE = "Add your in-game name, friend code, and Pokémon Sleep icon in Profile first, so they know who's asking.";
 
 export function relationOf(relations: Relations, userId: string): Relation {
   if (relations.friendIds.includes(userId)) return "friend";
   const sent = relations.sent[userId];
   if (sent === "declined") return "declined";
   // They asked you since yours lapsed: answering beats re-sending.
-  if (relations.incoming.includes(userId)) return "incoming";
+  // Accepting needs an IGN and friend code too; declining doesn't.
+  if (relations.incoming.includes(userId)) return relations.profileReady ? "incoming" : "incoming-setup";
   if (sent === "expired") return "expired";
   if (sent === "open") return "sent";
   return relations.profileReady ? "none" : "setup";

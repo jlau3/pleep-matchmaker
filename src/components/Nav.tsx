@@ -1,75 +1,63 @@
 import { cookies } from "next/headers";
-import Link from "next/link";
-import { HelpModal } from "./HelpModal";
+import { PokeballButton } from "./PokeballButton";
+import { PageHelpButton } from "./PageHelpButton";
 import { MetaNoteModal } from "./MetaNoteModal";
 import { NavExtras } from "./NavExtras";
+import { SignInButton } from "./SignInSheet";
 import { NavLinks } from "./NavLinks";
 import { NavStars } from "./NavStars";
 import { activeMetaPost, META_COOKIE, metaCookieValue } from "@/content/meta";
-import { HELP_COOKIE, HELP_VERSION, helpCookieValue } from "@/lib/help";
+import { automaticPopup } from "@/lib/help";
 import { LINES_BY_ID, lineSpriteUrl } from "@/lib/lines";
 import { getAuth } from "@/lib/supabase/server";
 
 type Popup = { autoOpen: boolean; rememberSeen: string | null };
 const SHUT: Popup = { autoOpen: false, rememberSeen: null };
 
-/**
- * Which popups open by themselves for a signed-in player: the active
- * new-Pokémon note (src/content/meta.tsx) if they haven't closed it, else How
- * it works if they haven't seen this HELP_VERSION (it then waits for the next
- * page). Cookies skip the profile lookup once both are seen; if the lookup
- * fails (e.g. a migration hasn't run), both stay shut.
- */
-async function popupState(userId: string | null, metaId: string | null): Promise<{ help: Popup; meta: Popup }> {
-  if (!userId) return { help: SHUT, meta: SHUT };
-  const jar = await cookies();
-  const helpValue = helpCookieValue(userId);
-  const metaValue = metaId ? metaCookieValue(metaId, userId) : null;
-  const helpKnown = jar.get(HELP_COOKIE)?.value === helpValue;
-  const metaKnown = !metaValue || jar.get(META_COOKIE)?.value === metaValue;
-  if (helpKnown && metaKnown) return { help: SHUT, meta: SHUT };
-
-  const columns = metaKnown ? "help_seen_version" : "help_seen_version, meta_seen_id";
+/** New-Pokémon announcements wait until setup is finished or dismissed. */
+async function popupState(userId: string | null, metaId: string | null): Promise<Popup> {
+  if (!userId || !metaId) return SHUT;
+  const metaValue = metaCookieValue(metaId, userId);
+  if ((await cookies()).get(META_COOKIE)?.value === metaValue) return SHUT;
   const { supabase } = await getAuth();
-  const { data, error } = await supabase.from("profiles").select(columns).eq("id", userId).maybeSingle();
-  if (error || !data) return { help: SHUT, meta: SHUT };
-  const row = data as unknown as { help_seen_version: number; meta_seen_id?: string | null };
-
-  const metaSeen = metaKnown || row.meta_seen_id === metaId;
-  const meta: Popup = metaKnown ? SHUT : { autoOpen: !metaSeen, rememberSeen: metaSeen ? metaValue : null };
-  const helpSeen = helpKnown || row.help_seen_version >= HELP_VERSION;
-  const help: Popup = helpKnown
-    ? SHUT
-    : // The note goes first; How it works waits until it's closed.
-      { autoOpen: !helpSeen && !meta.autoOpen, rememberSeen: helpSeen ? helpValue : null };
-  return { help, meta };
+  const { data, error } = await supabase.from("profiles").select("meta_seen_id, setup_done").eq("id", userId).maybeSingle();
+  if (error || !data) return SHUT;
+  const metaSeen = data.meta_seen_id === metaId;
+  return {
+    autoOpen: automaticPopup({ metaSeen, setupDone: data.setup_done === true }) === "meta",
+    rememberSeen: metaSeen ? metaValue : null,
+  };
 }
 
 export async function Nav() {
   const { userId } = await getAuth();
   const user = userId !== null;
   const note = activeMetaPost();
-  const popups = await popupState(userId, note?.id ?? null);
+  const popup = await popupState(userId, note?.id ?? null);
   const noteLine = note?.lineId ? LINES_BY_ID.get(note.lineId) : undefined;
 
   return (
-    <header className="sticky top-0 z-20 header-night text-white shadow-md">
-      <nav className="mx-auto flex max-w-5xl items-center gap-1 overflow-x-auto px-4 py-2 text-sm sm:gap-4">
-        <Link href="/" className="shrink-0" aria-label="Pleep Matchmaker home">
-          <img src="/logo.png" alt="Pleep Matchmaker" className="h-8 w-8" />
-        </Link>
-        {user && <NavLinks />}
-        <HelpModal signedIn={user} autoOpen={popups.help.autoOpen} rememberSeen={popups.help.rememberSeen} />
+    <header data-site-header className="sticky top-0 z-20 header-night text-white shadow-md">
+      <NavStars side="left" />
+      <NavStars side="right" />
+      <nav className="mx-auto flex max-w-5xl items-center gap-1 px-4 py-2 text-sm sm:gap-4">
+        <PokeballButton signedIn={user} />
+        <div className="flex min-w-0 items-center gap-1 overflow-x-auto sm:gap-4">
+          <NavLinks signedIn={user} />
+        </div>
         <NavStars />
-        <NavExtras donateUrl={process.env.NEXT_PUBLIC_DONATION_URL} />
+        <div className="ml-auto flex shrink-0 items-center gap-2">
+          <PageHelpButton />
+          {user ? <NavExtras donateUrl={process.env.NEXT_PUBLIC_DONATION_URL} /> : <SignInButton />}
+        </div>
       </nav>
-      {note && (popups.meta.autoOpen || popups.meta.rememberSeen) && (
+      {note && (popup.autoOpen || popup.rememberSeen) && (
         <MetaNoteModal
           postId={note.id}
           title={note.title}
           sprite={noteLine ? lineSpriteUrl(noteLine) : null}
-          autoOpen={popups.meta.autoOpen}
-          rememberSeen={popups.meta.rememberSeen}
+          autoOpen={popup.autoOpen}
+          rememberSeen={popup.rememberSeen}
         >
           {note.body}
         </MetaNoteModal>

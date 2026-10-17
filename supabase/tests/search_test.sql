@@ -7,6 +7,10 @@ insert into auth.users (id, raw_user_meta_data) values
 update public.profiles set ign = 'SnorLAX  Fan' where id = '00000000-0000-0000-0009-000000000001';
 -- Discord names are friends-only (20261020001100_discord_friends_only.sql): a
 -- stranger finds MixedCase_User by IGN only; a friend by Discord name too.
+-- Searching needs your own IGN (20261021000300_search_needs_ign.sql).
+update public.profiles set ign = coalesce(ign, 'ZzSearcher002'), friend_code = coalesce(friend_code, '420009002000') where id = '00000000-0000-0000-0009-000000000002';
+-- Existing social fixtures include a chosen icon.
+update public.profiles set game_avatar = coalesce(game_avatar, 'pikachu:normal') where id::text like any (array['00000000-0000-0000-0009-%']);
 set role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0009-000000000002', false);
 do $$ begin
@@ -17,6 +21,8 @@ end $$;
 reset role;
 select public.test_befriend('00000000-0000-0000-0009-000000000001', '00000000-0000-0000-0009-000000000002');
 
+-- Existing social fixtures include a chosen icon.
+update public.profiles set game_avatar = coalesce(game_avatar, 'pikachu:normal') where id::text like any (array['00000000-0000-0000-0009-%']);
 set role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0009-000000000002', false);
 do $$
@@ -43,21 +49,25 @@ update public.profiles set ign = discord_username where id::text like '00000000-
 insert into auth.users (id, raw_user_meta_data) values
   ('00000000-0000-0000-0009-000000000003', '{"name":"hidden_dragonite#0"}');
 update public.profiles set show_discord = false, ign = 'Quiet One' where discord_username = 'hidden_dragonite';
+-- Existing social fixtures include a chosen icon.
+update public.profiles set game_avatar = coalesce(game_avatar, 'pikachu:normal') where id::text like any (array['00000000-0000-0000-0009-%']);
 set role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-0009-000000000002', false);
 do $$
 declare first_id uuid;
 begin
-  assert exists (select 1 from public.lookup_players('snorlax') where user_id = '00000000-0000-0000-0009-000000000001'),
-    'partial IGN';
-  assert exists (select 1 from public.lookup_players('snorlx fan') where user_id = '00000000-0000-0000-0009-000000000001'),
-    'typo in IGN';
-  assert exists (select 1 from public.lookup_players('mixedcase') where user_id = '00000000-0000-0000-0009-000000000001'),
-    'partial Discord name';
+  -- Exact names only since 20261021001100_exact_search.sql: no partial names or typos.
+  assert not exists (select 1 from public.lookup_players('snorlax') where user_id = '00000000-0000-0000-0009-000000000001'),
+    'partial IGN: no';
+  assert not exists (select 1 from public.lookup_players('snorlx fan') where user_id = '00000000-0000-0000-0009-000000000001'),
+    'typo in IGN: no';
+  assert not exists (select 1 from public.lookup_players('mixedcase') where user_id = '00000000-0000-0000-0009-000000000001'),
+    'partial Discord name: no';
   assert not exists (select 1 from public.lookup_players('sn') where user_id = '00000000-0000-0000-0009-000000000001'),
     'two letters: exact only';
   assert not exists (select 1 from public.lookup_players('qqqqzz')), 'nothing close';
-  assert (select count(*) from public.lookup_players('fz_sleeper')) = 10, 'at most 10';
+  assert not exists (select 1 from public.lookup_players('fz_sleeper')), 'a shared prefix finds nobody';
+  assert (select count(*) from public.lookup_players('fz_sleeper_7')) = 1, 'only the exact name';
   -- The exact name comes first.
   select user_id into first_id from public.lookup_players('fz_sleeper_7') limit 1;
   assert first_id = '00000000-0000-0000-0009-000000000011', format('exact first, got %s', first_id);

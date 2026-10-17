@@ -1,6 +1,6 @@
 /**
  * Meta notes for newly released Pokémon. While a note is active (startsAt to
- * endsAt), it's the first popup signed-in players see (once per account), and
+ * endsAt), it opens once per account after setup is finished or skipped, and
  * it tops the Guides tab. Past notes stay on Guides under "Earlier notes".
  *
  * To add one: copy the template below to the top of META_POSTS, give it a new

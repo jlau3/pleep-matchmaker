@@ -2,15 +2,15 @@
 
 import { useMemo, useRef, useState } from "react";
 import { flushSync } from "react-dom";
-import { AVATAR_NAMES, AVATAR_VARIANTS, AVATARS, avatarLabel, avatarSrc, parseAvatar, type AvatarVariant } from "@/lib/avatars";
+import { AVATAR_NAMES, AVATAR_VARIANTS, AVATARS, avatarLabel, avatarSrc, DEFAULT_AVATAR, parseAvatar, type AvatarVariant } from "@/lib/avatars";
 
 /**
  * In-game icon picker for the profile form. Tapping your picture opens a
  * popup: the Pokémon grid scrolls on its own, and the style pills and Save
  * stay pinned below it. Saving submits the whole profile form with
- * game_avatar ("pikachu:happy"), or empty for the Discord picture.
+ * game_avatar ("pikachu:happy").
  */
-export function AvatarPicker({ initial, discordAvatar }: { initial: string | null; discordAvatar: string | null }) {
+export function AvatarPicker({ initial, discordAvatar, requiredForSetup = false }: { initial: string | null; discordAvatar: string | null; requiredForSetup?: boolean }) {
   const start = parseAvatar(initial);
   // Saved value (the hidden input) and the draft being picked in the popup.
   const [saved, setSaved] = useState<string>(start ? `${start[0]}:${start[1]}` : "");
@@ -42,39 +42,36 @@ export function AvatarPicker({ initial, discordAvatar }: { initial: string | nul
     hidden.current?.form?.requestSubmit();
   }
 
-  const big = "h-16 w-16 rounded-full";
+  const big = "h-20 w-20 shrink-0 rounded-full";
   return (
     <div className="space-y-1">
       <input ref={hidden} type="hidden" name="game_avatar" value={saved} />
-      <span className="block text-sm font-medium">Profile icon</span>
+      <span className="block text-sm font-semibold">Pokémon Sleep icon</span>
+      {requiredForSetup && !savedParsed && <p className="text-sm font-semibold text-slate-600 dark:text-slate-300">Choose an icon to complete this setup step.</p>}
       <button
         type="button"
         onClick={openPicker}
-        aria-label="Change profile icon"
-        className="group relative flex items-center gap-3 text-left"
+        aria-label={savedParsed ? "Change icon" : "Choose icon"}
+        className="group flex w-full items-center gap-3 rounded-2xl border-2 border-sun bg-sun/10 p-3 text-left hover:bg-sun/20"
       >
         {savedParsed ? (
           <img src={avatarSrc(...savedParsed)} alt="" className={`${big} bg-sky object-contain dark:bg-night-deep`} />
         ) : discordAvatar ? (
           <img src={discordAvatar} alt="" className={big} />
         ) : (
-          <span className={`block ${big} bg-slate-200 dark:bg-slate-700`} />
+          <img src={DEFAULT_AVATAR} alt="" className={`${big} bg-sky object-contain dark:bg-night-deep`} />
         )}
-        <span className="absolute left-11 top-11 flex h-6 w-6 items-center justify-center rounded-full bg-white text-xs shadow ring-1 ring-slate-300 group-hover:bg-sun dark:bg-night dark:ring-slate-600">
-          ✎
-        </span>
-        <span className="text-sm">
-          <span className="block font-semibold">
-            {savedParsed ? `${avatarLabel(savedParsed[0])}${savedParsed[1] === "normal" ? "" : ` (${AVATAR_VARIANTS.find(([v]) => v === savedParsed[1])?.[1]})`}` : discordAvatar ? "Discord picture" : "No icon"}
+        <span className="min-w-0 text-sm">
+          <span className="mb-2 block font-semibold">
+            {savedParsed ? `${avatarLabel(savedParsed[0])}${savedParsed[1] === "normal" ? "" : ` (${AVATAR_VARIANTS.find(([v]) => v === savedParsed[1])?.[1]})`}` : discordAvatar ? "Currently using your Discord icon" : "No icon chosen yet"}
           </span>
-          <span className="text-xs text-slate-500 underline group-hover:text-slate-700 dark:group-hover:text-slate-300">
-            Tap to pick your in-game icon
+          <span className="btn-primary inline-flex min-h-11 items-center px-4 py-2 text-sm">
+            {savedParsed ? "Change icon" : "Choose icon"} →
           </span>
         </span>
       </button>
       <p className="text-xs text-slate-500">
-        Use the same icon you have in Pokémon Sleep. IGNs aren&apos;t unique, so a matching icon helps friends tell it&apos;s
-        really you.
+        Choose the icon you use in Pokémon Sleep. In-game names aren't unique; the icon helps friends recognize you.
       </p>
 
       <dialog
@@ -91,11 +88,11 @@ export function AvatarPicker({ initial, discordAvatar }: { initial: string | nul
             ) : discordAvatar ? (
               <img src={discordAvatar} alt="" className="h-14 w-14 shrink-0 rounded-full" />
             ) : (
-              <span className="block h-14 w-14 shrink-0 rounded-full bg-slate-200 dark:bg-slate-700" />
+              <img src={DEFAULT_AVATAR} alt="" className="h-14 w-14 shrink-0 rounded-full bg-sky object-contain dark:bg-night-deep" />
             )}
             <div className="min-w-0 flex-1">
               <h2 id="avatar-title" className="font-bold">
-                {name ? avatarLabel(name) : "Pick your icon"}
+                {name ? avatarLabel(name) : "Choose Your Icon"}
               </h2>
               <input
                 value={filter}
@@ -150,7 +147,7 @@ export function AvatarPicker({ initial, discordAvatar }: { initial: string | nul
                     title={name && !available ? `${avatarLabel(name)} has no ${label.toLowerCase()} icon` : undefined}
                     onClick={() => setVariant(v)}
                     className={`rounded-full border px-1 py-1 text-xs disabled:opacity-40 sm:text-sm ${
-                      name && current === v ? "pill-active border-transparent" : "border-slate-300 dark:border-slate-600"
+                      name && current === v ? "pill-active border-transparent" : "pill-idle border-slate-300 dark:border-slate-600"
                     }`}
                   >
                     {label}
@@ -158,17 +155,14 @@ export function AvatarPicker({ initial, discordAvatar }: { initial: string | nul
                 );
               })}
             </div>
-            <div className="flex items-center justify-between gap-2">
-              <button type="button" onClick={() => save("")} className="text-xs text-slate-500 underline">
-                Use {discordAvatar ? "Discord picture" : "no icon"}
-              </button>
+            <div className="flex justify-end">
               <button
                 type="button"
                 disabled={!name}
                 onClick={() => name && save(`${name}:${current}`)}
                 className="btn-primary px-5 py-2 disabled:opacity-50"
               >
-                Save icon
+                Use this icon
               </button>
             </div>
           </div>

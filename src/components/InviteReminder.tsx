@@ -53,8 +53,8 @@ export function InviteReminder({ friendCount }: { friendCount: number }) {
       <button
         type="button"
         onClick={dismiss}
-        aria-label="Hide for now"
-        title="Hide for now"
+        aria-label="Hide for this session"
+        title="Hide for this session"
         className="absolute right-2 top-2 rounded-full px-2 text-lg leading-none text-slate-500 hover:text-slate-800 dark:hover:text-white"
       >
         ×

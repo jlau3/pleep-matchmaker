@@ -6,16 +6,18 @@ import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { normalizeFriendCode } from "@/lib/format";
 import { MAX_FRIENDS } from "@/lib/friendship";
-import { parseAvatar } from "@/lib/avatars";
+import { avatarKey, parseAvatar } from "@/lib/avatars";
+import { profileGuideError, profileGuideSteps } from "@/lib/profileGuide";
 import type { LookupRow } from "@/lib/types";
-import { PROFILE_INCOMPLETE } from "@/lib/relations";
+import { PROFILE_INCOMPLETE, SEARCH_NEEDS_PROFILE } from "@/lib/relations";
 import { nameMatch } from "@/lib/names";
 import { loadTop3Tiers, type Top3Tiers } from "@/lib/top3Tiers";
 import { META_COOKIE, META_POSTS, metaCookieValue } from "@/content/meta";
-import { FIRST_FRIEND_COOKIE, HELP_COOKIE, HELP_VERSION, helpCookieValue } from "@/lib/help";
-import { LINKING_COOKIE, NEXT_COOKIE, safeNextPath } from "@/lib/nextPath";
+import { FIRST_FRIEND_COOKIE, HELP_COOKIE, HELP_VERSION, helpCookieValue, SETUP_COOKIE } from "@/lib/help";
+import { LINKING_COOKIE, NEXT_COOKIE, SETUP_NEXT_COOKIE, safeNextPath } from "@/lib/nextPath";
 import { isChoice, LINES_BY_ID, MAX_TOP } from "@/lib/lines";
 import { createClient, requireUser } from "@/lib/supabase/server";
+import { signInLanding } from "@/lib/signInLanding";
 import { withExtras } from "@/lib/extras";
 
 const OAUTH_PROVIDERS = { discord: "Discord", google: "Google" } as const;
@@ -23,7 +25,9 @@ const OAUTH_PROVIDERS = { discord: "Discord", google: "Google" } as const;
 /** Remembers where the player was headed (a shared /friends?q= link, say) for after sign-in. */
 async function rememberNext(form?: FormData) {
   const next = safeNextPath(form?.get("next"));
-  if (next) (await cookies()).set(NEXT_COOKIE, next, { maxAge: 600, httpOnly: true, sameSite: "lax", path: "/" });
+  const store = await cookies();
+  if (next) store.set(NEXT_COOKIE, next, { maxAge: 600, httpOnly: true, sameSite: "lax", path: "/" });
+  else store.delete(NEXT_COOKIE);
 }
 
 async function siteOrigin() {
@@ -54,9 +58,15 @@ export async function signInWithOAuth(form?: FormData) {
  */
 export async function signInWithGoogleToken(credential: string, nonce: string, next: string | null): Promise<{ error?: string }> {
   const supabase = await createClient();
-  const { error } = await supabase.auth.signInWithIdToken({ provider: "google", token: credential, nonce });
+  const { data, error } = await supabase.auth.signInWithIdToken({ provider: "google", token: credential, nonce });
   if (error) return { error: error.message };
-  redirect(safeNextPath(next) ?? "/");
+  const destination = await signInLanding(supabase, data.user?.id, next);
+  const store = await cookies();
+  const safe = safeNextPath(next);
+  if (safe && destination.startsWith("/profile?setup=profile")) store.set(SETUP_NEXT_COOKIE, safe, { maxAge: 604800, httpOnly: true, sameSite: "lax", path: "/" });
+  else store.delete(SETUP_NEXT_COOKIE);
+  store.delete(NEXT_COOKIE);
+  redirect(destination);
 }
 
 type Provider = keyof typeof OAUTH_PROVIDERS;
@@ -120,7 +130,7 @@ export async function sendMagicLink(_prev: MagicLinkState, form: FormData): Prom
     return {
       error: /rate|limit|seconds/i.test(error.message)
         ? "Too many sign-in emails just now. Wait a minute and try again."
-        : "Couldn't send the email. Try again in a bit.",
+        : "Couldn't send the email. Try again.",
     };
   }
   return { sentTo: email };
@@ -130,6 +140,9 @@ export async function signOut() {
   const supabase = await createClient();
   // This device only: the default ("global") ends every session, e.g. your phone too.
   await supabase.auth.signOut({ scope: "local" });
+  const store = await cookies();
+  store.delete(SETUP_NEXT_COOKIE);
+  store.delete(NEXT_COOKIE);
   redirect("/");
 }
 
@@ -139,7 +152,7 @@ export async function setChoice(lineId: string, choice: string): Promise<{ error
   const { error } = await supabase
     .from("preferences")
     .upsert({ user_id: user.id, line_id: lineId, choice }, { onConflict: "user_id,line_id" });
-  if (error) return { error: "Couldn't save, try again" };
+  if (error) return { error: "Couldn't save your votes. Try again." };
   return {};
 }
 
@@ -153,7 +166,7 @@ export async function setTop(lineId: string, top: boolean): Promise<{ error?: st
         .upsert({ user_id: user.id, line_id: lineId, choice: "want", top: true }, { onConflict: "user_id,line_id" })
     : await supabase.from("preferences").update({ top: false }).eq("user_id", user.id).eq("line_id", lineId);
   if (error?.message === "top_limit") return { error: `You can star up to ${MAX_TOP}. Unstar one first.` };
-  if (error) return { error: "Couldn't save, try again" };
+  if (error) return { error: "Couldn't save your votes. Try again." };
   return {};
 }
 
@@ -175,15 +188,6 @@ export interface ProfileFormState {
   saved?: boolean;
 }
 
-/** Turns "Allow lookup" back on (the friend post's reminder), so a shared link finds you. */
-export async function enableLookup(): Promise<{ error?: string }> {
-  const { supabase, user } = await requireUser();
-  const { error } = await supabase.from("profiles").update({ allow_lookup: true }).eq("id", user.id);
-  if (error) return { error: "Couldn't turn it on, try again" };
-  revalidatePath("/", "layout");
-  return {};
-}
-
 /**
  * "Who can find you" -> the two settings behind it: everyone (search and Find
  * New), people who know me (search only), only my friends (neither).
@@ -199,6 +203,32 @@ function visibilityFields(form: FormData): { open_to_friends: boolean; allow_loo
 
 export async function updateProfile(_prev: ProfileFormState, form: FormData): Promise<ProfileFormState> {
   const { supabase, user } = await requireUser();
+  const scope = form.get("profile_step");
+  if (scope !== null) {
+    const step = profileGuideSteps(true).find((candidate) => candidate.id === scope);
+    if (!step) return { error: "Unknown profile step. Refresh and try again." };
+    const invalid = profileGuideError(step.id, form);
+    if (invalid) return { error: invalid };
+    let fields: Record<string, unknown> = {};
+    if (step.id === "ign") {
+      const name = String(form.get("ign") ?? "").trim();
+      if (name.length > 40) return { error: "IGN is too long (40 characters max)" };
+      fields = { ign: name };
+    } else if (step.id === "friend_code") fields = { friend_code: normalizeFriendCode(String(form.get("friend_code") ?? "")) };
+    else if (step.id === "game_avatar") fields = { game_avatar: avatarKey(String(form.get("game_avatar"))) };
+    else if (step.id === "visibility") {
+      if (!["everyone", "known", "friends"].includes(String(form.get("visibility")))) return { error: "Choose who can find you." };
+      fields = visibilityFields(form);
+    } else {
+      if (form.has("has_show_discord")) fields.show_discord = form.get("show_discord") === "on";
+      if (form.has("has_show_reddit")) fields.show_reddit = form.get("show_reddit") === "on";
+      if (Object.keys(fields).length === 0) return { error: "No name-sharing options are available." };
+    }
+    const { error } = await supabase.from("profiles").update(fields).eq("id", user.id);
+    if (error) return { error: "Couldn't save your profile. Try again." };
+    revalidatePath("/", "layout");
+    return { saved: true };
+  }
   const ign = String(form.get("ign") ?? "").trim();
   const rawCode = String(form.get("friend_code") ?? "").trim();
   const friendCode = rawCode ? normalizeFriendCode(rawCode) : null;
@@ -222,12 +252,12 @@ export async function updateProfile(_prev: ProfileFormState, form: FormData): Pr
     const avatar = String(form.get("game_avatar") ?? "");
     if (avatar && !parseAvatar(avatar)) return { error: "Pick an icon from the list" };
     extras.reddit_username = reddit || null;
-    extras.game_avatar = avatar || null;
+    extras.game_avatar = avatarKey(avatar);
   }
-  let { error } = await supabase.from("profiles").update({ ...update, ...extras }).eq("id", user.id);
-  // Before that migration runs, save the rest.
-  if (error && Object.keys(extras).length > 0) ({ error } = await supabase.from("profiles").update(update).eq("id", user.id));
-  if (error) return { error: "Couldn't save your profile, try again" };
+  if (form.has("has_show_reddit")) extras.show_reddit = form.get("show_reddit") === "on";
+  // A guided step must only advance after every submitted field was saved.
+  const { error } = await supabase.from("profiles").update({ ...update, ...extras }).eq("id", user.id);
+  if (error) return { error: "Couldn't save your profile. Try again." };
   revalidatePath("/", "layout");
   return { saved: true };
 }
@@ -238,7 +268,7 @@ export async function blockUser(userId: string): Promise<{ error?: string }> {
   const { supabase, user } = await requireUser();
   if (userId === user.id) return { error: "You can't block yourself." };
   const { error } = await supabase.from("blocks").insert({ blocker_id: user.id, blocked_id: userId });
-  if (error && error.code !== "23505") return { error: "Couldn't block, try again" };
+  if (error && error.code !== "23505") return { error: "Couldn't block this player. Try again." };
   revalidatePath("/", "layout");
   return {};
 }
@@ -261,10 +291,13 @@ export async function sendFriendRequest(
   targetId: string,
   /** Leave the page as is (the card is asking about a Not here yet name); the client refreshes after. */
   deferRefresh = false,
+  /** Send your friend code with it; false for "We're already friends in Pokémon Sleep" (20261021001000). */
+  withCode = true,
 ): Promise<{ status?: "sent" | "friends"; error?: string }> {
-  const { supabase } = await requireUser();
-  const { data, error } = await supabase.rpc("send_friend_request", { target: targetId });
-  if (error) return { error: FRIEND_ERRORS[error.message] ?? "Couldn't send the request, try again" };
+  const { supabase, user } = await requireUser();
+  const { data, error } = await supabase.rpc("send_friend_request", withCode ? { target: targetId } : { target: targetId, with_code: false });
+  if (error) return { error: FRIEND_ERRORS[error.message] ?? "Couldn't send your request. Try again." };
+  await recordFriendSetupStarted(supabase, user.id);
   // Whole layout: the requests banner and every Add friend button may change.
   if (!deferRefresh) revalidatePath("/", "layout");
   return { status: data === "friends" ? "friends" : "sent" };
@@ -273,7 +306,7 @@ export async function sendFriendRequest(
 export async function acceptFriendRequest(requesterId: string, deferRefresh = false): Promise<{ error?: string }> {
   const { supabase } = await requireUser();
   const { error } = await supabase.rpc("accept_friend_request", { requester: requesterId });
-  if (error) return { error: FRIEND_ERRORS[error.message] ?? "Couldn't accept, try again" };
+  if (error) return { error: FRIEND_ERRORS[error.message] ?? "Couldn't accept your request. Try again." };
   if (!deferRefresh) revalidatePath("/", "layout");
   return {};
 }
@@ -282,7 +315,7 @@ export async function acceptFriendRequest(requesterId: string, deferRefresh = fa
 export async function declineFriendRequest(requesterId: string): Promise<{ error?: string }> {
   const { supabase } = await requireUser();
   const { error } = await supabase.rpc("decline_friend_request", { requester: requesterId });
-  if (error) return { error: "Couldn't update, try again" };
+  if (error) return { error: "Couldn't update your request. Try again." };
   revalidatePath("/", "layout");
   return {};
 }
@@ -291,7 +324,7 @@ export async function declineFriendRequest(requesterId: string): Promise<{ error
 export async function cancelFriendRequest(targetId: string): Promise<{ error?: string }> {
   const { supabase } = await requireUser();
   const { error } = await supabase.rpc("cancel_friend_request", { target: targetId });
-  if (error) return { error: "Couldn't update, try again" };
+  if (error) return { error: "Couldn't update your request. Try again." };
   revalidatePath("/", "layout");
   return {};
 }
@@ -304,21 +337,31 @@ export async function cancelFriendRequest(targetId: string): Promise<{ error?: s
 export async function removeFriend(friendId: string, inactive = false): Promise<{ error?: string }> {
   const { supabase, user } = await requireUser();
   const { error } = await supabase.from("friends").delete().eq("user_id", user.id).eq("friend_id", friendId);
-  if (error) return { error: "Couldn't remove friend, try again" };
+  if (error) return { error: "Couldn't remove this friend. Try again." };
   if (inactive) await supabase.rpc("report_inactive", { player: friendId });
   revalidatePath("/friends");
   revalidatePath("/tiers");
   return {};
 }
 
+/** Searching needs your own IGN and friend code (the database enforces it too). A failed lookup lets the search run. */
+async function profileReady(supabase: SupabaseClient, userId: string): Promise<boolean> {
+  const { data, error } = await supabase.from("profiles").select("ign, friend_code, game_avatar").eq("id", userId).maybeSingle();
+  return Boolean(error || (data?.ign?.trim() && data?.friend_code && parseAvatar(data?.game_avatar)));
+}
+
 /** Player search as an action, so the search box and Not here yet can look people up without reloading the page. */
 export async function lookupPlayers(q: string): Promise<{ rows?: LookupRow[]; error?: string }> {
-  const { supabase } = await requireUser();
+  const { supabase, user } = await requireUser();
   const query = q.trim().slice(0, 64);
   if (!query) return { rows: [] };
+  if (!(await profileReady(supabase, user.id))) return { error: SEARCH_NEEDS_PROFILE };
   const { data, error } = await supabase.rpc("lookup_players", { q: query });
-  if (error) return { error: "Search failed, try again" };
-  return { rows: await withExtras(supabase, data as LookupRow[]) };
+  if (error) return { error: "Couldn't search for players. Try again." };
+  const rows = await withExtras(supabase, data as LookupRow[]);
+  await recordFriendSetupStarted(supabase, user.id);
+  revalidatePath("/", "layout");
+  return { rows };
 }
 
 /**
@@ -329,8 +372,9 @@ export async function lookupPlayers(q: string): Promise<{ rows?: LookupRow[]; er
  */
 export async function searchPlaceholders(): Promise<{ hits?: { name: string; rows: LookupRow[] }[]; searched?: number; error?: string }> {
   const { supabase, user } = await requireUser();
+  if (!(await profileReady(supabase, user.id))) return { error: SEARCH_NEEDS_PROFILE };
   const { data, error } = await supabase.from("friend_placeholders").select("name").eq("user_id", user.id);
-  if (error) return { error: "Search failed, try again" };
+  if (error) return { error: "Couldn't search for players. Try again." };
   const names = (data ?? []).map((r) => r.name as string);
   const results = await Promise.all(
     names.map(async (name) => {
@@ -359,15 +403,16 @@ export async function addPlaceholder(name: string): Promise<{ error?: string }> 
   const { error } = await supabase.from("friend_placeholders").insert({ user_id: user.id, name: clean });
   if (error?.code === "23505") return { error: "Already on your list." };
   if (error?.message === "placeholder_limit") return { error: `That's ${MAX_FRIENDS} already. Remove one first.` };
-  if (error) return { error: "Couldn't save, try again" };
-  revalidatePath("/friends");
+  if (error) return { error: "Couldn't save this name. Try again." };
+  await recordFriendSetupStarted(supabase, user.id);
+  revalidatePath("/", "layout");
   return {};
 }
 
 export async function removePlaceholder(name: string): Promise<{ error?: string }> {
   const { supabase, user } = await requireUser();
   const { error } = await supabase.from("friend_placeholders").delete().eq("user_id", user.id).eq("name", name);
-  if (error) return { error: "Couldn't remove, try again" };
+  if (error) return { error: "Couldn't remove this name. Try again." };
   revalidatePath("/friends");
   return {};
 }
@@ -375,7 +420,7 @@ export async function removePlaceholder(name: string): Promise<{ error?: string 
 export async function unblockUser(userId: string): Promise<{ error?: string }> {
   const { supabase, user } = await requireUser();
   const { error } = await supabase.from("blocks").delete().eq("blocker_id", user.id).eq("blocked_id", userId);
-  if (error) return { error: "Couldn't unblock, try again" };
+  if (error) return { error: "Couldn't unblock this player. Try again." };
   revalidatePath("/", "layout");
   return {};
 }
@@ -388,17 +433,67 @@ export async function deleteAccount() {
   redirect("/?deleted=1");
 }
 
-/** Records that the player has seen this HELP_VERSION of the How it works popup. */
+/** Records that the player has started guided Profile setup (legacy onboarding marker). */
 export async function markHelpSeen(): Promise<void> {
   const { supabase, user } = await requireUser();
   const { error } = await supabase.from("profiles").update({ help_seen_version: HELP_VERSION }).eq("id", user.id);
-  if (!error) (await cookies()).set(HELP_COOKIE, helpCookieValue(user.id), { path: "/", maxAge: 31536000, sameSite: "lax" });
+  if (!error) {
+    (await cookies()).set(HELP_COOKIE, helpCookieValue(user.id), { path: "/", maxAge: 31536000, sameSite: "lax" });
+    // Remove the release replay redirect from the persistent shared layout.
+    revalidatePath("/", "layout");
+  }
+}
+
+/**
+ * Records that the player finished or skipped the setup checklist (SetupChecklist).
+ * Finishing it on the Tier List with a friend already covers the first-friend note.
+ */
+export async function markSetupDone(finished = false): Promise<{ error?: string; next?: string }> {
+  const { supabase, user } = await requireUser();
+  let friends = 0;
+  if (finished) {
+    const result = await supabase.from("friends").select("friend_id", { count: "exact", head: true }).eq("user_id", user.id);
+    if (result.error) return { error: "Couldn't save your setup progress. Try again." };
+    friends = result.count ?? 0;
+  }
+  const { error } = await supabase
+    .from("profiles")
+    .update(friends ? { setup_done: true, first_friend_noted: true } : { setup_done: true })
+    .eq("id", user.id);
+  if (error) return { error: "Couldn't save your setup progress. Try again." };
+  const store = await cookies();
+  // Finishing: the card sets this itself once its "all set" note is gone, so the refresh keeps it on screen.
+  if (!finished) store.set(SETUP_COOKIE, user.id, { path: "/", maxAge: 31536000, sameSite: "lax" });
+  const next = safeNextPath(store.get(SETUP_NEXT_COOKIE)?.value);
+  store.delete(SETUP_NEXT_COOKIE);
+  return next ? { next } : {};
+}
+
+/** Consume the shared destination only after the essential profile fields are saved. */
+export async function finishProfileSetup(next?: string | null): Promise<{ error?: string; next?: string }> {
+  const { supabase, user } = await requireUser();
+  const { data, error } = await supabase.from("profiles").select("ign, friend_code, game_avatar").eq("id", user.id).maybeSingle();
+  if (error) return { error: "Couldn't check your saved profile. Try again." };
+  if (!data?.ign?.trim() || !normalizeFriendCode(data.friend_code ?? "") || !parseAvatar(data.game_avatar ?? "")) {
+    return { error: "Save your in-game name, friend code, and Pokémon Sleep icon before continuing." };
+  }
+  const store = await cookies();
+  const destination = safeNextPath(store.get(SETUP_NEXT_COOKIE)?.value) ?? safeNextPath(next) ?? "/vote";
+  store.delete(SETUP_NEXT_COOKIE);
+  return { next: destination };
+}
+
+/** Records that the player opened the detailed voting guide (VoteGuide). */
+export async function markVoteGuideSeen(): Promise<void> {
+  const { supabase, user } = await requireUser();
+  const { error } = await supabase.from("profiles").update({ vote_guide_seen: true }).eq("id", user.id);
+  if (!error) revalidatePath("/vote");
 }
 
 /** Your Top 3's tiers on these players' Tier Lists, for Find New's Top 3 sort (FindNewBoard). */
 export async function loadTop3TiersFor(ids: string[]): Promise<Top3Tiers> {
   const { supabase } = await requireUser();
-  return loadTop3Tiers(supabase, ids.filter((id) => typeof id === "string").slice(0, 1000));
+  return loadTop3Tiers(supabase, ids.filter((id) => typeof id === "string"), true);
 }
 
 /** Records that the player has seen the "You have your first friend!" note (FirstFriendBanner). */
@@ -414,4 +509,42 @@ export async function markMetaSeen(postId: string): Promise<void> {
   const { supabase, user } = await requireUser();
   const { error } = await supabase.from("profiles").update({ meta_seen_id: postId }).eq("id", user.id);
   if (!error) (await cookies()).set(META_COOKIE, metaCookieValue(postId, user.id), { path: "/", maxAge: 31536000, sameSite: "lax" });
+}
+
+/** Personal Find New preferences, independent of blocks and friend requests. */
+export async function hideSuggestedPlayer(targetId: string): Promise<{ error?: string }> {
+  const { supabase, user } = await requireUser();
+  if (targetId === user.id) return { error: "You can't hide yourself." };
+  const { error } = await supabase.from("hidden_suggestions").insert({ user_id: user.id, hidden_user_id: targetId });
+  if (error && error.code !== "23505") return { error: "Couldn't hide this player. Try again." };
+  revalidatePath("/matches");
+  return {};
+}
+
+export async function restoreSuggestedPlayer(targetId: string): Promise<{ error?: string }> {
+  const { supabase, user } = await requireUser();
+  const { error } = await supabase.from("hidden_suggestions").delete().eq("user_id", user.id).eq("hidden_user_id", targetId);
+  if (error) return { error: "Couldn't restore this player. Try again." };
+  revalidatePath("/matches");
+  return {};
+}
+
+export async function markMatchGuideSeen(): Promise<void> {
+  const { supabase, user } = await requireUser();
+  const { error } = await supabase.from("profiles").update({ match_guide_seen: true }).eq("id", user.id);
+  if (!error) {
+    revalidatePath("/friends");
+    revalidatePath("/matches");
+  }
+}
+
+async function recordFriendSetupStarted(supabase: SupabaseClient, userId: string): Promise<void> {
+  await supabase.from("profiles").update({ friends_setup_started: true }).eq("id", userId);
+}
+
+/** A shared ?q= link already ran its search on the server before this client action. */
+export async function markFriendSetupStarted(): Promise<void> {
+  const { supabase, user } = await requireUser();
+  await recordFriendSetupStarted(supabase, user.id);
+  revalidatePath("/", "layout");
 }

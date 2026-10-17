@@ -2,7 +2,7 @@ import { existsSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 import lines from "@/data/candy-lines.json";
-import { AVATAR_NAMES, AVATARS, avatarSrc, gameAvatarUrl, parseAvatar } from "./avatars";
+import { AVATAR_NAMES, AVATARS, avatarKey, avatarSrc, gameAvatarUrl, parseAvatar } from "./avatars";
 
 describe("in-game icons", () => {
   it("has a file for every listed variant", () => {
@@ -17,6 +17,14 @@ describe("in-game icons", () => {
     expect(parseAvatar("notamon:normal")).toBeNull();
     expect(parseAvatar("mew:shiny")).toBeNull(); // no shiny art for Mew
     expect(gameAvatarUrl(null)).toBeNull();
+  });
+  it("reads the old per-size Pumpkaboo and Gourgeist keys as the one icon", () => {
+    expect(AVATARS.pumpkaboo).toBeDefined();
+    expect(AVATAR_NAMES.some((name) => /^(pumpkaboo|gourgeist)_/.test(name))).toBe(false);
+    expect(parseAvatar("pumpkaboo_small:happy")).toEqual(["pumpkaboo", "happy"]);
+    expect(gameAvatarUrl("gourgeist_jumbo:shiny")).toBe("/avatars/portrait/gourgeist_shiny.webp");
+    expect(avatarKey("gourgeist_large:happy_shiny")).toBe("gourgeist:happy_shiny");
+    expect(avatarKey("pumpkaboo_huge:normal")).toBeNull();
   });
   it("lists icons in Pokédex order, forms after the base Pokémon", () => {
     const compact = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, "");

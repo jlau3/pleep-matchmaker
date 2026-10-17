@@ -1,12 +1,14 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { type RankedLine, rankedSpriteUrl, type TierId, TIERS } from "@/lib/tiers";
+import { NEW_LINE_DAYS } from "@/lib/lines";
+import { type RankedLine, rankedSpriteUrl, type TierId, type TierStyle, tierDefinitions, CONSENSUS_COLORS, type UnrankedLine } from "@/lib/tiers";
 
 export interface ExportSection {
   /** Island name when exporting By Island; none for a single list. */
   heading?: string;
   tiers: Map<TierId, RankedLine[]>;
+  unranked?: UnrankedLine[];
 }
 
 /** One labelled row of sprites in an exported image (a tier, or a vote). */
@@ -14,14 +16,19 @@ export interface ImageRow {
   /** Badge text; "\n" splits it over two lines. */
   label: string;
   color: { bg: string; fg: string };
-  /** Sprites left to right; `tops` puts a gold ★ count on the corner. */
-  items: { sprite: string; tops?: number }[];
+  /** Sprites left to right; `tops` puts a gold ★ count on the corner, `isNew` the new-release border. */
+  items: { sprite: string; tops?: number; isNew?: boolean }[];
 }
 
 export interface ImageSection {
   heading?: string;
   rows: ImageRow[];
 }
+
+/** Heading for public candies not ranked yet, on the page and in exports. */
+export const RANKING_PENDING = "Ranking Still Being Determined";
+/** The new-release border, same as TierBoard's. */
+const NEW_BORDER = "#3fa7f5";
 
 /** Tier badge colors, same as TierBoard. */
 const TIER_COLOR: Record<TierId, { bg: string; fg: string }> = {
@@ -72,25 +79,39 @@ async function renderPng(heading: string, subtitle: string, sections: ImageSecti
 
   const rows = sections.map((section) => section.rows.filter((row) => row.items.length > 0));
   const rowHeight = (n: number) => Math.ceil(n / COLS) * (ICON + GAP) - GAP + ROW_PAD * 2;
-  const HEADER = 58;
+  const canvas = document.createElement("canvas");
+  const ctx = canvas.getContext("2d")!;
+  ctx.font = `400 13px ${font}`;
+  const subtitleLines: string[] = [];
+  let current = "";
+  for (const word of subtitle.split(/\s+/)) {
+    const next = current ? `${current} ${word}` : word;
+    if (current && ctx.measureText(next).width > WIDTH - PAD * 2) {
+      subtitleLines.push(current);
+      current = word;
+    } else current = next;
+  }
+  if (current) subtitleLines.push(current);
+  const HEADER = 41 + Math.max(1, subtitleLines.length) * 17;
   const SECTION_HEAD = 30;
-  const FOOTER = 26;
+  const FOOTER = 54;
+  // A key for the blue border, only when the image has a new release in it.
+  const hasNew = rows.flat().some((row) => row.items.some((item) => item.isNew));
+  const LEGEND = hasNew ? 26 : 0;
   let height = PAD + HEADER;
   sections.forEach((section, i) => {
     if (section.heading) height += SECTION_HEAD;
     for (const row of rows[i]) height += rowHeight(row.items.length) + 4;
     height += 6;
   });
-  height += FOOTER;
+  height += LEGEND + FOOTER;
 
   const sprites = new Map<string, HTMLImageElement | null>();
   const urls = new Set(rows.flat().flatMap((row) => row.items.map((item) => item.sprite)));
   await Promise.all([...urls].map(async (url) => sprites.set(url, await loadImage(url))));
 
-  const canvas = document.createElement("canvas");
   canvas.width = WIDTH * SCALE;
   canvas.height = height * SCALE;
-  const ctx = canvas.getContext("2d")!;
   ctx.scale(SCALE, SCALE);
   ctx.fillStyle = "#e4f2ff";
   ctx.fillRect(0, 0, WIDTH, height);
@@ -102,7 +123,7 @@ async function renderPng(heading: string, subtitle: string, sections: ImageSecti
   ctx.fillText(heading, PAD, PAD + 22);
   ctx.font = `400 13px ${font}`;
   ctx.fillStyle = "#5a6385";
-  ctx.fillText(subtitle, PAD, PAD + 44);
+  subtitleLines.forEach((line, index) => ctx.fillText(line, PAD, PAD + 44 + index * 17));
 
   let y = PAD + HEADER;
   sections.forEach((section, i) => {
@@ -141,6 +162,12 @@ async function renderPng(heading: string, subtitle: string, sections: ImageSecti
         ctx.fill();
         const img = sprites.get(item.sprite);
         if (img) ctx.drawImage(img, x + 2, top + 2, ICON - 4, ICON - 4);
+        if (item.isNew) {
+          ctx.strokeStyle = NEW_BORDER;
+          ctx.lineWidth = 2.5;
+          roundRect(ctx, x + 1, top + 1, ICON - 2, ICON - 2, 9);
+          ctx.stroke();
+        }
         if (item.tops) drawStarCount(ctx, font, item.tops, x + ICON, top);
       });
       y += h + 4;
@@ -148,10 +175,25 @@ async function renderPng(heading: string, subtitle: string, sections: ImageSecti
     y += 6;
   });
 
-  ctx.fillStyle = "#8a97ab";
-  ctx.font = `400 11px ${font}`;
-  ctx.textAlign = "right";
-  ctx.fillText(`Made with Pleep Matchmaker · ${window.location.host}`, WIDTH - PAD, height - 10);
+  if (hasNew) {
+    ctx.strokeStyle = NEW_BORDER;
+    ctx.lineWidth = 2.5;
+    roundRect(ctx, PAD + 2, y + 4, 16, 16, 4);
+    ctx.stroke();
+    ctx.fillStyle = "#2d3354";
+    ctx.font = `600 12px ${font}`;
+    ctx.textBaseline = "middle";
+    ctx.fillText(`Blue border: new Pokémon, released in the last ${NEW_LINE_DAYS} days`, PAD + 26, y + 12.5);
+    ctx.textBaseline = "alphabetic";
+  }
+
+  ctx.fillStyle = "#2d3354";
+  ctx.font = `800 16px ${font}`;
+  ctx.textAlign = "center";
+  ctx.fillText("pleep-matchmaker.vercel.app", WIDTH / 2, height - 30);
+  ctx.fillStyle = "#5a6385";
+  ctx.font = `400 12px ${font}`;
+  ctx.fillText("what Pokémon Sleep players want", WIDTH / 2, height - 12);
 
   return new Promise((resolve, reject) =>
     canvas.toBlob((blob) => (blob ? resolve(blob) : reject(new Error("Couldn't draw the image"))), "image/png"),
@@ -180,15 +222,18 @@ function drawStarCount(ctx: CanvasRenderingContext2D, font: string, tops: number
 const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 
 /** The tier list currently shown, as image rows (the Top 3 row stays on the site: it isn't a tier). */
-function tierSections(sections: ExportSection[]): ImageSection[] {
-  return sections.map((section) => ({
+export function tierSections(sections: ExportSection[], style: TierStyle = "standard"): ImageSection[] {
+  return sections.flatMap((section) => [{
     heading: section.heading,
-    rows: TIERS.filter((tier) => tier.id !== "top").map((tier) => ({
+    rows: tierDefinitions(style).filter((tier) => tier.id !== "top").map((tier) => ({
       label: tier.label,
-      color: TIER_COLOR[tier.id],
-      items: (section.tiers.get(tier.id) ?? []).map((r) => ({ sprite: rankedSpriteUrl(r), tops: r.tops })),
+      color: (style === "consensus" ? CONSENSUS_COLORS[tier.id] : undefined) ?? TIER_COLOR[tier.id],
+      items: (section.tiers.get(tier.id) ?? []).map((r) => ({ sprite: rankedSpriteUrl(r), tops: r.tops, isNew: r.isNew })),
     })),
-  }));
+  }, ...(section.unranked?.length ? [{
+    heading: RANKING_PENDING,
+    rows: [{ label: "—", color: { bg: "#e2e8f0", fg: "#5a6385" }, items: section.unranked.map((row) => ({ sprite: rankedSpriteUrl(row), isNew: row.isNew })) }],
+  }] : [])]);
 }
 
 /** Tier List export: "Candy Tier List", the pool and filters, voters and date. */
@@ -197,18 +242,20 @@ export function TierExport({
   voters,
   sections,
   label = "Export image",
+  style = "standard",
 }: {
   title: string;
-  voters: number;
+  voters: number | null;
   sections: ExportSection[];
   label?: string;
+  style?: TierStyle;
 }) {
   return (
     <ImageExport
       title={title}
       heading="Candy Tier List"
-      subtitle={() => `${title} · ${voters} ${voters === 1 ? "player" : "players"} · ${today()}`}
-      sections={() => tierSections(sections)}
+      subtitle={() => [title, voters !== null && `${voters} ${voters === 1 ? "player" : "players"}`, today()].filter(Boolean).join(" · ")}
+      sections={() => tierSections(sections, style)}
       file={`tier-list-${slug(title)}.png`}
       label={label}
     />
@@ -255,7 +302,7 @@ export function ImageExport({
       setImage({ blob, url: URL.createObjectURL(blob) });
       dialog.current?.showModal();
     } catch {
-      setStatus("Couldn't make the image. Try again.");
+      setStatus("Couldn't create the image. Try again.");
     } finally {
       setBusy(false);
     }
@@ -280,7 +327,7 @@ export function ImageExport({
         type="button"
         onClick={open}
         disabled={busy}
-        className="rounded-full border border-slate-300 px-3 py-1 text-sm font-semibold hover:bg-white/60 disabled:opacity-60 dark:border-slate-700 dark:hover:bg-night"
+        className="pill-idle rounded-full border border-slate-300 px-3 py-1 text-sm font-semibold disabled:opacity-60 dark:border-slate-700"
       >
         {busy ? "Drawing…" : `⤓ ${label}`}
       </button>

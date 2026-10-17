@@ -39,3 +39,16 @@ export function activityLabel(iso: string | null, now: number = Date.now()): str
   if (age < 7 * 24 * 3600 * 1000) return "Active this week";
   return `Seen ${relativeTime(iso, now)}`;
 }
+
+/** Calendar-month cutoff, matching PostgreSQL's interval '2 months'. */
+export function staleFriend(iso: string | null, now: number = Date.now()): boolean {
+  if (!iso) return false;
+  const cutoff = new Date(now);
+  const day = cutoff.getUTCDate();
+  cutoff.setUTCDate(1);
+  cutoff.setUTCMonth(cutoff.getUTCMonth() - 2);
+  const end = new Date(cutoff.getTime());
+  end.setUTCMonth(end.getUTCMonth() + 1, 0);
+  cutoff.setUTCDate(Math.min(day, end.getUTCDate()));
+  return Date.parse(iso) <= cutoff.getTime();
+}

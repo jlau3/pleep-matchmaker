@@ -1,5 +1,9 @@
 \set ON_ERROR_STOP on
 
+-- Sections up to the last use friends-only math: no Everyone stand-ins
+-- (20261026000300_blend_demand.sql). The last section turns them back on.
+create or replace function public.demand_prior_votes() returns numeric language sql immutable as $$ select 0::numeric $$;
+
 -- viewer wants a,b,c. Fit = how much of the viewer's wants each candidate's
 -- Tier List wants (their own wants stand in while they have under 3 friends
 -- with votes). Candidates:
@@ -38,6 +42,8 @@ update public.preferences set top = true where user_id = '00000000-0000-0000-000
 
 -- Strangers see IGNs, not Discord names (20261020001100_discord_friends_only.sql): IGN = Discord name here.
 update public.profiles set ign = coalesce(ign, discord_username) where id::text like '00000000-0000-0000-000d-%';
+-- Existing social fixtures include a chosen icon.
+update public.profiles set game_avatar = coalesce(game_avatar, 'pikachu:normal') where id::text like any (array['00000000-0000-0000-000d-%', '00000000-0000-0000-0010-%']);
 set role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-000d-000000000001', false);
 
@@ -116,6 +122,8 @@ insert into public.friends (user_id, friend_id) values
   ('00000000-0000-0000-0010-000000000001', '00000000-0000-0000-0010-000000000004'),
   ('00000000-0000-0000-0010-000000000001', '00000000-0000-0000-000d-000000000001');
 
+-- Existing social fixtures include a chosen icon.
+update public.profiles set game_avatar = coalesce(game_avatar, 'pikachu:normal') where id::text like any (array['00000000-0000-0000-000d-%', '00000000-0000-0000-0010-%']);
 set role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-000d-000000000001', false);
 do $$ begin
@@ -134,6 +142,8 @@ reset role;
 
 -- My Friends shows both numbers once you add them.
 insert into public.friends (user_id, friend_id) values ('00000000-0000-0000-000d-000000000001', '00000000-0000-0000-0010-000000000001');
+-- Existing social fixtures include a chosen icon.
+update public.profiles set game_avatar = coalesce(game_avatar, 'pikachu:normal') where id::text like any (array['00000000-0000-0000-000d-%', '00000000-0000-0000-0010-%']);
 set role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-000d-000000000001', false);
 do $$ begin
@@ -143,14 +153,45 @@ end $$;
 reset role;
 delete from public.friends where user_id = '00000000-0000-0000-000d-000000000001' and friend_id = '00000000-0000-0000-0010-000000000001';
 
--- With one of the three friends gone, under 3 voters: no "for you" (their own x1 doesn't stand in).
+-- With one of the three friends gone there's no 3-friend minimum any more: the
+-- two left still make their list (their own x1 still doesn't stand in).
 delete from public.friends where user_id = '00000000-0000-0000-0010-000000000001' and friend_id = '00000000-0000-0000-0010-000000000004';
+-- Existing social fixtures include a chosen icon.
+update public.profiles set game_avatar = coalesce(game_avatar, 'pikachu:normal') where id::text like any (array['00000000-0000-0000-000d-%', '00000000-0000-0000-0010-%']);
 set role authenticated;
 select set_config('request.jwt.claim.sub', '00000000-0000-0000-000d-000000000001', false);
 do $$ begin
-  assert (select you_fit_pct from public.browse_players('fit', true, 50, 0) where user_id = public.test_uid('br_hub')) is null,
-    'under 3 friends with votes: a dash';
-  assert (select you_fit_pct from public.lookup_players('br_hub')) is null, 'search agrees';
+  assert (select you_fit_pct from public.browse_players('fit', true, 50, 0) where user_id = public.test_uid('br_hub')) = 100,
+    'two friends with votes still make a list';
+  assert (select you_fit_pct from public.lookup_players('br_hub')) = 100, 'search agrees';
+end $$;
+reset role;
+
+-- Everyone stands in (5 stand-in votes): numbers never wait on friends voting.
+create or replace function public.demand_prior_votes() returns numeric language sql immutable as $$ select 5::numeric $$;
+set role authenticated;
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-000d-000000000001', false);
+do $$
+declare
+  fresh record; low record; good record; hub record;
+begin
+  select * into fresh from public.browse_players('fit', true, 50, 0) where user_id = public.test_uid('br_fresh');
+  select * into low from public.browse_players('fit', true, 50, 0) where user_id = public.test_uid('br_low');
+  select * into good from public.browse_players('fit', true, 50, 0) where user_id = public.test_uid('br_good');
+  select * into hub from public.browse_players('fit', true, 50, 0) where user_id = public.test_uid('br_hub');
+  -- Nobody's friends have voted for fresh, low or good: Everyone is their list, the same for all three.
+  assert fresh.you_fit_pct is not null and fresh.you_fit_pct = low.you_fit_pct and low.you_fit_pct = good.you_fit_pct,
+    format('"for you" from Everyone: %s %s %s', fresh.you_fit_pct, low.you_fit_pct, good.you_fit_pct);
+  -- The viewer has no friends either: "for them" compares with Everyone's list...
+  assert good.match_pct is not null and low.match_pct is not null and good.match_pct > low.match_pct,
+    format('"for them" from Everyone: good %s, low %s', good.match_pct, low.match_pct);
+  -- ...but never invents the player's own wants.
+  assert fresh.match_pct is null, 'no votes of their own: still a dash';
+  assert not exists (select 1 from public.browse_players() where user_id = public.test_uid('br_fresh')), 'no votes: never a good match';
+  -- Real friends outweigh the stand-ins: the hub's two friends want what the viewer wants.
+  assert hub.you_fit_pct > good.you_fit_pct, format('friends lift "for you": hub %s, Everyone %s', hub.you_fit_pct, good.you_fit_pct);
+  assert hub.you_fit_wants @> '{bra,brb,brc}', format('their list covers the viewer''s wants: %s', hub.you_fit_wants);
+  assert (select you_fit_pct from public.lookup_players('br_hub')) = hub.you_fit_pct, 'search agrees';
 end $$;
 reset role;
 

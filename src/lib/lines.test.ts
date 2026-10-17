@@ -34,6 +34,22 @@ describe("sleep types", () => {
     expect(lineHasSleepType(pikachu, "dozing")).toBe(false);
   });
 
+  it("includes Mythicals in every sleep type, while respecting islands", () => {
+    for (const id of ["mew", "darkrai"]) {
+      const line = LINES_BY_ID.get(id)!;
+      expect(line.mythical).toBe(true);
+      for (const type of SLEEP_TYPES) {
+        expect(lineHasSleepType(line, type)).toBe(true);
+        for (const island of ISLANDS) {
+          expect(lineHasSleepType(line, type, island)).toBe(island.lines.includes(id));
+        }
+      }
+    }
+    // Rare status alone must not turn a legendary into an all-type encounter.
+    const raikou = LINES_BY_ID.get("raikou")!;
+    expect(SLEEP_TYPES.filter((type) => lineHasSleepType(raikou, type))).toHaveLength(1);
+  });
+
   it("only counts forms that spawn on the island", () => {
     const eevee = LINES_BY_ID.get("eevee")!;
     const island = (id: string) => ISLANDS.find((i) => i.id === id)!;

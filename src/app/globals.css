@@ -85,6 +85,10 @@ body {
     @apply rounded-full bg-sun font-extrabold text-[#5b3e00] shadow-[0_3px_0_var(--color-sun-deep)] transition hover:brightness-105 active:translate-y-[2px] active:shadow-[0_1px_0_var(--color-sun-deep)] disabled:opacity-60;
   }
 
+  .pill-idle {
+    @apply bg-[#dce6f2] hover:bg-[#cbd9e9] dark:bg-[#171f46] dark:hover:bg-[#111936];
+  }
+
   .pill-active {
     @apply bg-night text-white dark:bg-sun dark:text-[#5b3e00];
   }
@@ -110,4 +114,18 @@ button:not(:disabled),
 [role="button"]:not([aria-disabled="true"]),
 summary {
   cursor: pointer;
+}
+
+/* The profile walkthrough keeps the actual field above its dimmed backdrop. */
+.profile-guide-target {
+  position: relative;
+  z-index: 50;
+  border-radius: 0.75rem;
+  background: var(--color-cream);
+  outline: 4px solid var(--color-sun);
+  outline-offset: 6px;
+}
+:root.dark .profile-guide-target { background: var(--color-night); }
+@media (prefers-color-scheme: dark) {
+  :root:not(.light) .profile-guide-target { background: var(--color-night); }
 }

@@ -24,8 +24,9 @@ const link = "font-semibold underline disabled:opacity-50";
  * Send request → Request sent (Cancel) → they Accept or Decline (you see a
  * decline and can clear it; one left unanswered for 30 days shows as expired,
  * to send again or clear) → Remove friend. Sending also means sending a
- * request in Pokémon Sleep, so when their code is showing it says so; a
- * closed player's code stays hidden, and they usually know you already.
+ * request in Pokémon Sleep: codes travel only with requests (20261021000900),
+ * so yours goes to them and they add you in-game; once you're friends the
+ * codes are gone, as in the game.
  * Removing asks inline first (native confirm() is suppressed in some in-app
  * browsers, e.g. Discord's), including whether they stopped playing, which
  * feeds the inactive reports Find New uses.
@@ -40,7 +41,7 @@ export function FriendAction({
   userId: string;
   name: string;
   relation: Relation;
-  /** Their friend code is on the card, so "also send a request in Pokémon Sleep" makes sense. */
+  /** Their friend code is on the card. On a request to you, missing means they sent it as "already friends in the game". */
   showsCode?: boolean;
   /** Not here yet name this player was found from: after sending or accepting, asks whether to remove it. */
   placeholder?: string;
@@ -51,6 +52,8 @@ export function FriendAction({
   const [confirming, setConfirming] = useState(false);
   // The Not here yet name to offer removing, once a request or accept to them went through.
   const [askRemove, setAskRemove] = useState<string | null>(null);
+  // "We're already friends in Pokémon Sleep": send the request without your friend code.
+  const [inGame, setInGame] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busy, startTransition] = useTransition();
   const router = useRouter();
@@ -120,15 +123,23 @@ export function FriendAction({
             disabled={busy}
             onClick={() =>
               run(
-                () => sendFriendRequest(userId, Boolean(placeholder)),
+                () => sendFriendRequest(userId, Boolean(placeholder), !inGame),
                 (status) => (status === "friends" ? "friend" : "sent"),
-                showsCode ? `Also send ${name} a friend request in Pokémon Sleep with the code above.` : undefined,
+                inGame
+                  ? `Sent without your friend code, since you're already friends in Pokémon Sleep.`
+                  : `${name} gets your friend code with the request, to add you in Pokémon Sleep when they accept.`,
               )
             }
             className={solid}
           >
             {busy ? "Sending…" : "Send friend request"}
           </button>
+        )}
+        {relation === "none" && (
+          <label className="inline-flex cursor-pointer items-center gap-1.5 text-xs text-slate-600 dark:text-slate-300">
+            <input type="checkbox" checked={inGame} onChange={(e) => setInGame(e.target.checked)} className="h-3.5 w-3.5 accent-[var(--color-night)]" />
+            Already friends in Pokémon Sleep (send without my code)
+          </label>
         )}
 
         {relation === "sent" && (
@@ -155,7 +166,7 @@ export function FriendAction({
           <span className="text-sm text-slate-600 dark:text-slate-300">
             To send friend requests,{" "}
             <Link href="/profile" className="font-semibold underline">
-              add your in-game name and friend code
+              add your in-game name, friend code, and icon
             </Link>{" "}
             so they know who&apos;s asking.
           </span>
@@ -182,6 +193,7 @@ export function FriendAction({
 
         {relation === "incoming" && (
           <>
+            {!showsCode && <span className="w-full text-xs text-slate-500">{name} says you&apos;re already friends in Pokémon Sleep.</span>}
             <button
               type="button"
               disabled={busy}
@@ -189,13 +201,30 @@ export function FriendAction({
                 run(
                   () => acceptFriendRequest(userId, Boolean(placeholder)),
                   () => "friend",
-                  `You're friends now. Accept ${name}'s request in Pokémon Sleep too.`,
+                  showsCode
+                    ? `You're friends now. Add ${name} in Pokémon Sleep too if you haven't yet.`
+                    : `You're friends now.`,
                 )
               }
               className={solid}
             >
               {busy ? "Accepting…" : "Accept"}
             </button>
+            <button type="button" disabled={busy} onClick={() => run(() => declineFriendRequest(userId), () => "declined-them")} className={outline}>
+              Decline
+            </button>
+          </>
+        )}
+
+        {relation === "incoming-setup" && (
+          <>
+            <span className="text-sm text-slate-600 dark:text-slate-300">
+              To accept,{" "}
+              <Link href="/profile" className="font-semibold underline">
+                add your in-game name, friend code, and icon
+              </Link>{" "}
+              so they can add you in Pokémon Sleep.
+            </span>
             <button type="button" disabled={busy} onClick={() => run(() => declineFriendRequest(userId), () => "declined-them")} className={outline}>
               Decline
             </button>
@@ -215,7 +244,7 @@ export function FriendAction({
       {askRemove && (
         <span className="inline-flex flex-wrap items-center gap-2 rounded-lg bg-sun/30 px-2 py-1 text-xs dark:bg-sun/15">
           <span>
-            Take <b>{askRemove}</b> off your Not here yet list?
+            Take <b>{askRemove}</b> off your Friends to Find list?
           </span>
           <button
             type="button"

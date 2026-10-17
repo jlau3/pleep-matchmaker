@@ -10,7 +10,7 @@ export async function searchQuery(searchParams: Promise<{ q?: string }>): Promis
 }
 
 /**
- * Player search (exact or close names, friend codes), shared by My Friends and Find New.
+ * Player search (exact names, ignoring case, spacing and lookalike symbols; friend codes), shared by My Friends and Find New.
  * A ?q= in the link (shared friend posts, SubTabs) is searched on the server so it shows on
  * first paint; later searches run in the box without reloading the page.
  */
@@ -25,6 +25,8 @@ export async function PlayerSearch({
   relations: Relations;
   viewerId: string;
 }) {
+  // No IGN and friend code, no search (the database returns nothing either): point at Profile instead.
+  if (relations.canSearch === false) return null;
   let rows: LookupRow[] = [];
   if (q) {
     const { data, error } = await supabase.rpc("lookup_players", { q });
