@@ -107,6 +107,7 @@ export function FindNewBoard({
     return sortPlayers(pool, effectiveSort, tiers);
   }, [rows, hidden, opts.everyone, opts.activeWeek, opts.votingFriends, opts.spotlightSafe, opts.newPlayers, opts.hideDeclined, spotlightWaiting, filterTime, effectiveSort, tiers, tiersReady, tops]);
 
+  const filtered = !opts.everyone || opts.activeWeek || opts.votingFriends || opts.spotlightSafe || opts.newPlayers || opts.hideDeclined;
   const total = listed.length;
   const pages = Math.max(1, Math.ceil(total / BROWSE_PAGE_SIZE));
   const page = Math.min(opts.page, pages);
@@ -160,7 +161,7 @@ export function FindNewBoard({
     <section ref={top} className="scroll-mt-20 space-y-3">
       <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2">
         <h2 className="text-lg font-semibold">
-          Suggested Players <span className="text-sm font-normal text-slate-500">{spotlightWaiting ? "…" : total}</span>
+          {filtered ? "Filtered Players" : "All Players"} <span className="text-sm font-normal text-slate-500">{spotlightWaiting ? "…" : total}</span>
         </h2>
         <FitLegend friendsVoted={friendsVoted} youVoted={picked > 0} autoOpen={autoOpenGuide} />
       </div>

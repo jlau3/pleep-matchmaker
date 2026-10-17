@@ -55,47 +55,48 @@ export function PlayerHeader({
   const art = game || !player.avatar_url;
   return (
     <div className="space-y-2">
-      {/* Avatar, name and the aside (fits) on top; everything else full width below, flush left. */}
+      {/* Activity follows identity, independently of a taller fit/Spotlight column. */}
       <div className="flex items-start gap-3">
-        {/* Name centred on the avatar, not on the aside (which grows with the Top 3 row). */}
-        <div className="flex min-w-0 flex-1 items-center gap-3">
-          <img
-            src={avatar}
-            alt=""
-            title={game ? "Their Pokémon Sleep icon" : art ? "No icon picked" : undefined}
-            className={`h-12 w-12 shrink-0 rounded-full ${art ? "bg-sky object-contain dark:bg-night-deep" : ""}`}
-          />
-          <div className="min-w-0 flex-1">
-            {/* IGN, then Discord and Reddit names on their own lines; long names wrap and the others trim, so none run into the fits. */}
-            <span className="block break-words font-semibold">{name}</span>
-            {discord && (
-              <span className="flex min-w-0 items-center gap-1 text-sm text-slate-500" title={`Discord: ${discord}`}>
-                <DiscordIcon />
-                <span className="truncate">{discord}</span>
-              </span>
-            )}
-            {player.reddit_username && name !== `u/${player.reddit_username}` && (
-              <span className="flex min-w-0 items-center gap-1 text-sm text-slate-500" title="Reddit name (added by the player, not verified)">
-                <RedditIcon />
-                <span className="truncate">u/{player.reddit_username}</span>
-              </span>
-            )}
+        <div className="min-w-0 flex-1 space-y-2">
+          <div className="flex items-center gap-3">
+            <img
+              src={avatar}
+              alt=""
+              title={game ? "Their Pokémon Sleep icon" : art ? "No icon picked" : undefined}
+              className={`h-12 w-12 shrink-0 rounded-full ${art ? "bg-sky object-contain dark:bg-night-deep" : ""}`}
+            />
+            <div className="min-w-0 flex-1">
+              {/* IGN, then Discord and Reddit names on their own lines; long names wrap and the others trim, so none run into the fits. */}
+              <span className="block break-words font-semibold">{name}</span>
+              {discord && (
+                <span className="flex min-w-0 items-center gap-1 text-sm text-slate-500" title={`Discord: ${discord}`}>
+                  <DiscordIcon />
+                  <span className="truncate">{discord}</span>
+                </span>
+              )}
+              {player.reddit_username && name !== `u/${player.reddit_username}` && (
+                <span className="flex min-w-0 items-center gap-1 text-sm text-slate-500" title="Reddit name (added by the player, not verified)">
+                  <RedditIcon />
+                  <span className="truncate">u/{player.reddit_username}</span>
+                </span>
+              )}
+            </div>
+          </div>
+          <div className="flex flex-wrap items-center gap-x-3 text-[13px] text-slate-500">
+            <span>{warnStale && staleFriend(player.last_seen_at) ? "Last here over 2 months ago. Their votes may be stale." : activityLabel(player.last_seen_at)}</span>
+            <BlockButton userId={player.user_id} name={name} />
           </div>
         </div>
         {aside}
       </div>
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
-        {player.friend_code && (
+      {player.friend_code && (
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
           <span className="flex items-center gap-2 whitespace-nowrap">
             FC <strong className="font-mono">{formatFriendCode(player.friend_code)}</strong>
             <CopyButton text={player.friend_code} label="friend code" />
           </span>
-        )}
-      </div>
-      <div className="flex flex-wrap items-center gap-x-3 text-[13px] text-slate-500">
-        <span>{warnStale && staleFriend(player.last_seen_at) ? "Last here over 2 months ago. Their votes may be stale." : activityLabel(player.last_seen_at)}</span>
-        <BlockButton userId={player.user_id} name={name} />
-      </div>
+        </div>
+      )}
       {(relation !== undefined || actions) && (
         <div className="flex flex-wrap items-center gap-2">
           {relation !== undefined && (

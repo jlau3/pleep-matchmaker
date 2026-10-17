@@ -31,3 +31,5 @@
 
 - Final tier alignment: saved Neutral-only friends count in the My Friends denominator. Spotlight badges/filter tiers follow actual Percentile rules (zero is C, negative is F), available from one voting friend; no saved votes means unavailable. Keep 01100/01200 as separate production follow-ups after 01000, outside the existing squash.
 - Find New loads complete eligible candidates via authenticated browse_candidate_batch with stable ID cursors, at most 500 rows per query selected before scoring; never restore a top-1,000 population subset. Coarse flags share the batch query. Spotlight loads in 200-player chunks (at most 600 rows), without slicing away later IDs. A failed batch must not silently become a complete list. Named sort controls use Best Match, Best for You, Recently Active.
+
+- Find New labels the default list All Players, switching to Filtered Players only with optional filters active. Shared player headers keep activity directly below identity, independent of the fit/Spotlight column; do not render an empty friend-code row.
