@@ -8,12 +8,12 @@ import { friendPostProps } from "@/lib/friendPost";
 import { FriendshipLevel5 } from "@/components/FriendshipLevel5";
 import { loadOwnProfile, loadOwnVotes, loadRelations, MAX_FRIENDS } from "@/lib/data";
 import { LINES } from "@/lib/lines";
-import { BROWSE_PAGE_SIZE, parseBrowse, sortPlayers } from "@/lib/browse";
+import { BROWSE_PAGE_SIZE, parseBrowse, matchesBrowseFilters, sortPlayers } from "@/lib/browse";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { requireUser } from "@/lib/supabase/server";
 import type { HiddenSuggestion, MatchRow } from "@/lib/types";
 
-type Params = { q?: string; sort?: string; show?: string; page?: string };
+type Params = { q?: string; sort?: string; show?: string; active?: string; friends?: string; page?: string };
 
 export default async function MatchesPage({ searchParams }: { searchParams: Promise<Params> }) {
   const { supabase, user } = await requireUser();
@@ -45,7 +45,7 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
         // The client retries and explains a failed filter load instead of treating unknown tiers as matches.
       }
     } else {
-      const pool = rows.filter((r) => !hidden.has(r.user_id) && (opts.everyone || r.good));
+      const pool = rows.filter((r) => !hidden.has(r.user_id) && matchesBrowseFilters(r, opts));
       const first = sortPlayers(pool, opts.sort).slice((opts.page - 1) * BROWSE_PAGE_SIZE, opts.page * BROWSE_PAGE_SIZE);
       const loaded = await loadTop3Tiers(supabase, first.map((r) => r.user_id));
       // Known for every first-page player: no entry means all dashes.

@@ -20,3 +20,5 @@
 - Consensus has three sections: Mostly Wanted, Mixed, Mostly Unwanted. Mixed includes Divisive and Mostly Neutral cards with small badges. A clear Want/Don't Want lead means the largest vote group and at least twice its opposing group; Divisive (at least one-third on both sides) takes precedence.
 
 - My Votes uses island icons and colored sleep filters shared with Tier List; vote filters appear on their right. No Search or All vote button: tap the active Want/Neutral/Don't Want filter again to clear it. Export honors active filters except that Top 3 Spotlight always stays complete. Keep the plain Export Image link above filters and Spotlight below them.
+
+- Find New Friends defaults to all eligible suggestions. Its Filters dropdown combines optional Mutual Fit, Active This Week, and Has Voting Friends; all start off and preserve the selected sort. Do not add mutual-friend disclosure or a Spotlight/F cutoff without a separate product decision.

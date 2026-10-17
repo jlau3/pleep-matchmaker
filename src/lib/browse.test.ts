@@ -1,14 +1,38 @@
 import { describe, expect, it } from "vitest";
-import { BROWSE_SORTS, browseQuery, parseBrowse, type SortablePlayer, sortPlayers, top3Score } from "./browse";
+import { BROWSE_SORTS, browseQuery, matchesBrowseFilters, parseBrowse, type SortablePlayer, sortPlayers, top3Score } from "./browse";
 
 describe("trial suggestion controls", () => {
   it("defaults to Best for you and removes legacy sort/filter URL settings", () => {
     for (const params of [{}, { sort: "fit", spotlight: "safe" }, { sort: "unknown", page: "-3" }]) {
-      expect(parseBrowse(params)).toEqual({ sort: "you_fit", everyone: false, page: 1 });
+      expect(parseBrowse(params)).toEqual({ sort: "you_fit", everyone: true, activeWeek: false, votingFriends: false, page: 1 });
     }
+    expect(parseBrowse({ show: "mutual" }).everyone).toBe(false);
+    expect(parseBrowse({ show: "good" }).everyone).toBe(false);
+    expect(parseBrowse({ show: "all" }).everyone).toBe(true);
+    expect(browseQuery({ sort: "you_fit", everyone: false, activeWeek: false, votingFriends: false, page: 1 })).toBe("?show=mutual");
     expect(BROWSE_SORTS.map(([id]) => id)).toEqual(["you_fit", "top3", "active"]);
-    expect(browseQuery({ sort: "you_fit", everyone: false, page: 1 })).toBe("");
-    expect(browseQuery({ sort: "active", everyone: true, page: 2 }, "Snack")).toBe("?q=Snack&sort=active&show=all&page=2");
+    expect(browseQuery({ sort: "you_fit", everyone: true, activeWeek: false, votingFriends: false, page: 1 })).toBe("");
+    expect(browseQuery({ sort: "active", everyone: true, activeWeek: false, votingFriends: false, page: 2 }, "Snack")).toBe("?q=Snack&sort=active&page=2");
+  });
+});
+
+describe("suggestion filters", () => {
+  const now = Date.parse("2026-10-17T12:00:00Z");
+  const all = { everyone: true, activeWeek: false, votingFriends: false };
+  const recent = { good: false, last_seen_at: "2026-10-16T12:00:00Z", list_voters: 2 };
+  it("combines mutual fit, activity and voting friends without changing scores", () => {
+    expect(matchesBrowseFilters(recent, all, now)).toBe(true);
+    expect(matchesBrowseFilters(recent, { ...all, everyone: false }, now)).toBe(false);
+    expect(matchesBrowseFilters(recent, { ...all, activeWeek: true, votingFriends: true }, now)).toBe(true);
+    expect(matchesBrowseFilters({ ...recent, list_voters: 0 }, { ...all, votingFriends: true }, now)).toBe(false);
+    expect(matchesBrowseFilters({ ...recent, last_seen_at: "2026-10-10T11:59:59Z" }, { ...all, activeWeek: true }, now)).toBe(false);
+    expect(matchesBrowseFilters({ ...recent, last_seen_at: "2026-10-10T12:00:00Z" }, { ...all, activeWeek: true }, now)).toBe(true);
+  });
+  it("round-trips combined filters and preserves search and sort", () => {
+    const opts = { sort: "active" as const, everyone: false, activeWeek: true, votingFriends: true, page: 2 };
+    const query = browseQuery(opts, "Snack");
+    expect(query).toBe("?q=Snack&sort=active&show=mutual&active=week&friends=voting&page=2");
+    expect(parseBrowse(Object.fromEntries(new URLSearchParams(query)))).toEqual(opts);
   });
 });
 

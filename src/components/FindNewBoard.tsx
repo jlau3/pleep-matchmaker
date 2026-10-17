@@ -3,9 +3,10 @@
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { hideSuggestedPlayer, restoreSuggestedPlayer, loadTop3TiersFor } from "@/app/actions";
-import { BROWSE_PAGE_SIZE, BROWSE_SORT_HINTS, BROWSE_SORTS, type BrowseOptions, browseQuery, sortPlayers } from "@/lib/browse";
+import { BROWSE_PAGE_SIZE, BROWSE_SORT_HINTS, BROWSE_SORTS, type BrowseOptions, browseQuery, matchesBrowseFilters, sortPlayers } from "@/lib/browse";
 import { type Relations, relationOf } from "@/lib/relations";
 import type { HiddenSuggestion, MatchRow } from "@/lib/types";
+import { FindFilters } from "./FindFilters";
 import { ViewToggle } from "./ViewToggle";
 import { SortMenu } from "./SortMenu";
 import { FitLegend } from "./FitLegend";
@@ -56,6 +57,7 @@ export function FindNewBoard({
   picked: number;
   friendsVoted: boolean;
 }) {
+  const [filterTime] = useState(() => Date.now());
   const [opts, setOpts] = useState<BrowseOptions>(initial);
   const [tiers, setTiers] = useState<Tiers>(initialTiers);
   // Players whose tiers are known (no entry for one of them = all dashes).
@@ -98,9 +100,9 @@ export function FindNewBoard({
   // Sorting by Top 3 Spotlight before the tiers are in: keep Best for you order until they are.
   const effectiveSort = opts.sort === "top3" && !tiersReady ? "you_fit" : opts.sort;
   const listed = useMemo(() => {
-    const pool = rows.filter((r) => !hidden.has(r.user_id) && (opts.everyone || r.good));
+    const pool = rows.filter((r) => !hidden.has(r.user_id) && matchesBrowseFilters(r, opts, filterTime));
     return sortPlayers(pool, effectiveSort, tiers);
-  }, [rows, hidden, opts.everyone, effectiveSort, tiers, tiersReady, tops]);
+  }, [rows, hidden, opts.everyone, opts.activeWeek, opts.votingFriends, filterTime, effectiveSort, tiers, tiersReady, tops]);
 
   const total = listed.length;
   const pages = Math.max(1, Math.ceil(total / BROWSE_PAGE_SIZE));
@@ -159,16 +161,10 @@ export function FindNewBoard({
         </h2>
         <FitLegend friendsVoted={friendsVoted} youVoted={picked > 0} autoOpen={autoOpenGuide} />
       </div>
-      <div className="space-y-2">
-        <div className="inline-flex overflow-hidden rounded-xl border border-slate-300 text-sm dark:border-slate-700" role="group" aria-label="Suggested player pool">
-          <Pill active={!opts.everyone} onClick={() => change({ everyone: false })}>Mutual fit</Pill>
-          <Pill active={opts.everyone} onClick={() => change({ everyone: true })}>All players</Pill>
-        </div>
-
-      </div>
-      <div className="flex items-center justify-between gap-3">
+      <div className="relative flex items-center gap-2">
         <SortMenu value={opts.sort} options={BROWSE_SORTS} hints={BROWSE_SORT_HINTS} onChange={(sort) => change({ sort })} />
-        <ViewToggle view={view} onChange={changeView} />
+        <FindFilters opts={opts} onChange={change} />
+        <span className="ml-auto"><ViewToggle view={view} onChange={changeView} /></span>
       </div>
       {opts.sort === "top3" && !tiersReady && tops.length > 0 && (
         <p className="text-xs font-semibold text-slate-500" role={tierError ? "alert" : "status"}>
@@ -213,7 +209,10 @@ export function FindNewBoard({
         </p>
       ) : shown.length === 0 ? (
         <p className="py-8 text-center text-slate-500">
-          {opts.everyone ? (
+          {opts.activeWeek || opts.votingFriends ? (
+            <>No players match these filters. <button type="button" className="font-semibold underline"
+              onClick={() => change({ everyone: true, activeWeek: false, votingFriends: false })}>Clear filters</button></>
+          ) : opts.everyone ? (
             "No one to suggest right now. Check back as more players join."
           ) : (
             <>
@@ -288,24 +287,5 @@ export function FindNewBoard({
         </nav>
       )}
     </section>
-  );
-}
-
-/** A filter or sort pill; the active one is filled. An optional hint shows on hover. */
-function Pill({ active, onClick, hint, children }: { active: boolean; onClick: () => void; hint?: string; children: React.ReactNode }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      title={hint}
-      aria-pressed={active}
-      className={`px-3 py-2 font-semibold ${
-        active
-          ? "bg-night text-white dark:bg-sun dark:text-[#5b3e00]"
-          : "pill-idle"
-      }`}
-    >
-      {children}
-    </button>
   );
 }

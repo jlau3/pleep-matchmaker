@@ -19,14 +19,16 @@ export interface BrowseOptions {
   sort: BrowseSort;
   /** false: both exact utilities > 0; true: all eligible suggestions. */
   everyone: boolean;
+  activeWeek: boolean;
+  votingFriends: boolean;
   /** 1-based. */
   page: number;
 }
 
-export function parseBrowse(params: { sort?: string; show?: string; page?: string; spotlight?: string }): BrowseOptions {
+export function parseBrowse(params: { sort?: string; show?: string; page?: string; active?: string; friends?: string; spotlight?: string }): BrowseOptions {
   const sort = BROWSE_SORTS.some(([id]) => id === params.sort) ? (params.sort as BrowseSort) : "you_fit";
   const page = Math.max(1, Math.min(1000, Number.parseInt(params.page ?? "1", 10) || 1));
-  return { sort, everyone: params.show === "all", page };
+  return { sort, everyone: params.show !== "mutual" && params.show !== "good", activeWeek: params.active === "week", votingFriends: params.friends === "voting", page };
 }
 
 /** Query string for these options, dropping defaults; `q` (the search box) is kept. */
@@ -34,10 +36,20 @@ export function browseQuery(opts: BrowseOptions, q?: string): string {
   const p = new URLSearchParams();
   if (q) p.set("q", q);
   if (opts.sort !== "you_fit") p.set("sort", opts.sort);
-  if (opts.everyone) p.set("show", "all");
+  if (!opts.everyone) p.set("show", "mutual");
+  if (opts.activeWeek) p.set("active", "week");
+  if (opts.votingFriends) p.set("friends", "voting");
   if (opts.page > 1) p.set("page", String(opts.page));
   const s = p.toString();
   return s ? `?${s}` : "";
+}
+
+/** Optional filters combine; they use only fields already disclosed on suggestion rows. */
+export function matchesBrowseFilters(row: { good: boolean; last_seen_at: string; list_voters: number },
+  opts: Pick<BrowseOptions, "everyone" | "activeWeek" | "votingFriends">, now = Date.now()): boolean {
+  return (opts.everyone || row.good)
+    && (!opts.activeWeek || Date.parse(row.last_seen_at) >= now - 7 * 86400_000)
+    && (!opts.votingFriends || row.list_voters > 0);
 }
 
 /** What sortPlayers needs from a Find New row (browse_all). */

@@ -272,9 +272,8 @@ export function VoteBoard({
   return (
     <div>
       <div className="mb-4 space-y-4">
-        <div className="flex items-center justify-between gap-3">
+        <div>
           <ExportVotes choices={choices} tops={tops} lines={filtered} filterLabel={filterLabel} />
-          <ViewToggle view={view} onChange={changeView} />
         </div>
         <VoteGuide autoOpen={autoOpenGuide} />
         {error && <div role="alert" className="flex items-center justify-between gap-3 text-sm text-dont">
@@ -318,15 +317,18 @@ export function VoteBoard({
 
       <div className="mb-4 space-y-3">
         <p className="text-xs text-slate-500" role="status">{filtered.length} of {LINES.length} candies</p>
-        {crowd && (
-          <label className="flex cursor-pointer items-center gap-2 text-sm">
-            <input type="checkbox" checked={showCrowd} onChange={toggleCrowd} className="h-4 w-4 accent-[var(--color-night)]" />
-            <span>
-              Show community votes{" "}
-              <span className="text-slate-500">({crowd.voters} active players)</span>
-            </span>
-          </label>
-        )}
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          {crowd && (
+            <label className="flex cursor-pointer items-center gap-2 text-sm">
+              <input type="checkbox" checked={showCrowd} onChange={toggleCrowd} className="h-4 w-4 accent-[var(--color-night)]" />
+              <span>
+                Show community votes
+                <span className="block text-xs text-slate-500">{crowd.voters} active players</span>
+              </span>
+            </label>
+          )}
+          <span className="ml-auto"><ViewToggle view={view} onChange={changeView} /></span>
+        </div>
       </div>
 
       {newCards.map((id) => (
