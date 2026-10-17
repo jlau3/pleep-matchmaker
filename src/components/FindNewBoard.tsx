@@ -19,7 +19,7 @@ type Tiers = Record<string, Record<string, string>>;
 
 /**
  * Find New's suggested players. Every player comes down once (browse_all), so
- * Mutual fit / All players, the sorts and the pages all switch here, with no
+ * Mutual fit / available players, the sorts and the pages all switch here, with no
  * trip to the server; the URL follows along so a reload or a shared link
  * shows the same view. Your Top 3 Spotlight's tiers arrive for the first page with the
  * page, and for everyone else in the background (the Top 3 Spotlight sort waits for
@@ -161,7 +161,7 @@ export function FindNewBoard({
     <section ref={top} className="scroll-mt-20 space-y-3">
       <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2">
         <h2 className="text-lg font-semibold">
-          {filtered ? "Filtered Players" : "All Players"} <span className="text-sm font-normal text-slate-500">{spotlightWaiting ? "…" : total}</span>
+          {filtered ? "Filtered Players" : "Available Players"} <span className="text-sm font-normal text-slate-500">{spotlightWaiting ? "…" : total}</span>
         </h2>
         <FitLegend friendsVoted={friendsVoted} youVoted={picked > 0} autoOpen={autoOpenGuide} />
       </div>
@@ -211,7 +211,7 @@ export function FindNewBoard({
       ) : picked === 0 && !opts.everyone ? (
         <p className="py-8 text-center text-slate-500">
           <Link href="/vote" className="font-semibold underline">Save your candy votes</Link> to find mutual fits, or{" "}
-          <button type="button" onClick={() => change({ everyone: true })} className="underline">browse All Players</button> first.
+          <button type="button" onClick={() => change({ everyone: true })} className="underline">browse Available Players</button> first.
         </p>
       ) : shown.length === 0 ? (
         <p className="py-8 text-center text-slate-500">

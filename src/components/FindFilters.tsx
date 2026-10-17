@@ -3,7 +3,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { BrowseOptions } from "@/lib/browse";
 
-/** Optional, combinable filters; no selected filters means All Players. */
+/** Optional, combinable filters; no selected filters means Available Players. */
 export function FindFilters({ opts, onChange }: { opts: BrowseOptions; onChange: (next: Partial<BrowseOptions>) => void }) {
   const menu = useRef<HTMLDetailsElement>(null);
   const panel = useRef<HTMLDivElement>(null);
