@@ -33,7 +33,7 @@ export function FindFilters({ opts, onChange }: { opts: BrowseOptions; onChange:
   const options = [
     { label: "Mutual Fit", checked: !opts.everyone, update: { everyone: !opts.everyone }, hint: "Their estimated candy suits you, and yours suits them." },
     { label: "Active This Week", checked: opts.activeWeek, update: { activeWeek: !opts.activeWeek }, hint: "Visited the site in the past 7 days." },
-    { label: "None of My Spotlight in F", checked: opts.spotlightSafe, update: { spotlightSafe: !opts.spotlightSafe }, hint: "Every selected Spotlight candy ranks C or higher on their friends' Tier List. Unranked candies are excluded." },
+    { label: "None of My Spotlight in F", checked: opts.spotlightSafe, update: { spotlightSafe: !opts.spotlightSafe }, hint: "Every selected Spotlight candy ranks C or higher on their friends' Percentile Tier List. Unranked candies are excluded." },
     { label: "New to Pleep", checked: opts.newPlayers, update: { newPlayers: !opts.newPlayers }, hint: "Joined in the past two weeks." },
     { label: "Hide Players I've Declined or Who Declined Me", checked: opts.hideDeclined, update: { hideDeclined: !opts.hideDeclined }, hint: "Hide declined requests in either direction. Cleared or resent requests are not included." },
     { label: "Has Voting Friends", checked: opts.votingFriends, update: { votingFriends: !opts.votingFriends }, hint: "Their candy estimate includes votes from at least one friend." },

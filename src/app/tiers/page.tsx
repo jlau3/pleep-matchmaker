@@ -5,7 +5,8 @@ import { countOwnVotes } from "@/lib/data";
 import { getAuth } from "@/lib/supabase/server";
 import { loadDevTierSnapshot } from "@/lib/devTierSnapshot";
 import { loadPublicCommunityStats } from "@/lib/communityStats";
-import { countVotes, parseTierStyle } from "@/lib/tiers";
+import { parseTierStyle } from "@/lib/tiers";
+import { friendTierPool } from "@/lib/friendTierPool";
 import type { FriendRow } from "@/lib/types";
 
 /**
@@ -24,12 +25,12 @@ export default async function TiersPage({ searchParams }: { searchParams: Promis
   const [votedCount, friends, everyone] = await Promise.all([
     userId ? countOwnVotes(supabase, userId) : Promise.resolve(LINES.length),
     // Votes only: skip the per-friend fit %, which only My Friends shows.
-    userId ? supabase.rpc("get_friends", { with_match: false }).then(({ data, error }): PoolVotes => {
-      if (error) throw error;
-      const rows = data as FriendRow[];
-      const players = rows.filter((f) => f.visible && f.wants.length + f.dont_wants.length > 0);
-      return { votes: Object.fromEntries(countVotes(players)), voters: players.length, friendCount: rows.length };
-    }) : Promise.resolve({ votes: {}, voters: 0, friendCount: 0 }),
+    userId ? Promise.all([supabase.rpc("get_friends", { with_match: false }), supabase.rpc("get_friend_voters")])
+      .then(([contacts, voting]): PoolVotes => {
+        if (contacts.error) throw contacts.error;
+        if (voting.error) throw voting.error;
+        return friendTierPool(contacts.data as FriendRow[], (voting.data ?? []).map((row: { user_id: string }) => row.user_id));
+      }) : Promise.resolve({ votes: {}, voters: 0, friendCount: 0 }),
     snapshot ? Promise.resolve({ votes: snapshot.votes, voters: snapshot.voters, friendCount: 0, thresholded: true }) : loadPublicCommunityStats().then(
       (community): PoolVotes => ({ votes: community.votes, voters: community.voters, friendCount: 0, thresholded: true }),
     ),

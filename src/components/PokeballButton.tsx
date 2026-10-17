@@ -29,11 +29,13 @@ export function PokeballButton({ signedIn }: { signedIn: boolean }) {
   useEffect(() => {
     if (appearance?.phase !== "entering" || !sprite.current) return;
     const element = sprite.current;
-    const covered = document.querySelector("[data-site-header]")?.getBoundingClientRect().bottom ?? 48;
-    const top = covered + 16;
-    const bottom = Math.max(top, window.innerHeight - element.offsetHeight - 16);
-    const landing = top + appearance.y * (bottom - top);
-    const drop = element.animate([{ transform: "translateY(-100%)" }, { transform: `translateY(${landing}px)` }], {
+    const frames = () => {
+      const viewport = window.visualViewport;
+      const top = Math.max(viewport?.offsetTop ?? 0, document.querySelector("[data-site-header]")?.getBoundingClientRect().bottom ?? 48) + 16;
+      const bottom = Math.max(top, (viewport?.offsetTop ?? 0) + (viewport?.height ?? window.innerHeight) - element.offsetHeight - 16);
+      return [{ transform: "translateY(-100%)" }, { transform: `translateY(${top + appearance.y * (bottom - top)}px)` }];
+    };
+    const drop = element.animate(frames(), {
       duration: appearance.reduced ? 0 : 650, easing: "cubic-bezier(.32,.02,.7,1)", fill: "forwards",
     });
     animation.current = drop;
@@ -42,7 +44,18 @@ export function PokeballButton({ signedIn }: { signedIn: boolean }) {
       setAppearance((current) => current?.id === appearance.id && current.phase === "entering" ? { ...current, phase: "settled" } : current);
       if (document.activeElement === trigger.current) element.focus({ preventScroll: true });
     }).catch(() => {});
-  }, [appearance?.id, appearance?.phase, appearance?.reduced, appearance?.y]);
+    // Update the filled landing transform without restarting the drop or APNG.
+    const reposition = () => { if (animation.current === drop) (drop.effect as KeyframeEffect).setKeyframes(frames()); };
+    window.addEventListener("resize", reposition);
+    window.visualViewport?.addEventListener("resize", reposition);
+    window.visualViewport?.addEventListener("scroll", reposition);
+    return () => {
+      window.removeEventListener("resize", reposition);
+      window.visualViewport?.removeEventListener("resize", reposition);
+      window.visualViewport?.removeEventListener("scroll", reposition);
+      drop.cancel();
+    };
+  }, [appearance?.id, appearance?.reduced, appearance?.y]);
 
   async function activate() {
     if (!signedIn) { intro.current?.showModal(); return; }

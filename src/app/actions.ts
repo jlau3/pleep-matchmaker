@@ -493,7 +493,7 @@ export async function markVoteGuideSeen(): Promise<void> {
 /** Your Top 3's tiers on these players' Tier Lists, for Find New's Top 3 sort (FindNewBoard). */
 export async function loadTop3TiersFor(ids: string[]): Promise<Top3Tiers> {
   const { supabase } = await requireUser();
-  return loadTop3Tiers(supabase, ids.filter((id) => typeof id === "string").slice(0, 1000), true);
+  return loadTop3Tiers(supabase, ids.filter((id) => typeof id === "string"), true);
 }
 
 /** Records that the player has seen the "You have your first friend!" note (FirstFriendBanner). */

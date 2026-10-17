@@ -3,7 +3,7 @@ import type { Top3Tiers } from "./top3Tiers";
 import type { FriendRow } from "./types";
 
 /** My Friends orders, read from ?sort= (best match when missing or unknown). Same names as Find New Friends. */
-export const FRIEND_SORTS = [["fit", "Best match"], ...BROWSE_SORTS] as const;
+export const FRIEND_SORTS = [["fit", "Best Match"], ...BROWSE_SORTS] as const;
 export type FriendSort = (typeof FRIEND_SORTS)[number][0];
 
 export const FRIEND_SORT_HINTS: Record<FriendSort, string> = {

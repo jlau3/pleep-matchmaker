@@ -186,7 +186,7 @@ export function FindNewBoard({
       )}
       {hidden.size > 0 && (
         <details className="rounded-xl border border-slate-300 p-3 text-sm dark:border-slate-700">
-          <summary className="w-fit cursor-pointer font-semibold">Hidden players ({hidden.size})</summary>
+          <summary className="w-fit cursor-pointer font-semibold">Hidden Players ({hidden.size})</summary>
           <p className="mt-2 text-xs text-slate-500">Hidden players stay out of your suggestions until you restore them. Restoring a player won&apos;t show them unless they&apos;re available for suggestions.</p>
           <ul className="mt-3 max-h-64 space-y-2 overflow-y-auto">
             {[...hidden].map((id) => {
@@ -210,13 +210,13 @@ export function FindNewBoard({
       ) : picked === 0 && !opts.everyone ? (
         <p className="py-8 text-center text-slate-500">
           <Link href="/vote" className="font-semibold underline">Save your candy votes</Link> to find mutual fits, or{" "}
-          <button type="button" onClick={() => change({ everyone: true })} className="underline">browse All players</button> first.
+          <button type="button" onClick={() => change({ everyone: true })} className="underline">browse All Players</button> first.
         </p>
       ) : shown.length === 0 ? (
         <p className="py-8 text-center text-slate-500">
           {opts.activeWeek || opts.votingFriends || opts.spotlightSafe || opts.newPlayers || opts.hideDeclined ? (
             <>No players match these filters. <button type="button" className="font-semibold underline"
-              onClick={() => change({ everyone: true, activeWeek: false, votingFriends: false, spotlightSafe: false, newPlayers: false, hideDeclined: false })}>Clear filters</button></>
+              onClick={() => change({ everyone: true, activeWeek: false, votingFriends: false, spotlightSafe: false, newPlayers: false, hideDeclined: false })}>Clear Filters</button></>
           ) : opts.everyone ? (
             "No one to suggest right now. Check back as more players join."
           ) : (

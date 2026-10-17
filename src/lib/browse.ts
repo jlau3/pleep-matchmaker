@@ -1,14 +1,14 @@
 /** Find New Friends sorts; none uses the hidden other direction. */
 export const BROWSE_SORTS = [
-  ["you_fit", "Best for you"],
+  ["you_fit", "Best for You"],
   ["top3", "Your Top 3 Spotlight"],
-  ["active", "Recently active"],
+  ["active", "Recently Active"],
 ] as const;
 
 /** One line under the sort pills saying what the chosen order means. */
 export const BROWSE_SORT_HINTS: Record<(typeof BROWSE_SORTS)[number][0], string> = {
   you_fit: "Your estimated Want share minus half your unwanted share, highest first.",
-  top3: "Players whose Tier Lists rank your spotlighted candies highest first, so they're more likely to send what you want. Set your Top 3 Spotlight in My Votes.",
+  top3: "Players whose Percentile Tier Lists rank your spotlighted candies highest first, so they're more likely to send what you want. Set your Top 3 Spotlight in My Votes.",
   active: "Most recently online first, so they're likely to accept your friend request soon.",
 };
 export type BrowseSort = (typeof BROWSE_SORTS)[number][0];
@@ -30,7 +30,7 @@ export interface BrowseOptions {
 
 export function parseBrowse(params: { sort?: string; show?: string; page?: string; active?: string; friends?: string; spotlight?: string; joined?: string; declined?: string }): BrowseOptions {
   const sort = BROWSE_SORTS.some(([id]) => id === params.sort) ? (params.sort as BrowseSort) : "you_fit";
-  const page = Math.max(1, Math.min(1000, Number.parseInt(params.page ?? "1", 10) || 1));
+  const page = Math.max(1, Math.min(Number.MAX_SAFE_INTEGER, Number.parseInt(params.page ?? "1", 10) || 1));
   return { sort, everyone: params.show !== "mutual" && params.show !== "good", activeWeek: params.active === "week", votingFriends: params.friends === "voting", spotlightSafe: params.spotlight === "above-f", newPlayers: params.joined === "new", hideDeclined: params.declined === "hide", page };
 }
 

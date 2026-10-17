@@ -163,7 +163,7 @@ do $$ begin
  assert not exists(select 1 from pg_proc p join pg_namespace n on n.oid=p.pronamespace
    where n.nspname='public' and has_function_privilege('authenticated',p.oid,'execute')
    and p.prosrc ~ '\m(fit_pct|you_fit_pct|group_demand|trial_pair_scores)\M'
-   and p.proname not in ('browse_all','get_friends','get_friend_requests','lookup_players')), 'unreviewed match-score API remains executable';
+   and p.proname not in ('browse_all','browse_candidate_batch','get_friends','get_friend_requests','lookup_players')), 'unreviewed match-score API remains executable';
 end $$;
 rollback;
 \echo 'EXPECTED CANDY FIT TRIAL CONTRACT AND PRIVACY TESTS PASSED'

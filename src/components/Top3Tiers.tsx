@@ -8,7 +8,7 @@ import { FitPair } from "./FitPair";
  * it sits in there (same letters and colours as the Tier List), so you can
  * see who's likeliest to send your favorites. No label: it sits under the
  * fits on cards (FitWithTop3) and on grid tiles. Nothing if you haven't starred
- * any. A player with no list yet (fewer than 3 friends voting) shows dashes, for the Spotlight badges only.
+ * any. A player with no voting friends shows dashes, for the Spotlight badges only.
  */
 export function Top3Tiers({
   tops,
@@ -17,7 +17,7 @@ export function Top3Tiers({
 }: {
   /** Your starred line ids. */
   tops: string[];
-  /** Line → tier on their list. Empty or missing: no list yet (dashes). A line missing from a filled map is Avoid. */
+  /** Line → tier on their list. Empty or missing: no list yet (dashes). A missing line in a partial map is unavailable. */
   tiers: Record<string, string> | undefined;
   /** "end" under the fits at a card's top right; "center" on grid tiles. */
   align?: "center" | "end";
@@ -28,18 +28,18 @@ export function Top3Tiers({
   return (
     <div className={`flex items-center gap-x-1.5 text-xs ${align === "end" ? "justify-end" : "flex-wrap justify-center"}`}>
       {lines.map((line) => {
-        // Avoid: unlikely from this player (none of their friends want it, or more don't than do).
-        const tier = noList ? null : (tiers[line.id] ?? "Avoid");
+        // Avoid: the weighted score on their friends' Tier List is negative.
+        const tier = noList ? null : (tiers[line.id] ?? null);
         return (
           <span
             key={line.id}
             className="inline-flex items-center"
             title={
               !tier
-                ? `${line.name}: no list yet (fewer than 3 of their friends vote)`
+                ? noList ? `${line.name}: no list yet (none of their friends have saved votes)` : `${line.name}: rank unavailable`
                 : tier === "Avoid"
-                  ? `${line.name}: F on their Tier List, unlikely from this player`
-                  : `${line.name}: ${tier} on their Tier List`
+                  ? `${line.name}: F on their Percentile Tier List, unlikely from this player`
+                  : `${line.name}: ${tier} on their Percentile Tier List`
             }
           >
             <img src={lineSpriteUrl(line)} alt={line.name} className="h-5 w-5" />

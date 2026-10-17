@@ -9,9 +9,9 @@ import { FriendshipLevel5 } from "@/components/FriendshipLevel5";
 import { loadOwnProfile, loadOwnVotes, loadRelations, MAX_FRIENDS } from "@/lib/data";
 import { LINES } from "@/lib/lines";
 import { BROWSE_PAGE_SIZE, parseBrowse, matchesBrowseFilters, sortPlayers } from "@/lib/browse";
-import type { SupabaseClient } from "@supabase/supabase-js";
+import { loadCandidates } from "@/lib/loadCandidates";
 import { requireUser } from "@/lib/supabase/server";
-import type { HiddenSuggestion, MatchRow } from "@/lib/types";
+import type { HiddenSuggestion } from "@/lib/types";
 
 type Params = { q?: string; sort?: string; show?: string; active?: string; friends?: string; spotlight?: string; joined?: string; declined?: string; page?: string };
 
@@ -107,26 +107,4 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
       />
     </div>
   );
-}
-
-/**
- * Everyone Find New could suggest, with their numbers (browse_all, up to 1000,
- * ordered by the viewer's exact trial utility). No legacy response fallback.
- */
-async function loadCandidates(supabase: SupabaseClient): Promise<MatchRow[]> {
-  const all = await supabase.rpc("browse_all");
-  // Never fall back to the old response contract: it exposed the hidden direction.
-  if (all.error) throw all.error;
-  const rows = all.data as MatchRow[];
-  if (rows.length === 0) return rows;
-  const result = await supabase.rpc("get_suggestion_filter_flags", { ids: rows.map((row) => row.user_id) });
-  if (result.error) throw result.error;
-  const flags = new Map<string, { is_new: boolean; has_declined: boolean }>(
-    (result.data ?? []).map((flag: { user_id: string; is_new: boolean; has_declined: boolean }) => [flag.user_id, flag]),
-  );
-  // A player who became ineligible between reads must not re-enter through missing flags.
-  return rows.flatMap((row) => {
-    const flag = flags.get(row.user_id);
-    return flag ? [{ ...row, is_new: flag.is_new, has_declined: flag.has_declined }] : [];
-  });
 }

@@ -49,7 +49,7 @@ export function FitLegend({ friendsVoted = true, youVoted = true, autoOpen = fal
         <section className="space-y-3">
           <h3 className="text-lg font-extrabold text-ink dark:text-white">Finding a Good Fit</h3>
           <ul className="list-disc space-y-3 pl-5">
-            <li><b>Mutual fit</b> shows players whose candy suits you and yours suits them. <b>All players</b> skips that check. A high For you score can still miss Mutual fit if your candy doesn&apos;t suit them.</li>
+            <li><b>Mutual Fit</b> shows players whose candy suits you and yours suits them. <b>All Players</b> skips that check. A high For you score can still miss Mutual Fit if your candy doesn&apos;t suit them.</li>
             <li><b className="text-amber-600 dark:text-amber-400">Amber coloring</b> on a For you or For them percentage means the wanted share doesn&apos;t outweigh the unwanted penalty.</li>
             <li><b>A dash</b> means that side hasn&apos;t saved votes, or no sending estimate is available. 0% is a real result.</li>
           </ul>
@@ -74,11 +74,11 @@ export function FitLegend({ friendsVoted = true, youVoted = true, autoOpen = fal
               <li>For you: (8 + 2) ÷ 14 ≈ <b>71%</b></li>
               <li>Unwanted: 4 ÷ 14 ≈ <b>29%</b></li>
             </ul>
-            <p><b>3. Sort.</b> Best for you ranks by For you minus half of Unwanted. Using the exact shares: (10 − ½ × 4) ÷ 14 × 100 ≈ 57.1. Mutual fit needs this above 0 for both players. Amber means it&apos;s 0 or below.</p>
+            <p><b>3. Sort.</b> Best for You ranks by For you minus half of Unwanted. Using the exact shares: (10 − ½ × 4) ÷ 14 × 100 ≈ 57.1. Mutual Fit needs this above 0 for both players. Amber means it&apos;s 0 or below.</p>
             <p>Shares display as rounded whole percentages; sorting uses the exact values. Neutral earns no points. Spotlight doesn&apos;t affect the estimate.</p>
           </div>
         </details>
-        {!youVoted && <p><Link href="/vote" className="font-semibold underline">Save your candy votes</Link> to find mutual fits, or browse All players first.</p>}
+        {!youVoted && <p><Link href="/vote" className="font-semibold underline">Save your candy votes</Link> to find mutual fits, or browse All Players first.</p>}
         {!friendsVoted && <p><Link href="/friends" className="font-semibold underline">Add your Pokémon Sleep friends</Link> and ask them to vote to make your sending estimate more personal.</p>}
       </div>
       <button type="button" onClick={close} className="btn-primary mt-6 w-full py-2">Got it</button>

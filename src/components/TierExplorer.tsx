@@ -19,7 +19,7 @@ export type Pool = "friends" | "everyone";
 /** One pool's vote totals, as the server sends them. */
 export interface PoolVotes {
   votes: Record<string, LineVotes>;
-  /** Active players with saved choices (non-Neutral choices required only in the friends pool). */
+  /** Players with saved votes, including Neutral-only voters. */
   voters: number;
   /** Everyone on your list, voted or not (friends pool only). */
   friendCount: number;
