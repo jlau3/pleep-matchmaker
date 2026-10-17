@@ -2,6 +2,20 @@
 
 Work stays on `claude/pokemon-sleep-matchmaking-esw90a`. Production application is not authorized; the user will approve dev and hand it to the production agent.
 
+## Final handoff status
+
+Application commit reviewed: `48443d6` (Poké Ball/Snorlax). Its [full CI run](https://github.com/jlau3/pleep-matchmaker/actions/runs/39075747516) passed dependency installation, type checking, unit tests (241 across 40 files), throwaway-database migration/privacy/seed tests, and the production build. The checked-in matching squash matches its generator. [Dev preview](https://pleep-matchmaker-92x9jtz0i-snackson5.vercel.app) deployed successfully. The latest schema-changing dev workflow at `37c0705` also succeeded. No application fixes remain identified in this final pass; the trial's final Mutual Fit thresholds remain a later product decision based on diagnostics.
+
+Production agent release order, after user approval:
+
+1. Inspect the live migration history and schema. The matching bundle requires prerequisites through `20261025000100`; identify any missing earlier migrations rather than assuming dev and production match.
+2. Apply `supabase/production/20261026_expected_candy_fit.sql` once, replacing source migrations `20261026000000`–`20261026000600`. Record this replacement in the production migration process so a later runner cannot apply those files again.
+3. Apply the separate follow-ups in order: `20261026000700_replay_onboarding.sql`, `20261026000800_hidden_suggestion_names.sql`, `20261026000900_merge_sized_avatars.sql`, and `20261026001000_suggestion_filter_flags.sql`. Record each. The onboarding reset runs once for this release, not on every deploy.
+4. Coordinate the application release with these RPC changes and verify PostgREST schema reload. Keep production environment bindings; development seeds, acceptance helpers, database connections and fixture-refresh scripts stay in dev.
+5. Run authenticated hosted checks: first/returning/prefilled onboarding; unchanged privacy settings through Profile; vote auto-advance and filtered exports; suggestion filters/declines; incoming requests and both friend directions. Inspect suggestion payloads to ensure the hidden direction remains absent. Check signed-out public Tier List/Guides and the Poké Ball overview, then signed-in Snorlax without URL/scroll changes.
+
+Hosted checks require real browser sessions and are not implied by local component tests or green CI. The prior performance samples below are synthetic local SQL measurements. No production database or deployment was changed during this finalization.
+
 ## Contextual help and onboarding replay release
 
 After the matching bundle, apply `supabase/migrations/20261026000700_replay_onboarding.sql` once alongside the contextual-help app release. This separately resets only `help_seen_version`, `setup_done`, `vote_guide_seen` and `match_guide_seen`. It preserves identities, privacy, availability, votes, Spotlight, friends and requests. Do not repeat the reset on subsequent releases. Dev uses its normal migration log; do not add this migration to the matching squash.
@@ -14,13 +28,13 @@ Follow the replay migration with `20261026000800_hidden_suggestion_names.sql`. I
 
 Regression matrix: check new, partial Profile, saved Profile/no votes, saved votes/no friends, fully prefilled, and previously completed accounts. A Tier List visit must not call setup completion. Got it on the final tour step completes only when the prior steps are done; Skip/Esc leaves setup unfinished, with Finish setup available for players who already saw the tour. Check highlights after checklist hydration and late banner changes on mobile and tall desktop windows. Run a prefilled Profile through every step without altering privacy radios/social toggles. Hidden restores must retain eligible-to-view IGNs outside browse_all, redact blocked/lookup-off identities, and never read another account's list.
 
-Voting list auto-advance uses one native scrollIntoView call to the specific next card, after a successful save and its layout updates. A measured scroll margin reserves the navigation and vote toolbar. Every List vote tap advances once, including confirming or changing an existing vote. Manual interaction cancels pending advances; failed or stale saves and Grid do not advance. There is no ongoing body/viewport recentering. Check long All-list runs, fast taps, delayed/out-of-order saves, first-save checklist changes, Neutral filters as voted cards leave the list, tall navigation, and cancellation by manual scrolling.
+Voting list auto-advance uses one native scrollIntoView call to the specific next card, after a successful save and its layout updates. A measured scroll margin reserves the sticky site header; the vote toolbar is no longer sticky. Every List vote tap advances once, including confirming or changing an existing vote. Manual interaction cancels pending advances; failed or stale saves and Grid do not advance. There is no ongoing body/viewport recentering. Check long All-list runs, fast taps, delayed/out-of-order saves, first-save checklist changes, Neutral filters as voted cards leave the list, tall navigation, and cancellation by manual scrolling.
 
 ## Trial behavior
 
 - Count friends' Wants, add the existing k=5 global prior, and normalize total demand into sending shares. Do not divide a friend's contribution across their Wants or weight Spotlight. Exclude the receiver from a sender's existing friends. Inactive friends' votes remain, with the existing stale-votes note.
 - Display nearest-whole Want share and unwanted share on full cards, including 0% unwanted. Tiles show only Want %. Exact utility is Want share minus half unwanted share. Compute the net numerator before dividing so exact-zero cases cannot become positive through percentage rounding. Amber means utility <= 0.
-- Find New defaults to Best for You (exact utility). Keep Spotlight and Recently Active. Remove Best Match and the separate Spotlight specialty filter. Mutual fit's explanation lives in How Match Scores Work, not in another toolbar paragraph.
+- Find New defaults to Best for You (exact utility). Keep Spotlight and Recently Active. Remove Best Match. The optional Spotlight/F filter lives in the combined Filters dropdown. Mutual fit's explanation lives in How Match Scores Work, not in another toolbar paragraph.
 - Mutual fit requires both exact utilities > 0. Newcomers see a vote-first note with All Players available; never fall back to the hidden direction. Saved Neutral votes can produce known 0% Want; a dash means no saved votes or no sending estimate.
 - Find New and incoming requests show only the viewer/recipient's side. My Friends shows both directions. Search withholds the other direction unless the caller can see that player's votes.
 
@@ -70,7 +84,7 @@ Confirm the target schema and missing prerequisites. Apply the single reviewed s
 
 ## Local validation measurements
 
-224 unit tests passed. The 34 historical SQL suites ran before the trial upgrade; the trial contract/privacy suite passed on both the upgraded database and the independently installed production squash. Build/type checks and Chromium checks at 390px/1280px passed.
+At the earlier matching milestone, 224 unit tests passed. The 34 historical SQL suites ran before the trial upgrade; the trial contract/privacy suite passed on both the upgraded database and the independently installed production squash. Build/type checks and Chromium checks at 390px/1280px passed.
 
 Synthetic PostgreSQL 17 fixture, three warm samples, 107 saved votes per player and a 50-friend list:
 
