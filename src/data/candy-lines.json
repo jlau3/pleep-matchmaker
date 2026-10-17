@@ -877,7 +877,8 @@
         "sprite": 151,
         "sleepType": "snoozing"
       }
-    ]
+    ],
+    "mythical": true
   },
   {
     "id": "chikorita",
@@ -1997,7 +1998,8 @@
         "sprite": 491,
         "sleepType": "dozing"
       }
-    ]
+    ],
+    "mythical": true
   },
   {
     "id": "munna",

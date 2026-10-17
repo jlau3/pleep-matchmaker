@@ -5,7 +5,7 @@ import { ViewToggle } from "./ViewToggle";
 import Link from "next/link";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { setChoice, setTop, swapTop } from "@/app/actions";
-import { CHOICE_LABEL, type Choice, LINES, LINES_BY_ID, lineSpriteUrl, MAX_TOP } from "@/lib/lines";
+import { CHOICE_LABEL, type Choice, LINES, LINES_BY_ID, lineSpriteUrl, MAX_TOP, ISLANDS, lineHasSleepType, type SleepType } from "@/lib/lines";
 import { type CrowdHint, crowdHint } from "@/lib/crowd";
 import { rethrowIfNavigation, SAVE_FAILED } from "@/lib/saveError";
 import { notifySetupVotesSaved } from "@/lib/setup";
@@ -17,6 +17,7 @@ import { PickFlow } from "./PickFlow";
 import { NewCandyCard } from "./NewCandyCard";
 import { StarButton } from "./StarButton";
 import { SwapTopDialog } from "./SwapTopDialog";
+import { CandyFilters } from "./CandyFilters";
 import { VoteGuide } from "./VoteGuide";
 
 type Filter = "all" | Choice;
@@ -36,7 +37,7 @@ const FILTERS: { value: Filter; label: string }[] = [
 ];
 
 const pill = (active: boolean) =>
-  `rounded-full border px-3 py-1 text-sm ${active ? "pill-active border-transparent" : "border-slate-300 dark:border-slate-700"}`;
+  `rounded-full border px-3 py-1 text-sm ${active ? "pill-active border-transparent" : "pill-idle border-slate-300 dark:border-slate-700"}`;
 
 /**
  * Profile > My Votes. Every line is already saved (Neutral by default).
@@ -75,6 +76,8 @@ export function VoteBoard({
   const [swapFor, setSwapFor] = useState<string | null>(null);
   const [view, setView] = useState<View>("list");
   const [query, setQuery] = useState("");
+  const [islandId, setIslandId] = useState("");
+  const [sleepType, setSleepType] = useState<SleepType | null>(null);
   const [filter, setFilter] = useState<Filter>("all");
   const toolbar = useRef<HTMLDivElement>(null);
   const [headerHeight, setHeaderHeight] = useState(49);
@@ -159,11 +162,14 @@ export function VoteBoard({
 
   const visible = useMemo(() => {
     const q = query.trim().toLowerCase();
+    const island = ISLANDS.find((item) => item.id === islandId);
     return LINES.filter((line) => {
+      if (island && !island.lines.includes(line.id)) return false;
+      if (sleepType && !lineHasSleepType(line, sleepType, island)) return false;
       if (filter !== "all" && (choices[line.id] ?? "undecided") !== filter && !lingering.has(line.id)) return false;
       return !q || line.members.some((member) => member.name.toLowerCase().includes(q));
     });
-  }, [choices, query, filter, lingering]);
+  }, [choices, query, filter, lingering, islandId, sleepType]);
 
   const counts = { want: 0, dont_want: 0, undecided: 0 };
   for (const line of LINES) counts[choices[line.id] ?? "undecided"]++;
@@ -359,11 +365,13 @@ export function VoteBoard({
         </div>
         <div className="flex flex-wrap gap-2">
           {FILTERS.map((f) => (
-            <button key={f.value} type="button" onClick={() => changeFilter(f.value)} className={pill(filter === f.value)}>
+            <button key={f.value} type="button" onClick={() => changeFilter(f.value)} aria-pressed={filter === f.value} className={pill(filter === f.value)}>
               {f.label}
             </button>
           ))}
         </div>
+        <CandyFilters islandId={islandId} sleepType={sleepType} onIsland={setIslandId} onSleep={setSleepType} />
+        <p className="text-xs text-slate-500" role="status">{visible.length} of {LINES.length} candies</p>
         {crowd && (
           <label className="flex cursor-pointer items-center gap-2 text-sm">
             <input type="checkbox" checked={showCrowd} onChange={toggleCrowd} className="h-4 w-4 accent-[var(--color-night)]" />

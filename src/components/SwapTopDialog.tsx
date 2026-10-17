@@ -62,7 +62,7 @@ export function SwapTopDialog({
           type="button"
           autoFocus
           onClick={onCancel}
-          className="mt-3 w-full rounded-full border border-slate-300 py-2 text-sm font-semibold dark:border-slate-600"
+          className="pill-idle mt-3 w-full rounded-full border border-slate-300 py-2 text-sm font-semibold dark:border-slate-600"
         >
           Keep my Top {MAX_TOP} Spotlight
         </button>

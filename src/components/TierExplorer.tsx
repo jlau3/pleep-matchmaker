@@ -231,7 +231,7 @@ export function TierExplorer({
     return { tiers: built, unranked };
   }, [data, selected, sleepType, style]);
   const pill = (active: boolean) =>
-    `rounded-full border px-3 py-1 text-sm ${active ? "pill-active border-transparent" : "border-slate-300 dark:border-slate-700"}`;
+    `rounded-full border px-3 py-1 text-sm ${active ? "pill-active border-transparent" : "pill-idle border-slate-300 dark:border-slate-700"}`;
 
   return (
     <div ref={tourRoot} className="space-y-5">
@@ -300,8 +300,8 @@ export function TierExplorer({
                   active
                     ? "bg-sun/70 ring-2 ring-sun-deep dark:bg-sun/30"
                     : islandId
-                      ? "opacity-50 hover:opacity-100"
-                      : "hover:bg-white/60 dark:hover:bg-night"
+                      ? "pill-idle opacity-50 hover:opacity-100"
+                      : "pill-idle"
                 }`}
               >
                 <span className="relative">
@@ -345,7 +345,7 @@ export function TierExplorer({
           })}
         </div>
         <details ref={styleMenu} onToggle={placeStyleMenu} data-tier-tour="style" className="relative ml-auto max-w-full text-sm">
-          <summary className="w-fit cursor-pointer py-1 font-semibold">Ranking Style: {TIER_STYLE_LABEL[style]}</summary>
+          <summary className="pill-idle w-fit cursor-pointer rounded-xl border border-slate-300 px-3 py-2 font-semibold dark:border-slate-700">Ranking Style: {TIER_STYLE_LABEL[style]}</summary>
           <div style={{ maxHeight: menuPlacement.maxHeight }} className={`absolute right-0 z-20 ${menuPlacement.above ? "bottom-full mb-2" : "top-full mt-2"} w-[min(24rem,calc(100vw-2rem))] overflow-y-auto rounded-xl border border-slate-300 bg-cream p-3 shadow-lg dark:border-slate-700 dark:bg-night`}>
             <fieldset className="min-w-0 space-y-3 border-0 p-0">
               <legend className="mb-2 w-full p-0 font-semibold">Choose a ranking style</legend>

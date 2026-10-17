@@ -21,8 +21,6 @@ import { nameMatch } from "@/lib/names";
 import { FitWithTop3 } from "@/components/Top3Tiers";
 import { loadTop3Tiers } from "@/lib/top3Tiers";
 
-const card = "card p-4";
-
 export default async function FriendsPage({ searchParams }: { searchParams: Promise<{ q?: string; sort?: string }> }) {
   const { supabase, user } = await requireUser();
   const params = await searchParams;
@@ -81,20 +79,22 @@ export default async function FriendsPage({ searchParams }: { searchParams: Prom
       <FriendPostCard {...friendPostProps(profile, choices, tops)} />
 
       {requests.length > 0 && (
-        <section id="requests" className="scroll-mt-20">
-          <h2 className="mb-1 text-lg font-semibold">
-            Friend Requests <span className="text-sm font-normal text-slate-500">{requests.length}</span>
-          </h2>
-          <p className="mb-3 text-sm text-slate-500">
+        <details id="requests" open className="card group scroll-mt-20 p-4">
+          <summary className="flex cursor-pointer list-none items-center justify-between gap-3">
+            <span className="font-semibold">Friend Requests <span className="text-sm font-normal text-slate-500">{requests.length}</span></span>
+            <span className="shrink-0 text-xs font-semibold underline group-open:hidden">Show</span>
+            <span className="hidden shrink-0 text-xs font-semibold underline group-open:inline">Hide</span>
+          </summary>
+          <p className="mb-3 mt-3 text-sm text-slate-500">
             Accept to connect here. Add each other in Pokémon Sleep too if you aren't already friends.
           </p>
           <ul className="space-y-3">
             {requestsSorted.map((player) => {
               const maybe = placeholderFor(player.ign);
               return (
-                <li key={player.user_id} className={maybe ? `${card} ring-2 ring-sun-deep` : card}>
+                <li key={player.user_id} className={`rounded-2xl border border-slate-200 p-3 dark:border-slate-700 ${maybe ? "ring-2 ring-sun-deep" : ""}`}>
                   {maybe && (
-                    <p className="-mx-4 -mt-4 mb-3 rounded-t-3xl bg-sun/40 px-4 py-2 text-sm dark:bg-sun/20">
+                    <p className="-mx-3 -mt-3 mb-3 rounded-t-2xl bg-sun/40 px-3 py-2 text-sm dark:bg-sun/20">
                       {maybe.strong ? (
                         <b>★ This may be {maybe.name} from your Friends to Find list!</b>
                       ) : (
@@ -114,7 +114,7 @@ export default async function FriendsPage({ searchParams }: { searchParams: Prom
               );
             })}
           </ul>
-        </section>
+        </details>
       )}
 
       {sent.length > 0 && (

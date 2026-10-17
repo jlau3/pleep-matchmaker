@@ -163,7 +163,7 @@ export function FriendPostCard({
           <p className="text-xs text-slate-600 dark:text-slate-400">Paste it wherever you look for friends: Discord, Reddit, group chats.</p>
           <div className="flex shrink-0 gap-2">
             {canShare && (
-              <button type="button" onClick={share} className="rounded-full border border-slate-300 px-3 py-1.5 text-sm font-semibold dark:border-slate-600">
+              <button type="button" onClick={share} className="pill-idle rounded-full border border-slate-300 px-3 py-1.5 text-sm font-semibold dark:border-slate-600">
                 Share
               </button>
             )}

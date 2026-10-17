@@ -9,7 +9,7 @@ export const HELP_COOKIE = "pm_help_seen";
 
 /**
  * Page guides cancel these navbar events when they open. Without a mounted
- * guide (for example while loading), the button links to Getting Started.
+ * guide (for example while loading), the button links to Guides.
  */
 export const TIER_TOUR_EVENT = "pm:tier-tour";
 export const TIER_TOUR_COMPLETE_EVENT = "pm:tier-tour-complete";
@@ -25,7 +25,7 @@ export function pageHelp(pathname: string): { title: string; event?: string } {
     case "/matches": return { title: "How Match Scores Work", event: MATCH_HELP_EVENT };
     case "/vote": return { title: "How to Vote", event: VOTE_HELP_EVENT };
     case "/profile": return { title: "Replay Profile Walkthrough", event: PROFILE_HELP_EVENT };
-    default: return { title: "Getting Started" };
+    default: return { title: "Guides" };
   }
 }
 

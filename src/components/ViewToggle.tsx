@@ -10,7 +10,7 @@ export function ViewToggle({ view, onChange }: { view: "list" | "grid"; onChange
           type="button"
           aria-pressed={view === v}
           onClick={() => onChange(v)}
-          className={`min-w-[3.25rem] px-3 py-2 text-sm font-semibold ${view === v ? "bg-night text-white dark:bg-sun dark:text-[#5b3e00]" : "text-slate-600 dark:text-slate-300"}`}
+          className={`min-w-[3.25rem] px-3 py-2 text-sm font-semibold ${view === v ? "bg-night text-white dark:bg-sun dark:text-[#5b3e00]" : "pill-idle text-slate-600 dark:text-slate-300"}`}
         >
           {v === "list" ? "List" : "Grid"}
         </button>

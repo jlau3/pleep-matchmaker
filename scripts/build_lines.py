@@ -146,6 +146,7 @@ def main() -> int:
             "type": rep["type"],
             "addedAt": min(p["arrival"] for p in members),
             "rare": is_rare(first),
+            **({"mythical": True} if first["exp"] == 1320 else {}),
             "members": line_members,
         })
 

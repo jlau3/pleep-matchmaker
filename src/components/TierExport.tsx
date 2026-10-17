@@ -327,7 +327,7 @@ export function ImageExport({
         type="button"
         onClick={open}
         disabled={busy}
-        className="rounded-full border border-slate-300 px-3 py-1 text-sm font-semibold hover:bg-white/60 disabled:opacity-60 dark:border-slate-700 dark:hover:bg-night"
+        className="pill-idle rounded-full border border-slate-300 px-3 py-1 text-sm font-semibold disabled:opacity-60 dark:border-slate-700"
       >
         {busy ? "Drawing…" : `⤓ ${label}`}
       </button>

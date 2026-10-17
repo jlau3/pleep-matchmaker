@@ -40,7 +40,7 @@ export function ThemePicker({ initial }: { initial: Theme }) {
           className={`rounded-full border px-3 py-1 text-sm ${
             theme === value
               ? "border-transparent bg-night text-white dark:bg-sun dark:text-[#5b3e00]"
-              : "border-slate-300 dark:border-slate-700"
+              : "pill-idle border-slate-300 dark:border-slate-700"
           }`}
         >
           {label}

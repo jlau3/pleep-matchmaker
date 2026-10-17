@@ -8,7 +8,7 @@ After the matching bundle, apply `supabase/migrations/20261026000700_replay_onbo
 
 The app uses version 2 browser markers for the checklist, snooze, Profile dismissal and Tier List tour, so old dismissal cookies cannot suppress this replay. Existing sessions start at guided Profile on their next rendered visit, preserving the original destination; sign-ins use the same rule. Opening guided Profile records the legacy onboarding marker and refreshes the shared layout so subsequent navigation is not redirected again. Existing votes/friends remain checked only after their corresponding guides have opened. Completing or dismissing setup is still remembered normally.
 
-The navbar ? now opens the current page's help: match scores on My Friends/Find New Friends, How to Vote, the Profile walkthrough or Tier List walkthrough. Other pages link to Getting Started in Guides. First-visit page guides remain, the automatic welcome is removed, and the sign-in sheet keeps a short What You Get list.
+The navbar ? now opens the current page's help: match scores on My Friends/Find New Friends, How to Vote, the Profile walkthrough or Tier List walkthrough. Other pages link to Guides; the redundant Getting Started overview is removed. First-visit page guides remain, the automatic welcome is removed, and the sign-in sheet keeps a short What You Get list.
 
 Follow the replay migration with `20261026000800_hidden_suggestion_names.sql`. It adds the authenticated owner-only restore-list RPC; closed, inactive or full players retain their IGN independently of current suggestions, while lookup-off non-friends and blocked players return no name. It returns no votes, contact fields or fit. Visiting the Tier List no longer finishes setup: the last tour step or an explicit Finish setup does. Tours wait for checklist hydration and track page-height changes so highlights stay aligned. The match guide uses the agreed short explanation with its calculation collapsed.
 
@@ -80,3 +80,7 @@ Synthetic PostgreSQL 17 fixture, three warm samples, 107 saved votes per player 
 | 2,000 | 322 / 307 / 317 ms | 1,596 / 1,721 / 1,747 ms |
 
 These are local SQL times, not hosted page latency. The score batch keeps one global calculation. An EXPLAIN during validation showed about 1.1 seconds of JIT compilation alone at 2,000 players, so JIT is disabled only for the interactive batch functions, not database-wide. At larger scale, measure the hosted Find New query plan and consider short-lived response caching separately; this trial does not add a scheduled cache.
+
+## Filter and control polish
+
+Unselected pills use a shared contrasting fill in light and dark themes, including voting, feedback, layout, profile, and friend-page controls. My Votes now combines vote, name, island, and sleep-type filters. Mythicals (Mew and Darkrai) match every sleep type while retaining island restrictions, shared with Tier List/export filtering. Incoming Friend Requests can be collapsed and start expanded so new requests remain visible. Best Match scoring is unchanged pending product discussion about broad Want lists and baseline comparisons.

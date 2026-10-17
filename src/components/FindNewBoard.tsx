@@ -302,7 +302,7 @@ function Pill({ active, onClick, hint, children }: { active: boolean; onClick: (
       className={`px-3 py-2 font-semibold ${
         active
           ? "bg-night text-white dark:bg-sun dark:text-[#5b3e00]"
-          : "hover:bg-white/60 dark:hover:bg-night"
+          : "pill-idle"
       }`}
     >
       {children}

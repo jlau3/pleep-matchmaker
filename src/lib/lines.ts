@@ -42,6 +42,8 @@ export interface CandyLine {
   addedAt: string;
   /** Legendary, mythical, pseudo-legendary or 16-pip: wins score ties over other lines, all four equally. */
   rare: boolean;
+  /** Mythicals can be encountered with any sleep type. */
+  mythical?: boolean;
   members: LineMember[];
 }
 
@@ -111,7 +113,7 @@ for (const island of ISLANDS)
  */
 export function sleepTypeMember(line: CandyLine, sleepType: SleepType, island?: Island | null): LineMember | undefined {
   const spawning = island ? new Set(island.spawns[line.id] ?? []) : SPAWNS_ANYWHERE.get(line.id);
-  return line.members.find((member) => member.sleepType === sleepType && (!spawning || spawning.has(member.name)));
+  return line.members.find((member) => (line.mythical || member.sleepType === sleepType) && (!spawning || spawning.has(member.name)));
 }
 
 export function lineHasSleepType(line: CandyLine, sleepType: SleepType, island?: Island | null): boolean {

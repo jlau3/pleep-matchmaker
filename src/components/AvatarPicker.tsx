@@ -147,7 +147,7 @@ export function AvatarPicker({ initial, discordAvatar, requiredForSetup = false 
                     title={name && !available ? `${avatarLabel(name)} has no ${label.toLowerCase()} icon` : undefined}
                     onClick={() => setVariant(v)}
                     className={`rounded-full border px-1 py-1 text-xs disabled:opacity-40 sm:text-sm ${
-                      name && current === v ? "pill-active border-transparent" : "border-slate-300 dark:border-slate-600"
+                      name && current === v ? "pill-active border-transparent" : "pill-idle border-slate-300 dark:border-slate-600"
                     }`}
                   >
                     {label}

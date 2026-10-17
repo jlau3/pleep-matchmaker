@@ -23,7 +23,7 @@ describe("page help destinations", () => {
   ])("opens the page guide on %s", (path, event) => {
     expect(pageHelp(path).event).toBe(event);
   });
-  it("offers Getting Started on pages without a guide", () => {
-    expect(pageHelp("/guides")).toEqual({ title: "Getting Started" });
+  it("offers Guides on pages without a guide", () => {
+    expect(pageHelp("/guides")).toEqual({ title: "Guides" });
   });
 });

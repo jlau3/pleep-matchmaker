@@ -23,7 +23,7 @@ export function FeedbackForm({ page }: { page: string }) {
           {KINDS.map(([value, label], i) => (
             <label
               key={value}
-              className="cursor-pointer rounded-full border border-slate-300 px-3 py-1 text-sm has-[:checked]:border-transparent has-[:checked]:bg-night has-[:checked]:text-white dark:border-slate-700 dark:has-[:checked]:bg-sun dark:has-[:checked]:text-[#5b3e00]"
+              className="pill-idle cursor-pointer rounded-full border border-slate-300 px-3 py-1 text-sm has-[:checked]:border-transparent has-[:checked]:bg-night has-[:checked]:text-white dark:border-slate-700 dark:has-[:checked]:bg-sun dark:has-[:checked]:text-[#5b3e00]"
             >
               <input type="radio" name="kind" value={value} defaultChecked={i === 0} className="sr-only" />
               {label}

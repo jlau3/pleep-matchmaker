@@ -26,7 +26,7 @@ export function SortMenu<T extends string>({ value, options, hints, onChange }: 
   }, []);
   return (
     <details ref={menu} className="relative min-w-0 text-sm">
-      <summary className="max-w-[13rem] cursor-pointer truncate rounded-xl border border-slate-300 bg-white px-3 py-2 font-semibold dark:border-slate-700 dark:bg-night">
+      <summary className="max-w-[13rem] cursor-pointer truncate rounded-xl border border-slate-300 pill-idle px-3 py-2 font-semibold dark:border-slate-700">
         Sort: {options.find(([id]) => id === value)?.[1]}
       </summary>
       <fieldset className="absolute left-0 z-20 mt-2 w-[min(23rem,calc(100vw-2rem))] space-y-3 rounded-xl border border-slate-300 bg-cream p-3 shadow-lg dark:border-slate-700 dark:bg-night">

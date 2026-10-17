@@ -42,7 +42,7 @@ export function ChoiceButtons({
           aria-pressed={value === choice}
           onClick={() => onChoose(choice)}
           className={`rounded-full border-2 font-bold transition ${compact ? "px-1 py-1.5 text-xs" : "px-2 py-3 text-sm"} ${
-            value === choice ? ACTIVE[choice] : IDLE[choice]
+            value === choice ? ACTIVE[choice] : `pill-idle ${IDLE[choice]}`
           } ${suggested === choice ? GLOW[choice] : ""}`}
         >
           {CHOICE_LABEL[choice]}
