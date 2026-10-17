@@ -153,8 +153,8 @@ export function supportOf(score: number, voters: number): number | null {
   return voters > 0 ? 100 * score / voters : null;
 }
 
-/** "79/100" for ranked scores, a bare "−42" below 0 (Avoid). Sorting and tier boundaries keep exact scores. */
-export const formatScore = (support: number): string => support < 0 ? formatSupport(support) : `${formatSupport(support)}/100`;
+/** Bare scores, retaining negative signs. Sorting and tier boundaries keep exact scores. */
+export const formatScore = (support: number): string => formatSupport(support);
 
 /**
  * Whole-number labels only; sorting and tier boundaries retain exact support.

@@ -231,9 +231,9 @@ describe("net support", () => {
     expect(formatSupport(-100)).toBe("−100");
     expect(formatSupport(100)).toBe("100");
   });
-  it("shows ranked scores out of 100 and Avoid as a bare negative", () => {
-    expect(formatScore(79.1)).toBe("79/100");
-    expect(formatScore(0)).toBe("0/100");
+  it("shows bare scores while retaining the negative sign", () => {
+    expect(formatScore(79.1)).toBe("79");
+    expect(formatScore(0)).toBe("0");
     expect(formatScore(-42.04)).toBe("−42");
   });
   it("never places negative support outside Avoid in Standard or Fixed Scores", () => {

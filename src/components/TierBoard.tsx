@@ -29,7 +29,6 @@ function VoteCard({ ranked, consensus, pool }: { ranked: RankedLine; consensus: 
           {!consensus && ranked.support !== null && (
             <span className="shrink-0 whitespace-nowrap" title={`Score: (${ranked.wants} Want − ½ × ${ranked.dontWants} Don't Want) ÷ ${total} ${pool === "everyone" ? "players who have seen it" : "voting friends"} × 100. Neutral counts 0. ${ranked.support! < 0 ? "Below 0 is F: more than twice as many Don't Want votes as Want votes. " : ""}Displayed scores omit decimals. Tiers use the full score.`} aria-label={`Score ${formatScore(ranked.support)}`}>
               <span className={`text-lg font-extrabold ${supportColor(ranked.support)}`}>{formatSupport(ranked.support)}</span>
-              {ranked.support >= 0 && <span className="ml-0.5 text-xs text-slate-500">/100</span>}
             </span>
           )}
         </div>

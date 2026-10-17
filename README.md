@@ -30,7 +30,7 @@ Admin-only `match_trial_diagnostics(viewers uuid[])` reports utility, unwanted s
 
 ## Tier list rules
 
-The Tier List uses `100 × (Want − 0.5 × Don't Want) / seen`. Neutral counts 0. Everyone uses per-candy seen counts; My Friends uses the number of voting friends. Scores omit decimals toward zero and retain full precision for ranking. Positive scores display out of 100; negative scores retain their minus sign. Tiny nonzero scores display <1 or −<1. Top 3 Spotlight affects ordering ties, not scores.
+The Tier List uses `100 × (Want − 0.5 × Don't Want) / seen`. Neutral counts 0. Everyone uses per-candy seen counts; My Friends uses the number of voting friends. Scores omit decimals toward zero and retain full precision for ranking. Scores display without a denominator; negative scores retain their minus sign. Tiny nonzero scores display <1 or −<1. Top 3 Spotlight affects ordering ties, not scores.
 
 Percentile splits positive scores into S (top 10%), A (next 20%), B (next 30%) and C (the rest). Zero stays in C; negative scores go to F. Ties share a tier using their middle rank, with the highest positive tie always S, so tier sizes can vary. Filters affect the percentile population.
 
