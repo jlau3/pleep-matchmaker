@@ -21,6 +21,7 @@ Profile on the preview):
     select public.dev_befriend('YOUR_IGN', 15);      -- 15 fake friends
     select public.dev_requests_to('YOUR_IGN', 6);    -- 6 incoming requests, mixed senders
     select public.dev_requests_from('YOUR_IGN', 4);  -- 4 sent requests, mixed recipients
+    select public.dev_accept_sent('YOUR_IGN');       -- fake players accept your open sent requests
 """
 
 import json
@@ -420,8 +421,39 @@ begin
 end
 $$;
 
+-- The fake players you sent requests to (from Find New or a lookup) accept,
+-- as if they'd tapped Accept: same friend-limit checks as accept_friend_request.
+-- Only open, unexpired requests; skips anyone whose list is full. n = null: all.
+create or replace function public.dev_accept_sent(who text, n int default null)
+returns int
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  me uuid := public.dev_player(who);
+  added int := 0;
+  other uuid;
+begin
+  if me is null then raise exception 'No dev account with IGN %', who; end if;
+  for other in
+    select r.to_id from public.friend_requests r
+    where r.from_id = me and r.to_id::text like '{PREFIX}%'
+      and r.status = 'open' and r.created_at > now() - public.request_ttl()
+      and (select count(*) from public.friends f where f.user_id = r.to_id) < public.max_friends()
+    order by r.created_at
+    limit n
+  loop
+    exit when (select count(*) from public.friends f where f.user_id = me) >= public.max_friends();
+    perform public.make_friends(other, me);
+    added := added + 1;
+  end loop;
+  return added;
+end
+$$;
+
 revoke execute on function public.dev_player(text), public.dev_befriend(text, int), public.dev_requests_to(text, int),
-  public.dev_requests_from(text, int)
+  public.dev_requests_from(text, int), public.dev_accept_sent(text, int)
   from public, anon, authenticated;
 
 -- What landed, and the fixtures to test with.
