@@ -6,6 +6,8 @@ Work stays on `claude/pokemon-sleep-matchmaking-esw90a`. Production application 
 
 Application commit reviewed: `48443d6` (Poké Ball/Snorlax). Its [full CI run](https://github.com/jlau3/pleep-matchmaker/actions/runs/39075747516) passed dependency installation, type checking, unit tests (241 across 40 files), throwaway-database migration/privacy/seed tests, and the production build. The checked-in matching squash matches its generator. [Dev preview](https://pleep-matchmaker-92x9jtz0i-snackson5.vercel.app) deployed successfully. The latest schema-changing dev workflow at `37c0705` also succeeded. A subsequent deeper review identified the tier/Spotlight/resize/scaling gaps resolved below; the trial's final Mutual Fit thresholds remain a later product decision based on diagnostics.
 
+Production migration log: `scripts/bundle-prod.sh` keeps `public.applied_migrations` on production (RLS on, no client access), mirroring dev's log. `--baseline LAST` records what production already has; `--after LAST` prints every newer migration, each in its own transaction that refuses to run if already logged. It applies the matching squash in place of 0000–0600 and logs each source as applied via the squash. It refuses to run on the dev database.
+
 Production agent release order, after user approval:
 
 1. Inspect the live migration history and schema. The matching bundle requires prerequisites through `20261025000100`; identify any missing earlier migrations rather than assuming dev and production match.
