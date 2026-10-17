@@ -37,17 +37,49 @@ export function FitLegend({ friendsVoted = true, youVoted = true, autoOpen = fal
           <h2 id={titleId} className="text-2xl font-extrabold">How Match Scores Work</h2>
           <button type="button" onClick={close} aria-label="Close" className="rounded-full px-2 text-2xl leading-none text-slate-500">×</button>
         </div>
-      <div className="space-y-3 text-sm">
-        <p><b>For you</b> estimates the share of candy you would receive that matches your Wants. The smaller unwanted percentage is the share you Don&apos;t Want. The rest is Neutral.</p>
-        <p><b>The sending estimate</b> uses how many friends Want each candy, topped up by global votes equivalent to five voting friends. We normalize those counts into a mix totaling 100%. Spotlight does not change it. We don&apos;t observe what players actually send.</p>
-        <div className="rounded-2xl bg-sun/25 p-4">
-          <p><b>Example:</b> an estimated mix of 8 Pikachu, 4 Eevee and 2 Bulbasaur gives about 57%, 29% and 14%. If you Want Pikachu and Bulbasaur and Don&apos;t Want Eevee, your card shows <b>71% For you · 29% unwanted</b>.</p>
-        </div>
-        <p><b>Best for you</b> sorts by Want share minus half unwanted share. Neutral earns nothing. Amber means that result is zero or below. Shares are rounded to whole percentages; sorting and eligibility use the exact values.</p>
-        <p><b>Mutual fit</b> requires positive estimated utility in both directions: Want share must exceed half unwanted share for each player. You see your own fit; the other player sees theirs when they receive your request.</p>
-        <p><b>All players</b> includes eligible suggestions without the mutual-fit requirement. Activity, availability, privacy and blocking rules still apply.</p>
-        <p><b>Incoming requests</b> show your own estimated fit. <b>My Friends</b> shows both directions, so you can also see how your candy fits their votes.</p>
-        <p>A dash means that side has no saved votes, or no sending estimate is available. Saved Neutral votes can give 0% Want; that is different from a dash.</p>
+      <div className="space-y-4 text-sm">
+        <section className="space-y-2">
+          <h3 className="font-bold">Will Their Candy Suit You?</h3>
+          <p><b>For you</b> estimates how much of the candy they&apos;d send is candy you Want. <b>Unwanted</b> is the share you marked Don&apos;t Want. The rest is candy you left Neutral.</p>
+          <p><b>71% For you · 29% unwanted</b> means about 7 in 10 candies in their estimated mix would be ones you Want, and 3 in 10 ones you don&apos;t.</p>
+        </section>
+        <section className="space-y-2">
+          <h3 className="font-bold">Where the Estimate Comes From</h3>
+          <p>We use their friends&apos; Want votes to estimate what they might send. Global votes add a five-friend baseline, so they matter most when few of their friends have voted. It&apos;s an estimate: we never see what anyone sends.</p>
+        </section>
+        <section className="space-y-2">
+          <h3 className="font-bold">Finding a Good Fit</h3>
+          <ul className="list-disc space-y-2 pl-5">
+            <li><b>Best for you</b> puts the most wanted, least unwanted candy first.</li>
+            <li><b>Mutual fit</b> shows players whose candy suits you and yours suits them. <b>All players</b> skips that check. A high For you score can still miss Mutual fit if your candy doesn&apos;t suit them.</li>
+            <li><b>Amber</b> means the wanted share doesn&apos;t outweigh the unwanted penalty.</li>
+            <li><b>A dash</b> means that side hasn&apos;t saved votes, or no sending estimate is available. 0% is a real result.</li>
+          </ul>
+        </section>
+        <p>On incoming requests you see how their candy suits you. My Friends shows both directions.</p>
+        <details className="rounded-xl border border-slate-300 p-3 dark:border-slate-700">
+          <summary className="cursor-pointer font-semibold">How It&apos;s Calculated</summary>
+          <div className="mt-3 space-y-3">
+            <p><b>1. Count their friends&apos; Wants.</b> This simplified example leaves out the global baseline.</p>
+            <table className="w-full text-left text-xs sm:text-sm">
+              <caption className="sr-only">An example sending mix from fourteen Want votes</caption>
+              <thead><tr><th scope="col" className="py-2 pr-2">Candy</th><th scope="col" className="py-2 pr-2">Friends who Want it</th><th scope="col" className="py-2">Share of 14 Wants</th></tr></thead>
+              <tbody>
+                <tr><th scope="row" className="py-1 pr-2 font-normal">Pikachu</th><td>8</td><td>8 ÷ 14 ≈ 57%</td></tr>
+                <tr><th scope="row" className="py-1 pr-2 font-normal">Eevee</th><td>4</td><td>4 ÷ 14 ≈ 29%</td></tr>
+                <tr><th scope="row" className="py-1 pr-2 font-normal">Bulbasaur</th><td>2</td><td>2 ÷ 14 ≈ 14%</td></tr>
+              </tbody>
+            </table>
+            <p>That&apos;s the estimated mix they&apos;d send. In the full estimate, global votes always contribute the equivalent of five voting friends.</p>
+            <p><b>2. Match it to your votes.</b> You Want Pikachu and Bulbasaur, and Don&apos;t Want Eevee:</p>
+            <ul className="list-disc space-y-1 pl-5">
+              <li>For you: (8 + 2) ÷ 14 ≈ <b>71%</b></li>
+              <li>Unwanted: 4 ÷ 14 ≈ <b>29%</b></li>
+            </ul>
+            <p><b>3. Sort.</b> Best for you ranks by For you minus half of Unwanted. Using the exact shares: (10 − ½ × 4) ÷ 14 × 100 ≈ 57.1. Mutual fit needs this above 0 for both players. Amber means it&apos;s 0 or below.</p>
+            <p>Shares display as rounded whole percentages; sorting uses the exact values. Neutral earns no points. Spotlight doesn&apos;t affect the estimate.</p>
+          </div>
+        </details>
         {!youVoted && <p><Link href="/vote" className="font-semibold underline">Save your candy votes</Link> to find mutual fits, or browse All players first.</p>}
         {!friendsVoted && <p><Link href="/friends" className="font-semibold underline">Add your Pokémon Sleep friends</Link> and ask them to vote to make your sending estimate more personal.</p>}
       </div>

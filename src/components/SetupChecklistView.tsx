@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { markSetupDone } from "@/app/actions";
-import { SETUP_COOKIE, SETUP_SNOOZE_KEY } from "@/lib/help";
+import { SETUP_COOKIE, SETUP_SNOOZE_KEY, TIER_TOUR_COMPLETE_EVENT } from "@/lib/help";
 import { rethrowIfNavigation, SAVE_FAILED } from "@/lib/saveError";
 import { currentStep, SETUP_VOTE_EVENT, type SetupStep } from "@/lib/setup";
 
@@ -12,8 +12,8 @@ const CELEBRATE_MS = 4000;
 
 /**
  * The checklist card. "Hide for now" hides it until the browser session ends;
- * "Skip setup" hides it for good. Opening the Tier List with the first three
- * steps done finishes it with a short "all set" note
+ * "Don't show again" hides it for good. Finishing the Tier List walkthrough
+ * (or explicitly finishing setup) with the first three steps done shows an "all set" note
  * that stays a few seconds, before the Tier List tour. Already done: remembers
  * that in this browser and shows nothing.
  */
@@ -21,7 +21,7 @@ export function SetupChecklistView({ userId, done, steps }: { userId: string; do
   const pathname = usePathname();
   const router = useRouter();
   // Hidden until sessionStorage is read, so a snoozed card never flashes on load.
-  const [snoozed, setSnoozed] = useState(true);
+  const [snoozed, setSnoozed] = useState<boolean | null>(null);
   const [finished, setFinished] = useState(false);
   const [closed, setClosed] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -85,16 +85,19 @@ export function SetupChecklistView({ userId, done, steps }: { userId: string; do
   }, [userId]);
   const savedSteps = steps.map((item) => (item.id === "vote" && savedVote !== null ? { ...item, done: savedVote } : item));
   const readyForTiers = savedSteps.length > 0 && savedSteps.every((item) => item.id === "tiers" || item.done);
-  const visibleSteps = savedSteps.map((item) =>
-    item.id === "tiers" && readyForTiers && pathname === "/tiers" ? { ...item, done: true } : item,
-  );
+  const visibleSteps = savedSteps;
   const step = visibleSteps.length ? currentStep(visibleSteps) : null;
-  // Reaching the Tier List with everything else done is the last step.
+  // Visiting a page is not completion. Wait until the walkthrough has closed,
+  // so removing the checklist never moves targets under an active highlight.
   useEffect(() => {
-    if (done || snoozed || completionAttempted.current || step?.id !== "tiers" || pathname !== "/tiers") return;
-    completionAttempted.current = true;
-    void saveSetup(true);
-  }, [done, snoozed, step?.id, pathname, saveSetup]);
+    const finish = () => {
+      if (done || snoozed !== false || closed || completionAttempted.current || !readyForTiers || pathname !== "/tiers") return;
+      completionAttempted.current = true;
+      void saveSetup(true);
+    };
+    window.addEventListener(TIER_TOUR_COMPLETE_EVENT, finish);
+    return () => window.removeEventListener(TIER_TOUR_COMPLETE_EVENT, finish);
+  }, [done, snoozed, closed, readyForTiers, pathname, saveSetup]);
 
   if (closed) return null;
   if (finished)
@@ -108,6 +111,7 @@ export function SetupChecklistView({ userId, done, steps }: { userId: string; do
       </Shell>
     );
   if (done || !step) return null;
+  if (snoozed === null) return <div hidden data-setup-pending />;
   if (snoozed) return null;
 
   const index = visibleSteps.indexOf(step);
@@ -179,6 +183,10 @@ export function SetupChecklistView({ userId, done, steps }: { userId: string; do
             <Link href={step.href} className="btn-primary px-3 py-1 text-sm">
               {step.cta} →
             </Link>
+          ) : step.id === "tiers" ? (
+            <button type="button" disabled={saving} onClick={() => void saveSetup(true)} className="btn-primary px-3 py-1 text-sm">
+              Finish setup
+            </button>
           ) : step.href.startsWith("/profile") ? (
             <button
               type="button"

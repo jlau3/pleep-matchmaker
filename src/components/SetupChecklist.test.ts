@@ -21,6 +21,7 @@ vi.mock("@/lib/supabase/server", () => ({
 }));
 import { SetupChecklist } from "./SetupChecklist";
 import { StartProfileSetup } from "./StartProfileSetup";
+import { currentStep } from "@/lib/setup";
 vi.stubGlobal("React", React);
 afterAll(() => vi.unstubAllGlobals());
 beforeEach(() => { state.started = false; state.friends = state.sent = state.placeholders = 0; state.version = 2; state.voteGuide = state.matchGuide = true; });
@@ -44,5 +45,12 @@ describe("friend setup does not wait for acceptance", () => {
     const card = await SetupChecklist();
     expect(card?.props.steps.find((s: { id: string }) => s.id === "vote").done).toBe(false);
     expect(card?.props.steps.find((s: { id: string }) => s.id === "friends").done).toBe(false);
+  });
+  it("leaves the final step unfinished for a fully prefilled returning player", async () => {
+    state.friends = 20;
+    const card = await SetupChecklist();
+    expect(card?.props.steps.filter((s: { done: boolean }) => s.done)).toHaveLength(3);
+    expect(currentStep(card?.props.steps).id).toBe("tiers");
+    expect(currentStep(card?.props.steps).done).toBe(false);
   });
 });

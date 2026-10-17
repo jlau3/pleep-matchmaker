@@ -10,6 +10,10 @@ The app uses version 2 browser markers for the checklist, snooze, Profile dismis
 
 The navbar ? now opens the current page's help: match scores on My Friends/Find New Friends, How to Vote, the Profile walkthrough or Tier List walkthrough. Other pages link to Getting Started in Guides. First-visit page guides remain, the automatic welcome is removed, and the sign-in sheet keeps a short What You Get list.
 
+Follow the replay migration with `20261026000800_hidden_suggestion_names.sql`. It adds the authenticated owner-only restore-list RPC; closed, inactive or full players retain their IGN independently of current suggestions, while lookup-off non-friends and blocked players return no name. It returns no votes, contact fields or fit. Visiting the Tier List no longer finishes setup: the last tour step or an explicit Finish setup does. Tours wait for checklist hydration and track page-height changes so highlights stay aligned. The match guide uses the agreed short explanation with its calculation collapsed.
+
+Regression matrix: check new, partial Profile, saved Profile/no votes, saved votes/no friends, fully prefilled, and previously completed accounts. A Tier List visit must not call setup completion. Got it on the final tour step completes only when the prior steps are done; Skip/Esc leaves setup unfinished, with Finish setup available for players who already saw the tour. Check highlights after checklist hydration and late banner changes on mobile and tall desktop windows. Run a prefilled Profile through every step without altering privacy radios/social toggles. Hidden restores must retain eligible-to-view IGNs outside browse_all, redact blocked/lookup-off identities, and never read another account's list.
+
 ## Trial behavior
 
 - Count friends' Wants, add the existing k=5 global prior, and normalize total demand into sending shares. Do not divide a friend's contribution across their Wants or weight Spotlight. Exclude the receiver from a sender's existing friends. Inactive friends' votes remain, with the existing stale-votes note.

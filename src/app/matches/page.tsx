@@ -12,7 +12,7 @@ import { LINES } from "@/lib/lines";
 import { BROWSE_PAGE_SIZE, parseBrowse, sortPlayers } from "@/lib/browse";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { requireUser } from "@/lib/supabase/server";
-import type { MatchRow } from "@/lib/types";
+import type { HiddenSuggestion, MatchRow } from "@/lib/types";
 
 type Params = { q?: string; sort?: string; show?: string; page?: string };
 
@@ -27,10 +27,11 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
     loadRelations(supabase, user.id),
     supabase.rpc("my_friends_voted"),
     loadCandidates(supabase),
-    supabase.from("hidden_suggestions").select("hidden_user_id").eq("user_id", user.id),
+    supabase.rpc("get_hidden_suggestions"),
   ]);
   if (hiddenResult.error) throw hiddenResult.error;
-  const hiddenIds = (hiddenResult.data ?? []).map((r) => r.hidden_user_id as string);
+  const hiddenPlayers = (hiddenResult.data ?? []) as HiddenSuggestion[];
+  const hiddenIds = hiddenPlayers.map((r) => r.user_id);
   const hidden = new Set(hiddenIds);
   // Your Top 3's tiers: everyone's when the page opens sorted by them, else the first page's
   // (FindNewBoard fetches the rest in the background).
@@ -95,6 +96,7 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
       <FindNewBoard
         rows={relations.profileReady ? rows : []}
         initialHiddenIds={hiddenIds}
+        hiddenPlayers={hiddenPlayers}
         autoOpenGuide={profile.match_guide_seen === false}
         relations={relations}
         tops={tops}

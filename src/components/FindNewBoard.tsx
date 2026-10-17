@@ -5,7 +5,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { hideSuggestedPlayer, restoreSuggestedPlayer, loadTop3TiersFor } from "@/app/actions";
 import { BROWSE_PAGE_SIZE, BROWSE_SORT_HINTS, BROWSE_SORTS, type BrowseOptions, browseQuery, sortPlayers } from "@/lib/browse";
 import { type Relations, relationOf } from "@/lib/relations";
-import type { MatchRow } from "@/lib/types";
+import type { HiddenSuggestion, MatchRow } from "@/lib/types";
 import { ViewToggle } from "./ViewToggle";
 import { SortMenu } from "./SortMenu";
 import { FitLegend } from "./FitLegend";
@@ -27,6 +27,7 @@ type Tiers = Record<string, Record<string, string>>;
 export function FindNewBoard({
   rows,
   initialHiddenIds = [],
+  hiddenPlayers = [],
   autoOpenGuide = false,
   relations,
   tops,
@@ -40,6 +41,7 @@ export function FindNewBoard({
   /** browse_all, Best for you order. */
   rows: MatchRow[];
   initialHiddenIds?: string[];
+  hiddenPlayers?: HiddenSuggestion[];
   autoOpenGuide?: boolean;
   relations: Relations;
   /** Your starred lines. */
@@ -186,11 +188,12 @@ export function FindNewBoard({
       {hidden.size > 0 && (
         <details className="rounded-xl border border-slate-300 p-3 text-sm dark:border-slate-700">
           <summary className="w-fit cursor-pointer font-semibold">Hidden players ({hidden.size})</summary>
-          <p className="mt-2 text-xs text-slate-500">Hidden players stay out of your suggestions until you restore them.</p>
+          <p className="mt-2 text-xs text-slate-500">Hidden players stay out of your suggestions until you restore them. Restoring a player won&apos;t show them unless they&apos;re available for suggestions.</p>
           <ul className="mt-3 max-h-64 space-y-2 overflow-y-auto">
             {[...hidden].map((id) => {
               const row = rows.find((r) => r.user_id === id);
-              const name = row ? playerName(row) : "Player no longer suggested";
+              const saved = hiddenPlayers.find((r) => r.user_id === id);
+              const name = saved ? saved.ign ?? "Name unavailable" : row ? playerName(row) : "Name unavailable";
               return <li key={id} className="flex items-center justify-between gap-3">
                 <span className="min-w-0 truncate">{name}</span>
                 <button type="button" className="shrink-0 font-semibold underline disabled:opacity-50"

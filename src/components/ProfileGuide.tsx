@@ -135,6 +135,12 @@ export function ProfileGuide({
     const observer = new ResizeObserver(reveal);
     observer.observe(target);
     observer.observe(card);
+    observer.observe(root);
+    observer.observe(document.body);
+    const movement = new MutationObserver((records) => {
+      if (records.some((record) => !overlay.contains(record.target))) reposition();
+    });
+    movement.observe(document.body, { subtree: true, childList: true, attributes: true, attributeFilter: ["class", "style", "hidden"] });
     window.addEventListener("scroll", reposition, true);
     window.addEventListener("resize", reveal);
     window.visualViewport?.addEventListener("resize", reveal);
@@ -165,6 +171,7 @@ export function ProfileGuide({
     document.addEventListener("keydown", keydown);
     return () => {
       observer.disconnect();
+      movement.disconnect();
       window.removeEventListener("scroll", reposition, true);
       window.removeEventListener("resize", reveal);
       window.visualViewport?.removeEventListener("resize", reveal);

@@ -30,6 +30,13 @@ export interface MatchRow extends PlayerContact {
   top_wants?: string[];
 }
 
+/** Restore-list labels are independent of current suggestion eligibility. */
+export interface HiddenSuggestion {
+  user_id: string;
+  /** Null when privacy/blocking no longer allows their name to be shown. */
+  ign: string | null;
+}
+
 export interface LookupRow extends PlayerContact {
   wants: string[];
   dont_wants: string[];

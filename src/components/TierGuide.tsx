@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState, type RefObject } from "react";
 import { profileGuideScroll } from "@/lib/profileGuideScroll";
-import { TIER_TOUR_EVENT } from "@/lib/help";
+import { TIER_TOUR_EVENT, TIER_TOUR_COMPLETE_EVENT } from "@/lib/help";
 
 const SEEN_KEY = "pm_tier_tour_seen:v2";
 const SEEN_COOKIE = "pm_tier_tour_seen_v2"; // ":" isn't allowed in cookie names.
@@ -56,6 +56,10 @@ export function TierGuide({ root, signedIn }: { root: RefObject<HTMLDivElement |
     dialog.current?.close();
     setActive(false);
   };
+  const finish = () => {
+    close();
+    window.dispatchEvent(new Event(TIER_TOUR_COMPLETE_EVENT));
+  };
 
   useEffect(() => {
     // The nav's ? asks for the tour; preventDefault tells it the tour opened.
@@ -67,7 +71,7 @@ export function TierGuide({ root, signedIn }: { root: RefObject<HTMLDivElement |
   useEffect(() => {
     if (seen()) return;
     // Waits for open dialogs and the setup card's "all set" note.
-    const showWhenReady = () => { if (!opened.current && !document.querySelector("dialog[open], [data-setup-celebration]")) open(); };
+    const showWhenReady = () => { if (!opened.current && !document.querySelector("dialog[open], [data-setup-celebration], [data-setup-pending]")) open(); };
     showWhenReady();
     const observer = new MutationObserver(showWhenReady);
     observer.observe(document.body, { subtree: true, attributes: true, attributeFilter: ["open"], childList: true });
@@ -110,12 +114,20 @@ export function TierGuide({ root, signedIn }: { root: RefObject<HTMLDivElement |
     const observer = new ResizeObserver(reposition);
     targets.forEach((target) => observer.observe(target));
     observer.observe(panel.current);
+    observer.observe(document.body);
+    // A checklist/banner can move every target while body remains min-height:
+    // 100vh. ResizeObserver alone cannot detect that translation.
+    const movement = new MutationObserver((records) => {
+      if (records.some((record) => !dialog.current?.contains(record.target))) reposition();
+    });
+    movement.observe(document.body, { subtree: true, childList: true, attributes: true, attributeFilter: ["class", "style", "hidden"] });
     window.addEventListener("scroll", reposition, true);
     window.addEventListener("resize", reveal);
     window.visualViewport?.addEventListener("resize", reveal);
     window.visualViewport?.addEventListener("scroll", reposition);
     return () => {
       observer.disconnect();
+      movement.disconnect();
       window.removeEventListener("scroll", reposition, true);
       window.removeEventListener("resize", reveal);
       window.visualViewport?.removeEventListener("resize", reveal);
@@ -142,7 +154,7 @@ export function TierGuide({ root, signedIn }: { root: RefObject<HTMLDivElement |
             <button type="button" onClick={close} className="text-sm font-semibold text-slate-500 underline">Skip tour</button>
             <div className="flex items-center gap-3">
               {index > 0 && <button type="button" onClick={() => setIndex(index - 1)} className="text-sm font-semibold underline">Back</button>}
-              <button type="button" onClick={() => index === steps.length - 1 ? close() : setIndex(index + 1)} className="btn-primary px-4 py-2">{index === steps.length - 1 ? "Got it" : "Next →"}</button>
+              <button type="button" onClick={() => index === steps.length - 1 ? finish() : setIndex(index + 1)} className="btn-primary px-4 py-2">{index === steps.length - 1 ? "Got it" : "Next →"}</button>
             </div>
           </div>
         </div>

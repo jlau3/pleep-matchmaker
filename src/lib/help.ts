@@ -12,6 +12,7 @@ export const HELP_COOKIE = "pm_help_seen";
  * guide (for example while loading), the button links to Getting Started.
  */
 export const TIER_TOUR_EVENT = "pm:tier-tour";
+export const TIER_TOUR_COMPLETE_EVENT = "pm:tier-tour-complete";
 export const MATCH_HELP_EVENT = "pm:match-help";
 export const VOTE_HELP_EVENT = "pm:vote-help";
 export const PROFILE_HELP_EVENT = "pm-profile-guide-open";
