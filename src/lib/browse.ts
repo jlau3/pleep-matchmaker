@@ -22,14 +22,16 @@ export interface BrowseOptions {
   activeWeek: boolean;
   votingFriends: boolean;
   spotlightSafe: boolean;
+  newPlayers: boolean;
+  hideDeclined: boolean;
   /** 1-based. */
   page: number;
 }
 
-export function parseBrowse(params: { sort?: string; show?: string; page?: string; active?: string; friends?: string; spotlight?: string }): BrowseOptions {
+export function parseBrowse(params: { sort?: string; show?: string; page?: string; active?: string; friends?: string; spotlight?: string; joined?: string; declined?: string }): BrowseOptions {
   const sort = BROWSE_SORTS.some(([id]) => id === params.sort) ? (params.sort as BrowseSort) : "you_fit";
   const page = Math.max(1, Math.min(1000, Number.parseInt(params.page ?? "1", 10) || 1));
-  return { sort, everyone: params.show !== "mutual" && params.show !== "good", activeWeek: params.active === "week", votingFriends: params.friends === "voting", spotlightSafe: params.spotlight === "above-f", page };
+  return { sort, everyone: params.show !== "mutual" && params.show !== "good", activeWeek: params.active === "week", votingFriends: params.friends === "voting", spotlightSafe: params.spotlight === "above-f", newPlayers: params.joined === "new", hideDeclined: params.declined === "hide", page };
 }
 
 /** Query string for these options, dropping defaults; `q` (the search box) is kept. */
@@ -41,17 +43,21 @@ export function browseQuery(opts: BrowseOptions, q?: string): string {
   if (opts.activeWeek) p.set("active", "week");
   if (opts.votingFriends) p.set("friends", "voting");
   if (opts.spotlightSafe) p.set("spotlight", "above-f");
+  if (opts.newPlayers) p.set("joined", "new");
+  if (opts.hideDeclined) p.set("declined", "hide");
   if (opts.page > 1) p.set("page", String(opts.page));
   const s = p.toString();
   return s ? `?${s}` : "";
 }
 
 /** Optional filters combine; they use only fields already disclosed on suggestion rows. */
-export function matchesBrowseFilters(row: { good: boolean; last_seen_at: string; list_voters: number },
-  opts: Pick<BrowseOptions, "everyone" | "activeWeek" | "votingFriends">, now = Date.now()): boolean {
+export function matchesBrowseFilters(row: { good: boolean; last_seen_at: string; list_voters: number; is_new?: boolean; has_declined?: boolean },
+  opts: Pick<BrowseOptions, "everyone" | "activeWeek" | "votingFriends"> & Partial<Pick<BrowseOptions, "newPlayers" | "hideDeclined">>, now = Date.now()): boolean {
   return (opts.everyone || row.good)
     && (!opts.activeWeek || Date.parse(row.last_seen_at) >= now - 7 * 86400_000)
-    && (!opts.votingFriends || row.list_voters > 0);
+    && (!opts.votingFriends || row.list_voters > 0)
+    && (!opts.newPlayers || row.is_new === true)
+    && (!opts.hideDeclined || row.has_declined !== true);
 }
 
 /** What sortPlayers needs from a Find New row (browse_all). */

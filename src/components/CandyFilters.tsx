@@ -26,19 +26,21 @@ const shortName = (name: string) =>
 
 
 /** Shared island art, sleep colors, and deselection behavior on Tier List and My Votes. */
-export function CandyFilters({ islandId, sleepType, onIsland, onSleep, tour = false, children }: {
+export function CandyFilters({ islandId, sleepType, onIsland, onSleep, tour = false, headerAction, children }: {
   islandId: string | null;
   sleepType: SleepType | null;
   onIsland: (value: string | null) => void;
   onSleep: (value: SleepType | null) => void;
   tour?: boolean;
+  headerAction?: React.ReactNode;
   children?: React.ReactNode;
 }) {
   const pill = (active: boolean) =>
     `rounded-full border px-3 py-1 text-sm ${active ? "pill-active border-transparent" : "pill-idle border-slate-300 dark:border-slate-700"}`;
   return <div className="space-y-5">
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="flex items-center justify-between gap-2">
         <span className="text-sm font-semibold">Island</span>
+        {headerAction}
       </div>
       {/* One tap picks an island; tapping it again (or another) goes back / switches. None picked: all islands. */}
       {MAPPED_ISLANDS.length > 0 && (

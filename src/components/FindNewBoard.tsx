@@ -105,7 +105,7 @@ export function FindNewBoard({
     const pool = rows.filter((r) => !hidden.has(r.user_id) && matchesBrowseFilters(r, opts, filterTime)
       && (!opts.spotlightSafe || spotlightAboveF(tops, tiers[r.user_id])));
     return sortPlayers(pool, effectiveSort, tiers);
-  }, [rows, hidden, opts.everyone, opts.activeWeek, opts.votingFriends, opts.spotlightSafe, spotlightWaiting, filterTime, effectiveSort, tiers, tiersReady, tops]);
+  }, [rows, hidden, opts.everyone, opts.activeWeek, opts.votingFriends, opts.spotlightSafe, opts.newPlayers, opts.hideDeclined, spotlightWaiting, filterTime, effectiveSort, tiers, tiersReady, tops]);
 
   const total = listed.length;
   const pages = Math.max(1, Math.ceil(total / BROWSE_PAGE_SIZE));
@@ -214,9 +214,9 @@ export function FindNewBoard({
         </p>
       ) : shown.length === 0 ? (
         <p className="py-8 text-center text-slate-500">
-          {opts.activeWeek || opts.votingFriends || opts.spotlightSafe ? (
+          {opts.activeWeek || opts.votingFriends || opts.spotlightSafe || opts.newPlayers || opts.hideDeclined ? (
             <>No players match these filters. <button type="button" className="font-semibold underline"
-              onClick={() => change({ everyone: true, activeWeek: false, votingFriends: false, spotlightSafe: false })}>Clear filters</button></>
+              onClick={() => change({ everyone: true, activeWeek: false, votingFriends: false, spotlightSafe: false, newPlayers: false, hideDeclined: false })}>Clear filters</button></>
           ) : opts.everyone ? (
             "No one to suggest right now. Check back as more players join."
           ) : (

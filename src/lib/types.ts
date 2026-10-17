@@ -25,6 +25,8 @@ export interface MatchRow extends PlayerContact {
   you_unwanted_pct: number | null;
   you_utility: number | null;
   list_voters: number;
+  is_new?: boolean;
+  has_declined?: boolean;
   good: boolean;
   total_count?: number;
   top_wants?: string[];

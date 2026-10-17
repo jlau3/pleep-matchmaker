@@ -272,15 +272,13 @@ export function VoteBoard({
   return (
     <div>
       <div className="mb-4 space-y-4">
-        <div className="flex justify-end">
-          <ExportVotes choices={choices} tops={tops} lines={filtered} filterLabel={filterLabel} />
-        </div>
         <VoteGuide autoOpen={autoOpenGuide} />
         {error && <div role="alert" className="flex items-center justify-between gap-3 text-sm text-dont">
           <span>{error}</span>
           <button type="button" onClick={() => window.location.reload()} className="shrink-0 font-bold underline">Refresh</button>
         </div>}
-        <CandyFilters islandId={islandId} sleepType={sleepType} onIsland={setIslandId} onSleep={setSleepType}>
+        <CandyFilters islandId={islandId} sleepType={sleepType} onIsland={setIslandId} onSleep={setSleepType}
+          headerAction={<ExportVotes choices={choices} tops={tops} lines={filtered} filterLabel={filterLabel} />}>
           <div role="group" aria-label="Vote" className="ml-auto flex flex-wrap items-center gap-2">
             {FILTERS.map((item) => <button key={item.value} type="button" aria-pressed={filter === item.value}
               title={filter === item.value ? `${item.label} (tap again for all votes)` : item.label}
@@ -316,18 +314,18 @@ export function VoteBoard({
       </section>
 
       <div className="mb-4 space-y-3">
-        <p className="text-xs text-slate-500" role="status">{filtered.length} of {LINES.length} candies</p>
         <div className="flex flex-wrap items-center justify-between gap-3">
           {crowd && (
-            <label className="flex cursor-pointer items-center gap-2 text-sm">
-              <input type="checkbox" checked={showCrowd} onChange={toggleCrowd} className="h-4 w-4 accent-[var(--color-night)]" />
+            <label className="flex min-w-0 flex-1 cursor-pointer items-center gap-2 text-sm">
+              <input type="checkbox" checked={showCrowd} onChange={toggleCrowd} className="h-4 w-4 shrink-0 accent-[var(--color-night)]" />
               <span>
-                Show community votes
-                <span className="block text-xs text-slate-500">{crowd.voters} active players</span>
+                Show {crowd.voters} active community votes
+                <span className="block text-xs text-slate-500" role="status">{filtered.length} out of {LINES.length} candies</span>
               </span>
             </label>
           )}
-          <span className="ml-auto"><ViewToggle view={view} onChange={changeView} /></span>
+          {!crowd && <p className="text-xs text-slate-500" role="status">{filtered.length} out of {LINES.length} candies</p>}
+          <span className="ml-auto shrink-0"><ViewToggle view={view} onChange={changeView} /></span>
         </div>
       </div>
 
