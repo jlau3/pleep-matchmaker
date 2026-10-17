@@ -83,4 +83,10 @@ These are local SQL times, not hosted page latency. The score batch keeps one gl
 
 ## Filter and control polish
 
-Unselected pills use a shared contrasting fill in light and dark themes, including voting, feedback, layout, profile, and friend-page controls. My Votes now combines vote, name, island, and sleep-type filters. Mythicals (Mew and Darkrai) match every sleep type while retaining island restrictions, shared with Tier List/export filtering. Incoming Friend Requests can be collapsed and start expanded so new requests remain visible. Best Match scoring is unchanged pending product discussion about broad Want lists and baseline comparisons.
+Unselected pills use a shared contrasting fill in light and dark themes, including voting, feedback, layout, profile, and friend-page controls. My Votes now combines vote, name, island, and sleep-type filters. Its island icons and colored sleep-type pills come from the same CandyFilters component as Tier List. Mythicals (Mew and Darkrai) match every sleep type while retaining island restrictions, shared with Tier List/export filtering. Incoming Friend Requests can be collapsed and start expanded so new requests remain visible. Best Match scoring is unchanged pending product discussion about broad Want lists and baseline comparisons.
+
+## Review of recent parallel-agent changes
+
+Reviewed 3bac3af (merged Pumpkaboo/Gourgeist icons), fdce4a5 (blocking copy), and e0240c9 (dev request acceptance helper). No blocking app issue found. Legacy per-size avatar keys resolve to the merged assets, and profile saves normalize them. All listed avatar variants have files; normal Pumpkaboo/Gourgeist assets were also visually checked. The dev acceptance helper is restricted to fake recipients and revoked from public, anon, and authenticated roles. It remains a dev-only tool.
+
+The production agent should include `supabase/migrations/20261026000900_merge_sized_avatars.sql` separately after the matching bundle; it is not part of that squash. Old keys remain readable before this data normalization. This review does not authorize production changes.

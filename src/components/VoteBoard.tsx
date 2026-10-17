@@ -76,7 +76,7 @@ export function VoteBoard({
   const [swapFor, setSwapFor] = useState<string | null>(null);
   const [view, setView] = useState<View>("list");
   const [query, setQuery] = useState("");
-  const [islandId, setIslandId] = useState("");
+  const [islandId, setIslandId] = useState<string | null>(null);
   const [sleepType, setSleepType] = useState<SleepType | null>(null);
   const [filter, setFilter] = useState<Filter>("all");
   const toolbar = useRef<HTMLDivElement>(null);
