@@ -21,6 +21,7 @@ export interface BrowseOptions {
   everyone: boolean;
   activeWeek: boolean;
   votingFriends: boolean;
+  spotlightSafe: boolean;
   /** 1-based. */
   page: number;
 }
@@ -28,7 +29,7 @@ export interface BrowseOptions {
 export function parseBrowse(params: { sort?: string; show?: string; page?: string; active?: string; friends?: string; spotlight?: string }): BrowseOptions {
   const sort = BROWSE_SORTS.some(([id]) => id === params.sort) ? (params.sort as BrowseSort) : "you_fit";
   const page = Math.max(1, Math.min(1000, Number.parseInt(params.page ?? "1", 10) || 1));
-  return { sort, everyone: params.show !== "mutual" && params.show !== "good", activeWeek: params.active === "week", votingFriends: params.friends === "voting", page };
+  return { sort, everyone: params.show !== "mutual" && params.show !== "good", activeWeek: params.active === "week", votingFriends: params.friends === "voting", spotlightSafe: params.spotlight === "above-f", page };
 }
 
 /** Query string for these options, dropping defaults; `q` (the search box) is kept. */
@@ -39,6 +40,7 @@ export function browseQuery(opts: BrowseOptions, q?: string): string {
   if (!opts.everyone) p.set("show", "mutual");
   if (opts.activeWeek) p.set("active", "week");
   if (opts.votingFriends) p.set("friends", "voting");
+  if (opts.spotlightSafe) p.set("spotlight", "above-f");
   if (opts.page > 1) p.set("page", String(opts.page));
   const s = p.toString();
   return s ? `?${s}` : "";
@@ -71,6 +73,11 @@ const TIER_POINTS: Record<string, number> = { S: 4, A: 3, B: 2, C: 1, Avoid: 0 }
 export function top3Score(tiers: Record<string, string> | null | undefined): number | null {
   const values = Object.values(tiers ?? {});
   return values.length === 0 ? null : values.reduce((sum, tier) => sum + (TIER_POINTS[tier] ?? 0), 0);
+}
+
+/** Require a known, non-F rank for every selected Spotlight candy. Missing ranks never pass. */
+export function spotlightAboveF(tops: string[], tiers?: Record<string, string>): boolean {
+  return tops.length > 0 && tops.every((id) => ["S", "A", "B", "C"].includes(tiers?.[id] ?? ""));
 }
 
 /** Shared primary score for both friend lists; each supplies its own row fields and tie order. */

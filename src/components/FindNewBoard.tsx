@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { hideSuggestedPlayer, restoreSuggestedPlayer, loadTop3TiersFor } from "@/app/actions";
-import { BROWSE_PAGE_SIZE, BROWSE_SORT_HINTS, BROWSE_SORTS, type BrowseOptions, browseQuery, matchesBrowseFilters, sortPlayers } from "@/lib/browse";
+import { BROWSE_PAGE_SIZE, BROWSE_SORT_HINTS, BROWSE_SORTS, type BrowseOptions, browseQuery, matchesBrowseFilters, spotlightAboveF, sortPlayers } from "@/lib/browse";
 import { type Relations, relationOf } from "@/lib/relations";
 import type { HiddenSuggestion, MatchRow } from "@/lib/types";
 import { FindFilters } from "./FindFilters";
@@ -96,13 +96,16 @@ export function FindNewBoard({
     };
   }, [allTiersLoaded, tops.length, rows, tierRetry]);
 
-  const tiersReady = known === "all";
+  const tiersReady = known === "all" || rows.length === 0;
+  const spotlightWaiting = opts.spotlightSafe && tops.length > 0 && !tiersReady;
   // Sorting by Top 3 Spotlight before the tiers are in: keep Best for you order until they are.
   const effectiveSort = opts.sort === "top3" && !tiersReady ? "you_fit" : opts.sort;
   const listed = useMemo(() => {
-    const pool = rows.filter((r) => !hidden.has(r.user_id) && matchesBrowseFilters(r, opts, filterTime));
+    if (spotlightWaiting) return [];
+    const pool = rows.filter((r) => !hidden.has(r.user_id) && matchesBrowseFilters(r, opts, filterTime)
+      && (!opts.spotlightSafe || spotlightAboveF(tops, tiers[r.user_id])));
     return sortPlayers(pool, effectiveSort, tiers);
-  }, [rows, hidden, opts.everyone, opts.activeWeek, opts.votingFriends, filterTime, effectiveSort, tiers, tiersReady, tops]);
+  }, [rows, hidden, opts.everyone, opts.activeWeek, opts.votingFriends, opts.spotlightSafe, spotlightWaiting, filterTime, effectiveSort, tiers, tiersReady, tops]);
 
   const total = listed.length;
   const pages = Math.max(1, Math.ceil(total / BROWSE_PAGE_SIZE));
@@ -117,11 +120,11 @@ export function FindNewBoard({
   }
 
   useEffect(() => {
-    if (opts.page <= pages) return;
+    if (spotlightWaiting || opts.page <= pages) return;
     const merged = { ...opts, page: pages };
     setOpts(merged);
     window.history.replaceState(window.history.state, "", `/matches${browseQuery(merged, q)}`);
-  }, [opts, pages, q]);
+  }, [opts, pages, q, spotlightWaiting]);
 
   async function setPlayerHidden(id: string, hide: boolean) {
     if (pending.has(id)) return;
@@ -157,7 +160,7 @@ export function FindNewBoard({
     <section ref={top} className="scroll-mt-20 space-y-3">
       <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2">
         <h2 className="text-lg font-semibold">
-          Suggested Players <span className="text-sm font-normal text-slate-500">{total}</span>
+          Suggested Players <span className="text-sm font-normal text-slate-500">{spotlightWaiting ? "…" : total}</span>
         </h2>
         <FitLegend friendsVoted={friendsVoted} youVoted={picked > 0} autoOpen={autoOpenGuide} />
       </div>
@@ -166,7 +169,7 @@ export function FindNewBoard({
         <FindFilters opts={opts} onChange={change} />
         <span className="ml-auto"><ViewToggle view={view} onChange={changeView} /></span>
       </div>
-      {opts.sort === "top3" && !tiersReady && tops.length > 0 && (
+      {(opts.sort === "top3" || opts.spotlightSafe) && !tiersReady && tops.length > 0 && (
         <p className="text-xs font-semibold text-slate-500" role={tierError ? "alert" : "status"}>
           {tierError ? <>Couldn&apos;t load Spotlight tiers. <button type="button" onClick={() => setTierRetry((n) => n + 1)} className="underline">Try again</button>.</>
             : "Loading Spotlight tiers…"}
@@ -202,16 +205,18 @@ export function FindNewBoard({
         </details>
       )}
 
-      {picked === 0 && !opts.everyone ? (
+      {spotlightWaiting ? null : opts.spotlightSafe && tops.length === 0 ? (
+        <p className="py-8 text-center text-slate-500"><Link href="/vote" className="font-semibold underline">Choose your Spotlight candies</Link> in My Votes to use this filter.</p>
+      ) : picked === 0 && !opts.everyone ? (
         <p className="py-8 text-center text-slate-500">
           <Link href="/vote" className="font-semibold underline">Save your candy votes</Link> to find mutual fits, or{" "}
           <button type="button" onClick={() => change({ everyone: true })} className="underline">browse All players</button> first.
         </p>
       ) : shown.length === 0 ? (
         <p className="py-8 text-center text-slate-500">
-          {opts.activeWeek || opts.votingFriends ? (
+          {opts.activeWeek || opts.votingFriends || opts.spotlightSafe ? (
             <>No players match these filters. <button type="button" className="font-semibold underline"
-              onClick={() => change({ everyone: true, activeWeek: false, votingFriends: false })}>Clear filters</button></>
+              onClick={() => change({ everyone: true, activeWeek: false, votingFriends: false, spotlightSafe: false })}>Clear filters</button></>
           ) : opts.everyone ? (
             "No one to suggest right now. Check back as more players join."
           ) : (

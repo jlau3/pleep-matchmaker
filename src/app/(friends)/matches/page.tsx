@@ -13,7 +13,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { requireUser } from "@/lib/supabase/server";
 import type { HiddenSuggestion, MatchRow } from "@/lib/types";
 
-type Params = { q?: string; sort?: string; show?: string; active?: string; friends?: string; page?: string };
+type Params = { q?: string; sort?: string; show?: string; active?: string; friends?: string; spotlight?: string; page?: string };
 
 export default async function MatchesPage({ searchParams }: { searchParams: Promise<Params> }) {
   const { supabase, user } = await requireUser();
@@ -35,9 +35,9 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
   // Your Top 3's tiers: everyone's when the page opens sorted by them, else the first page's
   // (FindNewBoard fetches the rest in the background).
   let tiers: Top3Tiers = {};
-  let allTiers = tops.length === 0;
+  let allTiers = tops.length === 0 || rows.length === 0;
   if (tops.length > 0 && rows.length > 0) {
-    if (opts.sort === "top3") {
+    if (opts.sort === "top3" || opts.spotlightSafe) {
       try {
         tiers = await loadTop3Tiers(supabase, rows.map((r) => r.user_id), true);
         allTiers = true;

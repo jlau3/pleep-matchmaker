@@ -275,7 +275,6 @@ export function ImageExport({
   sections,
   file: fileName,
   label = "Export image",
-  buttonClassName,
 }: {
   /** Popup title and image alt text. */
   title: string;
@@ -285,7 +284,6 @@ export function ImageExport({
   sections: () => ImageSection[];
   file: string;
   label?: string;
-  buttonClassName?: string;
 }) {
   const dialog = useRef<HTMLDialogElement>(null);
   const [image, setImage] = useState<{ blob: Blob; url: string } | null>(null);
@@ -329,7 +327,7 @@ export function ImageExport({
         type="button"
         onClick={open}
         disabled={busy}
-        className={buttonClassName ?? "pill-idle rounded-full border border-slate-300 px-3 py-1 text-sm font-semibold disabled:opacity-60 dark:border-slate-700"}
+        className="pill-idle rounded-full border border-slate-300 px-3 py-1 text-sm font-semibold disabled:opacity-60 dark:border-slate-700"
       >
         {busy ? "Drawing…" : `⤓ ${label}`}
       </button>

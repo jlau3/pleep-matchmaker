@@ -6,7 +6,7 @@ import type { BrowseOptions } from "@/lib/browse";
 /** Optional, combinable filters; no selected filters means All Players. */
 export function FindFilters({ opts, onChange }: { opts: BrowseOptions; onChange: (next: Partial<BrowseOptions>) => void }) {
   const menu = useRef<HTMLDetailsElement>(null);
-  const count = Number(!opts.everyone) + Number(opts.activeWeek) + Number(opts.votingFriends);
+  const count = Number(!opts.everyone) + Number(opts.activeWeek) + Number(opts.votingFriends) + Number(opts.spotlightSafe);
   useEffect(() => {
     const outside = (event: PointerEvent) => {
       if (menu.current && !menu.current.contains(event.target as Node)) menu.current.open = false;
@@ -24,6 +24,7 @@ export function FindFilters({ opts, onChange }: { opts: BrowseOptions; onChange:
   const options = [
     { label: "Mutual Fit", checked: !opts.everyone, update: { everyone: !opts.everyone }, hint: "Their estimated candy suits you, and yours suits them." },
     { label: "Active This Week", checked: opts.activeWeek, update: { activeWeek: !opts.activeWeek }, hint: "Visited the site in the past 7 days." },
+    { label: "None of My Spotlight in F", checked: opts.spotlightSafe, update: { spotlightSafe: !opts.spotlightSafe }, hint: "Every selected Spotlight candy ranks C or higher on their friends' Tier List. Unranked candies are excluded." },
     { label: "Has Voting Friends", checked: opts.votingFriends, update: { votingFriends: !opts.votingFriends }, hint: "Their candy estimate includes votes from at least one friend." },
   ];
   return <details ref={menu} className="shrink-0 text-sm">
@@ -39,7 +40,7 @@ export function FindFilters({ opts, onChange }: { opts: BrowseOptions; onChange:
         </label>)}
       </fieldset>
       {count > 0 && <button type="button" className="mt-3 font-semibold underline"
-        onClick={() => onChange({ everyone: true, activeWeek: false, votingFriends: false })}>Clear Filters</button>}
+        onClick={() => onChange({ everyone: true, activeWeek: false, votingFriends: false, spotlightSafe: false })}>Clear Filters</button>}
     </div>
   </details>;
 }

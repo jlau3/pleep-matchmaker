@@ -272,7 +272,7 @@ export function VoteBoard({
   return (
     <div>
       <div className="mb-4 space-y-4">
-        <div>
+        <div className="flex justify-end">
           <ExportVotes choices={choices} tops={tops} lines={filtered} filterLabel={filterLabel} />
         </div>
         <VoteGuide autoOpen={autoOpenGuide} />

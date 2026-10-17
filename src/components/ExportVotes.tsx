@@ -21,7 +21,6 @@ export function ExportVotes({ choices, tops, lines, filterLabel }: {
         sections={() => [{ rows }]}
         file="my-candy-votes.png"
         label="Export Image"
-        buttonClassName="py-1 text-sm font-semibold underline underline-offset-2 disabled:opacity-60"
       />
     </span>
   );

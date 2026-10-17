@@ -1,18 +1,18 @@
 import { describe, expect, it } from "vitest";
-import { BROWSE_SORTS, browseQuery, matchesBrowseFilters, parseBrowse, type SortablePlayer, sortPlayers, top3Score } from "./browse";
+import { BROWSE_SORTS, browseQuery, matchesBrowseFilters, parseBrowse, type SortablePlayer, sortPlayers, spotlightAboveF, top3Score } from "./browse";
 
 describe("trial suggestion controls", () => {
   it("defaults to Best for you and removes legacy sort/filter URL settings", () => {
     for (const params of [{}, { sort: "fit", spotlight: "safe" }, { sort: "unknown", page: "-3" }]) {
-      expect(parseBrowse(params)).toEqual({ sort: "you_fit", everyone: true, activeWeek: false, votingFriends: false, page: 1 });
+      expect(parseBrowse(params)).toEqual({ sort: "you_fit", everyone: true, activeWeek: false, votingFriends: false, spotlightSafe: false, page: 1 });
     }
     expect(parseBrowse({ show: "mutual" }).everyone).toBe(false);
     expect(parseBrowse({ show: "good" }).everyone).toBe(false);
     expect(parseBrowse({ show: "all" }).everyone).toBe(true);
-    expect(browseQuery({ sort: "you_fit", everyone: false, activeWeek: false, votingFriends: false, page: 1 })).toBe("?show=mutual");
+    expect(browseQuery({ sort: "you_fit", everyone: false, activeWeek: false, votingFriends: false, spotlightSafe: false, page: 1 })).toBe("?show=mutual");
     expect(BROWSE_SORTS.map(([id]) => id)).toEqual(["you_fit", "top3", "active"]);
-    expect(browseQuery({ sort: "you_fit", everyone: true, activeWeek: false, votingFriends: false, page: 1 })).toBe("");
-    expect(browseQuery({ sort: "active", everyone: true, activeWeek: false, votingFriends: false, page: 2 }, "Snack")).toBe("?q=Snack&sort=active&page=2");
+    expect(browseQuery({ sort: "you_fit", everyone: true, activeWeek: false, votingFriends: false, spotlightSafe: false, page: 1 })).toBe("");
+    expect(browseQuery({ sort: "active", everyone: true, activeWeek: false, votingFriends: false, spotlightSafe: false, page: 2 }, "Snack")).toBe("?q=Snack&sort=active&page=2");
   });
 });
 
@@ -29,10 +29,20 @@ describe("suggestion filters", () => {
     expect(matchesBrowseFilters({ ...recent, last_seen_at: "2026-10-10T12:00:00Z" }, { ...all, activeWeek: true }, now)).toBe(true);
   });
   it("round-trips combined filters and preserves search and sort", () => {
-    const opts = { sort: "active" as const, everyone: false, activeWeek: true, votingFriends: true, page: 2 };
+    const opts = { sort: "active" as const, everyone: false, activeWeek: true, votingFriends: true, spotlightSafe: true, page: 2 };
     const query = browseQuery(opts, "Snack");
-    expect(query).toBe("?q=Snack&sort=active&show=mutual&active=week&friends=voting&page=2");
+    expect(query).toBe("?q=Snack&sort=active&show=mutual&active=week&friends=voting&spotlight=above-f&page=2");
     expect(parseBrowse(Object.fromEntries(new URLSearchParams(query)))).toEqual(opts);
+  });
+});
+
+describe("Spotlight above F", () => {
+  it("checks every selected candy and excludes missing, F and unknown ranks", () => {
+    expect(spotlightAboveF(["a", "b"], { a: "S", b: "C" })).toBe(true);
+    for (const bad of ["Avoid", "F", "—", "unknown"]) expect(spotlightAboveF(["a", "b"], { a: "S", b: bad })).toBe(false);
+    expect(spotlightAboveF(["a", "b"], { a: "S" })).toBe(false);
+    expect(spotlightAboveF(["a"], undefined)).toBe(false);
+    expect(spotlightAboveF([], { a: "S" })).toBe(false);
   });
 });
 
