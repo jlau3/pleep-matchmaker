@@ -1,96 +1,20 @@
-import Link from "next/link";
-import { MAX_TOP } from "@/lib/lines";
-import { MAX_FRIENDS } from "@/lib/friendship";
-import { InviteButton } from "./InviteButton";
-
-const STEPS: { title: string; body: React.ReactNode; href: string; cta: string }[] = [
-  {
-    title: "Set Up Your Profile",
-    body: (
-      <>
-        Add your in-game name (IGN), friend code, and Pokémon Sleep icon so friends can recognize you.
-      </>
-    ),
-    href: "/profile",
-    cta: "Profile",
-  },
-  {
-    title: "Vote on the Candy You Care About",
-    body: (
-      <>
-        Choose <b>Want</b> for candy you need and <b>Don&apos;t Want</b> for candy you don't need. Leave the rest <b>Neutral</b>.
-        Votes save automatically. Use <b>Top {MAX_TOP} Spotlight</b> to highlight the candy you most want friends to send.
-      </>
-    ),
-    href: "/vote",
-    cta: "My Votes",
-  },
-  {
-    title: "Add Your In-game Friends",
-    body: (
-      <>
-        Look up your Pokémon Sleep friends by IGN or friend code and send a request.
-        Their votes build your Tier List once they accept. You can connect with up to {MAX_FRIENDS} friends.
-      </>
-    ),
-    href: "/friends",
-    cta: "My Friends",
-  },
-  {
-    title: "Find New Friends",
-    body: (
-      <>
-        Find players who are a good candy match for you both. Send a request to connect here and share your friend code when needed.
-      </>
-    ),
-    href: "/matches",
-    cta: "Find New Friends",
-  },
-  {
-    title: "See What Your Friends Want",
-    body: (
-      <>
-        The Tier List ranks every candy by what your friends (or all players) want, so you know which candies to send
-        the people you play with.
-      </>
-    ),
-    href: "/tiers",
-    cta: "Tier List",
-  },
-];
-
-/** Optional Getting Started overview in Guides. */
-export function HowItWorks({ links = true }: { links?: boolean }) {
-  return (
-    <div>
-      <ol className="space-y-4">
-        {STEPS.map((step, i) => (
-          <li key={step.title} className="flex gap-3">
-            <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-sun font-extrabold text-[#5b3e00]">
-              {i + 1}
-            </span>
-            <div>
-              <h3 className="font-bold">{step.title}</h3>
-              <p className="text-sm text-slate-600 dark:text-slate-300">{step.body}</p>
-              {links && (
-                <Link href={step.href} className="text-sm font-semibold underline">
-                  {step.cta} →
-                </Link>
-              )}
-            </div>
-          </li>
-        ))}
-      </ol>
-      <div className="mt-5 rounded-2xl bg-sun/25 p-4">
-        <h3 className="font-bold">Bring Your Friends Along</h3>
-        <p className="mb-3 text-sm text-slate-700 dark:text-slate-200">
-          Invite your Pokémon Sleep friends and ask them to vote so My Friends reflects the candy they want.
-        </p>
-        <InviteButton />
-      </div>
-      <p className="mt-5 text-xs text-slate-500">
-        Manage who can find you in Profile. Players inactive for 2 months stop appearing in Find New Friends.
-      </p>
-    </div>
-  );
+/** Visitor overview, opened deliberately from the Poké Ball. Page-specific ? help stays separate. */
+export function HowItWorks() {
+  return <div className="space-y-5 text-sm leading-relaxed">
+    <p>Pleep Matchmaker helps Pokémon Sleep friends choose candy to send and find players with compatible candy preferences.</p>
+    <section>
+      <h3 className="mb-1 font-extrabold">Explore Without Signing In</h3>
+      <p className="text-slate-600 dark:text-slate-300">Browse the Global Tier List, filter by island and sleep type, compare ranking styles, and export an image to share. Guides are open to everyone too.</p>
+    </section>
+    <section>
+      <h3 className="mb-2 font-extrabold">Make It Personal</h3>
+      <ul className="list-disc space-y-3 pl-5 text-slate-600 dark:text-slate-300">
+        <li><b className="text-ink dark:text-white">Set Up Your Profile.</b> Add your in-game name, friend code, and Pokémon Sleep icon so friends can recognize you. Choose who can find you.</li>
+        <li><b className="text-ink dark:text-white">Save Your Candy Votes.</b> Choose Want, Neutral, or Don&apos;t Want. Every change saves automatically. Your Top 3 Spotlight highlights the candy you most want friends to send, separately from tier scores.</li>
+        <li><b className="text-ink dark:text-white">Connect With Friends.</b> Find your existing Pokémon Sleep friends or browse new players by estimated candy fit. Filters help narrow the list. Send a request here and add each other in Pokémon Sleep too.</li>
+        <li><b className="text-ink dark:text-white">See What Your Friends Want.</b> Once they accept and vote, switch the Tier List to My Friends to help choose your research photo. Candy-fit numbers are estimates; Pleep doesn&apos;t see what anyone actually sends.</li>
+      </ul>
+    </section>
+    <p className="text-xs text-slate-500">The ? button in the navbar explains the page you&apos;re on.</p>
+  </div>;
 }

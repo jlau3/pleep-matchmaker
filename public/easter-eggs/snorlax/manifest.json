@@ -1,0 +1,20 @@
+{
+  "normal": {
+    "size": [
+      81,
+      81
+    ],
+    "frames": 59,
+    "durationMs": 2875.1831233518897,
+    "plays": 1
+  },
+  "shiny": {
+    "size": [
+      81,
+      81
+    ],
+    "frames": 59,
+    "durationMs": 2875.1831233518897,
+    "plays": 1
+  }
+}

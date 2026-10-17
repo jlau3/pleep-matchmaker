@@ -26,3 +26,5 @@
 - My Votes labels community hints "Show XX active community votes", with "X out of X candies" beneath it. Keep List/Grid to their right. Anchor the Find New Friends filter menu to its own button and clamp it inside the viewport. Main navigation stays as the single sticky top bar; sub-tabs scroll with page content.
 
 - Navbar: keep logo/page tabs together and help with feedback/support or Sign in at the right edge. Stars fill the flexible gap between those groups and the outer desktop margins on both sides of the navigation, with density reduced on narrow screens; keep them clear of controls.
+
+- Poké Ball never navigates: visitors open the What Pleep Does overlay; signed-in players get a Snorlax surprise. Use the first static frame while dropping, play its APNG once on landing, wait on the final frame, then reset to the first frame and fall off-screen when clicked. Randomize each appearance across the viewport width and landing depth, keeping the entire sprite below the navbar and inside the screen. Shiny is 1/500 per appearance. Keep URL, page state and scroll position unchanged; honor reduced motion.

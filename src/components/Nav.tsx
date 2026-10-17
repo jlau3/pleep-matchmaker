@@ -1,5 +1,5 @@
 import { cookies } from "next/headers";
-import Link from "next/link";
+import { PokeballButton } from "./PokeballButton";
 import { PageHelpButton } from "./PageHelpButton";
 import { MetaNoteModal } from "./MetaNoteModal";
 import { NavExtras } from "./NavExtras";
@@ -41,9 +41,7 @@ export async function Nav() {
       <NavStars side="left" />
       <NavStars side="right" />
       <nav className="mx-auto flex max-w-5xl items-center gap-1 px-4 py-2 text-sm sm:gap-4">
-        <Link href="/" className="shrink-0" aria-label="Pleep Matchmaker home">
-          <img src="/logo.png" alt="Pleep Matchmaker" className="h-8 w-8" />
-        </Link>
+        <PokeballButton signedIn={user} />
         <div className="flex min-w-0 items-center gap-1 overflow-x-auto sm:gap-4">
           <NavLinks signedIn={user} />
         </div>
