@@ -349,7 +349,11 @@ export function TierExplorer({
           <div style={{ maxHeight: menuPlacement.maxHeight }} className={`absolute right-0 z-20 ${menuPlacement.above ? "bottom-full mb-2" : "top-full mt-2"} w-[min(24rem,calc(100vw-2rem))] overflow-y-auto rounded-xl border border-slate-300 bg-cream p-3 shadow-lg dark:border-slate-700 dark:bg-night`}>
             <fieldset className="min-w-0 space-y-3 border-0 p-0">
               <legend className="mb-2 w-full p-0 font-semibold">Choose a ranking style</legend>
-              <p className="text-xs text-slate-600 dark:text-slate-300">Each candy scores Want +1, Neutral 0 and Don&apos;t Want −½ per {pool === "everyone" ? "player who has seen it" : "voting friend"}, scaled by 100: a score of 60 is as good as 60% of players wanting it and the rest Neutral. Below 0 goes to F in Percentile and Fixed Scores. Displayed scores omit decimals. Tiers use the full score.</p>
+              <div className="space-y-1.5 text-xs text-slate-600 dark:text-slate-300">
+                <p>Each candy you send goes to all your friends at once, so the best pick is one many of them Want and few Don&apos;t Want.</p>
+                <p><b>Score:</b> Want +1, Neutral 0, Don&apos;t Want −½, averaged over {pool === "everyone" ? "the players who have seen it" : "your voting friends"} and shown out of 100. A Don&apos;t Want counts half because it takes two of them to cancel out one friend who Wants it. 60 is as good as 60% Want with the rest Neutral.</p>
+                <p><b>F</b> (Percentile and Fixed Scores): below 0, meaning more than twice as many Don&apos;t Want votes as Want votes.</p>
+              </div>
               {TIER_STYLES.map((option) => <label key={option} className="flex cursor-pointer items-start gap-2">
                 <input type="radio" name="tier-style" value={option} checked={style === option}
                   onChange={() => show({ style: option })} className="mt-1 shrink-0 accent-want" />

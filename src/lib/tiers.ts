@@ -12,8 +12,8 @@ export const TIER_STYLE_LABEL: Record<TierStyle, string> = {
  */
 export const FIXED_SCORE_CUTOFFS = { S: 75, A: 50, B: 25 } as const;
 export const TIER_STYLE_DESCRIPTION: Record<TierStyle, string> = {
-  standard: "Best for choosing priorities within this group. Positive scores are ranked against each other: S is the top 10%, A the next 20%, B the next 30%, C the rest. Ties stay together, so tier sizes can vary. Zero scores go to C; negative scores go to F.",
-  fixed: `Best for comparing scores across groups and over time. Scores below 0 go to F; the rest are placed by their own score: S ${FIXED_SCORE_CUTOFFS.S}–100, A ${FIXED_SCORE_CUTOFFS.A}–${FIXED_SCORE_CUTOFFS.S - 1}, B ${FIXED_SCORE_CUTOFFS.B}–${FIXED_SCORE_CUTOFFS.A - 1}, C 0–${FIXED_SCORE_CUTOFFS.B - 1}. The same score cutoffs apply to every group.`,
+  standard: "Best for choosing priorities within this group. Scores above 0 are ranked against each other: S is the top 10%, A the next 20%, B the next 30%, C the rest, plus scores of 0. Ties share a tier, so sizes vary.",
+  fixed: `Best for comparing across groups and over time. Each candy is placed by its own score, with the same cutoffs everywhere: S ${FIXED_SCORE_CUTOFFS.S}–100, A ${FIXED_SCORE_CUTOFFS.A}–${FIXED_SCORE_CUTOFFS.S - 1}, B ${FIXED_SCORE_CUTOFFS.B}–${FIXED_SCORE_CUTOFFS.A - 1}, C 0–${FIXED_SCORE_CUTOFFS.B - 1}.`,
   consensus: "Best for seeing agreement and disagreement. Groups candy as Mostly Wanted, Mixed, or Mostly Unwanted. Divisive requires at least one-third Want and one-third Don't Want.",
 };
 export const parseTierStyle = (value: unknown): TierStyle =>
