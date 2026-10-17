@@ -14,6 +14,8 @@ Follow the replay migration with `20261026000800_hidden_suggestion_names.sql`. I
 
 Regression matrix: check new, partial Profile, saved Profile/no votes, saved votes/no friends, fully prefilled, and previously completed accounts. A Tier List visit must not call setup completion. Got it on the final tour step completes only when the prior steps are done; Skip/Esc leaves setup unfinished, with Finish setup available for players who already saw the tour. Check highlights after checklist hydration and late banner changes on mobile and tall desktop windows. Run a prefilled Profile through every step without altering privacy radios/social toggles. Hidden restores must retain eligible-to-view IGNs outside browse_all, redact blocked/lookup-off identities, and never read another account's list.
 
+Voting list auto-advance centers the next card below the measured navigation and vote toolbar, after rendering the selected vote. It tracks late setup/hint layout changes until the next manual interaction, respects reduced motion, and leaves re-votes and Grid stationary. Check first-save checklist changes, Neutral filters as voted cards leave the list, tall navigation, and cancellation by manual scrolling.
+
 ## Trial behavior
 
 - Count friends' Wants, add the existing k=5 global prior, and normalize total demand into sending shares. Do not divide a friend's contribution across their Wants or weight Spotlight. Exclude the receiver from a sender's existing friends. Inactive friends' votes remain, with the existing stale-votes note.

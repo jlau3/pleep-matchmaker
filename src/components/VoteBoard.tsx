@@ -3,7 +3,7 @@
 import { ViewToggle } from "./ViewToggle";
 
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { setChoice, setTop, swapTop } from "@/app/actions";
 import { CHOICE_LABEL, type Choice, LINES, LINES_BY_ID, lineSpriteUrl, MAX_TOP } from "@/lib/lines";
 import { type CrowdHint, crowdHint } from "@/lib/crowd";
@@ -76,6 +76,17 @@ export function VoteBoard({
   const [view, setView] = useState<View>("list");
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<Filter>("all");
+  const toolbar = useRef<HTMLDivElement>(null);
+  const [headerHeight, setHeaderHeight] = useState(49);
+  useLayoutEffect(() => {
+    const header = document.querySelector<HTMLElement>("[data-site-header]");
+    if (!header) return;
+    const measure = () => setHeaderHeight(header.getBoundingClientRect().height);
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(header);
+    return () => observer.disconnect();
+  }, []);
 
   // Community hints start on; remember an explicit choice to turn them off.
   const [showCrowd, setShowCrowd] = useState(true);
@@ -265,7 +276,7 @@ export function VoteBoard({
 
   return (
     <div>
-      <div className="sticky top-[49px] z-10 -mx-4 mb-4 bg-sky/95 px-4 py-2 shadow-sm backdrop-blur dark:bg-night-deep/95">
+      <div ref={toolbar} data-vote-toolbar style={{ top: headerHeight }} className="sticky z-10 -mx-4 mb-4 bg-sky/95 px-4 py-2 shadow-sm backdrop-blur dark:bg-night-deep/95">
         <div className="flex items-center justify-between gap-3 text-sm">
           <span className="flex flex-wrap gap-x-3">
             <span className="text-want">
@@ -364,7 +375,7 @@ export function VoteBoard({
       {visible.length === 0 ? (
         <p className="py-8 text-center text-slate-500">Nothing here.</p>
       ) : view === "list" ? (
-        <PickFlow lines={visible} choices={choices} onChoose={choose} tops={tops} onStar={toggleTop} hints={hints} />
+        <PickFlow lines={visible} choices={choices} onChoose={choose} tops={tops} onStar={toggleTop} hints={hints} toolbar={toolbar} />
       ) : (
         <CollectionGrid lines={visible} choices={choices} onChoose={choose} tops={tops} onStar={toggleTop} hints={hints} />
       )}
