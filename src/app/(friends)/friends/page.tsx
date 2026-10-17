@@ -9,7 +9,6 @@ import { staleFriend } from "@/lib/format";
 import { FitPair } from "@/components/FitPair";
 import { FitLegend } from "@/components/FitLegend";
 import { PlayerSearch, searchQuery } from "@/components/PlayerSearch";
-import { FRIENDS_TABS, SubTabs } from "@/components/SubTabs";
 import { loadOwnProfile, loadOwnVotes, loadRelations, MAX_FRIENDS } from "@/lib/data";
 import { requireUser } from "@/lib/supabase/server";
 import type { FriendRow, PlaceholderRow, RequestRow, SentRequestRow } from "@/lib/types";
@@ -71,7 +70,6 @@ export default async function FriendsPage({ searchParams }: { searchParams: Prom
   return (
     <div className="space-y-8">
       <section className="space-y-3">
-        <SubTabs tabs={FRIENDS_TABS} active="/friends" />
         <FriendSetupBanner profile={profile} />
         <PlayerSearch supabase={supabase} q={q} relations={relations} viewerId={user.id} />
       </section>

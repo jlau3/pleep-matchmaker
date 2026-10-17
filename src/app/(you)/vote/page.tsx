@@ -1,4 +1,3 @@
-import { PROFILE_TABS, SubTabs } from "@/components/SubTabs";
 import { VoteBoard } from "@/components/VoteBoard";
 import { loadCommunityStats } from "@/lib/communityStats";
 import { loadOwnVotes, seedUndecided } from "@/lib/data";
@@ -28,7 +27,6 @@ export default async function VotePage() {
   const crowd = community.voters >= CROWD_MIN_VOTERS ? { votes: community.votes, voters: community.voters } : undefined;
   return (
     <div>
-      <SubTabs tabs={PROFILE_TABS} active="/vote" />
       <VoteBoard
         userId={user.id}
         initial={choices} initialTops={tops} newCandy={newCandy}

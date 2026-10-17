@@ -3,7 +3,6 @@ import { FriendSetupBanner } from "@/components/FriendSetupBanner";
 import { FindNewBoard } from "@/components/FindNewBoard";
 import { loadTop3Tiers, type Top3Tiers } from "@/lib/top3Tiers";
 import { PlayerSearch, searchQuery } from "@/components/PlayerSearch";
-import { FRIENDS_TABS, SubTabs } from "@/components/SubTabs";
 import { FriendPostCard } from "@/components/FriendPostCard";
 import { friendPostProps } from "@/lib/friendPost";
 import { FriendshipLevel5 } from "@/components/FriendshipLevel5";
@@ -78,7 +77,6 @@ export default async function MatchesPage({ searchParams }: { searchParams: Prom
   return (
     <div className="space-y-4">
       <div>
-        <SubTabs tabs={FRIENDS_TABS} active="/matches" />
         <FriendSetupBanner profile={profile} />
         <PlayerSearch supabase={supabase} q={q} relations={relations} viewerId={user.id} />
         <div className="mt-4">
