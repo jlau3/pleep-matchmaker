@@ -6,7 +6,7 @@ import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { normalizeFriendCode } from "@/lib/format";
 import { MAX_FRIENDS } from "@/lib/friendship";
-import { parseAvatar } from "@/lib/avatars";
+import { avatarKey, parseAvatar } from "@/lib/avatars";
 import { profileGuideError, profileGuideSteps } from "@/lib/profileGuide";
 import type { LookupRow } from "@/lib/types";
 import { PROFILE_INCOMPLETE, SEARCH_NEEDS_PROFILE } from "@/lib/relations";
@@ -215,7 +215,7 @@ export async function updateProfile(_prev: ProfileFormState, form: FormData): Pr
       if (name.length > 40) return { error: "IGN is too long (40 characters max)" };
       fields = { ign: name };
     } else if (step.id === "friend_code") fields = { friend_code: normalizeFriendCode(String(form.get("friend_code") ?? "")) };
-    else if (step.id === "game_avatar") fields = { game_avatar: String(form.get("game_avatar")) };
+    else if (step.id === "game_avatar") fields = { game_avatar: avatarKey(String(form.get("game_avatar"))) };
     else if (step.id === "visibility") {
       if (!["everyone", "known", "friends"].includes(String(form.get("visibility")))) return { error: "Choose who can find you." };
       fields = visibilityFields(form);
@@ -252,7 +252,7 @@ export async function updateProfile(_prev: ProfileFormState, form: FormData): Pr
     const avatar = String(form.get("game_avatar") ?? "");
     if (avatar && !parseAvatar(avatar)) return { error: "Pick an icon from the list" };
     extras.reddit_username = reddit || null;
-    extras.game_avatar = avatar || null;
+    extras.game_avatar = avatarKey(avatar);
   }
   if (form.has("has_show_reddit")) extras.show_reddit = form.get("show_reddit") === "on";
   // A guided step must only advance after every submitted field was saved.
