@@ -38,6 +38,8 @@ export async function Nav() {
 
   return (
     <header data-site-header className="sticky top-0 z-20 header-night text-white shadow-md">
+      <NavStars side="left" />
+      <NavStars side="right" />
       <nav className="mx-auto flex max-w-5xl items-center gap-1 px-4 py-2 text-sm sm:gap-4">
         <Link href="/" className="shrink-0" aria-label="Pleep Matchmaker home">
           <img src="/logo.png" alt="Pleep Matchmaker" className="h-8 w-8" />

@@ -1,9 +1,4 @@
-/**
- * Sparkles for the night header, drawn only in the empty stretch of the nav
- * between the page tabs and the right-hand utility buttons, so they never touch text or
- * pills. Each star keeps a 10px margin from both ends; the narrower the gap,
- * the fewer stars (container queries), and on a crowded phone nav there are none.
- */
+/** Stars fill available navigation space and the outer desktop margins, clear of controls. */
 // Centered at small widths, then a staggered constellation as space opens up.
 const STARS = [
   { x: 0.5, y: 50, size: 7, opacity: 0.7, show: "hidden @[56px]:block @[140px]:hidden" },
@@ -13,10 +8,12 @@ const STARS = [
     size: [6, 8, 6, 9, 7, 6, 8][i], opacity: i === 3 ? 0.8 : 0.6, show: "hidden @[320px]:block" })),
 ];
 
-export function NavStars() {
+export function NavStars({ side }: { side?: "left" | "right" } = {}) {
   return (
     // -my-2 spans the nav's vertical padding, so y is measured over the whole header height.
-    <span aria-hidden className="@container relative -my-2 min-w-0 flex-1 self-stretch">
+    <span aria-hidden
+      className={side ? `@container pointer-events-none absolute inset-y-0 ${side === "left" ? "left-0" : "right-0"}` : "@container pointer-events-none relative -my-2 min-w-0 flex-1 self-stretch"}
+      style={side ? { width: "max(0px, calc((100% - 64rem) / 2))" } : undefined}>
       {STARS.map((s, i) => (
         <svg
           key={i}

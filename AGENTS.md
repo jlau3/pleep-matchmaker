@@ -25,4 +25,4 @@
 
 - My Votes labels community hints "Show XX active community votes", with "X out of X candies" beneath it. Keep List/Grid to their right. Anchor the Find New Friends filter menu to its own button and clamp it inside the viewport. Main navigation stays as the single sticky top bar; sub-tabs scroll with page content.
 
-- Navbar: keep logo/page tabs together and help with feedback/support or Sign in at the right edge. Stars live only in the flexible gap between those groups, with density reduced on narrow screens; keep them clear of controls.
+- Navbar: keep logo/page tabs together and help with feedback/support or Sign in at the right edge. Stars fill the flexible gap between those groups and the outer desktop margins on both sides of the navigation, with density reduced on narrow screens; keep them clear of controls.
